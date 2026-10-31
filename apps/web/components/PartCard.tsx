@@ -10,6 +10,8 @@ export interface PartCardData {
   condition?: string;
   tested_status?: string;
   stock_quantity?: number;
+  primary_image_url?: string | null;
+  image_urls?: string[] | null;
 }
 
 export function PartCard({ part }: { part: PartCardData }) {
@@ -17,7 +19,15 @@ export function PartCard({ part }: { part: PartCardData }) {
     <article className="part-card">
       <div className="part-card-media">
         <span className="part-tag">{part.condition ?? 'New'}</span>
-        <div className="part-glyph">AWP</div>
+        {part.primary_image_url || part.image_urls?.[0] ? (
+          <img
+            src={part.primary_image_url ?? part.image_urls?.[0]}
+            alt={part.part_name}
+            className="part-card-image"
+          />
+        ) : (
+          <div className="part-glyph">AWP</div>
+        )}
       </div>
       <div className="part-card-body">
         <div className="eyebrow">

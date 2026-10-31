@@ -51,7 +51,11 @@ export function PartsTable() {
       {rows.map((row: any) => (
         <div className="table-row" key={row.id}>
           <div className="table-primary">
-            <div className="mini-glyph">AWP</div>
+            {row.primary_image_url ? (
+              <img className="mini-glyph" src={row.primary_image_url} alt="" />
+            ) : (
+              <div className="mini-glyph">AWP</div>
+            )}
             <strong>{row.part_name}</strong>
           </div>
           <span>

@@ -20,6 +20,11 @@ appropriate:
 
 - `NEXT_PUBLIC_API_URL` — deployed API URL, for example `https://al-waha-parts-api.vercel.app`.
 
+For direct Supabase browser authentication in the web/admin apps, also set:
+
+- `NEXT_PUBLIC_SUPABASE_URL` — `https://pitxdheggaxxhzqdbpln.supabase.co`.
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — the Supabase publishable key (`sb_publishable_...`).
+
 Do not commit real `.env` values. After deployment, verify `GET /health`, `GET /api/v1/categories`, and
 submit a test booking from a non-production environment.
 
