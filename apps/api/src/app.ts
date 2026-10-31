@@ -34,6 +34,14 @@ async function requireAdmin(request: FastifyRequest, reply: FastifyReply) {
   (request as FastifyRequest & { admin?: typeof admin }).admin = admin;
 }
 
+app.get('/', async () => ({
+  name: 'Al Waha Parts API',
+  version: 'v1',
+  status: 'ready',
+  health: '/health',
+  documentation: '/api/v1',
+}));
+
 app.get('/health', async (): Promise<ApiHealth> => ({
   status: 'ok',
   service: 'al-waha-parts-api',
