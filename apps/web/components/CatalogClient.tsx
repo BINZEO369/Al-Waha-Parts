@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { PartCard, type PartCardData } from './PartCard';
 
-type Category = { id: string; category_name: string; slug?: string | null };
+type Category = { id: string; category_name: string; slug?: string | null; image_url?: string | null };
 
 export function CatalogClient() {
   const [parts, setParts] = useState<PartCardData[]>([]);
@@ -67,6 +67,7 @@ export function CatalogClient() {
             key={category.id}
             onClick={() => setCategoryId(category.id)}
           >
+            {category.image_url && <img className="category-chip-image" src={category.image_url} alt="" />}
             {category.category_name}
           </button>
         ))}

@@ -12,9 +12,6 @@ export function Header() {
         <Link href="/booking">Request a part</Link>
       </nav>
       <div className="header-actions">
-        <Link className="nav-muted" href="/login">
-          Sign in
-        </Link>
         <Link className="button button-small" href="/booking">
           Book a part
         </Link>

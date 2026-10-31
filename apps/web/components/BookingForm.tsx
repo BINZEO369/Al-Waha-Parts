@@ -13,7 +13,7 @@ export function BookingForm() {
       customer_phone: String(form.get('customer_phone')),
       customer_email: String(form.get('customer_email') || ''),
       customer_note: String(form.get('customer_note') || ''),
-      items: [{ part_id: String(form.get('part_id') || 'request'), quantity: 1, unit_price: 0 }],
+      part_number: String(form.get('part_number') || ''),
     };
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/v1/bookings`, {

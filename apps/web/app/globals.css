@@ -395,12 +395,21 @@ label {
   margin: -18px 0 28px;
 }
 .category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   border: 1px solid var(--line);
   background: #fff;
   color: var(--muted);
   padding: 9px 13px;
   font: 11px 'DM Mono';
   cursor: pointer;
+}
+.category-chip-image {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 .category-chip.active,
 .category-chip:hover {

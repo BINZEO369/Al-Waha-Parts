@@ -53,7 +53,7 @@ app.get('/api/v1', async () => ({ name: 'Al Waha Parts API', version: 'v1', stat
 app.get('/api/v1/categories', async (_request, reply) => {
   const { data, error } = await getSupabaseAdmin()
     .from('parts_categories')
-    .select('id,category_name,slug,description,status')
+    .select('id,category_name,slug,description,status,image_url,icon_name,is_featured,sort_order')
     .eq('status', 'active')
     .order('category_name');
   if (error) return jsonError(reply, 500, error.message);
