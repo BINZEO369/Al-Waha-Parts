@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -297,7 +299,7 @@ export function Footer() {
           color: var(--gold);
         }
 
-        p {
+        .footerBrand p {
           font-size: 13px;
           line-height: 1.6;
           color: var(--muted);
