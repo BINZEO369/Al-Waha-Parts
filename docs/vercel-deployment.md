@@ -37,3 +37,5 @@ token and its user must have an active row in `public.admins`.
 Customer web: `/`, `/catalog`, `/vehicles`, `/booking`, `/contact`, `/login`, `/account`.
 Admin panel: `/`, `/dashboard`, `/parts`, `/vehicles`, `/categories`, `/bookings`, `/admins`, `/settings`, `/login`.
 These are intentionally basic route shells; business UI is the next milestone.
+
+Security and visibility rules are documented in `docs/data-access.md`.

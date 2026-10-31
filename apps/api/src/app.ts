@@ -114,7 +114,7 @@ app.get(
       );
     if (q.category_id) query = query.eq('category_id', q.category_id);
     if (q.vehicle_id) query = query.eq('part_vehicles.vehicle_id', q.vehicle_id);
-    if (q.status) query = query.eq('status', q.status);
+    query = query.eq('status', q.status ?? 'active');
     const { data, error } = await query;
     if (error) return jsonError(reply, 500, error.message);
     return { data: data ?? [] };
