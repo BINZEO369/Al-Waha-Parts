@@ -4,63 +4,48 @@ import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { PartCard, type PartCardData } from './PartCard';
 
-const fallback: PartCardData[] = [
-  {
-    id: 'demo-1',
-    part_name: 'Front brake pad set',
-    brand_name: 'Brembo',
-    sku: 'AWP-BR-001',
-    price: 280,
-    sale_price: 245,
-    condition: 'New',
-    tested_status: 'tested',
-    stock_quantity: 8,
-  },
-  {
-    id: 'demo-2',
-    part_name: 'Oil filter housing',
-    brand_name: 'Mann',
-    sku: 'AWP-OF-044',
-    price: 145,
-    condition: 'New',
-    tested_status: 'tested',
-    stock_quantity: 12,
-  },
-  {
-    id: 'demo-3',
-    part_name: 'Alternator assembly',
-    brand_name: 'Bosch',
-    sku: 'AWP-AL-208',
-    price: 640,
-    condition: 'Refurbished',
-    tested_status: 'tested',
-    stock_quantity: 3,
-  },
-];
+type Category = { id: string; category_name: string; slug?: string | null };
 
 export function CatalogClient() {
-  const [parts, setParts] = useState<PartCardData[]>(fallback);
+  const [parts, setParts] = useState<PartCardData[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState('');
+  const [categoryId, setCategoryId] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
   useEffect(() => {
-    const url = process.env.NEXT_PUBLIC_API_URL;
-    if (!url) {
+    if (!apiUrl) {
+      setError('Catalog API is not configured. Add NEXT_PUBLIC_API_URL to the Web project.');
       setLoading(false);
       return;
     }
-    apiFetch<PartCardData[]>(url, `/api/v1/parts?limit=24&search=${encodeURIComponent(search)}`)
-      .then(setParts)
-      .catch(() => setParts(fallback))
+    setLoading(true);
+    setError('');
+    Promise.all([
+      apiFetch<PartCardData[]>(
+        apiUrl,
+        `/api/v1/parts?limit=100&search=${encodeURIComponent(search)}${categoryId ? `&category_id=${categoryId}` : ''}`,
+      ),
+      apiFetch<Category[]>(apiUrl, '/api/v1/categories'),
+    ])
+      .then(([nextParts, nextCategories]) => {
+        setParts(nextParts);
+        setCategories(nextCategories);
+      })
+      .catch((cause) => {
+        setParts([]);
+        setError(cause instanceof Error ? cause.message : 'Unable to load the live catalog.');
+      })
       .finally(() => setLoading(false));
-  }, [search]);
-  const visible = parts.filter((p) =>
-    `${p.part_name} ${p.brand_name ?? ''} ${p.sku}`.toLowerCase().includes(search.toLowerCase()),
-  );
+  }, [apiUrl, search, categoryId]);
+
   return (
     <>
       <div className="catalog-toolbar">
         <div>
-          <span className="eyebrow">Inventory / curated selection</span>
+          <span className="eyebrow">Live inventory / from Supabase</span>
           <h1>Parts that fit the work.</h1>
         </div>
         <div className="search-field">
@@ -72,14 +57,30 @@ export function CatalogClient() {
           />
         </div>
       </div>
+      <div className="category-list" aria-label="Part categories">
+        <button className={!categoryId ? 'category-chip active' : 'category-chip'} onClick={() => setCategoryId('')}>
+          All categories
+        </button>
+        {categories.map((category) => (
+          <button
+            className={categoryId === category.id ? 'category-chip active' : 'category-chip'}
+            key={category.id}
+            onClick={() => setCategoryId(category.id)}
+          >
+            {category.category_name}
+          </button>
+        ))}
+      </div>
+      {error && <div className="data-alert">{error}</div>}
       <div className="catalog-grid">
         {loading ? (
-          <div className="empty-state">Loading the latest catalog…</div>
-        ) : visible.length ? (
-          visible.map((part) => <PartCard key={part.id} part={part} />)
+          <div className="empty-state">Loading the latest catalog from the database…</div>
+        ) : parts.length ? (
+          parts.map((part) => <PartCard key={part.id} part={part} />)
         ) : (
           <div className="empty-state">
-            No parts match that search. Try a part number or request it directly.
+            <strong>No parts are published yet.</strong>
+            <span>When an active part is added in Supabase, it will appear here automatically.</span>
           </div>
         )}
       </div>
