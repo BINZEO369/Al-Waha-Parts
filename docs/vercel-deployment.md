@@ -31,3 +31,9 @@ Public: `GET /health`, `GET /api/v1`, `GET /api/v1/categories`, `GET /api/v1/veh
 Admin bearer-token routes: `GET /api/v1/admin/dashboard`, `GET /api/v1/admin/bookings`,
 `PATCH /api/v1/admin/bookings/:id`, `GET /api/v1/admin/parts`. The token must be a Supabase Auth access
 token and its user must have an active row in `public.admins`.
+
+## Initial page map
+
+Customer web: `/`, `/catalog`, `/vehicles`, `/booking`, `/contact`, `/login`, `/account`.
+Admin panel: `/`, `/dashboard`, `/parts`, `/vehicles`, `/categories`, `/bookings`, `/admins`, `/settings`, `/login`.
+These are intentionally basic route shells; business UI is the next milestone.

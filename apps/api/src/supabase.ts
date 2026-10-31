@@ -6,7 +6,9 @@ let client: SupabaseClient | undefined;
 export function getSupabaseAdmin(): SupabaseClient {
   if (!client) {
     const config = assertSupabaseConfig();
-    client = createClient(config.supabaseUrl, config.serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    client = createClient(config.supabaseUrl, config.serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
   }
   return client;
 }

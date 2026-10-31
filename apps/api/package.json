@@ -20,5 +20,6 @@
     "tsx": "^4.19.3",
     "typescript": "^5.8.2",
     "@vercel/node": "^5.3.11"
-  }
+  },
+  "type": "module"
 }
