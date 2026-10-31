@@ -47,7 +47,7 @@ export function BookingForm() {
         </label>
         <label>
           Part number / SKU
-          <input name="part_id" placeholder="OEM or part number" />
+          <input name="part_number" placeholder="OEM or part number" />
         </label>
       </div>
       <label>

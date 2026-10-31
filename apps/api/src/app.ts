@@ -167,20 +167,22 @@ app.post(
       .single();
     if (bookingError || !booking)
       return jsonError(reply, 400, bookingError?.message ?? 'Unable to create booking');
-    const { error: itemsError } = await supabase.from('booking_items').insert(
-      body.items.map((item) => ({
-        booking_id: booking.id,
-        part_id: item.part_id,
-        vehicle_id: item.vehicle_id ?? null,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-      })),
-    );
+    const { error: itemsError } = items.length
+      ? await supabase.from('booking_items').insert(
+          items.map((item) => ({
+            booking_id: booking.id,
+            part_id: item.part_id,
+            vehicle_id: item.vehicle_id ?? null,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+          })),
+        )
+      : { error: null };
     if (itemsError) {
       await supabase.from('bookings').delete().eq('id', booking.id);
       return jsonError(reply, 400, itemsError.message);
     }
-    return reply.code(201).send({ data: { ...booking, items: body.items } });
+    return reply.code(201).send({ data: { ...booking, items } });
   },
 );
 
