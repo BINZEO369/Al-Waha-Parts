@@ -130,7 +130,8 @@ app.post(
         customer_phone: string;
         customer_email?: string;
         customer_note?: string;
-        items: Array<{
+        part_number?: string;
+        items?: Array<{
           part_id: string;
           vehicle_id?: string;
           quantity: number;
@@ -144,16 +145,32 @@ app.post(
     if (
       !body?.customer_name ||
       !body.customer_phone ||
-      !Array.isArray(body.items) ||
-      body.items.length === 0
-    )
+      (!body.part_number && (!Array.isArray(body.items) || body.items.length === 0))
+    ) {
       return jsonError(
         reply,
         400,
-        'customer_name, customer_phone and at least one item are required',
+        'customer_name, customer_phone and a part number or item are required',
       );
+    }
     const supabase = getSupabaseAdmin();
+    let items = body.items ?? [];
+    if (body.part_number && items.length === 0) {
+      const { data: matchedPart } = await supabase
+        .from('parts')
+        .select('id,price')
+        .or(
+          `sku.eq.${body.part_number},oem_number.eq.${body.part_number},part_number.eq.${body.part_number}`,
+        )
+        .limit(1)
+        .maybeSingle();
+      if (matchedPart)
+        items = [{ part_id: matchedPart.id, quantity: 1, unit_price: matchedPart.price }];
+    }
     const bookingNumber = `AWP-${Date.now()}`;
+    const bookingNote = body.part_number
+      ? `${body.customer_note ?? ''}\nRequested part: ${body.part_number}`.trim()
+      : (body.customer_note ?? null);
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .insert({
@@ -161,7 +178,7 @@ app.post(
         customer_name: body.customer_name,
         customer_phone: body.customer_phone,
         customer_email: body.customer_email ?? null,
-        customer_note: body.customer_note ?? null,
+        customer_note: bookingNote,
       })
       .select()
       .single();
