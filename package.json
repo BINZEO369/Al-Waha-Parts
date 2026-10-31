@@ -1,0 +1,24 @@
+{
+  "name": "al-waha-parts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Al Waha Parts automotive parts SaaS platform monorepo",
+  "packageManager": "pnpm@9.15.5",
+  "scripts": {
+    "dev": "pnpm --parallel --filter './apps/*' dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:up": "docker compose -f infra/docker-compose.yml up -d postgres",
+    "db:down": "docker compose -f infra/docker-compose.yml down",
+    "db:migrate": "psql \"$DATABASE_URL\" -f database/migrations/001_initial.sql",
+    "db:seed": "psql \"$DATABASE_URL\" -f database/seeds/001_development.sql"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}

@@ -1,0 +1,10 @@
+create extension if not exists pgcrypto;
+create type part_status as enum ('draft', 'active', 'archived');
+create table if not exists tenants (id uuid primary key default gen_random_uuid(), name text not null, slug text not null unique, created_at timestamptz not null default now());
+create table if not exists users (id uuid primary key default gen_random_uuid(), tenant_id uuid not null references tenants(id) on delete cascade, email text not null, display_name text not null, created_at timestamptz not null default now(), unique (tenant_id, email));
+create table if not exists parts (id uuid primary key default gen_random_uuid(), tenant_id uuid not null references tenants(id) on delete cascade, sku text not null, name text not null, description text, status part_status not null default 'draft', created_at timestamptz not null default now(), updated_at timestamptz not null default now(), unique (tenant_id, sku));
+create index if not exists idx_users_tenant_id on users(tenant_id);
+create index if not exists idx_parts_tenant_status on parts(tenant_id, status);
+create or replace function set_updated_at() returns trigger language plpgsql as $$ begin new.updated_at = now(); return new; end; $$;
+drop trigger if exists parts_set_updated_at on parts;
+create trigger parts_set_updated_at before update on parts for each row execute function set_updated_at();
