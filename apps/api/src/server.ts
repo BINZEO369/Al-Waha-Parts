@@ -1,10 +1,5 @@
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
-import type { ApiHealth } from '@al-waha/shared';
-const app = Fastify({ logger: true });
-const port = Number(process.env.API_PORT ?? 4000);
-const environment = process.env.NODE_ENV ?? 'development';
-await app.register(cors, { origin: (process.env.CORS_ORIGINS ?? 'http://localhost:3000').split(',') });
-app.get('/health', async (): Promise<ApiHealth> => ({ status: 'ok', service: 'al-waha-parts-api', environment, timestamp: new Date().toISOString() }));
-app.get('/api/v1', async () => ({ name: 'Al Waha Parts API', version: 'v1' }));
-app.listen({ port, host: '0.0.0.0' }).catch((error) => { app.log.error(error); process.exit(1); });
+import { app } from './app.js';
+import { getConfig } from './env.js';
+
+const config = getConfig();
+app.listen({ port: config.port, host: '0.0.0.0' }).catch((error) => { app.log.error(error); process.exit(1); });
