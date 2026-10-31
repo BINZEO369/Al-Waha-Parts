@@ -1,9 +1,21 @@
 export default function Page() {
   return (
-    <main>
-      <p className="eyebrow">Al Waha Parts</p>
-      <h1>Vehicle Management</h1>
-      <p>The vehicle management workspace is ready for API and UI integration.</p>
-    </main>
+    <div className="admin-page">
+      <header className="admin-topbar">
+        <div>
+          <span className="admin-kicker">Operations</span>
+          <h1>Vehicle library.</h1>
+        </div>
+        <button className="admin-button">+ Add new</button>
+      </header>
+      <div className="placeholder-panel">
+        <div className="placeholder-icon">AWP</div>
+        <h2>Manage manufacturers, generations and fitment data.</h2>
+        <p>
+          This workspace is connected to the database schema and ready for the next data-management
+          action.
+        </p>
+      </div>
+    </div>
   );
 }

@@ -1,0 +1,11 @@
+{
+  "routes": [
+    { "path": "/", "title": "Home" },
+    { "path": "/catalog", "title": "Parts Catalog" },
+    { "path": "/vehicles", "title": "Vehicle Finder" },
+    { "path": "/booking", "title": "Booking Request" },
+    { "path": "/contact", "title": "Contact" },
+    { "path": "/login", "title": "Customer Login" },
+    { "path": "/account", "title": "Account" }
+  ]
+}

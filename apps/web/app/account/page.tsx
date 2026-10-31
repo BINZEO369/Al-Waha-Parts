@@ -1,9 +1,14 @@
 export default function Page() {
   return (
-    <main>
-      <p className="eyebrow">Al Waha Parts</p>
-      <h1>Customer Account</h1>
-      <p>The customer account page is ready for the next implementation milestone.</p>
+    <main className="page-shell narrow">
+      <section className="page-intro">
+        <p className="eyebrow">Al Waha Parts</p>
+        <h1>Your Account.</h1>
+        <p>Authentication and saved vehicle preferences are ready to connect to Supabase Auth.</p>
+        <button className="button">
+          Continue <span>→</span>
+        </button>
+      </section>
     </main>
   );
 }

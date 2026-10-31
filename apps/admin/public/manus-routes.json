@@ -1,0 +1,13 @@
+{
+  "routes": [
+    { "path": "/", "title": "Admin Home" },
+    { "path": "/dashboard", "title": "Dashboard" },
+    { "path": "/parts", "title": "Parts" },
+    { "path": "/vehicles", "title": "Vehicles" },
+    { "path": "/categories", "title": "Categories" },
+    { "path": "/bookings", "title": "Bookings" },
+    { "path": "/admins", "title": "Admins" },
+    { "path": "/settings", "title": "Settings" },
+    { "path": "/login", "title": "Admin Login" }
+  ]
+}

@@ -1,9 +1,19 @@
+import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { Header, Footer } from '../components/Header';
 import './globals.css';
+export const metadata: Metadata = {
+  title: 'Al Waha Parts — Right part. Right fit.',
+  description: 'Automotive parts sourcing and fitment for the UAE.',
+};
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Header />
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }

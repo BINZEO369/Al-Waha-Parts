@@ -1,9 +1,8 @@
-export default function Page() {
+import { CatalogClient } from '../../components/CatalogClient';
+export default function CatalogPage() {
   return (
-    <main>
-      <p className="eyebrow">Al Waha Parts</p>
-      <h1>Parts Catalog</h1>
-      <p>The parts catalog page is ready for the next implementation milestone.</p>
+    <main className="page-shell">
+      <CatalogClient />
     </main>
   );
 }
