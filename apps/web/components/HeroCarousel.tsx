@@ -15,6 +15,15 @@ type Banner = {
   mobile_image_url?: string | null;
 };
 
+const FALLBACK_BANNER: Banner = {
+  id: 'fallback-hero',
+  eyebrow: 'Al Waha Parts',
+  title: 'The right part for the right vehicle.',
+  description: 'Verified automotive parts with fitment support across the UAE.',
+  cta_label: 'Browse parts',
+  cta_href: '/catalog',
+};
+
 export function HeroCarousel() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [active, setActive] = useState(0);
@@ -42,8 +51,7 @@ export function HeroCarousel() {
     return () => window.clearInterval(timer);
   }, [banners.length]);
 
-  const banner = banners[active];
-  if (!banner && !loading) return null;
+  const banner = banners[active] ?? FALLBACK_BANNER;
 
   return (
     <section
