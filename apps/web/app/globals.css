@@ -289,6 +289,8 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .contact-grid h2 { margin: 14px 0 8px; font-size: 22px; }
 .contact-grid p { color: #777; font-size: 13px; line-height: 1.7; }
 
+.vehicle-home-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 900px) {
   .store-header { gap: 25px; }
@@ -358,10 +360,10 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .category-card strong { font-size: 10px; }
   .arrival-grid { grid-template-columns: 1fr 1fr; }
   .arrival-image { height: 140px; }
-  .vehicle-home-grid { grid-template-columns: 1fr; }
   .arrival-details h3 { min-height: 48px; font-size: 11px; }
   .price-row { display: grid; gap: 4px; }
   .catalog-grid { grid-template-columns: 1fr; }
+  .vehicle-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .booking-form, .finder-card { padding: 22px 16px; }
 }
 
@@ -508,7 +510,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .arrival-image { height: 145px; }
   .arrival-details h3 { min-height: 42px; font-size: 10px; }
   .price-row { gap: 5px; }
-  .vehicle-home-grid { grid-template-columns: 1fr; }
+  .vehicle-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 
