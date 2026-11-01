@@ -579,19 +579,20 @@ export default function Home() {
           outline-offset: 3px;
         }
         .popular-cars-heading {
-          justify-content: flex-start;
+          justify-content: center;
           margin-bottom: 22px;
         }
         .popular-cars-title-box {
           display: inline-block;
           margin: 0;
           padding: 12px 22px;
-          border: 2px solid var(--red);
+          border: 1px solid var(--red);
           color: var(--red);
           font-family: Montserrat, sans-serif;
           font-size: 21px;
           letter-spacing: -.03em;
         }
+        .popular-cars-title-box::after { display: none; }
         @media (max-width: 520px) {
           .popular-cars-title-box { padding: 10px 16px; font-size: 18px; }
         }

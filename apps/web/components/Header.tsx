@@ -79,6 +79,7 @@ export function Header() {
       </header>
 
       <nav className={`main-nav ${menuOpen ? 'is-open' : ''}`} aria-label="Main navigation">
+        <div className="nav-drawer-header"><strong>Menu</strong><button type="button" onClick={() => setMenuOpen(false)} aria-label="Close navigation"><MenuIcon open /></button></div>
         <div className="main-nav-inner">
           {navItems.map((item, index) => (
             <Link className={index === 0 ? 'active' : ''} href={item.href} key={item.label} onClick={closePanels}>{item.label}</Link>
@@ -86,6 +87,7 @@ export function Header() {
           <button className="nav-search-button" type="button" onClick={() => { setMenuOpen(false); setSearchOpen(true); }}><SearchIcon /> Search catalog</button>
         </div>
       </nav>
+      {menuOpen && <button className="menu-drawer-backdrop" type="button" aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
 
       {searchOpen && (
         <>
