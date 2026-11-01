@@ -60,6 +60,20 @@ app.get('/api/v1/categories', async (_request, reply) => {
   return { data: data ?? [] };
 });
 
+app.get('/api/v1/banners', async (_request, reply) => {
+  const now = new Date().toISOString();
+  const { data, error } = await getSupabaseAdmin()
+    .from('hero_banners')
+    .select('id,eyebrow,title,description,cta_label,cta_href,image_url,mobile_image_url,badge_text,sort_order')
+    .eq('status', 'active')
+    .or(`starts_at.is.null,starts_at.lte.${now}`)
+    .or(`ends_at.is.null,ends_at.gt.${now}`)
+    .order('sort_order')
+    .order('created_at');
+  if (error) return jsonError(reply, 500, error.message);
+  return { data: data ?? [] };
+});
+
 app.get(
   '/api/v1/vehicles',
   async (
@@ -126,6 +140,21 @@ app.get(
     const { data, error } = await query;
     if (error) return jsonError(reply, 500, error.message);
     return { data: data ?? [] };
+  },
+);
+
+app.get(
+  '/api/v1/parts/slug/:slug',
+  async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
+    const { data, error } = await getSupabaseAdmin()
+      .from('parts')
+      .select('*,parts_categories(id,category_name,slug,image_url),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))')
+      .eq('slug', request.params.slug)
+      .eq('status', 'active')
+      .maybeSingle();
+    if (error) return jsonError(reply, 500, error.message);
+    if (!data) return jsonError(reply, 404, 'Part not found');
+    return { data };
   },
 );
 
@@ -227,6 +256,35 @@ app.get('/api/v1/admin/dashboard', { preHandler: requireAdmin as any }, async (_
       active_admins: admins.count ?? 0,
     },
   });
+});
+
+app.get('/api/v1/admin/banners', { preHandler: requireAdmin as any }, async (_request, reply) => {
+  const { data, error } = await getSupabaseAdmin()
+    .from('hero_banners')
+    .select('*')
+    .order('sort_order')
+    .order('created_at', { ascending: false });
+  if (error) return jsonError(reply, 500, error.message);
+  return { data: data ?? [] };
+});
+
+app.post('/api/v1/admin/banners', { preHandler: requireAdmin as any }, async (request, reply) => {
+  const body = request.body as Record<string, unknown>;
+  if (!body.slug || !body.title || !body.image_url) return jsonError(reply, 400, 'slug, title and image_url are required');
+  const { data, error } = await getSupabaseAdmin().from('hero_banners').insert(body).select().single();
+  if (error) return jsonError(reply, 400, error.message);
+  return reply.code(201).send({ data });
+});
+
+app.patch('/api/v1/admin/banners/:id', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string }; Body: Record<string, unknown> }>, reply) => {
+  const { data, error } = await getSupabaseAdmin()
+    .from('hero_banners')
+    .update(request.body)
+    .eq('id', request.params.id)
+    .select()
+    .single();
+  if (error) return jsonError(reply, 400, error.message);
+  return { data };
 });
 
 app.get(

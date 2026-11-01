@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
+import { HeroCarousel } from '../components/HeroCarousel';
 
 type Category = {
   id: string;
@@ -110,7 +111,6 @@ export default function Home() {
     () => vehicles.filter((vehicle) => vehicle.is_featured).slice(0, 4),
     [vehicles],
   );
-  const heroPart = featuredParts[0] ?? parts[0];
   const promoCategories = featuredCategories.slice(0, 3);
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
@@ -121,27 +121,7 @@ export default function Home() {
 
   return (
     <main className="home-page">
-      <section className="hero-storefront">
-        <div className="hero-storefront-inner">
-          <div className="hero-storefront-copy">
-            <span className="hero-kicker">Live inventory from Al Waha Parts</span>
-            <h1>Find the right part.</h1>
-            <span className="hero-rule" />
-            <p>Browse verified automotive categories, real stock and vehicle fitment data from our database.</p>
-            <Link className="red-button" href="/catalog">
-              Browse database <ArrowIcon />
-            </Link>
-          </div>
-          <div className="hero-storefront-art database-hero-art">
-            {heroPart?.primary_image_url ? (
-              <img src={heroPart.primary_image_url} alt={heroPart.part_name} />
-            ) : (
-              <div className="database-image-empty">Product image will appear from the database</div>
-            )}
-          </div>
-          <div className="hero-dots" aria-hidden="true"><span className="is-active" /><span /></div>
-        </div>
-      </section>
+      <HeroCarousel />
 
       {error && <div className="store-section data-alert home-data-alert">{error}</div>}
       {loading && <div className="store-section home-loading">Loading categories, parts and vehicles from the database…</div>}

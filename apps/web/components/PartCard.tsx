@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 export interface PartCardData {
   id: string;
+  slug?: string | null;
   part_name: string;
   brand_name?: string | null;
   sku: string;
@@ -33,7 +34,9 @@ export function PartCard({ part }: { part: PartCardData }) {
         <div className="eyebrow">
           {part.brand_name || 'Al Waha Select'} · {part.sku}
         </div>
-        <h3>{part.part_name}</h3>
+        <h3>
+          <Link href={`/catalog/${part.slug ?? part.id}`}>{part.part_name}</Link>
+        </h3>
         <div className="part-meta">
           <span>{part.tested_status === 'tested' ? 'Tested' : 'Verified fit'}</span>
           <span>
