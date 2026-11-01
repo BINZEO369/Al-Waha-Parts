@@ -53,86 +53,134 @@ function HeroCarousel() {
   }, [banners.length]);
 
   const banner = banners[active] ?? FALLBACK_BANNER;
+  const hasImage = Boolean(banner.image_url || banner.mobile_image_url);
 
   return (
     <section
-      className={'hero-carousel-root'}
+      className="hero-carousel-root"
       aria-label="Featured parts banners"
       aria-busy={loading}
     >
       <style jsx global>{`
         .hero-carousel-root {
-          width: 100%;
-          max-width: none;
-          min-height: 390px;
-          padding: 35px max(18px, calc((100vw - var(--max)) / 2 + 18px)) 42px;
-          margin: 0;
-          display: grid;
-          grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-          align-items: center;
-          gap: clamp(16px, 3vw, 48px);
           position: relative;
+          width: 100%;
+          min-height: 540px;
           overflow: hidden;
-          background: #f5f5f5;
+          background: #151515;
+        }
+
+        /* One slide = full-bleed image + overlay + centered copy */
+        .hero-carousel-slide {
+          position: relative;
+          width: 100%;
+          min-height: 540px;
+          display: flex;
+          align-items: center;
+          animation: slide-fade 0.5s ease both;
+        }
+
+        .hero-carousel-media {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+
+        .hero-carousel-media img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+        }
+
+        .hero-carousel-bg-fallback {
+          background:
+            radial-gradient(circle at 20% 30%, rgba(220, 38, 38, 0.35), transparent 60%),
+            linear-gradient(135deg, #1f1f1f, #2c2c2c 60%, #111);
+        }
+
+        /* Dark gradient so text stays readable on any banner image */
+        .hero-carousel-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          background: linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.78) 0%,
+            rgba(0, 0, 0, 0.55) 42%,
+            rgba(0, 0, 0, 0.18) 75%,
+            rgba(0, 0, 0, 0.05) 100%
+          );
         }
 
         .hero-carousel-copy {
-          max-width: 500px;
           position: relative;
-          z-index: 1;
-          padding: 16px 0 20px;
-          animation: copy-in 0.35s ease both;
+          z-index: 2;
+          width: 100%;
+          padding: 84px max(22px, calc((100vw - var(--max)) / 2 + 22px));
+          color: #fff;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .hero-carousel-copy > * {
+          max-width: 560px;
         }
 
         .hero-carousel-copy .eyebrow {
-          margin: 0 0 10px;
-          color: #555;
-          font-size: 12px;
+          margin: 0 0 14px;
+          color: rgba(255, 255, 255, 0.88);
+          font-size: 13px;
           font-weight: 500;
-          letter-spacing: 0;
+          letter-spacing: 0.02em;
           line-height: 1.4;
           text-transform: none;
         }
 
         .hero-carousel-copy h1 {
-          max-width: 590px;
           margin: 0;
-          color: #292929;
+          color: #fff;
           font-family: Montserrat, sans-serif;
-          font-size: clamp(42px, 5.5vw, 68px);
+          font-size: clamp(40px, 5.4vw, 66px);
           font-weight: 800;
-          line-height: 0.98;
-          letter-spacing: -0.065em;
+          line-height: 1;
+          letter-spacing: -0.04em;
+          text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
         }
 
         .hero-carousel-rule {
           display: block;
           width: 52px;
           height: 2px;
-          margin: 13px 0 12px;
+          margin: 18px 0;
           background: var(--red);
         }
 
         .hero-carousel-lede {
-          max-width: 370px;
-          margin: 0 0 23px;
-          color: #666;
-          font-size: 12px;
-          line-height: 1.75;
+          margin: 0 0 26px;
+          color: rgba(255, 255, 255, 0.88);
+          font-size: 14px;
+          line-height: 1.7;
         }
 
         .hero-carousel-actions .button {
-          min-width: 132px;
-          min-height: 40px;
-          padding: 0 18px;
+          min-width: 140px;
+          min-height: 46px;
+          padding: 0 24px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           background: var(--red);
           color: #fff;
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 700;
           text-transform: none;
+          border-radius: 2px;
           transition:
             background 0.18s ease,
             transform 0.18s ease;
@@ -143,50 +191,33 @@ function HeroCarousel() {
           transform: translateY(-2px);
         }
 
-        .hero-carousel-visual {
-          min-width: 0;
-          min-height: 300px;
-          height: 100%;
-          display: grid;
-          place-items: center;
-          overflow: hidden;
-          animation: visual-in 0.45s ease both;
-        }
-
-        .hero-carousel-visual picture {
-          width: 100%;
-          height: 100%;
-          display: grid;
-          place-items: center;
-        }
-
-        .hero-carousel-visual img {
-          width: 100%;
-          height: min(350px, 100%);
-          object-fit: contain;
-          object-position: center;
-          mix-blend-mode: multiply;
-        }
-
         .hero-carousel-dots {
           position: absolute;
           left: 50%;
-          bottom: 17px;
-          z-index: 2;
+          bottom: 22px;
+          z-index: 3;
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 9px;
           transform: translateX(-50%);
         }
 
         .hero-carousel-dot {
-          width: 9px;
-          height: 9px;
+          width: 10px;
+          height: 10px;
           padding: 0;
-          border: 1px solid #777;
+          border: 1px solid rgba(255, 255, 255, 0.65);
           border-radius: 50%;
           background: transparent;
           cursor: pointer;
+          transition:
+            background 0.18s ease,
+            border-color 0.18s ease,
+            transform 0.18s ease;
+        }
+
+        .hero-carousel-dot:hover {
+          transform: scale(1.15);
         }
 
         .hero-carousel-dot.active {
@@ -195,34 +226,21 @@ function HeroCarousel() {
         }
 
         .hero-carousel-loading {
-          grid-column: 1 / -1;
           width: 100%;
-          height: 240px;
-          border-radius: 2px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 38%, #f0f0f0 63%);
+          height: 540px;
+          background: linear-gradient(90deg, #1a1a1a 25%, #262626 38%, #1a1a1a 63%);
           background-size: 400% 100%;
           animation: shimmer 1.25s ease infinite;
         }
 
-        @keyframes copy-in {
+        @keyframes slide-fade {
           from {
             opacity: 0;
-            transform: translateY(8px);
+            transform: scale(1.01);
           }
           to {
             opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes visual-in {
-          from {
-            opacity: 0;
-            transform: translateX(12px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
+            transform: scale(1);
           }
         }
 
@@ -233,106 +251,120 @@ function HeroCarousel() {
         }
 
         @media (max-width: 800px) {
-          .hero-carousel-root {
-            min-height: 0;
-            padding: 32px 18px 38px;
-            grid-template-columns: 1fr;
-            gap: 0;
+          .hero-carousel-root,
+          .hero-carousel-slide {
+            min-height: 520px;
+          }
+
+          .hero-carousel-overlay {
+            background: linear-gradient(
+              180deg,
+              rgba(0, 0, 0, 0.6) 0%,
+              rgba(0, 0, 0, 0.55) 40%,
+              rgba(0, 0, 0, 0.8) 100%
+            );
           }
 
           .hero-carousel-copy {
-            max-width: 560px;
-            padding: 6px 0 0;
+            padding: 72px 22px;
+            justify-content: flex-end;
+            min-height: 520px;
+          }
+
+          .hero-carousel-copy > * {
+            max-width: 100%;
           }
 
           .hero-carousel-copy h1 {
-            font-size: clamp(40px, 8vw, 58px);
+            font-size: clamp(36px, 9vw, 52px);
           }
 
-          .hero-carousel-lede {
-            max-width: 420px;
-            margin-bottom: 17px;
-          }
-
-          .hero-carousel-visual {
-            min-height: 245px;
-            height: 245px;
-            margin-top: 2px;
-          }
-
-          .hero-carousel-visual img {
-            height: 245px;
-          }
-
-          .hero-carousel-dots {
-            bottom: 14px;
+          .hero-carousel-loading {
+            height: 520px;
           }
         }
 
         @media (max-width: 480px) {
-          .hero-carousel-root {
-            padding: 28px 16px 36px;
+          .hero-carousel-root,
+          .hero-carousel-slide,
+          .hero-carousel-copy {
+            min-height: 460px;
+          }
+
+          .hero-carousel-copy {
+            padding: 56px 16px;
           }
 
           .hero-carousel-copy .eyebrow {
-            margin-bottom: 8px;
             font-size: 11px;
+            margin-bottom: 10px;
           }
 
           .hero-carousel-copy h1 {
-            font-size: clamp(38px, 10vw, 46px);
+            font-size: clamp(32px, 9.5vw, 40px);
           }
 
           .hero-carousel-lede {
-            max-width: 310px;
+            font-size: 12px;
+            margin-bottom: 20px;
+          }
+
+          .hero-carousel-actions .button {
+            min-height: 42px;
             font-size: 11px;
           }
 
-          .hero-carousel-visual {
-            min-height: 205px;
-            height: 205px;
+          .hero-carousel-loading {
+            height: 460px;
           }
-
-          .hero-carousel-visual img {
-            height: 205px;
-          }
-        }
-
-        /* Final palette refinement: pure white stage behind the database banner. */
-        .hero-carousel-root {
-          background: #fff;
         }
       `}</style>
+
       {banner ? (
         <>
-          <div className={'hero-carousel-copy'} key={`${banner.id}-copy`}>
-            <p className="eyebrow">{banner.eyebrow}</p>
-            <h1>{banner.title}</h1>
-            <span className={'hero-carousel-rule'} aria-hidden="true" />
-            {banner.description && <p className={'hero-carousel-lede'}>{banner.description}</p>}
-            <div className={'hero-carousel-actions'}>
-              <Link className="button" href={banner.cta_href}>
-                {banner.cta_label}
-              </Link>
-            </div>
-          </div>
-          <div className={'hero-carousel-visual'} key={`${banner.id}-visual`}>
-            {(banner.image_url || banner.mobile_image_url) && (
-              <picture>
+          <div className="hero-carousel-slide" key={banner.id}>
+            {hasImage ? (
+              <picture className="hero-carousel-media">
                 {banner.mobile_image_url && (
                   <source media="(max-width: 700px)" srcSet={banner.mobile_image_url} />
                 )}
-                <img src={banner.image_url || banner.mobile_image_url || ''} alt={banner.title} />
+                <img
+                  src={banner.image_url || banner.mobile_image_url || ''}
+                  alt=""
+                  aria-hidden="true"
+                />
               </picture>
+            ) : (
+              <div
+                className="hero-carousel-media hero-carousel-bg-fallback"
+                aria-hidden="true"
+              />
             )}
+            <div className="hero-carousel-overlay" aria-hidden="true" />
+            <div className="hero-carousel-copy">
+              <p className="eyebrow">{banner.eyebrow}</p>
+              <h1>{banner.title}</h1>
+              <span className="hero-carousel-rule" aria-hidden="true" />
+              {banner.description && (
+                <p className="hero-carousel-lede">{banner.description}</p>
+              )}
+              <div className="hero-carousel-actions">
+                <Link className="button" href={banner.cta_href}>
+                  {banner.cta_label}
+                </Link>
+              </div>
+            </div>
           </div>
+
           {banners.length > 1 && (
-            <div className={'hero-carousel-dots'} aria-label="Select banner">
+            <div className="hero-carousel-dots" aria-label="Select banner">
               {banners.map((item, index) => (
                 <button
                   key={item.id}
                   type="button"
-                  className={index === active ? 'hero-carousel-dot active' : 'hero-carousel-dot'}
+                  className={
+                    index === active ? 'hero-carousel-dot active' : 'hero-carousel-dot'
+                  }
                   onClick={() => setActive(index)}
                   aria-label={`Show banner ${index + 1}: ${item.title}`}
                   aria-current={index === active ? 'true' : undefined}
@@ -342,11 +374,13 @@ function HeroCarousel() {
           )}
         </>
       ) : (
-        <div className={'hero-carousel-loading'} aria-hidden="true" />
+        <div className="hero-carousel-loading" aria-hidden="true" />
       )}
     </section>
   );
 }
+
+/* ---------- নিচের সব কোড আগের মতোই আছে (কোনো পরিবর্তন নেই) ---------- */
 
 type Category = {
   id: string;
