@@ -216,6 +216,23 @@ h1, h2, h3, p { margin-top: 0; }
 .vehicle-home-card small { color: var(--red); font-size: 9px; text-transform: uppercase; }
 .vehicle-home-card strong { font-size: 13px; }
 .vehicle-home-card span { color: #999; font-size: 10px; }
+.back-link { display: inline-flex; margin-bottom: 18px; color: var(--red); font-size: 11px; font-weight: 700; }
+.vehicle-detail-hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); min-height: 380px; border: 1px solid var(--line); background: #fff; box-shadow: 0 12px 35px rgba(0,0,0,.04); }
+.vehicle-detail-media { min-height: 380px; background: #f7f7f7; }
+.vehicle-detail-media img { width: 100%; height: 100%; min-height: 380px; display: block; object-fit: cover; }
+.vehicle-detail-placeholder { height: 100%; min-height: 380px; display: grid; place-items: center; color: var(--red); font-family: Montserrat, sans-serif; font-size: 45px; font-weight: 800; }
+.vehicle-detail-copy { display: flex; flex-direction: column; justify-content: center; padding: 42px; }
+.vehicle-detail-copy h1 { max-width: 480px; margin: 9px 0 8px; font-family: Montserrat, sans-serif; font-size: clamp(30px, 4vw, 48px); line-height: 1.02; letter-spacing: -.06em; }
+.vehicle-detail-subtitle { margin: 0 0 26px; color: #888; font-size: 13px; }
+.vehicle-detail-specs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; padding: 15px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.vehicle-detail-specs div, .vehicle-info-strip div { display: grid; gap: 5px; }
+.vehicle-detail-specs small, .vehicle-info-strip small { color: #999; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
+.vehicle-detail-specs strong { font-size: 12px; }
+.vehicle-info-strip { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 18px; margin: 24px 0 58px; padding: 20px 22px; border: 1px solid var(--line); background: #fafafa; }
+.vehicle-info-strip strong { font-size: 12px; }
+.fitment-ok { color: #287d58; }
+.vehicle-products-section { padding-bottom: 30px; }
+.vehicle-products-count { color: #999; font-size: 11px; }
 
 /* ---------- FOOTER ---------- */
 .store-footer { background: var(--red); color: #fff; }
@@ -354,6 +371,11 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .arrival-details { padding: 12px; }
   .vehicle-home-grid { grid-template-columns: 1fr; gap: 14px; }
   .vehicle-home-card > img, .vehicle-home-card > .database-image-empty { height: 220px; }
+  .vehicle-detail-hero { grid-template-columns: 1fr; }
+  .vehicle-detail-media, .vehicle-detail-media img, .vehicle-detail-placeholder { min-height: 250px; height: 250px; }
+  .vehicle-detail-copy { padding: 26px 20px; }
+  .vehicle-detail-specs { gap: 8px; }
+  .vehicle-info-strip { grid-template-columns: 1fr 1fr; margin-bottom: 40px; padding: 16px; }
   .wide-feature { margin: 0 14px 42px; padding: 35px 24px 10px; display: block; }
   .wide-feature-art { height: 190px; }
   .wide-feature-art img { height: 200px; }

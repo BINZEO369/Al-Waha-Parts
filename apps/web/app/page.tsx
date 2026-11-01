@@ -602,6 +602,23 @@ export default function Home() {
           outline: 2px solid var(--red);
           outline-offset: 3px;
         }
+        .popular-cars-heading {
+          justify-content: flex-start;
+          margin-bottom: 22px;
+        }
+        .popular-cars-title-box {
+          display: inline-block;
+          margin: 0;
+          padding: 12px 22px;
+          border: 2px solid var(--red);
+          color: var(--red);
+          font-family: Montserrat, sans-serif;
+          font-size: 21px;
+          letter-spacing: -.03em;
+        }
+        @media (max-width: 520px) {
+          .popular-cars-title-box { padding: 10px 16px; font-size: 18px; }
+        }
       `}</style>
 
       {/* ----------------------------------------------------------------
@@ -623,20 +640,14 @@ export default function Home() {
        * ---------------------------------------------------------------- */}
       {!loading && homeSelectedVehicles.length > 0 && (
         <section className="store-section vehicle-home-section">
-          <div className="section-heading">
-            <div>
-              <span className="section-kicker">Vehicle fitment database</span>
-              <h2>Popular Vehicles</h2>
-            </div>
-            <Link className="section-link" href="/vehicles">
-              Open vehicle finder <ArrowIcon />
-            </Link>
+          <div className="section-heading popular-cars-heading">
+            <h2 className="popular-cars-title-box">Popular Cars</h2>
           </div>
           <div className="vehicle-home-grid">
             {homeSelectedVehicles.map((vehicle) => (
               <Link
                 className="vehicle-home-card"
-                href="/vehicles"
+                href={`/vehicles/${vehicle.id}`}
                 key={vehicle.id}
               >
                 {vehicle.cover_image_url ? (
