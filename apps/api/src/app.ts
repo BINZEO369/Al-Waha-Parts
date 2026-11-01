@@ -203,16 +203,21 @@ app.post(
           part_id: string;
           vehicle_id?: string;
           quantity: number;
-          unit_price: number;
         }>;
+        delivery_method?: 'pickup' | 'delivery';
+        shipping_address?: string;
+        customer_city?: string;
+        payment_method?: 'cash_on_delivery';
       };
     }>,
     reply,
   ) => {
     const body = request.body;
+    const customerName = body?.customer_name?.trim();
+    const customerPhone = body?.customer_phone?.trim();
     if (
-      !body?.customer_name ||
-      !body.customer_phone ||
+      !customerName ||
+      !customerPhone ||
       (!body.part_number && (!Array.isArray(body.items) || body.items.length === 0))
     ) {
       return jsonError(
@@ -222,20 +227,96 @@ app.post(
       );
     }
     const supabase = getSupabaseAdmin();
-    let items = body.items ?? [];
-    if (body.part_number && items.length === 0) {
-      const { data: matchedPart } = await supabase
-        .from('parts')
-        .select('id,price')
-        .or(
-          `sku.eq.${body.part_number},oem_number.eq.${body.part_number},part_number.eq.${body.part_number}`,
-        )
-        .limit(1)
-        .maybeSingle();
-      if (matchedPart)
-        items = [{ part_id: matchedPart.id, quantity: 1, unit_price: matchedPart.price }];
+    if (body.delivery_method === 'delivery' && !body.shipping_address?.trim()) {
+      return jsonError(reply, 400, 'A delivery address is required for delivery requests');
     }
-    const bookingNumber = `AWP-${Date.now()}`;
+
+    const requestedItems = new Map<string, { part_id: string; vehicle_id?: string; quantity: number }>();
+    for (const item of body.items ?? []) {
+      if (!item?.part_id || !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 99) {
+        return jsonError(reply, 400, 'Each cart item must have a valid quantity between 1 and 99');
+      }
+      const previous = requestedItems.get(item.part_id);
+      const quantity = (previous?.quantity ?? 0) + item.quantity;
+      if (quantity > 99) return jsonError(reply, 400, 'The quantity for one product cannot exceed 99');
+      requestedItems.set(item.part_id, { part_id: item.part_id, vehicle_id: item.vehicle_id, quantity });
+    }
+
+    if (body.part_number && requestedItems.size === 0) {
+      const partNumber = body.part_number.trim();
+      if (partNumber.length > 120) return jsonError(reply, 400, 'Part number is too long');
+      let matchedPart = null as { id: string } | null;
+      for (const column of ['sku', 'oem_number', 'part_number'] as const) {
+        const { data } = await supabase
+          .from('parts')
+          .select('id')
+          .eq('status', 'active')
+          .eq(column, partNumber)
+          .limit(1)
+          .maybeSingle();
+        if (data) {
+          matchedPart = data;
+          break;
+        }
+      }
+      if (matchedPart)
+        requestedItems.set(matchedPart.id, { part_id: matchedPart.id, quantity: 1 });
+    }
+
+    const partIds = [...requestedItems.keys()];
+    const { data: parts, error: partsError } = partIds.length
+      ? await supabase
+          .from('parts')
+          .select('id,part_name,sku,price,sale_price,stock_quantity')
+          .in('id', partIds)
+          .eq('status', 'active')
+      : { data: [], error: null };
+    if (partsError) return jsonError(reply, 500, 'Unable to verify cart items');
+    if (parts.length !== partIds.length) return jsonError(reply, 400, 'One or more products are no longer available');
+
+    const partById = new Map(parts.map((part) => [part.id, part]));
+    const vehicleIds = [...new Set([...requestedItems.values()].map((item) => item.vehicle_id).filter(Boolean))] as string[];
+    const { data: vehicles, error: vehiclesError } = vehicleIds.length
+      ? await supabase.from('vehicles').select('id,manufacturer_name,model_name,generation').in('id', vehicleIds).eq('status', 'active')
+      : { data: [], error: null };
+    if (vehiclesError) return jsonError(reply, 500, 'Unable to verify vehicle fitment');
+    if (vehicles.length !== vehicleIds.length) return jsonError(reply, 400, 'The selected vehicle is no longer available');
+    const vehicleById = new Map(vehicles.map((vehicle) => [vehicle.id, vehicle]));
+
+    const items: Array<{
+      part_id: string;
+      vehicle_id: string | null;
+      quantity: number;
+      unit_price: number;
+      part_name_snapshot: string;
+      sku_snapshot: string;
+      vehicle_name_snapshot: string | null;
+      line_total: number;
+    }> = [];
+    for (const item of requestedItems.values()) {
+      const part = partById.get(item.part_id);
+      if (!part) return jsonError(reply, 400, 'Product validation failed');
+      const stock = part.stock_quantity == null ? null : Number(part.stock_quantity);
+      if (stock !== null && (stock <= 0 || item.quantity > stock)) {
+        return jsonError(reply, 409, `${part.part_name} has only ${Math.max(stock, 0)} available`);
+      }
+      const unitPrice = Number(part.sale_price ?? part.price ?? 0);
+      const vehicle = item.vehicle_id ? vehicleById.get(item.vehicle_id) : undefined;
+      items.push({
+        part_id: part.id,
+        vehicle_id: item.vehicle_id ?? null,
+        quantity: item.quantity,
+        unit_price: unitPrice,
+        part_name_snapshot: part.part_name,
+        sku_snapshot: part.sku,
+        vehicle_name_snapshot: vehicle
+          ? `${vehicle.manufacturer_name} ${vehicle.model_name}${vehicle.generation ? ` · ${vehicle.generation}` : ''}`
+          : null,
+        line_total: unitPrice * item.quantity,
+      });
+    }
+    const totalAmount = items.reduce((total, item) => total + item.line_total, 0);
+    const bookingNumber = `AWP-${Date.now()}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
     const bookingNote = body.part_number
       ? `${body.customer_note ?? ''}\nRequested part: ${body.part_number}`.trim()
       : (body.customer_note ?? null);
@@ -243,10 +324,17 @@ app.post(
       .from('bookings')
       .insert({
         booking_number: bookingNumber,
-        customer_name: body.customer_name,
-        customer_phone: body.customer_phone,
+        customer_name: customerName,
+        customer_phone: customerPhone,
         customer_email: body.customer_email ?? null,
         customer_note: bookingNote,
+        total_amount: totalAmount,
+        currency: 'AED',
+        shipping_address: body.shipping_address?.trim() ?? null,
+        customer_city: body.customer_city?.trim() ?? null,
+        delivery_method: body.delivery_method ?? 'pickup',
+        payment_method: body.payment_method ?? 'cash_on_delivery',
+        source: 'website_cart',
       })
       .select()
       .single();
@@ -257,9 +345,13 @@ app.post(
           items.map((item) => ({
             booking_id: booking.id,
             part_id: item.part_id,
-            vehicle_id: item.vehicle_id ?? null,
+            vehicle_id: item.vehicle_id,
             quantity: item.quantity,
             unit_price: item.unit_price,
+            part_name_snapshot: item.part_name_snapshot,
+            sku_snapshot: item.sku_snapshot,
+            vehicle_name_snapshot: item.vehicle_name_snapshot,
+            line_total: item.line_total,
           })),
         )
       : { error: null };

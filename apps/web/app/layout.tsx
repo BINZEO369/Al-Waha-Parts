@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Header, Footer } from '../components/Header';
+import { CartProvider } from '../components/CartProvider';
 const globalStyles = String.raw`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap');
 
 :root {
@@ -264,7 +265,10 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .part-price { display: flex; align-items: center; gap: 10px; margin-top: 18px; }
 .part-price strong { color: var(--red); font-size: 17px; }
 .part-price del { color: #aaa; font-size: 10px; }
-.part-price a { margin-left: auto; color: var(--red); font-size: 11px; font-weight: 700; }
+.part-card-actions { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+.part-add-to-cart { min-height: 36px; padding: 0 14px; }
+.part-add-to-cart:disabled { cursor: not-allowed; opacity: .55; }
+.part-request-link { margin-left: auto; color: var(--red); font-size: 11px; font-weight: 700; }
 .empty-state { grid-column: 1 / -1; padding: 55px 20px; border: 1px dashed var(--line); color: #888; text-align: center; }
 .empty-state strong, .empty-state span { display: block; }
 .empty-state span { margin-top: 8px; font-size: 12px; }
@@ -291,6 +295,23 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .contact-grid > div { padding: 28px; border: 1px solid var(--line); background: #fff; }
 .contact-grid h2 { margin: 14px 0 8px; font-size: 22px; }
 .contact-grid p { color: #777; font-size: 13px; line-height: 1.7; }
+.cart-panel { display: grid; gap: 14px; padding: 20px; border: 1px solid #f0d6d8; background: #fffafa; }
+.cart-panel-heading, .cart-total { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.cart-panel-heading h3 { margin: 2px 0 0; font-size: 18px; }
+.cart-clear, .cart-remove { border: 0; background: transparent; color: var(--red); font-size: 11px; font-weight: 700; }
+.cart-items { display: grid; gap: 10px; }
+.cart-item { display: grid; grid-template-columns: 58px minmax(0, 1fr) 72px auto 20px; align-items: center; gap: 12px; padding: 10px; border: 1px solid var(--line); background: #fff; }
+.cart-item-image { width: 58px; height: 58px; display: grid; place-items: center; overflow: hidden; background: var(--soft); color: var(--red); font-size: 10px; font-weight: 700; }
+.cart-item-image img { width: 100%; height: 100%; object-fit: cover; }
+.cart-item-copy { min-width: 0; display: grid; gap: 3px; }
+.cart-item-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.cart-item-copy small, .cart-item-copy span { color: #888; font-size: 10px; }
+.cart-quantity { display: grid; gap: 4px; color: #888; font-size: 9px; }
+.cart-quantity input { width: 64px; height: 30px; padding: 0 7px; border: 1px solid var(--line); }
+.cart-item-total { color: var(--red); font-size: 12px; white-space: nowrap; }
+.cart-empty { padding: 16px; border: 1px dashed #e7c5c8; color: #888; font-size: 11px; line-height: 1.6; }
+.cart-total { padding-top: 12px; border-top: 1px solid #eedfe0; color: #777; font-size: 11px; }
+.cart-total strong { color: var(--red); font-size: 19px; }
 
 .vehicle-home-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 
@@ -351,6 +372,13 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .booking-form-heading { display: block; }
   .booking-form-heading p { margin-top: 12px; }
   .page-shell { padding: 50px 18px 75px; }
+  .booking-form { padding: 22px 16px; }
+  .cart-panel { padding: 14px; }
+  .cart-item { grid-template-columns: 50px minmax(0, 1fr) 64px 18px; gap: 9px; }
+  .cart-item-image { width: 50px; height: 50px; }
+  .cart-item-total { grid-column: 2 / 3; grid-row: 2; }
+  .cart-quantity { grid-column: 3; grid-row: 1 / span 2; }
+  .cart-remove { grid-column: 4; grid-row: 1 / span 2; }
 }
 @media (max-width: 430px) {
   .utility-links { display: none; }
@@ -597,9 +625,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body>
         <style>{globalStyles}</style>
+      <CartProvider>
         <Header />
         {children}
         <Footer />
+      </CartProvider>
       </body>
     </html>
   );

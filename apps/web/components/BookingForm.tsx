@@ -1,6 +1,8 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import { formatSar } from '../../../packages/shared/src/currency';
+import { useCart } from './CartProvider';
 
 interface Vehicle {
   id: string;
@@ -13,16 +15,17 @@ interface Vehicle {
 
 export function BookingForm() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const { items, subtotal, updateQuantity, removeItem, clearCart } = useCart();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState('');
-  const [partNumber, setPartNumber] = useState('');
+  const [manualPartNumber, setManualPartNumber] = useState('');
   const [state, setState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [bookingNumber, setBookingNumber] = useState('');
 
   useEffect(() => {
     const requestedPart = new URLSearchParams(window.location.search).get('part');
-    if (requestedPart) setPartNumber(requestedPart);
+    if (requestedPart) setManualPartNumber(requestedPart);
     if (!apiUrl) return;
     fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/vehicles?limit=100`)
       .then(async (response) => {
@@ -35,6 +38,12 @@ export function BookingForm() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!items.length && !manualPartNumber.trim()) {
+      setState('error');
+      setMessage('Add at least one product to the cart or enter a part number.');
+      return;
+    }
+
     setState('loading');
     setMessage('');
     setBookingNumber('');
@@ -43,14 +52,22 @@ export function BookingForm() {
     const customerNote = [
       String(form.get('customer_note') || '').trim(),
       vehicle ? `Vehicle: ${vehicle.manufacturer_name} ${vehicle.model_name} ${vehicle.generation ?? ''}`.trim() : '',
-      `Delivery preference: ${String(form.get('delivery_method') || 'pickup')}`,
     ].filter(Boolean).join('\n');
     const payload = {
       customer_name: String(form.get('customer_name') || '').trim(),
       customer_phone: String(form.get('customer_phone') || '').trim(),
-      customer_email: String(form.get('customer_email') || '').trim(),
-      customer_note: customerNote,
-      part_number: partNumber.trim(),
+      customer_email: String(form.get('customer_email') || '').trim() || undefined,
+      customer_note: customerNote || undefined,
+      part_number: manualPartNumber.trim() || undefined,
+      delivery_method: String(form.get('delivery_method') || 'pickup'),
+      shipping_address: String(form.get('shipping_address') || '').trim() || undefined,
+      customer_city: String(form.get('customer_city') || '').trim() || undefined,
+      payment_method: 'cash_on_delivery',
+      items: items.map((item) => ({
+        part_id: item.part_id,
+        quantity: item.quantity,
+        vehicle_id: selectedVehicle || undefined,
+      })),
     };
 
     try {
@@ -64,10 +81,11 @@ export function BookingForm() {
       if (!response.ok) throw new Error(result?.error?.message || 'Unable to create the booking.');
       setState('success');
       setBookingNumber(result?.data?.booking_number || 'Submitted');
-      setMessage('Your request is now with the Al Waha Parts desk. We will confirm fitment and availability shortly.');
+      setMessage('Your request is safely recorded. Our parts desk will confirm fitment, stock and delivery shortly.');
       event.currentTarget.reset();
-      setPartNumber('');
+      setManualPartNumber('');
       setSelectedVehicle('');
+      clearCart();
     } catch (cause) {
       setState('error');
       setMessage(cause instanceof Error ? cause.message : 'We could not send this booking yet.');
@@ -78,64 +96,57 @@ export function BookingForm() {
     <form className="booking-form" onSubmit={submit}>
       <div className="booking-form-heading">
         <div>
-          <span className="section-kicker">Database-connected request</span>
-          <h2>Tell us what your car needs.</h2>
+          <span className="section-kicker">Secure parts request</span>
+          <h2>Review your cart and send the request.</h2>
         </div>
-        <p>Your request is matched against the live catalog before our parts desk calls you.</p>
+        <p>Prices are rechecked against the live catalog before the booking is saved.</p>
       </div>
-      <div className="form-grid">
-        <label>
-          Name
-          <input name="customer_name" required placeholder="Your full name" />
-        </label>
-        <label>
-          Phone
-          <input name="customer_phone" required placeholder="+971 5X XXX XXXX" />
-        </label>
-      </div>
-      <div className="form-grid">
-        <label>
-          Email
-          <input type="email" name="customer_email" placeholder="you@company.com" />
-        </label>
-        <label>
-          Part number / SKU / OEM
-          <input value={partNumber} onChange={(event) => setPartNumber(event.target.value)} required placeholder="AWP-BR-001 or OEM number" />
-        </label>
-      </div>
-      <div className="form-grid">
-        <label>
-          Vehicle from database
-          <select value={selectedVehicle} onChange={(event) => setSelectedVehicle(event.target.value)}>
-            <option value="">Select vehicle (optional)</option>
-            {vehicles.map((vehicle) => (
-              <option value={vehicle.id} key={vehicle.id}>
-                {vehicle.manufacturer_name} {vehicle.model_name} {vehicle.generation ? `· ${vehicle.generation}` : ''}
-              </option>
+
+      <section className="cart-panel" aria-labelledby="cart-title">
+        <div className="cart-panel-heading">
+          <div><span className="section-kicker">Your selection</span><h3 id="cart-title">Cart ({items.length} products)</h3></div>
+          {items.length > 0 && <button type="button" className="cart-clear" onClick={clearCart}>Clear cart</button>}
+        </div>
+        {items.length ? (
+          <div className="cart-items">
+            {items.map((item) => (
+              <article className="cart-item" key={item.part_id}>
+                <div className="cart-item-image">
+                  {item.image_url ? <img src={item.image_url} alt="" /> : <span>AWP</span>}
+                </div>
+                <div className="cart-item-copy"><strong>{item.part_name}</strong><small>{item.sku}</small><span>{formatSar(item.unit_price)} each</span></div>
+                <label className="cart-quantity">Qty<input type="number" min="1" max={item.stock_quantity || 99} value={item.quantity} onChange={(event) => updateQuantity(item.part_id, Number(event.target.value))} /></label>
+                <strong className="cart-item-total">{formatSar(item.unit_price * item.quantity)}</strong>
+                <button type="button" className="cart-remove" aria-label={`Remove ${item.part_name}`} onClick={() => removeItem(item.part_id)}>×</button>
+              </article>
             ))}
-          </select>
-        </label>
-        <label>
-          Delivery preference
-          <select name="delivery_method" defaultValue="pickup">
-            <option value="pickup">Pickup / confirm with parts desk</option>
-            <option value="delivery">Delivery in UAE</option>
-          </select>
-        </label>
+          </div>
+        ) : <div className="cart-empty">Your cart is empty. Add products from the catalog, or use the manual part number below.</div>}
+        <div className="cart-total"><span>Estimated subtotal</span><strong>{formatSar(subtotal)}</strong></div>
+      </section>
+
+      <div className="form-grid">
+        <label>Name<input name="customer_name" required placeholder="Your full name" /></label>
+        <label>Phone<input name="customer_phone" required placeholder="+971 5X XXX XXXX" /></label>
       </div>
-      <label>
-        Fitment details / message
-        <textarea name="customer_note" rows={5} placeholder="Tell us the car year, engine, part condition or any fitment details." />
-      </label>
-      <div className="booking-form-actions">
-        <button className="button" disabled={state === 'loading'}>
-          {state === 'loading' ? 'Sending request…' : 'Send booking request'}
-        </button>
-        <span>We only use these details to respond to your parts request.</span>
+      <div className="form-grid">
+        <label>Email<input type="email" name="customer_email" placeholder="you@company.com" /></label>
+        <label>Manual part number / OEM<input value={manualPartNumber} onChange={(event) => setManualPartNumber(event.target.value)} placeholder="Optional if products are in cart" /></label>
       </div>
-      {state === 'success' && (
-        <div className="booking-status-panel success"><strong>Request received: {bookingNumber}</strong><span>{message}</span></div>
-      )}
+      <div className="form-grid">
+        <label>Vehicle from database<select value={selectedVehicle} onChange={(event) => setSelectedVehicle(event.target.value)}>
+          <option value="">Select vehicle (optional)</option>
+          {vehicles.map((vehicle) => <option value={vehicle.id} key={vehicle.id}>{vehicle.manufacturer_name} {vehicle.model_name} {vehicle.generation ? `· ${vehicle.generation}` : ''}</option>)}
+        </select></label>
+        <label>Delivery preference<select name="delivery_method" defaultValue="pickup"><option value="pickup">Pickup / confirm with parts desk</option><option value="delivery">Delivery in UAE</option></select></label>
+      </div>
+      <div className="form-grid">
+        <label>City<input name="customer_city" placeholder="Dubai, Abu Dhabi …" /></label>
+        <label>Delivery address<input name="shipping_address" placeholder="Required for delivery" /></label>
+      </div>
+      <label>Fitment details / message<textarea name="customer_note" rows={4} placeholder="Car year, engine, part condition or other fitment details." /></label>
+      <div className="booking-form-actions"><button className="button" disabled={state === 'loading'}>{state === 'loading' ? 'Saving secure request…' : 'Submit booking request'}</button><span>No payment is taken online. The parts desk confirms the final quote.</span></div>
+      {state === 'success' && <div className="booking-status-panel success"><strong>Request received: {bookingNumber}</strong><span>{message}</span></div>}
       {state === 'error' && <div className="booking-status-panel error">{message}</div>}
     </form>
   );

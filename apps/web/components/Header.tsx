@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
+import { useCart } from './CartProvider';
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -49,6 +50,7 @@ function MenuIcon({ open }: { open: boolean }) {
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const { itemCount } = useCart();
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -83,7 +85,7 @@ export function Header() {
         </form>
         <div className="header-actions">
           <Link href="/account" aria-label="Wishlist" className="icon-action"><HeartIcon /><span>0</span></Link>
-          <Link href="/booking" aria-label="Shopping cart" className="icon-action"><CartIcon /><span>0</span></Link>
+          <Link href="/booking" aria-label={`Shopping cart, ${itemCount} items`} className="icon-action"><CartIcon /><span>{itemCount}</span></Link>
           <button className="menu-toggle" onClick={() => setMenuOpen((value) => !value)} aria-label="Toggle navigation" aria-expanded={menuOpen}><MenuIcon open={menuOpen} /></button>
         </div>
       </header>
