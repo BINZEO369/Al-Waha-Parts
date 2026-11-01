@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
-import { formatAedAsSar } from '../../../packages/shared/src/currency';
+import { formatSar } from '../../../packages/shared/src/currency';
 import { HeroCarousel } from '../components/HeroCarousel';
 
 type Category = {
@@ -159,8 +159,8 @@ export default function Home() {
                   <h3><Link href={`/catalog/${part.slug ?? part.id}`}>{part.part_name}</Link></h3>
                   <div className="rating" aria-label="Verified database item">Verified <span>· {part.sku}</span></div>
                   <div className="price-row">
-                    <strong>{formatAedAsSar(part.sale_price ?? part.price)}</strong>
-                    {part.sale_price && <del>{formatAedAsSar(part.price)}</del>}
+                    <strong>{formatSar(part.sale_price ?? part.price)}</strong>
+                    {part.sale_price && <del>{formatSar(part.price)}</del>}
                   </div>
                 </div>
               </article>

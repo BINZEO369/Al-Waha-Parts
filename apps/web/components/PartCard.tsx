@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { formatAedAsSar } from '../../../packages/shared/src/currency';
+import { formatSar } from '../../../packages/shared/src/currency';
 
 export interface PartCardData {
   id: string;
@@ -45,8 +45,8 @@ export function PartCard({ part }: { part: PartCardData }) {
           </span>
         </div>
         <div className="part-price">
-          <strong>{formatAedAsSar(part.sale_price ?? part.price)}</strong>
-          {part.sale_price && <del>{formatAedAsSar(part.price)}</del>}
+          <strong>{formatSar(part.sale_price ?? part.price)}</strong>
+          {part.sale_price && <del>{formatSar(part.price)}</del>}
           <Link href={`/booking?part=${encodeURIComponent(part.sku)}`}>Request</Link>
         </div>
       </div>

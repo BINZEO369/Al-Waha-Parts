@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { use, useEffect, useState } from 'react';
 import { apiFetch } from '../../../../../packages/shared/src/api';
-import { formatAedAsSar } from '../../../../../packages/shared/src/currency';
+import { formatSar } from '../../../../../packages/shared/src/currency';
 import styles from './ProductDetail.module.css';
 
 type VehicleFitment = {
@@ -81,7 +81,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           <span className="eyebrow">{product.parts_categories?.category_name ?? 'Al Waha Parts'} / {product.sku}</span>
           <h1>{product.part_name}</h1>
           <p className={styles.description}>{product.description ?? 'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}</p>
-          <div className={styles.price}><strong>{formatAedAsSar(currentPrice)}</strong>{product.sale_price && <del>{formatAedAsSar(product.price)}</del>}</div>
+          <div className={styles.price}><strong>{formatSar(currentPrice)}</strong>{product.sale_price && <del>{formatSar(product.price)}</del>}</div>
           <div className={styles.status}><span>{product.tested_status === 'tested' ? 'Tested' : 'Fitment checked'}</span><span>{product.stock_quantity ? `${product.stock_quantity} in stock` : 'Available to order'}</span></div>
           <Link className="button" href={`/booking?part=${encodeURIComponent(product.sku)}`}>Book this part <span>↗</span></Link>
           <dl className={styles.specs}>
