@@ -7,11 +7,9 @@ import { useCart } from './CartProvider';
 
 const navItems = [
   { label: 'Home', href: '/' },
-  { label: 'Categories', href: '/category', dropdown: true },
-  { label: 'Blog', href: '/category', dropdown: true },
-  { label: 'Pages', href: '/vehicles', dropdown: true },
-  { label: 'About Us', href: '/contact' },
-  { label: 'Contact Us', href: '/contact' },
+  { label: 'Categories', href: '/category' },
+  { label: 'Vehicle Finder', href: '/vehicles' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 function SearchIcon() {
@@ -49,6 +47,7 @@ function MenuIcon({ open }: { open: boolean }) {
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const { itemCount } = useCart();
 
@@ -58,47 +57,50 @@ export function Header() {
     window.location.href = value ? `/category?search=${encodeURIComponent(value)}` : '/category';
   }
 
+  function closePanels() {
+    setMenuOpen(false);
+    setSearchOpen(false);
+  }
+
   return (
     <div className="site-chrome">
-      <div className="utility-bar">
-        <div className="utility-inner">
-          <span>Welcome to our store!</span>
-          <div className="utility-links">
-            <button>Setting⌄</button>
-            <span>|</span>
-            <button>SAR⌄</button>
-            <span>|</span>
-            <button>English⌄</button>
-            <span>|</span>
-            <button>Compare (0)</button>
-          </div>
-        </div>
-      </div>
-
       <header className="store-header">
         <Link className="brand" href="/" aria-label="Al Waha Parts home">
           <Image src="/logo.png" alt="Al Waha Parts" width={112} height={54} className="logo" priority />
         </Link>
-        <form className="header-search" onSubmit={submitSearch}>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search entire store here ..." aria-label="Search entire store" />
-          <button aria-label="Search" type="submit"><SearchIcon /></button>
-        </form>
         <div className="header-actions">
+          <button className="search-trigger" type="button" onClick={() => setSearchOpen(true)} aria-label="Open catalog search">
+            <SearchIcon /><span>Search</span>
+          </button>
           <Link href="/account" aria-label="Wishlist" className="icon-action"><HeartIcon /><span>0</span></Link>
           <Link href="/booking" aria-label={`Shopping cart, ${itemCount} items`} className="icon-action"><CartIcon /><span>{itemCount}</span></Link>
-          <button className="menu-toggle" onClick={() => setMenuOpen((value) => !value)} aria-label="Toggle navigation" aria-expanded={menuOpen}><MenuIcon open={menuOpen} /></button>
+          <button className="menu-toggle" type="button" onClick={() => setMenuOpen((value) => !value)} aria-label="Toggle navigation" aria-expanded={menuOpen}><MenuIcon open={menuOpen} /></button>
         </div>
       </header>
 
       <nav className={`main-nav ${menuOpen ? 'is-open' : ''}`} aria-label="Main navigation">
         <div className="main-nav-inner">
           {navItems.map((item, index) => (
-            <Link className={index === 0 ? 'active' : ''} href={item.href} key={item.label} onClick={() => setMenuOpen(false)}>
-              {item.label}{item.dropdown && <span className="nav-caret">⌄</span>}
-            </Link>
+            <Link className={index === 0 ? 'active' : ''} href={item.href} key={item.label} onClick={closePanels}>{item.label}</Link>
           ))}
+          <button className="nav-search-button" type="button" onClick={() => { setMenuOpen(false); setSearchOpen(true); }}><SearchIcon /> Search catalog</button>
         </div>
       </nav>
+
+      {searchOpen && (
+        <>
+          <button className="search-drawer-backdrop" type="button" aria-label="Close search" onClick={() => setSearchOpen(false)} />
+          <aside className="search-drawer" aria-label="Catalog search" role="dialog" aria-modal="true">
+            <div className="search-drawer-header"><strong>Find a part</strong><button type="button" onClick={() => setSearchOpen(false)} aria-label="Close search">×</button></div>
+            <p>Search the live catalog by part name, brand, SKU or OEM number.</p>
+            <form onSubmit={submitSearch} className="drawer-search-form">
+              <label htmlFor="catalog-search">Catalog search</label>
+              <div><input id="catalog-search" autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search parts or vehicles" /><button type="submit" aria-label="Search"><SearchIcon /></button></div>
+            </form>
+            <Link className="drawer-vehicle-link" href="/vehicles" onClick={() => setSearchOpen(false)}>Search cars by make, model and year →</Link>
+          </aside>
+        </>
+      )}
     </div>
   );
 }
@@ -108,14 +110,11 @@ export function Footer() {
     <footer className="store-footer">
       <div className="footer-main">
         <div className="footer-about">
-          <Link className="brand" href="/" aria-label="Al Waha Parts home">
-            <Image src="/logo.png" alt="Al Waha Parts" width={112} height={54} className="logo" />
-          </Link>
+          <Link className="brand" href="/" aria-label="Al Waha Parts home"><Image src="/logo.png" alt="Al Waha Parts" width={112} height={54} className="logo" /></Link>
           <p>Quality automotive parts, fitment support and a parts desk you can rely on across the UAE.</p>
-          <div className="footer-socials"><span>f</span><span>in</span><span>◎</span><span>▶</span></div>
         </div>
-        <div className="footer-column"><h3>Information</h3><Link href="/contact">About us</Link><Link href="/contact">Contact us</Link><Link href="/booking">Delivery information</Link><Link href="/booking">Privacy policy</Link></div>
-        <div className="footer-column"><h3>Customer service</h3><Link href="/account">My account</Link><Link href="/category">Order history</Link><Link href="/vehicles">Vehicle finder</Link><Link href="/booking">Request a part</Link></div>
+        <div className="footer-column"><h3>Information</h3><Link href="/contact">About us</Link><Link href="/contact">Contact us</Link><Link href="/booking">Delivery information</Link></div>
+        <div className="footer-column"><h3>Customer service</h3><Link href="/account">My account</Link><Link href="/vehicles">Vehicle finder</Link><Link href="/booking">Request a part</Link></div>
         <div className="footer-column"><h3>Contact us</h3><p>Dubai, United Arab Emirates</p><a href="tel:+971500000000">+971 50 000 0000</a><a href="mailto:hello@alwahaparts.com">hello@alwahaparts.com</a></div>
       </div>
       <div className="footer-bottom"><span>© 2026 Al Waha Parts. All rights reserved.</span><span>Right part. Right fit.</span></div>

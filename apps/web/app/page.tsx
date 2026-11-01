@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { formatAed } from '../../../packages/shared/src/currency';
 
@@ -77,28 +77,6 @@ function ArrowIcon() {
         strokeWidth="1.7"
         strokeLinecap="round"
         strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle
-        cx="10.8"
-        cy="10.8"
-        r="6.4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path
-        d="m16 16 4.5 4.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
       />
     </svg>
   );
@@ -338,6 +316,11 @@ function HeroCarousel() {
           line-height: 1.7;
         }
 
+        .hero-carousel-actions {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+        }
         .hero-carousel-actions .button {
           min-width: 140px;
           min-height: 46px;
@@ -345,11 +328,13 @@ function HeroCarousel() {
           display: inline-flex;
           align-items: center;
           justify-content: center;
+          border: 1px solid var(--red);
           background: var(--red);
           color: #fff;
           font-size: 12px;
           font-weight: 700;
           text-transform: none;
+          white-space: nowrap;
           border-radius: 2px;
           transition:
             background 0.18s ease,
@@ -553,7 +538,6 @@ export default function Home() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (!apiUrl) {
@@ -583,14 +567,6 @@ export default function Home() {
 
   const homeSelectedParts = parts;
   const homeSelectedVehicles = vehicles;
-
-  function submitSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const value = search.trim();
-    window.location.href = value
-      ? `/category?search=${encodeURIComponent(value)}`
-      : '/category';
-  }
 
   return (
     <main className="home-page">
@@ -815,26 +791,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ----------------------------------------------------------------
-       *  6. SEARCH NEWSLETTER
-       * ---------------------------------------------------------------- */}
-      <section className="store-section newsletter-card">
-        <div>
-          <span className="section-kicker">Search the live catalog</span>
-          <h2>Find your next part faster.</h2>
-        </div>
-        <form className="newsletter-search" onSubmit={submitSearch}>
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search part, brand or SKU ..."
-            aria-label="Search live catalog"
-          />
-          <button aria-label="Search" type="submit">
-            <SearchIcon />
-          </button>
-        </form>
-      </section>
     </main>
   );
 }

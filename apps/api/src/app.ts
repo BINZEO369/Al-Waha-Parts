@@ -13,6 +13,32 @@ const config = getConfig();
 export const app = Fastify({ logger: true, trustProxy: true });
 await app.register(cors, { origin: config.corsOrigins });
 
+type RateBucket = { count: number; resetAt: number };
+const publicBuckets = new Map<string, RateBucket>();
+const bookingBuckets = new Map<string, RateBucket>();
+const checkRate = (buckets: Map<string, RateBucket>, key: string, max: number, windowMs: number) => {
+  const now = Date.now();
+  const current = buckets.get(key);
+  if (!current || current.resetAt <= now) {
+    buckets.set(key, { count: 1, resetAt: now + windowMs });
+    return null;
+  }
+  if (current.count >= max) return Math.ceil((current.resetAt - now) / 1000);
+  current.count += 1;
+  return null;
+};
+app.addHook('onRequest', async (request, reply) => {
+  if (!request.url.startsWith('/api/v1')) return;
+  const isBooking = request.method === 'POST' && request.url.split('?')[0] === '/api/v1/bookings';
+  const retryAfter = isBooking
+    ? checkRate(bookingBuckets, request.ip, 5, 10 * 60 * 1000)
+    : checkRate(publicBuckets, request.ip, 120, 60 * 1000);
+  if (retryAfter !== null) {
+    reply.header('Retry-After', String(retryAfter));
+    return reply.code(429).send({ error: { message: `Too many requests. Try again in ${retryAfter} seconds.` } });
+  }
+});
+
 const limit = (value: unknown, fallback = 50) =>
   Math.min(Math.max(Number(value) || fallback, 1), 200);
 const jsonError = (reply: FastifyReply, statusCode: number, message: string) =>
@@ -104,7 +130,7 @@ app.get(
       .order('manufacturer_name')
       .order('model_name')
       .range(Number(q.offset) || 0, (Number(q.offset) || 0) + limit(q.limit) - 1);
-    if (q.status) query = query.eq('status', q.status);
+    query = query.eq('status', q.status ?? 'active');
     if (q.search)
       query = query.or(
         `manufacturer_name.ilike.%${q.search}%,model_name.ilike.%${q.search}%,chassis_code.ilike.%${q.search}%`,
@@ -324,6 +350,22 @@ app.post(
     if (vehiclesError) return jsonError(reply, 500, 'Unable to verify vehicle fitment');
     if (vehicles.length !== vehicleIds.length) return jsonError(reply, 400, 'The selected vehicle is no longer available');
     const vehicleById = new Map(vehicles.map((vehicle) => [vehicle.id, vehicle]));
+
+    if (vehicleIds.length) {
+      const { data: fitments, error: fitmentError } = await supabase
+        .from('part_vehicles')
+        .select('part_id,vehicle_id')
+        .in('part_id', partIds)
+        .in('vehicle_id', vehicleIds);
+      if (fitmentError) return jsonError(reply, 500, 'Unable to verify part fitment');
+      const fitmentKeys = new Set((fitments ?? []).map((fitment) => `${fitment.part_id}:${fitment.vehicle_id}`));
+      for (const item of requestedItems.values()) {
+        if (item.vehicle_id && !fitmentKeys.has(`${item.part_id}:${item.vehicle_id}`)) {
+          const part = partById.get(item.part_id);
+          return jsonError(reply, 400, `${part?.part_name ?? 'This part'} is not listed for the selected vehicle`);
+        }
+      }
+    }
 
     const items: Array<{
       part_id: string;
