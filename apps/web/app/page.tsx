@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { HeroCarousel } from '../components/HeroCarousel';
 
@@ -86,8 +86,8 @@ export default function Home() {
     }
     Promise.all([
       apiFetch<Category[]>(apiUrl, '/api/v1/popular-categories?limit=200'),
-      apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=8'),
-      apiFetch<Vehicle[]>(apiUrl, '/api/v1/vehicles?limit=8'),
+      apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=200&featured_only=true'),
+      apiFetch<Vehicle[]>(apiUrl, '/api/v1/homepage-selected-vehicles?limit=200'),
     ])
       .then(([nextPopularCategories, nextParts, nextVehicles]) => {
         setPopularCategories(nextPopularCategories);
@@ -100,14 +100,8 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, [apiUrl]);
 
-  const featuredParts = useMemo(
-    () => parts.filter((part) => part.is_featured).slice(0, 4),
-    [parts],
-  );
-  const featuredVehicles = useMemo(
-    () => vehicles.filter((vehicle) => vehicle.is_featured).slice(0, 4),
-    [vehicles],
-  );
+  const homeSelectedParts = parts;
+  const homeSelectedVehicles = vehicles;
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = search.trim();
@@ -146,7 +140,7 @@ export default function Home() {
         </section>
       )}
 
-      {!loading && featuredParts.length > 0 && (
+      {!loading && homeSelectedParts.length > 0 && (
         <section className="store-section arrivals-section">
           <div className="section-heading arrivals-heading">
             <div>
@@ -156,7 +150,7 @@ export default function Home() {
             <Link className="section-link" href="/catalog">Open full catalog <ArrowIcon /></Link>
           </div>
           <div className="arrival-grid">
-            {featuredParts.map((part) => (
+            {homeSelectedParts.map((part) => (
               <article className="arrival-card" key={part.id}>
                 <Link href={`/catalog/${part.slug ?? part.id}`} className="arrival-image" aria-label={`View ${part.part_name}`}>
                   <span className="sale-badge">{part.condition || 'Available'}</span>
@@ -178,7 +172,7 @@ export default function Home() {
         </section>
       )}
 
-      {!loading && featuredVehicles.length > 0 && (
+      {!loading && homeSelectedVehicles.length > 0 && (
         <section className="store-section vehicle-home-section">
           <div className="section-heading">
             <div>
@@ -188,7 +182,7 @@ export default function Home() {
             <Link className="section-link" href="/vehicles">Open vehicle finder <ArrowIcon /></Link>
           </div>
           <div className="vehicle-home-grid">
-            {featuredVehicles.map((vehicle) => (
+            {homeSelectedVehicles.map((vehicle) => (
               <Link className="vehicle-home-card" href="/vehicles" key={vehicle.id}>
                 {vehicle.cover_image_url ? <img src={vehicle.cover_image_url} alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`} /> : <span className="database-image-empty">No vehicle image</span>}
                 <div>
@@ -202,7 +196,7 @@ export default function Home() {
         </section>
       )}
 
-      {!loading && !popularCategories.length && !featuredParts.length && !featuredVehicles.length && !error && (
+      {!loading && !popularCategories.length && !homeSelectedParts.length && !homeSelectedVehicles.length && !error && (
         <section className="store-section home-empty-state">
           <h2>No published database records yet.</h2>
           <p>Categories, parts and vehicles will appear here after they are added to the live database.</p>

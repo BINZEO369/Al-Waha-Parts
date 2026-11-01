@@ -14,7 +14,7 @@ export const app = Fastify({ logger: true, trustProxy: true });
 await app.register(cors, { origin: config.corsOrigins });
 
 const limit = (value: unknown, fallback = 50) =>
-  Math.min(Math.max(Number(value) || fallback, 1), 100);
+  Math.min(Math.max(Number(value) || fallback, 1), 200);
 const jsonError = (reply: FastifyReply, statusCode: number, message: string) =>
   reply.code(statusCode).send({ error: { message } });
 
@@ -115,6 +115,20 @@ app.get(
   },
 );
 
+app.get('/api/v1/homepage-selected-vehicles', async (_request, reply) => {
+  const { data, error } = await getSupabaseAdmin()
+    .from('homepage_selected_vehicles')
+    .select('display_order,vehicle:vehicles!inner(id,manufacturer_name,manufacturer_logo,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,status)')
+    .eq('is_active', true)
+    .eq('vehicle.status', 'active')
+    .order('display_order', { ascending: true })
+    .limit(200);
+  if (error) return jsonError(reply, 500, error.message);
+  return {
+    data: (data ?? []).map((item) => ({ ...item.vehicle, sort_order: item.display_order })),
+  };
+});
+
 app.get(
   '/api/v1/parts',
   async (
@@ -124,6 +138,7 @@ app.get(
         category_id?: string;
         vehicle_id?: string;
         status?: string;
+        featured_only?: string;
         limit?: string;
         offset?: string;
       };
@@ -151,6 +166,7 @@ app.get(
       );
     if (q.category_id) query = query.eq('category_id', q.category_id);
     if (q.vehicle_id) query = query.eq('part_vehicles.vehicle_id', q.vehicle_id);
+    if (q.featured_only === 'true') query = query.eq('is_featured', true);
     query = query.eq('status', q.status ?? 'active');
     const { data, error } = await query;
     if (error) return jsonError(reply, 500, error.message);
