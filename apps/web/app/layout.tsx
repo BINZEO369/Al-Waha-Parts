@@ -294,6 +294,8 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .booking-status-panel { display: grid; gap: 5px; padding: 14px 16px; font-size: 12px; line-height: 1.6; }
 .booking-status-panel.success { border-left: 3px solid #2d8b5d; background: #effaf4; color: #236b49; }
 .booking-status-panel.error { border-left: 3px solid var(--red); background: #fff3f3; color: #a33c43; }
+.booking-contact-note { display: grid; gap: 5px; padding: 15px 16px; border-left: 3px solid var(--red); background: #fff7f7; color: #6f4a4d; font-size: 11px; line-height: 1.55; }
+.booking-contact-note strong { color: var(--ink); font-size: 12px; }
 .finder-vehicle-image { width: 100%; height: 190px; object-fit: cover; background: #f8f8f8; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; }
 .booking-form .button, .finder-card .button { justify-self: start; }
@@ -325,6 +327,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .cart-empty { padding: 16px; border: 1px dashed #e7c5c8; color: #888; font-size: 11px; line-height: 1.6; }
 .cart-total { padding-top: 12px; border-top: 1px solid #eedfe0; color: #777; font-size: 11px; }
 .cart-total strong { color: var(--red); font-size: 19px; }
+.cart-total small { color: #999; font-size: 9px; }
 
 .vehicle-home-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 

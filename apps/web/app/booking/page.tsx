@@ -24,12 +24,12 @@ export default function BookingPage() {
       <section className="page-intro">
         <p className="eyebrow">Live database request desk</p>
         <h1>Tell us what you need.</h1>
-        <p>Send the part and vehicle details you have. We will verify the selected records, stock and delivery preference before the parts desk confirms the request.</p>
+        <p>Select a product once. Its live database details and total are attached automatically, then our parts desk will call you to confirm delivery and handover.</p>
       </section>
       <div className="booking-steps" aria-label="Booking process">
-        <div className="booking-step"><strong>01 · Select</strong><span>Review cart items or enter a SKU / OEM number.</span></div>
-        <div className="booking-step"><strong>02 · Match</strong><span>Choose an active vehicle record when fitment matters.</span></div>
-        <div className="booking-step"><strong>03 · Confirm</strong><span>We recheck live price and availability before saving.</span></div>
+        <div className="booking-step"><strong>01 · Select</strong><span>Press Booking now on the product you want.</span></div>
+        <div className="booking-step"><strong>02 · Review</strong><span>Product details, live stock and total are attached automatically.</span></div>
+        <div className="booking-step"><strong>03 · Call</strong><span>Our parts desk calls to confirm delivery and handover.</span></div>
       </div>
       <BookingForm />
     </main>
