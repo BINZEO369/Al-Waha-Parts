@@ -1,8 +1,5 @@
-import { CatalogClient } from '../../components/CatalogClient';
-export default function CatalogPage() {
-  return (
-    <main className="page-shell">
-      <CatalogClient />
-    </main>
-  );
+import { CatalogPage } from '../../components/pages/catalog/CatalogPage';
+
+export default function Page() {
+  return <CatalogPage />;
 }

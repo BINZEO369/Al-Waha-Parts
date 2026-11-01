@@ -1,0 +1,154 @@
+.page {
+  max-width: 1200px;
+  padding: 55px 18px 90px;
+  margin: 0 auto;
+}
+.back {
+  display: inline-block;
+  margin-bottom: 28px;
+  color: #777;
+  font-size: 12px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 7vw;
+  align-items: start;
+}
+.image {
+  min-height: 520px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #f3f3f3;
+}
+.image img {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+}
+.thumbnails {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.thumbnail {
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  border: 2px solid transparent;
+  background: #fff;
+  cursor: pointer;
+}
+.thumbnail.active {
+  border-color: var(--red);
+}
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.copy h1 {
+  margin: 15px 0 18px;
+  font-family: Montserrat, sans-serif;
+  font-size: clamp(38px, 5vw, 66px);
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+.description {
+  max-width: 540px;
+  color: #777;
+  line-height: 1.75;
+}
+.price {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin: 28px 0 16px;
+}
+.price strong {
+  font-size: 27px;
+}
+.price del {
+  color: #999;
+}
+.status {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #e9e9e9;
+  border-bottom: 1px solid #e9e9e9;
+  padding: 14px 0;
+  margin-bottom: 24px;
+  color: #777;
+  font-size: 11px;
+}
+.specs {
+  margin: 42px 0 0;
+  border-top: 1px solid #e9e9e9;
+}
+.specs div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px 0;
+  border-bottom: 1px solid #e9e9e9;
+}
+.specs dt {
+  color: #777;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.specs dd {
+  margin: 0;
+  text-align: right;
+}
+.fitment {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 8vw;
+  margin-top: 90px;
+  padding: 52px 0;
+  border-top: 1px solid #e9e9e9;
+}
+.fitment h2 {
+  margin: 12px 0 0;
+  font-family: Montserrat, sans-serif;
+  font-size: 36px;
+  line-height: 1.05;
+}
+.fitmentList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.fitmentList div {
+  padding: 18px;
+  border: 1px solid #e9e9e9;
+  background: #fff;
+}
+.fitmentList strong,
+.fitmentList span {
+  display: block;
+}
+.fitmentList span {
+  margin-top: 7px;
+  color: #777;
+  font-size: 10px;
+}
+@media (max-width: 800px) {
+  .page {
+    padding: 50px 18px 75px;
+  }
+  .grid,
+  .fitment {
+    grid-template-columns: 1fr;
+  }
+  .image,
+  .image img {
+    min-height: 330px;
+    height: 330px;
+  }
+  .fitment {
+    margin-top: 65px;
+  }
+}
