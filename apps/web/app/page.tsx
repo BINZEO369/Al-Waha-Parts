@@ -127,42 +127,28 @@ export default function Home() {
       {error && <div className="store-section data-alert home-data-alert">{error}</div>}
       {loading && <div className="store-section home-loading">Loading categories, parts and vehicles from the database…</div>}
 
-      {!loading && featuredCategories.length > 0 && (
-        <section className="store-section categories-section">
+      {!loading && promoCategories.length > 0 && (
+        <section className="store-section category-promo-section" aria-label="Popular categories">
           <div className="section-heading">
             <div>
-              <span className="section-kicker">From the live database</span>
+              <span className="section-kicker">Browse the live catalog</span>
               <h2>Popular Categories</h2>
             </div>
             <Link className="section-link" href="/catalog">View all categories <ArrowIcon /></Link>
           </div>
-          <div className="category-grid">
-            {featuredCategories.map((category) => (
-              <Link className="category-card" href={`/catalog?category=${category.id}`} key={category.id}>
-                {category.image_url ? <img src={category.image_url} alt="" /> : <span className="category-no-image">No image</span>}
-                <span>
+          <div className="category-promo-grid">
+            {promoCategories.map((category) => (
+              <Link className="promo-card promo-card-database category-promo-card" href={`/catalog?category=${category.id}`} key={category.id}>
+                <div>
+                  <small>Popular category</small>
                   <strong>{category.category_name.trim()}</strong>
-                  <small>{category.description || 'Browse available parts'}</small>
-                </span>
-                <ArrowIcon />
+                  <p>{category.description || 'Browse available parts and find the right fit.'}</p>
+                  <span>Browse parts <ArrowIcon /></span>
+                </div>
+                {category.image_url && <img src={category.image_url} alt="" />}
               </Link>
             ))}
           </div>
-        </section>
-      )}
-
-      {!loading && promoCategories.length > 0 && (
-        <section className="store-section promo-section" aria-label="Database collections">
-          {promoCategories.map((category) => (
-            <Link className="promo-card promo-card-database" href={`/catalog?category=${category.id}`} key={category.id}>
-              <div>
-                <small>Database collection</small>
-                <strong>{category.category_name.trim()}</strong>
-                <span>Browse parts <ArrowIcon /></span>
-              </div>
-              {category.image_url && <img src={category.image_url} alt="" />}
-            </Link>
-          ))}
         </section>
       )}
 

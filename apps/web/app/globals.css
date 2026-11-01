@@ -528,3 +528,43 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .home-page .arrival-card { background: #fff; }
 .home-page .promo-card-database { border-color: #ededed; }
 .home-page .promo-card-database:hover { background: #fff; }
+
+
+/* ---------- HOME: single category showcase in red split boxes ---------- */
+.category-promo-section { padding-top: 42px; padding-bottom: 50px; }
+.category-promo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.category-promo-card {
+  min-height: 168px;
+  padding: 18px 17px;
+  border: 0;
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 5px 14px rgba(190, 22, 35, .12);
+  transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.category-promo-card > div { width: 61%; gap: 7px; }
+.category-promo-card small { color: rgba(255,255,255,.78); font-size: 9px; }
+.category-promo-card strong { max-width: 100%; color: #fff; font-size: 17px; line-height: 1.2; }
+.category-promo-card p { max-width: 230px; margin: 0; color: rgba(255,255,255,.84); font-size: 10px; line-height: 1.45; }
+.category-promo-card span { margin-top: 3px; color: #fff; font-size: 9px; font-weight: 700; }
+.category-promo-card img { width: 39%; max-width: 155px; height: 132px; margin-right: -9px; object-fit: contain; mix-blend-mode: multiply; }
+.category-promo-card:hover { background: var(--red-dark); transform: translateY(-3px); box-shadow: 0 10px 22px rgba(190, 22, 35, .2); }
+
+@media (max-width: 900px) {
+  .category-promo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  .category-promo-section { padding-top: 34px; padding-bottom: 39px; }
+  .category-promo-grid { grid-template-columns: 1fr; gap: 10px; }
+  .category-promo-card { min-height: 142px; padding: 14px 16px; }
+  .category-promo-card > div { width: 64%; }
+  .category-promo-card img { width: 36%; height: 116px; }
+}
+
+@media (max-width: 420px) {
+  .category-promo-card { min-height: 132px; }
+  .category-promo-card strong { font-size: 16px; }
+  .category-promo-card p { font-size: 9px; }
+  .category-promo-card img { height: 105px; }
+}
