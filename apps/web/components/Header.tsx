@@ -64,7 +64,7 @@ export function Header() {
           <div className="utility-links">
             <button>Setting⌄</button>
             <span>|</span>
-            <button>USD⌄</button>
+            <button>SAR⌄</button>
             <span>|</span>
             <button>English⌄</button>
             <span>|</span>

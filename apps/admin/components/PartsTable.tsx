@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
+import { formatAedAsSar } from '../../../packages/shared/src/currency';
 const fallback = [
   {
     id: '1',
@@ -63,7 +64,7 @@ export function PartsTable() {
             <small>{row.brand_name}</small>
           </span>
           <span>{row.stock_quantity} units</span>
-          <span>{row.price} AED</span>
+          <span>{formatAedAsSar(row.price)}</span>
           <span>
             <b className={`status ${row.status}`}>{row.status}</b>
           </span>

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
+import { formatAedAsSar } from '../../../packages/shared/src/currency';
 import { HeroCarousel } from '../components/HeroCarousel';
 
 type Category = {
@@ -63,10 +64,6 @@ function SearchIcon() {
       <path d="m16 16 4.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
-}
-
-function money(value: number, currency = 'AED') {
-  return `${currency} ${Number(value).toFixed(2)}`;
 }
 
 export default function Home() {
@@ -162,8 +159,8 @@ export default function Home() {
                   <h3><Link href={`/catalog/${part.slug ?? part.id}`}>{part.part_name}</Link></h3>
                   <div className="rating" aria-label="Verified database item">Verified <span>· {part.sku}</span></div>
                   <div className="price-row">
-                    <strong>{money(part.sale_price ?? part.price)}</strong>
-                    {part.sale_price && <del>{money(part.price)}</del>}
+                    <strong>{formatAedAsSar(part.sale_price ?? part.price)}</strong>
+                    {part.sale_price && <del>{formatAedAsSar(part.price)}</del>}
                   </div>
                 </div>
               </article>
