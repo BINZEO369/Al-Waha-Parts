@@ -17,6 +17,7 @@ export function BookingForm() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const { items, subtotal, updateQuantity, removeItem, clearCart } = useCart();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState(true);
   const [selectedVehicle, setSelectedVehicle] = useState('');
   const [manualPartNumber, setManualPartNumber] = useState('');
   const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
@@ -27,14 +28,18 @@ export function BookingForm() {
   useEffect(() => {
     const requestedPart = new URLSearchParams(window.location.search).get('part');
     if (requestedPart) setManualPartNumber(requestedPart);
-    if (!apiUrl) return;
+    if (!apiUrl) {
+      setVehiclesLoading(false);
+      return;
+    }
     fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/vehicles?limit=100`)
       .then(async (response) => {
         if (!response.ok) throw new Error('Unable to load vehicle fitment data.');
         const payload = await response.json();
         setVehicles(payload.data ?? []);
       })
-      .catch(() => setVehicles([]));
+      .catch(() => setVehicles([]))
+      .finally(() => setVehiclesLoading(false));
   }, [apiUrl]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -107,7 +112,7 @@ export function BookingForm() {
 
       <section className="cart-panel" aria-labelledby="cart-title">
         <div className="cart-panel-heading">
-          <div><span className="section-kicker">Your selection</span><h3 id="cart-title">Cart ({items.length} products)</h3></div>
+          <div><span className="section-kicker">Live catalog selection</span><h3 id="cart-title">Cart ({items.length} {items.length === 1 ? 'product' : 'products'})</h3></div>
           {items.length > 0 && <button type="button" className="cart-clear" onClick={clearCart}>Clear cart</button>}
         </div>
         {items.length ? (
@@ -117,8 +122,8 @@ export function BookingForm() {
                 <div className="cart-item-image">
                   {item.image_url ? <img src={item.image_url} alt="" /> : <span>AWP</span>}
                 </div>
-                <div className="cart-item-copy"><strong>{item.part_name}</strong><small>{item.sku}</small><span>{formatAed(item.unit_price)} each</span></div>
-                <label className="cart-quantity">Qty<input aria-label={`Quantity for ${item.part_name}`} type="number" min="1" max={item.stock_quantity || 99} value={item.quantity} onChange={(event) => updateQuantity(item.part_id, Number(event.target.value))} /></label>
+                <div className="cart-item-copy"><strong>{item.part_name}</strong><small>SKU {item.sku}</small><span>{formatAed(item.unit_price)} each · {item.stock_quantity == null ? 'Available to order' : `${item.stock_quantity} in stock`}</span></div>
+                <label className="cart-quantity">Qty<input aria-label={`Quantity for ${item.part_name}`} type="number" min="1" max={item.stock_quantity ?? 99} value={item.quantity} onChange={(event) => updateQuantity(item.part_id, Number(event.target.value))} /></label>
                 <strong className="cart-item-total">{formatAed(item.unit_price * item.quantity)}</strong>
                 <button type="button" className="cart-remove" aria-label={`Remove ${item.part_name}`} onClick={() => removeItem(item.part_id)}>×</button>
               </article>
@@ -137,9 +142,9 @@ export function BookingForm() {
         <label>Manual part number / OEM<input value={manualPartNumber} onChange={(event) => setManualPartNumber(event.target.value)} placeholder="Optional if products are in cart" /></label>
       </div>
       <div className="form-grid">
-        <label>Vehicle from database<select value={selectedVehicle} onChange={(event) => setSelectedVehicle(event.target.value)}>
-          <option value="">Select vehicle (optional)</option>
-          {vehicles.map((vehicle) => <option value={vehicle.id} key={vehicle.id}>{vehicle.manufacturer_name} {vehicle.model_name} {vehicle.generation ? `· ${vehicle.generation}` : ''}</option>)}
+        <label>Vehicle from live database<select value={selectedVehicle} onChange={(event) => setSelectedVehicle(event.target.value)} disabled={vehiclesLoading}>
+          <option value="">{vehiclesLoading ? 'Loading active vehicles…' : 'Select vehicle (optional)'}</option>
+          {vehicles.map((vehicle) => <option value={vehicle.id} key={vehicle.id}>{vehicle.manufacturer_name} {vehicle.model_name} {vehicle.generation ? `· ${vehicle.generation}` : ''}{vehicle.year_start ? ` · ${vehicle.year_start}–${vehicle.year_end ?? 'present'}` : ''}</option>)}
         </select></label>
         <label>Delivery preference<select name="delivery_method" value={deliveryMethod} onChange={(event) => setDeliveryMethod(event.target.value as 'pickup' | 'delivery')}>
           <option value="pickup">Pickup / confirm with parts desk</option><option value="delivery">Delivery in UAE</option>

@@ -283,11 +283,11 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .empty-state span { margin-top: 8px; font-size: 12px; }
 
 /* ---------- FORMS / CONTACT ---------- */
-.booking-form, .finder-card { max-width: 860px; padding: 34px; display: grid; gap: 20px; border: 1px solid var(--line); background: #fff; box-shadow: 0 12px 35px rgba(0,0,0,.04); }
+.booking-form, .finder-card { max-width: 860px; padding: 34px; display: grid; gap: 24px; border: 1px solid var(--line); background: #fff; box-shadow: 0 16px 40px rgba(28,28,28,.06); }
 .booking-form-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
 .booking-form-heading h2 { margin: 0; font-family: Montserrat, sans-serif; font-size: 24px; letter-spacing: -.05em; }
 .booking-form-heading p { max-width: 260px; margin: 0; color: #888; font-size: 11px; line-height: 1.6; }
-.booking-form-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.booking-form-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding-top: 4px; }
 .booking-form-actions > span { color: #999; font-size: 10px; }
 .booking-status-panel { display: grid; gap: 5px; padding: 14px 16px; font-size: 12px; line-height: 1.6; }
 .booking-status-panel.success { border-left: 3px solid #2d8b5d; background: #effaf4; color: #236b49; }
@@ -305,7 +305,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .contact-grid > div { padding: 28px; border: 1px solid var(--line); background: #fff; }
 .contact-grid h2 { margin: 14px 0 8px; font-size: 22px; }
 .contact-grid p { color: #777; font-size: 13px; line-height: 1.7; }
-.cart-panel { display: grid; gap: 14px; padding: 20px; border: 1px solid #f0d6d8; background: #fffafa; }
+.cart-panel { display: grid; gap: 14px; padding: 22px; border: 1px solid #f0d6d8; background: linear-gradient(180deg, #fffafa, #fff); }
 .cart-panel-heading, .cart-total { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .cart-panel-heading h3 { margin: 2px 0 0; font-size: 18px; }
 .cart-clear, .cart-remove { border: 0; background: transparent; color: var(--red); font-size: 11px; font-weight: 700; }
