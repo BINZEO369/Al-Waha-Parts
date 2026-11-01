@@ -200,7 +200,11 @@ function HeroCarousel() {
     return null;
   }
 
+  // The active index can briefly be stale while fresh API data replaces the list.
   const banner = banners[active];
+  if (!banner) {
+    return null;
+  }
   const hasImage = Boolean(banner.image_url || banner.mobile_image_url);
 
   return (
