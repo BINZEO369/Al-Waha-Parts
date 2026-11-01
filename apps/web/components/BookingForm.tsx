@@ -10,6 +10,7 @@ export function BookingForm() {
   const [state, setState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [bookingNumber, setBookingNumber] = useState('');
+  const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -27,7 +28,11 @@ export function BookingForm() {
     const payload = {
       customer_name: String(form.get('customer_name') || '').trim(),
       customer_phone: String(form.get('customer_phone') || '').trim(),
+      customer_email: String(form.get('customer_email') || '').trim() || undefined,
       customer_note: String(form.get('customer_note') || '').trim() || undefined,
+      delivery_method: deliveryMethod,
+      shipping_address: String(form.get('shipping_address') || '').trim() || undefined,
+      customer_city: String(form.get('customer_city') || '').trim() || undefined,
       items: items.map((item) => ({
         part_id: item.part_id,
         quantity: item.quantity,
@@ -48,6 +53,7 @@ export function BookingForm() {
       setBookingNumber(result?.data?.booking_number || 'Submitted');
       setMessage('Your selected product details and total were saved. Our parts desk will call you to confirm delivery and handover.');
       formElement.reset();
+      setDeliveryMethod('pickup');
       clearCart();
     } catch (cause) {
       setState('error');
@@ -86,10 +92,21 @@ export function BookingForm() {
         <div className="cart-total"><span>Total booking amount <small>(AED, rechecked before save)</small></span><strong>{formatAed(subtotal)}</strong></div>
       </section>
 
-      <div className="booking-contact-note"><strong>Only callback details are needed.</strong><span>We do not ask you to choose a vehicle or enter product details again. Our parts desk will call you to confirm delivery and handover.</span></div>
+      <div className="booking-contact-note"><strong>Product details are automatic; delivery details come from you.</strong><span>We do not ask you to choose a vehicle or enter product details again. Add the contact and delivery information needed for our parts desk to call and complete the handover.</span></div>
       <div className="form-grid">
         <label>Name for callback<input name="customer_name" required autoComplete="name" placeholder="Your name" /></label>
         <label>Phone for callback<input name="customer_phone" required autoComplete="tel" inputMode="tel" placeholder="+971 5X XXX XXXX" /></label>
+      </div>
+      <div className="form-grid">
+        <label>Email (optional)<input type="email" name="customer_email" autoComplete="email" placeholder="you@company.com" /></label>
+        <label>Delivery method<select name="delivery_method" value={deliveryMethod} onChange={(event) => setDeliveryMethod(event.target.value as 'pickup' | 'delivery')}>
+          <option value="pickup">Pickup / confirm with parts desk</option>
+          <option value="delivery">Delivery in UAE</option>
+        </select></label>
+      </div>
+      <div className="form-grid">
+        <label>City<input name="customer_city" autoComplete="address-level2" placeholder="Dubai, Abu Dhabi …" /></label>
+        <label>Delivery address<input name="shipping_address" autoComplete="street-address" required={deliveryMethod === 'delivery'} placeholder={deliveryMethod === 'delivery' ? 'Required for delivery' : 'Optional for pickup'} /></label>
       </div>
       <label>Note for the parts desk (optional)<textarea name="customer_note" rows={3} placeholder="Anything the team should know before calling?" /></label>
       <div className="booking-form-actions">
