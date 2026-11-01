@@ -550,6 +550,9 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .category-promo-card img { width: 39%; max-width: 155px; height: 132px; margin-right: -9px; object-fit: contain; mix-blend-mode: multiply; }
 .category-promo-card:hover { background: var(--red-dark); transform: translateY(-3px); box-shadow: 0 10px 22px rgba(190, 22, 35, .2); }
 
+.home-page .category-promo-card { background: var(--red); }
+.home-page .category-promo-card:hover { background: var(--red-dark); }
+
 @media (max-width: 900px) {
   .category-promo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
