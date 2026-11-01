@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { use, useEffect, useState } from 'react';
 import { apiFetch } from '../../../../../packages/shared/src/api';
-import { formatSar } from '../../../../../packages/shared/src/currency';
+import { formatAed } from '../../../../../packages/shared/src/currency';
 
 type VehicleFitment = {
   id: string;
@@ -219,7 +219,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         <div className="data-alert">
           {error}
           <br />
-          <Link className="text-link" href="/catalog">
+          <Link className="text-link" href="/category">
             Back to catalog
           </Link>
         </div>
@@ -557,7 +557,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         }
       `}</style>
 
-      <Link className="product-back" href="/catalog">
+      <Link className="product-back" href="/category">
         ← Back to catalog
       </Link>
       <div className="product-grid">
@@ -595,8 +595,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}
           </p>
           <div className="product-price">
-            <strong>{formatSar(currentPrice)}</strong>
-            {product.sale_price && <del>{formatSar(product.price)}</del>}
+            <strong>{formatAed(currentPrice)}</strong>
+            {product.sale_price && <del>{formatAed(product.price)}</del>}
           </div>
           <div className="product-status">
             <span>{product.tested_status === 'tested' ? 'Tested' : 'Fitment checked'}</span>

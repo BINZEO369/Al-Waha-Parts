@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
-import { formatSar } from '../../../packages/shared/src/currency';
+import { formatAed } from '../../../packages/shared/src/currency';
 import { useCart } from './CartProvider';
 
 interface Vehicle {
@@ -19,6 +19,7 @@ export function BookingForm() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState('');
   const [manualPartNumber, setManualPartNumber] = useState('');
+  const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
   const [state, setState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [bookingNumber, setBookingNumber] = useState('');
@@ -38,6 +39,7 @@ export function BookingForm() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     if (!items.length && !manualPartNumber.trim()) {
       setState('error');
       setMessage('Add at least one product to the cart or enter a part number.');
@@ -47,7 +49,7 @@ export function BookingForm() {
     setState('loading');
     setMessage('');
     setBookingNumber('');
-    const form = new FormData(event.currentTarget);
+    const form = new FormData(formElement);
     const vehicle = vehicles.find((item) => item.id === selectedVehicle);
     const customerNote = [
       String(form.get('customer_note') || '').trim(),
@@ -59,10 +61,10 @@ export function BookingForm() {
       customer_email: String(form.get('customer_email') || '').trim() || undefined,
       customer_note: customerNote || undefined,
       part_number: manualPartNumber.trim() || undefined,
-      delivery_method: String(form.get('delivery_method') || 'pickup'),
+      delivery_method: deliveryMethod,
       shipping_address: String(form.get('shipping_address') || '').trim() || undefined,
       customer_city: String(form.get('customer_city') || '').trim() || undefined,
-      payment_method: 'cash_on_delivery',
+      payment_method: 'cash_on_delivery' as const,
       items: items.map((item) => ({
         part_id: item.part_id,
         quantity: item.quantity,
@@ -82,9 +84,10 @@ export function BookingForm() {
       setState('success');
       setBookingNumber(result?.data?.booking_number || 'Submitted');
       setMessage('Your request is safely recorded. Our parts desk will confirm fitment, stock and delivery shortly.');
-      event.currentTarget.reset();
+      formElement.reset();
       setManualPartNumber('');
       setSelectedVehicle('');
+      setDeliveryMethod('pickup');
       clearCart();
     } catch (cause) {
       setState('error');
@@ -114,23 +117,23 @@ export function BookingForm() {
                 <div className="cart-item-image">
                   {item.image_url ? <img src={item.image_url} alt="" /> : <span>AWP</span>}
                 </div>
-                <div className="cart-item-copy"><strong>{item.part_name}</strong><small>{item.sku}</small><span>{formatSar(item.unit_price)} each</span></div>
-                <label className="cart-quantity">Qty<input type="number" min="1" max={item.stock_quantity || 99} value={item.quantity} onChange={(event) => updateQuantity(item.part_id, Number(event.target.value))} /></label>
-                <strong className="cart-item-total">{formatSar(item.unit_price * item.quantity)}</strong>
+                <div className="cart-item-copy"><strong>{item.part_name}</strong><small>{item.sku}</small><span>{formatAed(item.unit_price)} each</span></div>
+                <label className="cart-quantity">Qty<input aria-label={`Quantity for ${item.part_name}`} type="number" min="1" max={item.stock_quantity || 99} value={item.quantity} onChange={(event) => updateQuantity(item.part_id, Number(event.target.value))} /></label>
+                <strong className="cart-item-total">{formatAed(item.unit_price * item.quantity)}</strong>
                 <button type="button" className="cart-remove" aria-label={`Remove ${item.part_name}`} onClick={() => removeItem(item.part_id)}>×</button>
               </article>
             ))}
           </div>
         ) : <div className="cart-empty">Your cart is empty. Add products from the catalog, or use the manual part number below.</div>}
-        <div className="cart-total"><span>Estimated subtotal</span><strong>{formatSar(subtotal)}</strong></div>
+        <div className="cart-total"><span>Estimated subtotal</span><strong>{formatAed(subtotal)}</strong></div>
       </section>
 
       <div className="form-grid">
-        <label>Name<input name="customer_name" required placeholder="Your full name" /></label>
-        <label>Phone<input name="customer_phone" required placeholder="+971 5X XXX XXXX" /></label>
+        <label>Name<input name="customer_name" required autoComplete="name" placeholder="Your full name" /></label>
+        <label>Phone<input name="customer_phone" required autoComplete="tel" inputMode="tel" placeholder="+971 5X XXX XXXX" /></label>
       </div>
       <div className="form-grid">
-        <label>Email<input type="email" name="customer_email" placeholder="you@company.com" /></label>
+        <label>Email<input type="email" name="customer_email" autoComplete="email" placeholder="you@company.com" /></label>
         <label>Manual part number / OEM<input value={manualPartNumber} onChange={(event) => setManualPartNumber(event.target.value)} placeholder="Optional if products are in cart" /></label>
       </div>
       <div className="form-grid">
@@ -138,16 +141,21 @@ export function BookingForm() {
           <option value="">Select vehicle (optional)</option>
           {vehicles.map((vehicle) => <option value={vehicle.id} key={vehicle.id}>{vehicle.manufacturer_name} {vehicle.model_name} {vehicle.generation ? `· ${vehicle.generation}` : ''}</option>)}
         </select></label>
-        <label>Delivery preference<select name="delivery_method" defaultValue="pickup"><option value="pickup">Pickup / confirm with parts desk</option><option value="delivery">Delivery in UAE</option></select></label>
+        <label>Delivery preference<select name="delivery_method" value={deliveryMethod} onChange={(event) => setDeliveryMethod(event.target.value as 'pickup' | 'delivery')}>
+          <option value="pickup">Pickup / confirm with parts desk</option><option value="delivery">Delivery in UAE</option>
+        </select></label>
       </div>
       <div className="form-grid">
-        <label>City<input name="customer_city" placeholder="Dubai, Abu Dhabi …" /></label>
-        <label>Delivery address<input name="shipping_address" placeholder="Required for delivery" /></label>
+        <label>City<input name="customer_city" autoComplete="address-level2" placeholder="Dubai, Abu Dhabi …" /></label>
+        <label>Delivery address<input name="shipping_address" autoComplete="street-address" required={deliveryMethod === 'delivery'} placeholder={deliveryMethod === 'delivery' ? 'Required for delivery' : 'Optional for pickup'} /></label>
       </div>
       <label>Fitment details / message<textarea name="customer_note" rows={4} placeholder="Car year, engine, part condition or other fitment details." /></label>
-      <div className="booking-form-actions"><button className="button" disabled={state === 'loading'}>{state === 'loading' ? 'Saving secure request…' : 'Submit booking request'}</button><span>No payment is taken online. The parts desk confirms the final quote.</span></div>
-      {state === 'success' && <div className="booking-status-panel success"><strong>Request received: {bookingNumber}</strong><span>{message}</span></div>}
-      {state === 'error' && <div className="booking-status-panel error">{message}</div>}
+      <div className="booking-form-actions">
+        <button className="button" disabled={state === 'loading'}>{state === 'loading' ? 'Saving secure request…' : 'Submit booking request'}</button>
+        <span>No payment is taken online. The parts desk confirms the final quote.</span>
+      </div>
+      {state === 'success' && <div className="booking-status-panel success" role="status" aria-live="polite"><strong>Request received: {bookingNumber}</strong><span>{message}</span></div>}
+      {state === 'error' && <div className="booking-status-panel error" role="alert">{message}</div>}
     </form>
   );
 }

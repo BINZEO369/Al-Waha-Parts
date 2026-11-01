@@ -1,7 +1,7 @@
-export function formatSar(value: number): string {
-  return new Intl.NumberFormat('en-SA', {
+export function formatAed(value: number): string {
+  return new Intl.NumberFormat('en-AE', {
     style: 'currency',
-    currency: 'SAR',
+    currency: 'AED',
     currencyDisplay: 'code',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

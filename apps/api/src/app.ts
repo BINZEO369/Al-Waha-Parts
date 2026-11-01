@@ -241,6 +241,9 @@ app.post(
     const body = request.body;
     const customerName = body?.customer_name?.trim();
     const customerPhone = body?.customer_phone?.trim();
+    const customerEmail = body?.customer_email?.trim() || null;
+    const deliveryMethod = body?.delivery_method ?? 'pickup';
+    const paymentMethod = body?.payment_method ?? 'cash_on_delivery';
     if (
       !customerName ||
       !customerPhone ||
@@ -252,8 +255,20 @@ app.post(
         'customer_name, customer_phone and a part number or item are required',
       );
     }
+    if (customerName.length > 160 || customerPhone.length > 40) {
+      return jsonError(reply, 400, 'Name or phone number is too long');
+    }
+    if (customerEmail && (customerEmail.length > 254 || !/^\S+@\S+\.\S+$/.test(customerEmail))) {
+      return jsonError(reply, 400, 'Please provide a valid email address');
+    }
+    if (deliveryMethod !== 'pickup' && deliveryMethod !== 'delivery') {
+      return jsonError(reply, 400, 'Please choose a valid delivery method');
+    }
+    if (paymentMethod !== 'cash_on_delivery') {
+      return jsonError(reply, 400, 'Please choose a valid payment method');
+    }
     const supabase = getSupabaseAdmin();
-    if (body.delivery_method === 'delivery' && !body.shipping_address?.trim()) {
+    if (deliveryMethod === 'delivery' && !body.shipping_address?.trim()) {
       return jsonError(reply, 400, 'A delivery address is required for delivery requests');
     }
 
@@ -268,7 +283,7 @@ app.post(
       requestedItems.set(item.part_id, { part_id: item.part_id, vehicle_id: item.vehicle_id, quantity });
     }
 
-    if (body.part_number && requestedItems.size === 0) {
+    if (body.part_number?.trim() && requestedItems.size === 0) {
       const partNumber = body.part_number.trim();
       if (partNumber.length > 120) return jsonError(reply, 400, 'Part number is too long');
       let matchedPart = null as { id: string } | null;
@@ -287,6 +302,7 @@ app.post(
       }
       if (matchedPart)
         requestedItems.set(matchedPart.id, { part_id: matchedPart.id, quantity: 1 });
+      else return jsonError(reply, 400, 'We could not find that part number. Check the SKU, OEM or part number and try again.');
     }
 
     const partIds = [...requestedItems.keys()];
@@ -352,14 +368,14 @@ app.post(
         booking_number: bookingNumber,
         customer_name: customerName,
         customer_phone: customerPhone,
-        customer_email: body.customer_email ?? null,
+        customer_email: customerEmail,
         customer_note: bookingNote,
         total_amount: totalAmount,
         currency: 'AED',
         shipping_address: body.shipping_address?.trim() ?? null,
         customer_city: body.customer_city?.trim() ?? null,
-        delivery_method: body.delivery_method ?? 'pickup',
-        payment_method: body.payment_method ?? 'cash_on_delivery',
+        delivery_method: deliveryMethod,
+        payment_method: paymentMethod,
         source: 'website_cart',
       })
       .select()

@@ -8,7 +8,7 @@ import { useCart } from './CartProvider';
 const navItems = [
   { label: 'Home', href: '/' },
   { label: 'Categories', href: '/category', dropdown: true },
-  { label: 'Blog', href: '/catalog', dropdown: true },
+  { label: 'Blog', href: '/category', dropdown: true },
   { label: 'Pages', href: '/vehicles', dropdown: true },
   { label: 'About Us', href: '/contact' },
   { label: 'Contact Us', href: '/contact' },
@@ -55,7 +55,7 @@ export function Header() {
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = query.trim();
-    window.location.href = value ? `/catalog?search=${encodeURIComponent(value)}` : '/catalog';
+    window.location.href = value ? `/category?search=${encodeURIComponent(value)}` : '/category';
   }
 
   return (
@@ -115,7 +115,7 @@ export function Footer() {
           <div className="footer-socials"><span>f</span><span>in</span><span>◎</span><span>▶</span></div>
         </div>
         <div className="footer-column"><h3>Information</h3><Link href="/contact">About us</Link><Link href="/contact">Contact us</Link><Link href="/booking">Delivery information</Link><Link href="/booking">Privacy policy</Link></div>
-        <div className="footer-column"><h3>Customer service</h3><Link href="/account">My account</Link><Link href="/catalog">Order history</Link><Link href="/vehicles">Vehicle finder</Link><Link href="/booking">Request a part</Link></div>
+        <div className="footer-column"><h3>Customer service</h3><Link href="/account">My account</Link><Link href="/category">Order history</Link><Link href="/vehicles">Vehicle finder</Link><Link href="/booking">Request a part</Link></div>
         <div className="footer-column"><h3>Contact us</h3><p>Dubai, United Arab Emirates</p><a href="tel:+971500000000">+971 50 000 0000</a><a href="mailto:hello@alwahaparts.com">hello@alwahaparts.com</a></div>
       </div>
       <div className="footer-bottom"><span>© 2026 Al Waha Parts. All rights reserved.</span><span>Right part. Right fit.</span></div>

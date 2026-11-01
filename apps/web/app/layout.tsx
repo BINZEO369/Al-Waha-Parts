@@ -263,7 +263,7 @@ h1, h2, h3, p { margin-top: 0; }
 input, select, textarea { width: 100%; border: 1px solid var(--line); outline: 0; padding: 13px; background: #fff; color: var(--ink); font-size: 13px; }
 input:focus, select:focus, textarea:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(229,35,47,.08); }
 label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
-.catalog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 19px; }
+.catalog-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 19px; }
 .category-list { display: flex; flex-wrap: wrap; gap: 9px; margin: -10px 0 26px; }
 .category-chip { display: inline-flex; align-items: center; gap: 7px; padding: 9px 13px; border: 1px solid var(--line); background: #fff; color: #777; font-size: 10px; cursor: pointer; }
 .category-chip:hover, .category-chip.active { border-color: var(--red); background: var(--red); color: #fff; }
@@ -291,7 +291,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .empty-state span { margin-top: 8px; font-size: 12px; }
 
 /* ---------- FORMS / CONTACT ---------- */
-.booking-form, .finder-card { max-width: 780px; padding: 34px; display: grid; gap: 20px; border: 1px solid var(--line); background: #fff; box-shadow: 0 12px 35px rgba(0,0,0,.04); }
+.booking-form, .finder-card { max-width: 860px; padding: 34px; display: grid; gap: 20px; border: 1px solid var(--line); background: #fff; box-shadow: 0 12px 35px rgba(0,0,0,.04); }
 .booking-form-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
 .booking-form-heading h2 { margin: 0; font-family: Montserrat, sans-serif; font-size: 24px; letter-spacing: -.05em; }
 .booking-form-heading p { max-width: 260px; margin: 0; color: #888; font-size: 11px; line-height: 1.6; }
@@ -305,6 +305,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .booking-form .button, .finder-card .button { justify-self: start; }
 .button { min-height: 40px; padding: 0 20px; border: 0; background: var(--red); color: #fff; font-size: 11px; font-weight: 700; }
 .button:hover { background: var(--red-dark); }
+.button:disabled { cursor: wait; opacity: .62; }
 .button-light { background: #fff; color: var(--red); }
 .form-success { color: #287d58; font-size: 12px; }
 .form-error { color: #a83e45; font-size: 12px; }
@@ -316,6 +317,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .cart-panel-heading, .cart-total { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .cart-panel-heading h3 { margin: 2px 0 0; font-size: 18px; }
 .cart-clear, .cart-remove { border: 0; background: transparent; color: var(--red); font-size: 11px; font-weight: 700; }
+.cart-remove { width: 24px; height: 24px; font-size: 18px; line-height: 1; cursor: pointer; }
 .cart-items { display: grid; gap: 10px; }
 .cart-item { display: grid; grid-template-columns: 58px minmax(0, 1fr) 72px auto 20px; align-items: center; gap: 12px; padding: 10px; border: 1px solid var(--line); background: #fff; }
 .cart-item-image { width: 58px; height: 58px; display: grid; place-items: center; overflow: hidden; background: var(--soft); color: var(--red); font-size: 10px; font-weight: 700; }
@@ -415,7 +417,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .arrival-image { height: 140px; }
   .arrival-details h3 { min-height: 48px; font-size: 11px; }
   .price-row { display: grid; gap: 4px; }
-  .catalog-grid { grid-template-columns: 1fr; }
+  .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .vehicle-home-grid { grid-template-columns: 1fr; }
   .booking-form, .finder-card { padding: 22px 16px; }
 }

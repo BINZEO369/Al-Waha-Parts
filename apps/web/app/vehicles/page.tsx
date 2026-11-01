@@ -92,7 +92,7 @@ export default function VehiclesPage() {
         {selectedVehicle?.cover_image_url && <img className="finder-vehicle-image" src={selectedVehicle.cover_image_url} alt={`${selectedVehicle.manufacturer_name} ${selectedVehicle.model_name}`} />}
         {error && <p className="form-error">{error}</p>}
         {!loading && !error && !vehicles.length && <p className="empty-state">No vehicles are published in the database yet.</p>}
-        <button className="button" disabled={loading || !selectedVehicle} onClick={() => { if (selectedVehicle) window.location.href = `/catalog?vehicle_id=${selectedVehicle.id}`; }}>
+        <button className="button" disabled={loading || !selectedVehicle} onClick={() => { if (selectedVehicle) window.location.href = `/category?vehicle_id=${selectedVehicle.id}`; }}>
           Show compatible parts <span>→</span>
         </button>
       </div>

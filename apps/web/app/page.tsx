@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
-import { formatSar } from '../../../packages/shared/src/currency';
+import { formatAed } from '../../../packages/shared/src/currency';
 
 /* ==================================================================
  *  TYPES
@@ -588,8 +588,8 @@ export default function Home() {
     event.preventDefault();
     const value = search.trim();
     window.location.href = value
-      ? `/catalog?search=${encodeURIComponent(value)}`
-      : '/catalog';
+      ? `/category?search=${encodeURIComponent(value)}`
+      : '/category';
   }
 
   return (
@@ -731,7 +731,7 @@ export default function Home() {
               <span className="section-kicker">From the live catalog</span>
               <h2>New Arrivals</h2>
             </div>
-            <Link className="section-link" href="/catalog">
+            <Link className="section-link" href="/category">
               Open full catalog <ArrowIcon />
             </Link>
           </div>
@@ -768,8 +768,8 @@ export default function Home() {
                     Verified <span>· {part.sku}</span>
                   </div>
                   <div className="price-row">
-                    <strong>{formatSar(part.sale_price ?? part.price)}</strong>
-                    {part.sale_price && <del>{formatSar(part.price)}</del>}
+                    <strong>{formatAed(part.sale_price ?? part.price)}</strong>
+                    {part.sale_price && <del>{formatAed(part.price)}</del>}
                   </div>
                 </div>
               </article>

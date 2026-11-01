@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { formatSar } from '../../../packages/shared/src/currency';
+import { formatAed } from '../../../packages/shared/src/currency';
 import { useCart } from './CartProvider';
 
 export interface PartCardData {
@@ -51,8 +51,8 @@ export function PartCard({ part }: { part: PartCardData }) {
           </span>
         </div>
         <div className="part-price">
-          <strong>{formatSar(part.sale_price ?? part.price)}</strong>
-          {part.sale_price && <del>{formatSar(part.price)}</del>}
+          <strong>{formatAed(part.sale_price ?? part.price)}</strong>
+          {part.sale_price && <del>{formatAed(part.price)}</del>}
         </div>
         <div className="part-card-actions">
           <button
