@@ -71,7 +71,7 @@ function money(value: number, currency = 'AED') {
 
 export default function Home() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [popularCategories, setPopularCategories] = useState<Category[]>([]);
   const [parts, setParts] = useState<Part[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,12 +85,12 @@ export default function Home() {
       return;
     }
     Promise.all([
-      apiFetch<Category[]>(apiUrl, '/api/v1/categories?limit=100'),
+      apiFetch<Category[]>(apiUrl, '/api/v1/popular-categories?limit=200'),
       apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=8'),
       apiFetch<Vehicle[]>(apiUrl, '/api/v1/vehicles?limit=8'),
     ])
-      .then(([nextCategories, nextParts, nextVehicles]) => {
-        setCategories(nextCategories);
+      .then(([nextPopularCategories, nextParts, nextVehicles]) => {
+        setPopularCategories(nextPopularCategories);
         setParts(nextParts);
         setVehicles(nextVehicles);
       })
@@ -100,10 +100,6 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, [apiUrl]);
 
-  const featuredCategories = useMemo(
-    () => categories.filter((category) => category.is_featured).slice(0, 8),
-    [categories],
-  );
   const featuredParts = useMemo(
     () => parts.filter((part) => part.is_featured).slice(0, 4),
     [parts],
@@ -112,8 +108,6 @@ export default function Home() {
     () => vehicles.filter((vehicle) => vehicle.is_featured).slice(0, 4),
     [vehicles],
   );
-  const promoCategories = featuredCategories.slice(0, 3);
-
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = search.trim();
@@ -127,7 +121,7 @@ export default function Home() {
       {error && <div className="store-section data-alert home-data-alert">{error}</div>}
       {loading && <div className="store-section home-loading">Loading categories, parts and vehicles from the database…</div>}
 
-      {!loading && promoCategories.length > 0 && (
+      {!loading && popularCategories.length > 0 && (
         <section className="store-section category-promo-section" aria-label="Popular categories">
           <div className="section-heading">
             <div>
@@ -137,7 +131,7 @@ export default function Home() {
             <Link className="section-link" href="/category">View all categories <ArrowIcon /></Link>
           </div>
           <div className="category-promo-grid">
-            {promoCategories.map((category) => (
+            {popularCategories.map((category) => (
               <Link className="promo-card promo-card-database category-promo-card" href={`/category?category=${category.id}`} key={category.id}>
                 <div>
                   <small>Popular category</small>
@@ -208,7 +202,7 @@ export default function Home() {
         </section>
       )}
 
-      {!loading && !featuredCategories.length && !featuredParts.length && !featuredVehicles.length && !error && (
+      {!loading && !popularCategories.length && !featuredParts.length && !featuredVehicles.length && !error && (
         <section className="store-section home-empty-state">
           <h2>No published database records yet.</h2>
           <p>Categories, parts and vehicles will appear here after they are added to the live database.</p>

@@ -55,9 +55,24 @@ app.get('/api/v1/categories', async (_request, reply) => {
     .from('parts_categories')
     .select('id,category_name,slug,description,status,image_url,icon_name,is_featured,sort_order')
     .eq('status', 'active')
-    .order('category_name');
+    .order('category_name')
+    .limit(200);
   if (error) return jsonError(reply, 500, error.message);
   return { data: data ?? [] };
+});
+
+app.get('/api/v1/popular-categories', async (_request, reply) => {
+  const { data, error } = await getSupabaseAdmin()
+    .from('popular_categories')
+    .select('display_order,category:parts_categories!inner(id,category_name,slug,description,image_url,status)')
+    .eq('is_active', true)
+    .eq('category.status', 'active')
+    .order('display_order', { ascending: true })
+    .limit(200);
+  if (error) return jsonError(reply, 500, error.message);
+  return {
+    data: (data ?? []).map((item) => ({ ...item.category, sort_order: item.display_order })),
+  };
 });
 
 app.get('/api/v1/banners', async (_request, reply) => {
