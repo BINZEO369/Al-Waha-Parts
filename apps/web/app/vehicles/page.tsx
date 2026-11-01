@@ -6,9 +6,12 @@ import { apiFetch } from '../../../../packages/shared/src/api';
 type Vehicle = {
   id: string;
   manufacturer_name: string;
+  manufacturer_logo?: string | null;
   model_name: string;
-  model_year?: number | null;
-  year?: number | null;
+  generation?: string | null;
+  year_start?: number | null;
+  year_end?: number | null;
+  cover_image_url?: string | null;
 };
 
 export default function VehiclesPage() {
@@ -41,19 +44,21 @@ export default function VehiclesPage() {
     [vehicles, manufacturer],
   );
   const years = useMemo(
-    () => [...new Set(vehicles.filter((vehicle) => (!manufacturer || vehicle.manufacturer_name === manufacturer) && (!model || vehicle.model_name === model)).map((vehicle) => vehicle.model_year ?? vehicle.year).filter(Boolean))].sort().reverse(),
+    () => [...new Set(vehicles.filter((vehicle) => (!manufacturer || vehicle.manufacturer_name === manufacturer) && (!model || vehicle.model_name === model)).flatMap((vehicle) => {
+      if (!vehicle.year_start) return [];
+      const end = vehicle.year_end ?? vehicle.year_start;
+      return Array.from({ length: Math.min(end - vehicle.year_start + 1, 50) }, (_, index) => end - index);
+    }))].sort().reverse(),
     [vehicles, manufacturer, model],
   );
+  const selectedVehicle = vehicles.find((vehicle) => vehicle.manufacturer_name === manufacturer && vehicle.model_name === model && (!year || (vehicle.year_start ?? 0) <= Number(year)) && (!year || (vehicle.year_end ?? Number(year)) >= Number(year)));
 
   return (
     <main className="page-shell">
       <section className="page-intro">
-        <p className="eyebrow">Fitment finder</p>
+        <p className="eyebrow">Fitment finder / live database</p>
         <h1>Start with the vehicle.</h1>
-        <p>
-          Vehicle lookup is connected to the live catalog API. Select your make, model and year to
-          narrow the right parts.
-        </p>
+        <p>Choose a real vehicle record from the database, then open the catalog with its compatible parts filter.</p>
       </section>
       <div className="finder-card">
         <div className="form-grid">
@@ -79,9 +84,10 @@ export default function VehiclesPage() {
             </select>
           </label>
         </div>
+        {selectedVehicle?.cover_image_url && <img className="finder-vehicle-image" src={selectedVehicle.cover_image_url} alt={`${selectedVehicle.manufacturer_name} ${selectedVehicle.model_name}`} />}
         {error && <p className="form-error">{error}</p>}
         {!loading && !error && !vehicles.length && <p className="empty-state">No vehicles are published in the database yet.</p>}
-        <button className="button" disabled={loading || !manufacturer}>
+        <button className="button" disabled={loading || !selectedVehicle} onClick={() => { if (selectedVehicle) window.location.href = `/catalog?vehicle_id=${selectedVehicle.id}`; }}>
           Show compatible parts <span>→</span>
         </button>
       </div>

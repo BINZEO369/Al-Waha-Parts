@@ -113,6 +113,13 @@ h1, h2, h3, p { margin-top: 0; }
 .hero-storefront-copy p { max-width: 300px; margin-bottom: 25px; color: #777; font-size: 11px; line-height: 1.8; }
 .hero-storefront-art { align-self: stretch; display: flex; align-items: center; justify-content: center; min-width: 0; }
 .hero-storefront-art img { width: 100%; height: auto; max-height: 425px; object-fit: contain; }
+.database-hero-art img { width: min(100%, 500px); height: 330px; object-fit: contain; mix-blend-mode: multiply; }
+.database-image-empty { padding: 20px; border: 1px dashed #d8d8d8; color: #9a9a9a; font-size: 10px; text-align: center; }
+.home-loading { padding-top: 32px; color: #888; font-size: 12px; text-align: center; }
+.home-data-alert { margin-top: 28px; }
+.home-empty-state { padding: 55px 20px; margin-bottom: 45px; border: 1px dashed var(--line); text-align: center; }
+.home-empty-state h2 { margin-bottom: 8px; font-family: Montserrat, sans-serif; font-size: 24px; }
+.home-empty-state p { margin: 0; color: #888; font-size: 12px; }
 .hero-dots { position: absolute; left: 50%; bottom: 17px; display: flex; gap: 8px; transform: translateX(-50%); }
 .hero-dots span { width: 8px; height: 8px; border: 1px solid var(--red); border-radius: 50%; background: transparent; }
 .hero-dots span.is-active { background: var(--red); }
@@ -127,6 +134,7 @@ h1, h2, h3, p { margin-top: 0; }
 .category-card strong { color: #444; font-size: 11px; font-weight: 600; }
 .category-card small { color: #909090; font-size: 9px; }
 .category-card > svg { width: 13px; color: #bbb; }
+.category-card > .category-no-image { width: 64px; height: 58px; display: grid; place-items: center; flex-shrink: 0; color: #aaa; background: #f7f7f7; font-size: 9px; }
 
 /* ---------- PROMOTIONS ---------- */
 .promo-section { padding-bottom: 54px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -140,6 +148,9 @@ h1, h2, h3, p { margin-top: 0; }
 .promo-card-dark { background: #707070; }
 .promo-card-red { background: #ed3b43; }
 .promo-card-slate { background: #59626d; }
+.promo-card-database { background: #5e6268; }
+.promo-card-database strong { max-width: 150px; font-size: 17px; line-height: 1.15; }
+.promo-card-database img { mix-blend-mode: multiply; }
 
 /* ---------- ARRIVALS ---------- */
 .arrivals-section { padding-bottom: 66px; }
@@ -184,6 +195,16 @@ h1, h2, h3, p { margin-top: 0; }
 .newsletter-search input { min-width: 0; flex: 1; border: 0; outline: 0; padding: 0 15px; color: var(--ink); font-size: 11px; }
 .newsletter-search button { width: 48px; border: 0; background: var(--red); color: #fff; }
 .newsletter-search svg { width: 17px; height: 17px; }
+.vehicle-home-section { padding-bottom: 58px; }
+.vehicle-home-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.vehicle-home-card { min-width: 0; overflow: hidden; border: 1px solid var(--line); background: #fff; transition: transform .2s ease, box-shadow .2s ease; }
+.vehicle-home-card:hover { transform: translateY(-3px); box-shadow: 0 9px 22px rgba(0,0,0,.08); }
+.vehicle-home-card > img { width: 100%; height: 145px; object-fit: cover; background: #f8f8f8; }
+.vehicle-home-card > .database-image-empty { height: 145px; display: grid; place-items: center; background: #f8f8f8; }
+.vehicle-home-card > div { display: grid; gap: 6px; padding: 14px; }
+.vehicle-home-card small { color: var(--red); font-size: 9px; text-transform: uppercase; }
+.vehicle-home-card strong { font-size: 13px; }
+.vehicle-home-card span { color: #999; font-size: 10px; }
 
 /* ---------- FOOTER ---------- */
 .store-footer { background: #262626; color: #fff; }
@@ -240,6 +261,15 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 
 /* ---------- FORMS / CONTACT ---------- */
 .booking-form, .finder-card { max-width: 780px; padding: 34px; display: grid; gap: 20px; border: 1px solid var(--line); background: #fff; box-shadow: 0 12px 35px rgba(0,0,0,.04); }
+.booking-form-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.booking-form-heading h2 { margin: 0; font-family: Montserrat, sans-serif; font-size: 24px; letter-spacing: -.05em; }
+.booking-form-heading p { max-width: 260px; margin: 0; color: #888; font-size: 11px; line-height: 1.6; }
+.booking-form-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.booking-form-actions > span { color: #999; font-size: 10px; }
+.booking-status-panel { display: grid; gap: 5px; padding: 14px 16px; font-size: 12px; line-height: 1.6; }
+.booking-status-panel.success { border-left: 3px solid #2d8b5d; background: #effaf4; color: #236b49; }
+.booking-status-panel.error { border-left: 3px solid var(--red); background: #fff3f3; color: #a33c43; }
+.finder-vehicle-image { width: 100%; height: 190px; object-fit: cover; background: #f8f8f8; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; }
 .booking-form .button, .finder-card .button { justify-self: start; }
 .button { min-height: 40px; padding: 0 20px; border: 0; background: var(--red); color: #fff; font-size: 11px; font-weight: 700; }
@@ -289,6 +319,8 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .arrival-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .arrival-image { height: 165px; }
   .arrival-details { padding: 12px; }
+  .vehicle-home-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .vehicle-home-card > img, .vehicle-home-card > .database-image-empty { height: 125px; }
   .wide-feature { margin: 0 14px 42px; padding: 35px 24px 10px; display: block; }
   .wide-feature-art { height: 190px; }
   .wide-feature-art img { height: 200px; }
@@ -304,6 +336,8 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .search-field { min-width: 0; margin-top: 22px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; }
   .form-grid, .contact-grid { grid-template-columns: 1fr; }
+  .booking-form-heading { display: block; }
+  .booking-form-heading p { margin-top: 12px; }
   .page-shell { padding: 50px 18px 75px; }
 }
 @media (max-width: 430px) {
@@ -317,6 +351,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .category-card strong { font-size: 10px; }
   .arrival-grid { grid-template-columns: 1fr 1fr; }
   .arrival-image { height: 140px; }
+  .vehicle-home-grid { grid-template-columns: 1fr; }
   .arrival-details h3 { min-height: 48px; font-size: 11px; }
   .price-row { display: grid; gap: 4px; }
   .catalog-grid { grid-template-columns: 1fr; }

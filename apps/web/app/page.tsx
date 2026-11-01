@@ -1,50 +1,50 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { apiFetch } from '../../../packages/shared/src/api';
 
-const categories = [
-  { name: 'Suspension', count: '20 items', image: '/product-shocks.png' },
-  { name: 'Brake system', count: '20 items', image: '/product-brake.png' },
-  { name: 'Steering parts', count: '20 items', image: '/product-shocks.png' },
-  { name: 'Shocks & struts', count: '20 items', image: '/product-shocks.png' },
-  { name: 'Wheels & tyres', count: '20 items', image: '/product-wheel.png' },
-  { name: 'Brake discs', count: '20 items', image: '/product-brake.png' },
-  { name: 'Lighting', count: '20 items', image: '/product-headlight.png' },
-  { name: 'Engine parts', count: '20 items', image: '/product-headlight.png' },
-];
+type Category = {
+  id: string;
+  category_name: string;
+  slug?: string | null;
+  description?: string | null;
+  image_url?: string | null;
+  is_featured?: boolean;
+  sort_order?: number;
+};
 
-const arrivals = [
-  {
-    name: 'Performance Coilover Kit',
-    category: 'Suspension',
-    price: 'AED 425.00',
-    oldPrice: 'AED 520.00',
-    image: '/product-shocks.png',
-  },
-  {
-    name: 'Premium LED Headlight',
-    category: 'Lighting',
-    price: 'AED 280.00',
-    oldPrice: 'AED 340.00',
-    image: '/product-headlight.png',
-  },
-  {
-    name: 'Sport Brake Disc Set',
-    category: 'Brake system',
-    price: 'AED 390.00',
-    oldPrice: 'AED 470.00',
-    image: '/product-brake.png',
-  },
-  {
-    name: 'Alloy Wheel 18 inch',
-    category: 'Wheels & tyres',
-    price: 'AED 615.00',
-    oldPrice: 'AED 730.00',
-    image: '/product-wheel.png',
-  },
-];
+type Part = {
+  id: string;
+  part_name: string;
+  brand_name?: string | null;
+  sku: string;
+  price: number;
+  sale_price?: number | null;
+  condition?: string | null;
+  tested_status?: string | null;
+  stock_quantity?: number | null;
+  primary_image_url?: string | null;
+  image_urls?: string[] | null;
+  parts_categories?: { category_name?: string | null } | null;
+  is_featured?: boolean;
+  sort_order?: number;
+};
+
+type Vehicle = {
+  id: string;
+  manufacturer_name: string;
+  manufacturer_logo?: string | null;
+  model_name: string;
+  generation?: string | null;
+  chassis_code?: string | null;
+  year_start?: number | null;
+  year_end?: number | null;
+  vehicle_type?: string | null;
+  cover_image_url?: string | null;
+  is_featured?: boolean;
+  sort_order?: number;
+};
 
 function ArrowIcon() {
   return (
@@ -54,24 +54,64 @@ function ArrowIcon() {
   );
 }
 
-function HeartIcon() {
+function SearchIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M20.8 8.7c0 5.5-8.8 10.4-8.8 10.4S3.2 14.2 3.2 8.7A4.7 4.7 0 0 1 12 6.2a4.7 4.7 0 0 1 8.8 2.5Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <circle cx="10.8" cy="10.8" r="6.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="m16 16 4.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
 
-function CartIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3.5 4h2l1.6 10.1a1.5 1.5 0 0 0 1.5 1.3h8.9a1.5 1.5 0 0 0 1.5-1.2L20.5 7H6.1M9 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm10 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+function money(value: number, currency = 'AED') {
+  return `${currency} ${Number(value).toFixed(2)}`;
 }
 
 export default function Home() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [parts, setParts] = useState<Part[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    if (!apiUrl) {
+      setError('Live catalog is not configured yet.');
+      setLoading(false);
+      return;
+    }
+    Promise.all([
+      apiFetch<Category[]>(apiUrl, '/api/v1/categories?limit=100'),
+      apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=8'),
+      apiFetch<Vehicle[]>(apiUrl, '/api/v1/vehicles?limit=8'),
+    ])
+      .then(([nextCategories, nextParts, nextVehicles]) => {
+        setCategories(nextCategories);
+        setParts(nextParts);
+        setVehicles(nextVehicles);
+      })
+      .catch((cause) => {
+        setError(cause instanceof Error ? cause.message : 'Unable to load live database data.');
+      })
+      .finally(() => setLoading(false));
+  }, [apiUrl]);
+
+  const featuredCategories = useMemo(
+    () => categories.filter((category) => category.is_featured).slice(0, 8),
+    [categories],
+  );
+  const featuredParts = useMemo(
+    () => parts.filter((part) => part.is_featured).slice(0, 4),
+    [parts],
+  );
+  const featuredVehicles = useMemo(
+    () => vehicles.filter((vehicle) => vehicle.is_featured).slice(0, 4),
+    [vehicles],
+  );
+  const heroPart = featuredParts[0] ?? parts[0];
+  const promoCategories = featuredCategories.slice(0, 3);
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -84,138 +124,145 @@ export default function Home() {
       <section className="hero-storefront">
         <div className="hero-storefront-inner">
           <div className="hero-storefront-copy">
-            <span className="hero-kicker">World best quality</span>
-            <h1>New Car Parts</h1>
+            <span className="hero-kicker">Live inventory from Al Waha Parts</span>
+            <h1>Find the right part.</h1>
             <span className="hero-rule" />
-            <p>Find the right part for every drive, every repair and every road ahead.</p>
+            <p>Browse verified automotive categories, real stock and vehicle fitment data from our database.</p>
             <Link className="red-button" href="/catalog">
-              Shopping now <ArrowIcon />
+              Browse database <ArrowIcon />
             </Link>
           </div>
-          <div className="hero-storefront-art">
-            <Image src="/hero-parts.png" alt="Brake and suspension parts" width={980} height={560} priority />
+          <div className="hero-storefront-art database-hero-art">
+            {heroPart?.primary_image_url ? (
+              <img src={heroPart.primary_image_url} alt={heroPart.part_name} />
+            ) : (
+              <div className="database-image-empty">Product image will appear from the database</div>
+            )}
           </div>
-          <div className="hero-dots" aria-label="Hero slides">
-            <span className="is-active" />
-            <span />
-          </div>
+          <div className="hero-dots" aria-hidden="true"><span className="is-active" /><span /></div>
         </div>
       </section>
 
-      <section className="store-section categories-section">
-        <div className="section-heading">
-          <div>
-            <span className="section-kicker">Shop by fitment</span>
-            <h2>Popular Categories</h2>
-          </div>
-          <Link className="section-link" href="/catalog">
-            View all categories <ArrowIcon />
-          </Link>
-        </div>
-        <div className="category-grid">
-          {categories.map((category) => (
-            <Link className="category-card" href="/catalog" key={category.name}>
-              <Image src={category.image} alt="" width={92} height={92} />
-              <span>
-                <strong>{category.name}</strong>
-                <small>{category.count}</small>
-              </span>
-              <ArrowIcon />
-            </Link>
-          ))}
-        </div>
-      </section>
+      {error && <div className="store-section data-alert home-data-alert">{error}</div>}
+      {loading && <div className="store-section home-loading">Loading categories, parts and vehicles from the database…</div>}
 
-      <section className="store-section promo-section" aria-label="Offers">
-        <Link className="promo-card promo-card-dark" href="/catalog">
-          <div>
-            <small>Car Wheel</small>
-            <strong>30% <em>Off</em></strong>
-            <span>Shop now <ArrowIcon /></span>
+      {!loading && featuredCategories.length > 0 && (
+        <section className="store-section categories-section">
+          <div className="section-heading">
+            <div>
+              <span className="section-kicker">From the live database</span>
+              <h2>Popular Categories</h2>
+            </div>
+            <Link className="section-link" href="/catalog">View all categories <ArrowIcon /></Link>
           </div>
-          <Image src="/product-wheel.png" alt="Car wheel" width={220} height={180} />
-        </Link>
-        <Link className="promo-card promo-card-red" href="/booking">
-          <div>
-            <small>Car Parts</small>
-            <strong>40% <em>Off</em></strong>
-            <span>Shop now <ArrowIcon /></span>
-          </div>
-          <Image src="/product-brake.png" alt="Brake parts" width={220} height={180} />
-        </Link>
-        <Link className="promo-card promo-card-slate" href="/catalog">
-          <div>
-            <small>Car Vails</small>
-            <strong>50% <em>Off</em></strong>
-            <span>Shop now <ArrowIcon /></span>
-          </div>
-          <Image src="/product-shocks.png" alt="Suspension parts" width={220} height={180} />
-        </Link>
-      </section>
-
-      <section className="store-section arrivals-section">
-        <div className="section-heading arrivals-heading">
-          <div>
-            <span className="section-kicker">Fresh from the parts desk</span>
-            <h2>New Arrivals</h2>
-          </div>
-          <div className="arrival-tabs" aria-label="Product categories">
-            <button className="is-active">Car &amp; Drive</button>
-            <button>Motorcycle</button>
-            <button>Truck &amp; Drive</button>
-          </div>
-        </div>
-        <div className="arrival-grid">
-          {arrivals.map((item) => (
-            <article className="arrival-card" key={item.name}>
-              <Link href="/catalog" className="arrival-image">
-                <span className="sale-badge">Sale</span>
-                <Image src={item.image} alt={item.name} width={240} height={220} />
-                <span className="quick-view">Quick view</span>
+          <div className="category-grid">
+            {featuredCategories.map((category) => (
+              <Link className="category-card" href={`/catalog?category=${category.id}`} key={category.id}>
+                {category.image_url ? <img src={category.image_url} alt="" /> : <span className="category-no-image">No image</span>}
+                <span>
+                  <strong>{category.category_name.trim()}</strong>
+                  <small>{category.description || 'Browse available parts'}</small>
+                </span>
+                <ArrowIcon />
               </Link>
-              <div className="arrival-details">
-                <small>{item.category}</small>
-                <h3>{item.name}</h3>
-                <div className="rating" aria-label="5 out of 5 stars">★★★★★ <span>(12)</span></div>
-                <div className="price-row">
-                  <strong>{item.price}</strong>
-                  <del>{item.oldPrice}</del>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
-      <section className="wide-feature">
-        <div className="wide-feature-copy">
-          <span className="section-kicker">2026 latest collection</span>
-          <h2>Built for the way you move.</h2>
-          <p>Verified parts, clear pricing and a helpful desk behind every order.</p>
-          <Link className="red-button" href="/booking">
-            Request a part <ArrowIcon />
-          </Link>
-        </div>
-        <div className="wide-feature-art">
-          <Image src="/product-wheel.png" alt="Latest wheel collection" width={540} height={420} />
-        </div>
-      </section>
+      {!loading && promoCategories.length > 0 && (
+        <section className="store-section promo-section" aria-label="Database collections">
+          {promoCategories.map((category) => (
+            <Link className="promo-card promo-card-database" href={`/catalog?category=${category.id}`} key={category.id}>
+              <div>
+                <small>Database collection</small>
+                <strong>{category.category_name.trim()}</strong>
+                <span>Browse parts <ArrowIcon /></span>
+              </div>
+              {category.image_url && <img src={category.image_url} alt="" />}
+            </Link>
+          ))}
+        </section>
+      )}
+
+      {!loading && featuredParts.length > 0 && (
+        <section className="store-section arrivals-section">
+          <div className="section-heading arrivals-heading">
+            <div>
+              <span className="section-kicker">Real records / current catalog</span>
+              <h2>Featured Parts</h2>
+            </div>
+            <Link className="section-link" href="/catalog">Open full catalog <ArrowIcon /></Link>
+          </div>
+          <div className="arrival-grid">
+            {featuredParts.map((part) => (
+              <article className="arrival-card" key={part.id}>
+                <Link href={`/booking?part=${encodeURIComponent(part.sku)}`} className="arrival-image">
+                  <span className="sale-badge">{part.condition || 'Available'}</span>
+                  {part.primary_image_url ? <img src={part.primary_image_url} alt={part.part_name} /> : <span className="database-image-empty">No product image</span>}
+                  <span className="quick-view">Request this part</span>
+                </Link>
+                <div className="arrival-details">
+                  <small>{part.parts_categories?.category_name || 'Database catalog'}</small>
+                  <h3>{part.part_name}</h3>
+                  <div className="rating" aria-label="Verified database item">Verified <span>· {part.sku}</span></div>
+                  <div className="price-row">
+                    <strong>{money(part.sale_price ?? part.price)}</strong>
+                    {part.sale_price && <del>{money(part.price)}</del>}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {!loading && featuredVehicles.length > 0 && (
+        <section className="store-section vehicle-home-section">
+          <div className="section-heading">
+            <div>
+              <span className="section-kicker">Vehicle fitment database</span>
+              <h2>Popular Vehicles</h2>
+            </div>
+            <Link className="section-link" href="/vehicles">Open vehicle finder <ArrowIcon /></Link>
+          </div>
+          <div className="vehicle-home-grid">
+            {featuredVehicles.map((vehicle) => (
+              <Link className="vehicle-home-card" href="/vehicles" key={vehicle.id}>
+                {vehicle.cover_image_url ? <img src={vehicle.cover_image_url} alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`} /> : <span className="database-image-empty">No vehicle image</span>}
+                <div>
+                  <small>{vehicle.vehicle_type || 'Vehicle'}</small>
+                  <strong>{vehicle.manufacturer_name} {vehicle.model_name}</strong>
+                  <span>{vehicle.year_start || '—'}–{vehicle.year_end || 'present'} · {vehicle.generation || vehicle.chassis_code || 'Fitment data'}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {!loading && !featuredCategories.length && !featuredParts.length && !featuredVehicles.length && !error && (
+        <section className="store-section home-empty-state">
+          <h2>No published database records yet.</h2>
+          <p>Categories, parts and vehicles will appear here after they are added to the live database.</p>
+        </section>
+      )}
 
       <section className="store-section service-strip">
-        <div><strong>Free shipping</strong><span>On orders over AED 250</span></div>
-        <div><strong>Secure payment</strong><span>Safe checkout every time</span></div>
-        <div><strong>Fitment support</strong><span>Real help from our parts desk</span></div>
-        <div><strong>Easy request</strong><span>Tell us what your car needs</span></div>
+        <div><strong>Database-first catalog</strong><span>Only published records appear</span></div>
+        <div><strong>Fitment support</strong><span>Use the vehicle finder</span></div>
+        <div><strong>Request a part</strong><span>Booking goes to the parts desk</span></div>
+        <div><strong>Live availability</strong><span>Stock comes from the catalog</span></div>
       </section>
 
       <section className="store-section newsletter-card">
         <div>
-          <span className="section-kicker">Stay in the fast lane</span>
-          <h2>Search smarter. Drive further.</h2>
+          <span className="section-kicker">Search the live catalog</span>
+          <h2>Find your next part faster.</h2>
         </div>
         <form className="newsletter-search" onSubmit={submitSearch}>
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search entire store here ..." aria-label="Search entire store" />
-          <button aria-label="Search"><ArrowIcon /></button>
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search part, brand or SKU ..." aria-label="Search live catalog" />
+          <button aria-label="Search" type="submit"><SearchIcon /></button>
         </form>
       </section>
     </main>

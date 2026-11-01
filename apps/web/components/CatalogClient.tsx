@@ -11,9 +11,17 @@ export function CatalogClient() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [vehicleId, setVehicleId] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setSearch(params.get('search') ?? '');
+    setCategoryId(params.get('category') ?? '');
+    setVehicleId(params.get('vehicle_id') ?? '');
+  }, []);
 
   useEffect(() => {
     if (!apiUrl) {
@@ -26,7 +34,7 @@ export function CatalogClient() {
     Promise.all([
       apiFetch<PartCardData[]>(
         apiUrl,
-        `/api/v1/parts?limit=100&search=${encodeURIComponent(search)}${categoryId ? `&category_id=${categoryId}` : ''}`,
+        `/api/v1/parts?limit=100&search=${encodeURIComponent(search)}${categoryId ? `&category_id=${categoryId}` : ''}${vehicleId ? `&vehicle_id=${vehicleId}` : ''}`,
       ),
       apiFetch<Category[]>(apiUrl, '/api/v1/categories'),
     ])
@@ -39,7 +47,7 @@ export function CatalogClient() {
         setError(cause instanceof Error ? cause.message : 'Unable to load the live catalog.');
       })
       .finally(() => setLoading(false));
-  }, [apiUrl, search, categoryId]);
+  }, [apiUrl, search, categoryId, vehicleId]);
 
   return (
     <>

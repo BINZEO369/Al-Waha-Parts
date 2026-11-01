@@ -43,7 +43,7 @@ export function PartCard({ part }: { part: PartCardData }) {
         <div className="part-price">
           <strong>{part.sale_price ?? part.price} AED</strong>
           {part.sale_price && <del>{part.price} AED</del>}
-          <Link href={`/booking?part=${part.id}`}>Request</Link>
+          <Link href={`/booking?part=${encodeURIComponent(part.sku)}`}>Request</Link>
         </div>
       </div>
     </article>
