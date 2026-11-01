@@ -5,6 +5,10 @@ import { FormEvent, useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { formatSar } from '../../../packages/shared/src/currency';
 
+/* ==================================================================
+ *  TYPES
+ * ================================================================== */
+
 type Banner = {
   id: string;
   eyebrow: string;
@@ -16,12 +20,105 @@ type Banner = {
   mobile_image_url?: string | null;
 };
 
+type Category = {
+  id: string;
+  category_name: string;
+  slug?: string | null;
+  description?: string | null;
+  image_url?: string | null;
+  is_featured?: boolean;
+  sort_order?: number;
+};
+
+type Part = {
+  id: string;
+  slug?: string | null;
+  part_name: string;
+  brand_name?: string | null;
+  sku: string;
+  price: number;
+  sale_price?: number | null;
+  condition?: string | null;
+  tested_status?: string | null;
+  stock_quantity?: number | null;
+  primary_image_url?: string | null;
+  image_urls?: string[] | null;
+  parts_categories?: { category_name?: string | null } | null;
+  is_featured?: boolean;
+  sort_order?: number;
+};
+
+type Vehicle = {
+  id: string;
+  manufacturer_name: string;
+  manufacturer_logo?: string | null;
+  model_name: string;
+  generation?: string | null;
+  chassis_code?: string | null;
+  year_start?: number | null;
+  year_end?: number | null;
+  vehicle_type?: string | null;
+  cover_image_url?: string | null;
+  is_featured?: boolean;
+  sort_order?: number;
+};
+
+/* ==================================================================
+ *  ICONS
+ * ================================================================== */
+
+function ArrowIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <path
+        d="M4 10h11M10 5l5 5-5 5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle
+        cx="10.8"
+        cy="10.8"
+        r="6.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="m16 16 4.5 4.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/* ==================================================================
+ *  HERO CAROUSEL
+ *  - শুধু ডেটাবেজ থেকে (কোনো fallback নেই)
+ *  - টেক্সট ইমেজের উপরে overlay
+ *  - object-fit: contain → কোনো জুম / ক্রপ হবে না
+ *  - ডেটা না থাকলে সেকশন সম্পূর্ণ hide
+ * ================================================================== */
+
 function HeroCarousel() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [active, setActive] = useState(0);
   const [loading, setLoading] = useState(true);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  /* ---- API থেকে ব্যানার লোড ---- */
   useEffect(() => {
     if (!apiUrl) {
       setLoading(false);
@@ -34,6 +131,7 @@ function HeroCarousel() {
       .finally(() => setLoading(false));
   }, [apiUrl]);
 
+  /* ---- অটো স্লাইড ---- */
   useEffect(() => {
     if (banners.length < 2) return;
     const timer = window.setInterval(
@@ -44,7 +142,8 @@ function HeroCarousel() {
   }, [banners.length]);
 
   /* ------------------------------------------------------------------
-   *  LOADING — শুধু shimmer placeholder দেখাবে (কোনো fallback data না)
+   *  LOADING — শুধু shimmer skeleton (কোনো fallback ডেটা না)
+   *  ⚠️ এখানে return করার আগে সব hook কল হয়ে গেছে — safe
    * ------------------------------------------------------------------ */
   if (loading) {
     return (
@@ -89,7 +188,7 @@ function HeroCarousel() {
             }
           }
         `}</style>
-        <div className="hero-carousel-loading" />
+        <div className="hero-carousel-loading" aria-hidden="true" />
       </section>
     );
   }
@@ -128,7 +227,7 @@ function HeroCarousel() {
           animation: slide-fade 0.5s ease both;
         }
 
-        /* ---- Media (contained image, no zoom, no crop) ---- */
+        /* ---- Media: contain (no zoom, no crop) ---- */
         .hero-carousel-media {
           position: absolute;
           inset: 0;
@@ -155,8 +254,8 @@ function HeroCarousel() {
           display: block;
           width: 100%;
           height: 100%;
-          object-fit: contain;     /* ← জুম বা ক্রপ হবে না */
-          object-position: center; /* ← মাঝখানে থাকবে */
+          object-fit: contain;      /* ← জুম / ক্রপ হবে না */
+          object-position: center;
         }
 
         .hero-carousel-bg-fallback {
@@ -169,7 +268,7 @@ function HeroCarousel() {
             linear-gradient(135deg, #1f1f1f, #2c2c2c 60%, #111);
         }
 
-        /* ---- Overlay for text readability ---- */
+        /* ---- Overlay (টেক্সট পড়ার জন্য) ---- */
         .hero-carousel-overlay {
           position: absolute;
           inset: 0;
@@ -375,7 +474,10 @@ function HeroCarousel() {
         {hasImage ? (
           <picture className="hero-carousel-media">
             {banner.mobile_image_url && (
-              <source media="(max-width: 700px)" srcSet={banner.mobile_image_url} />
+              <source
+                media="(max-width: 700px)"
+                srcSet={banner.mobile_image_url}
+              />
             )}
             <img
               src={banner.image_url || banner.mobile_image_url || ''}
@@ -430,88 +532,15 @@ function HeroCarousel() {
 }
 
 /* ==================================================================
- *  নিচের সব কোড (Category, Part, Vehicle, Home) আগের মতোই আছে
+ *  HOME PAGE
+ *  সেকশন অর্ডার:
+ *    1. Hero Banner
+ *    2. Popular Vehicles
+ *    3. Popular Categories
+ *    4. New Arrivals (Parts)
+ *    5. Service Strip
+ *    6. Search Newsletter
  * ================================================================== */
-
-type Category = {
-  id: string;
-  category_name: string;
-  slug?: string | null;
-  description?: string | null;
-  image_url?: string | null;
-  is_featured?: boolean;
-  sort_order?: number;
-};
-
-type Part = {
-  id: string;
-  slug?: string | null;
-  part_name: string;
-  brand_name?: string | null;
-  sku: string;
-  price: number;
-  sale_price?: number | null;
-  condition?: string | null;
-  tested_status?: string | null;
-  stock_quantity?: number | null;
-  primary_image_url?: string | null;
-  image_urls?: string[] | null;
-  parts_categories?: { category_name?: string | null } | null;
-  is_featured?: boolean;
-  sort_order?: number;
-};
-
-type Vehicle = {
-  id: string;
-  manufacturer_name: string;
-  manufacturer_logo?: string | null;
-  model_name: string;
-  generation?: string | null;
-  chassis_code?: string | null;
-  year_start?: number | null;
-  year_end?: number | null;
-  vehicle_type?: string | null;
-  cover_image_url?: string | null;
-  is_featured?: boolean;
-  sort_order?: number;
-};
-
-function ArrowIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true">
-      <path
-        d="M4 10h11M10 5l5 5-5 5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle
-        cx="10.8"
-        cy="10.8"
-        r="6.4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path
-        d="m16 16 4.5 4.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 export default function Home() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -570,6 +599,10 @@ export default function Home() {
           outline-offset: 3px;
         }
       `}</style>
+
+      {/* ----------------------------------------------------------------
+       *  1. HERO BANNER
+       * ---------------------------------------------------------------- */}
       <HeroCarousel />
 
       {error && (
@@ -581,6 +614,59 @@ export default function Home() {
         </div>
       )}
 
+      {/* ----------------------------------------------------------------
+       *  2. POPULAR VEHICLES (হিরোর ঠিক নিচে)
+       * ---------------------------------------------------------------- */}
+      {!loading && homeSelectedVehicles.length > 0 && (
+        <section className="store-section vehicle-home-section">
+          <div className="section-heading">
+            <div>
+              <span className="section-kicker">Vehicle fitment database</span>
+              <h2>Popular Vehicles</h2>
+            </div>
+            <Link className="section-link" href="/vehicles">
+              Open vehicle finder <ArrowIcon />
+            </Link>
+          </div>
+          <div className="vehicle-home-grid">
+            {homeSelectedVehicles.map((vehicle) => (
+              <Link
+                className="vehicle-home-card"
+                href="/vehicles"
+                key={vehicle.id}
+              >
+                {vehicle.cover_image_url ? (
+                  <img
+                    src={vehicle.cover_image_url}
+                    alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`}
+                  />
+                ) : (
+                  <span className="database-image-empty">
+                    No vehicle image
+                  </span>
+                )}
+                <div>
+                  <small>{vehicle.vehicle_type || 'Vehicle'}</small>
+                  <strong>
+                    {vehicle.manufacturer_name} {vehicle.model_name}
+                  </strong>
+                  <span>
+                    {vehicle.year_start || '—'}–{vehicle.year_end || 'present'}{' '}
+                    ·{' '}
+                    {vehicle.generation ||
+                      vehicle.chassis_code ||
+                      'Fitment data'}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ----------------------------------------------------------------
+       *  3. POPULAR CATEGORIES (ভেহিকেলের পরে)
+       * ---------------------------------------------------------------- */}
       {!loading && popularCategories.length > 0 && (
         <section
           className="store-section category-promo-section"
@@ -620,6 +706,9 @@ export default function Home() {
         </section>
       )}
 
+      {/* ----------------------------------------------------------------
+       *  4. NEW ARRIVALS / PARTS (ক্যাটাগরির পরে)
+       * ---------------------------------------------------------------- */}
       {!loading && homeSelectedParts.length > 0 && (
         <section className="store-section arrivals-section">
           <div className="section-heading arrivals-heading">
@@ -674,51 +763,7 @@ export default function Home() {
         </section>
       )}
 
-      {!loading && homeSelectedVehicles.length > 0 && (
-        <section className="store-section vehicle-home-section">
-          <div className="section-heading">
-            <div>
-              <span className="section-kicker">Vehicle fitment database</span>
-              <h2>Popular Vehicles</h2>
-            </div>
-            <Link className="section-link" href="/vehicles">
-              Open vehicle finder <ArrowIcon />
-            </Link>
-          </div>
-          <div className="vehicle-home-grid">
-            {homeSelectedVehicles.map((vehicle) => (
-              <Link
-                className="vehicle-home-card"
-                href="/vehicles"
-                key={vehicle.id}
-              >
-                {vehicle.cover_image_url ? (
-                  <img
-                    src={vehicle.cover_image_url}
-                    alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`}
-                  />
-                ) : (
-                  <span className="database-image-empty">No vehicle image</span>
-                )}
-                <div>
-                  <small>{vehicle.vehicle_type || 'Vehicle'}</small>
-                  <strong>
-                    {vehicle.manufacturer_name} {vehicle.model_name}
-                  </strong>
-                  <span>
-                    {vehicle.year_start || '—'}–{vehicle.year_end || 'present'}{' '}
-                    ·{' '}
-                    {vehicle.generation ||
-                      vehicle.chassis_code ||
-                      'Fitment data'}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
+      {/* ---- সব খালি হলে empty state ---- */}
       {!loading &&
         !popularCategories.length &&
         !homeSelectedParts.length &&
@@ -733,6 +778,9 @@ export default function Home() {
           </section>
         )}
 
+      {/* ----------------------------------------------------------------
+       *  5. SERVICE STRIP
+       * ---------------------------------------------------------------- */}
       <section className="store-section service-strip">
         <div>
           <strong>Database-first catalog</strong>
@@ -752,6 +800,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ----------------------------------------------------------------
+       *  6. SEARCH NEWSLETTER
+       * ---------------------------------------------------------------- */}
       <section className="store-section newsletter-card">
         <div>
           <span className="section-kicker">Search the live catalog</span>
