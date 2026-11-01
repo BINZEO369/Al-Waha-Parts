@@ -1,8 +1,0 @@
-.root {
-  --page-accent: var(--red);
-}
-
-.root :global(.catalog-toolbar) {
-  border-left: 3px solid var(--page-accent);
-  padding-left: 16px;
-}

@@ -1,7 +1,0 @@
-.root {
-  --page-accent: var(--red);
-}
-
-.root :global(.button) {
-  background: var(--page-accent);
-}
