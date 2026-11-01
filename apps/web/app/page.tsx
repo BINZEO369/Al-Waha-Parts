@@ -170,8 +170,8 @@ export default function Home() {
         <section className="store-section arrivals-section">
           <div className="section-heading arrivals-heading">
             <div>
-              <span className="section-kicker">Real records / current catalog</span>
-              <h2>Featured Parts</h2>
+              <span className="section-kicker">From the live catalog</span>
+              <h2>New Arrivals</h2>
             </div>
             <Link className="section-link" href="/catalog">Open full catalog <ArrowIcon /></Link>
           </div>

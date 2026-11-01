@@ -12,32 +12,26 @@ type Banner = {
   description?: string | null;
   cta_label: string;
   cta_href: string;
-  image_url: string;
+  image_url?: string | null;
   mobile_image_url?: string | null;
-  badge_text?: string | null;
 };
 
-const fallback: Banner[] = [{
-  id: 'fallback',
-  eyebrow: 'Automotive parts / UAE',
-  title: 'Keep every vehicle moving.',
-  description: 'A trusted parts desk for workshops, fleets and drivers. Search by vehicle, match the fit, and book with confidence.',
-  cta_label: 'Explore parts',
-  cta_href: '/catalog',
-  image_url: 'https://files.manuscdn.com/search-media/310519663944260083/UbMvgpUBeEdUZmW9afB3AQ/4wKGRTiQ8tMFf6VWfzk9Wk.jpg',
-  badge_text: 'FITMENT FIRST',
-}];
-
 export function HeroCarousel() {
-  const [banners, setBanners] = useState<Banner[]>(fallback);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [active, setActive] = useState(0);
+  const [loading, setLoading] = useState(true);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
-    if (!apiUrl) return;
-    apiFetch<Banner[]>(apiUrl, '/api/v1/banners').then((items) => {
-      if (items.length) setBanners(items);
-    }).catch(() => undefined);
+    if (!apiUrl) {
+      setLoading(false);
+      return;
+    }
+
+    apiFetch<Banner[]>(apiUrl, '/api/v1/banners')
+      .then((items) => setBanners(items))
+      .catch(() => setBanners([]))
+      .finally(() => setLoading(false));
   }, [apiUrl]);
 
   useEffect(() => {
@@ -46,23 +40,48 @@ export function HeroCarousel() {
     return () => window.clearInterval(timer);
   }, [banners.length]);
 
-  const banner = banners[active] ?? fallback[0]!;
+  const banner = banners[active];
+  if (!banner && !loading) return null;
+
   return (
-    <section className={styles.root} aria-label="Featured parts banners">
-      <div className={styles.copy}>
-        <p className="eyebrow">{banner.eyebrow}</p>
-        <h1>{banner.title}</h1>
-        <p className="hero-lede">{banner.description}</p>
-        <div className="hero-actions">
-          <Link className="button" href={banner.cta_href}>{banner.cta_label} <span>↗</span></Link>
-          <Link className="text-link" href="/vehicles">Find by vehicle <span>→</span></Link>
-        </div>
-        {banners.length > 1 && <div className={styles.dots} aria-label="Select banner">{banners.map((item, index) => <button key={item.id} className={index === active ? `${styles.dot} ${styles.active}` : styles.dot} onClick={() => setActive(index)} aria-label={`Show banner ${index + 1}`} />)}</div>}
-      </div>
-      <div className={styles.visual}>
-        <img src={banner.image_url} alt="" />
-        <div className={styles.stamp}>{banner.badge_text ?? 'AL WAHA PARTS'}<br /><b>UAE / 2026</b></div>
-      </div>
+    <section className={styles.root} aria-label="Featured parts banners" aria-busy={loading}>
+      {banner ? (
+        <>
+          <div className={styles.copy} key={`${banner.id}-copy`}>
+            <p className="eyebrow">{banner.eyebrow}</p>
+            <h1>{banner.title}</h1>
+            <span className={styles.rule} aria-hidden="true" />
+            {banner.description && <p className={styles.lede}>{banner.description}</p>}
+            <div className={styles.actions}>
+              <Link className="button" href={banner.cta_href}>{banner.cta_label}</Link>
+            </div>
+          </div>
+          <div className={styles.visual} key={`${banner.id}-visual`}>
+            {(banner.image_url || banner.mobile_image_url) && (
+              <picture>
+                {banner.mobile_image_url && <source media="(max-width: 700px)" srcSet={banner.mobile_image_url} />}
+                <img src={banner.image_url || banner.mobile_image_url || ''} alt={banner.title} />
+              </picture>
+            )}
+          </div>
+          {banners.length > 1 && (
+            <div className={styles.dots} aria-label="Select banner">
+              {banners.map((item, index) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={index === active ? `${styles.dot} ${styles.active}` : styles.dot}
+                  onClick={() => setActive(index)}
+                  aria-label={`Show banner ${index + 1}: ${item.title}`}
+                  aria-current={index === active ? 'true' : undefined}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+        <div className={styles.loading} aria-hidden="true" />
+      )}
     </section>
   );
 }

@@ -412,3 +412,101 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .product-detail-image, .product-detail-image img { min-height: 330px; height: 330px; }
   .fitment-panel { margin-top: 65px; }
 }
+
+
+/* ---------- HOME: reference-inspired storefront finish ---------- */
+:root { --dark: #2d2d2d; }
+.main-nav { background: #2d2d2d; }
+.main-nav a.active { background: var(--red); }
+
+.categories-section { padding-top: 46px; padding-bottom: 44px; }
+.categories-section .section-kicker,
+.arrivals-section .section-kicker { display: none; }
+.section-heading { margin-bottom: 22px; }
+.section-heading h2 { padding-bottom: 9px; font-size: 21px; font-weight: 600; letter-spacing: -.045em; }
+.section-heading h2::after { width: 48px; }
+.category-grid { gap: 14px; }
+.category-card {
+  min-height: 76px;
+  padding: 7px 11px;
+  gap: 11px;
+  border-color: #e9e9e9;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .025);
+}
+.category-card:hover { border-color: #d8d8d8; box-shadow: 0 6px 16px rgba(0, 0, 0, .055); }
+.category-card img { width: 61px; height: 58px; }
+.category-card strong { color: #373737; font-size: 11px; }
+.category-card small { color: #888; font-size: 9px; }
+.category-card > svg { display: none; }
+
+.promo-section { padding-bottom: 54px; gap: 16px; }
+.promo-card-database {
+  min-height: 120px;
+  border: 1px solid #f0f0f0;
+  background: #f5f5f5;
+  color: #303030;
+}
+.promo-card-database small { color: #858585; }
+.promo-card-database strong { max-width: 150px; color: #313131; font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 600; }
+.promo-card-database span { color: var(--red); }
+.promo-card-database img { width: 145px; height: 118px; mix-blend-mode: multiply; }
+
+.arrivals-section { padding-bottom: 58px; }
+.arrivals-heading { align-items: center; }
+.arrival-grid { gap: 15px; }
+.arrival-card { border-color: #e8e8e8; box-shadow: 0 1px 3px rgba(0, 0, 0, .02); }
+.arrival-image { height: 205px; background: #fff; }
+.arrival-image img { width: 86%; height: 86%; object-fit: contain; }
+.arrivals-section .sale-badge { display: none; }
+.arrival-details { padding: 13px 14px 15px; }
+.arrival-details h3 { min-height: 35px; margin-top: 7px; font-size: 11px; font-weight: 500; }
+.arrival-details > small { color: #929292; }
+.arrivals-section .rating { display: none; }
+.price-row { margin-top: 10px; }
+.price-row strong { color: #555; font-size: 11px; font-weight: 500; }
+.price-row del { color: #999; }
+
+.promo-card-database:hover { background: #f0f0f0; }
+.vehicle-home-card { border-color: #e8e8e8; }
+.vehicle-home-card:hover { box-shadow: 0 8px 18px rgba(0, 0, 0, .07); }
+
+@media (max-width: 900px) {
+  .category-grid { gap: 10px; }
+  .category-card { padding: 7px 8px; }
+  .category-card img { width: 54px; }
+}
+
+@media (max-width: 700px) {
+  .main-nav { background: #2d2d2d; }
+  .main-nav-inner { grid-template-columns: 1fr 1fr; }
+  .categories-section { padding-top: 35px; padding-bottom: 35px; }
+  .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .category-card { min-width: 0; min-height: 68px; padding: 6px 8px; gap: 7px; }
+  .category-card img { width: 45px; height: 48px; }
+  .category-card strong { font-size: 10px; line-height: 1.25; }
+  .category-card small { display: none; }
+  .promo-section { grid-template-columns: 1fr; gap: 9px; padding-bottom: 38px; }
+  .promo-card-database { min-height: 108px; }
+  .promo-card-database img { width: 128px; height: 105px; }
+  .arrivals-section { padding-bottom: 42px; }
+  .arrival-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .arrival-image { height: 170px; }
+  .arrival-details { padding: 11px; }
+  .arrival-details h3 { min-height: 40px; }
+  .vehicle-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 480px) {
+  .section-heading { margin-bottom: 18px; }
+  .section-heading h2 { font-size: 19px; }
+  .category-grid { gap: 8px; }
+  .category-card { min-height: 63px; }
+  .category-card img { width: 39px; height: 42px; }
+  .promo-card-database { min-height: 100px; padding: 12px 15px; }
+  .promo-card-database img { width: 112px; height: 96px; }
+  .arrival-image { height: 145px; }
+  .arrival-details h3 { min-height: 42px; font-size: 10px; }
+  .price-row { gap: 5px; }
+  .vehicle-home-grid { grid-template-columns: 1fr; }
+}
