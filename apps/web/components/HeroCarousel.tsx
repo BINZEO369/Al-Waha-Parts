@@ -59,8 +59,8 @@ export function HeroCarousel() {
         </div>
         {banners.length > 1 && <div className={styles.dots} aria-label="Select banner">{banners.map((item, index) => <button key={item.id} className={index === active ? `${styles.dot} ${styles.active}` : styles.dot} onClick={() => setActive(index)} aria-label={`Show banner ${index + 1}`} />)}</div>}
       </div>
-      <div className={styles.visual} style={{ backgroundImage: `url(${banner.image_url})` }}>
-        <div className={styles.shade} />
+      <div className={styles.visual}>
+        <img src={banner.image_url} alt="" />
         <div className={styles.stamp}>{banner.badge_text ?? 'AL WAHA PARTS'}<br /><b>UAE / 2026</b></div>
       </div>
     </section>
