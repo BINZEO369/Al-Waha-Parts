@@ -206,12 +206,12 @@ h1, h2, h3, p { margin-top: 0; }
 .newsletter-search button { width: 48px; border: 0; background: var(--red); color: #fff; }
 .newsletter-search svg { width: 17px; height: 17px; }
 .vehicle-home-section { padding-bottom: 58px; }
-.vehicle-home-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.vehicle-home-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .vehicle-home-card { min-width: 0; overflow: hidden; border: 1px solid #f0c4c7; background: #fff; transition: transform .2s ease, box-shadow .2s ease; }
 .vehicle-home-card:hover { transform: translateY(-3px); box-shadow: 0 9px 22px rgba(229,35,47,.12); }
-.vehicle-home-card > img { width: 100%; height: 145px; object-fit: cover; background: #f8f8f8; }
-.vehicle-home-card > .database-image-empty { height: 145px; display: grid; place-items: center; background: #f8f8f8; }
-.vehicle-home-card > div { display: grid; gap: 6px; padding: 14px; }
+.vehicle-home-card > img { display: block; width: 100%; height: 230px; object-fit: cover; object-position: center; background: #f8f8f8; }
+.vehicle-home-card > .database-image-empty { height: 230px; display: grid; place-items: center; background: #f8f8f8; }
+.vehicle-home-card > div { display: grid; min-height: 92px; gap: 6px; padding: 16px 18px 18px; }
 .vehicle-home-card small { color: var(--red); font-size: 9px; text-transform: uppercase; }
 .vehicle-home-card strong { font-size: 13px; }
 .vehicle-home-card span { color: #999; font-size: 10px; }
@@ -292,7 +292,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .contact-grid h2 { margin: 14px 0 8px; font-size: 22px; }
 .contact-grid p { color: #777; font-size: 13px; line-height: 1.7; }
 
-.vehicle-home-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.vehicle-home-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 900px) {
@@ -331,8 +331,8 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .arrival-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .arrival-image { height: 165px; }
   .arrival-details { padding: 12px; }
-  .vehicle-home-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .vehicle-home-card > img, .vehicle-home-card > .database-image-empty { height: 125px; }
+  .vehicle-home-grid { grid-template-columns: 1fr; gap: 14px; }
+  .vehicle-home-card > img, .vehicle-home-card > .database-image-empty { height: 220px; }
   .wide-feature { margin: 0 14px 42px; padding: 35px 24px 10px; display: block; }
   .wide-feature-art { height: 190px; }
   .wide-feature-art img { height: 200px; }
@@ -366,7 +366,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .arrival-details h3 { min-height: 48px; font-size: 11px; }
   .price-row { display: grid; gap: 4px; }
   .catalog-grid { grid-template-columns: 1fr; }
-  .vehicle-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vehicle-home-grid { grid-template-columns: 1fr; }
   .booking-form, .finder-card { padding: 22px 16px; }
 }
 
@@ -499,7 +499,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .arrival-image { height: 170px; }
   .arrival-details { padding: 11px; }
   .arrival-details h3 { min-height: 40px; }
-  .vehicle-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vehicle-home-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
@@ -513,7 +513,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .arrival-image { height: 145px; }
   .arrival-details h3 { min-height: 42px; font-size: 10px; }
   .price-row { gap: 5px; }
-  .vehicle-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vehicle-home-grid { grid-template-columns: 1fr; }
 }
 
 
