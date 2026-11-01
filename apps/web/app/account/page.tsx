@@ -1,6 +1,9 @@
 export default function Page() {
   return (
-    <main className="page-shell narrow">
+    <main className="page-shell narrow account-page">
+      <style>{`
+        .account-page :global(.button) { background: var(--red); }
+      `}</style>
       <section className="page-intro">
         <p className="eyebrow">Al Waha Parts</p>
         <h1>Your Account.</h1>

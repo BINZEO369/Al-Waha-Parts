@@ -1,6 +1,10 @@
 export default function ContactPage() {
   return (
-    <main className="page-shell">
+    <main className="page-shell contact-page">
+      <style>{`
+        .contact-page :global(.contact-grid > div) { border-top: 3px solid var(--red); transition: transform .2s ease, box-shadow .2s ease; }
+        .contact-page :global(.contact-grid > div:hover) { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(0, 0, 0, .06); }
+      `}</style>
       <section className="page-intro">
         <p className="eyebrow">Contact / Al Waha Parts</p>
         <h1>Bring us the tricky one.</h1>

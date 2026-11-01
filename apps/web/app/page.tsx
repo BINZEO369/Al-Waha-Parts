@@ -107,6 +107,12 @@ export default function Home() {
 
   return (
     <main className="home-page">
+      <style jsx>{`
+        .home-page :global(.section-link:focus-visible),
+        .home-page :global(a:focus-visible),
+        .home-page :global(button:focus-visible),
+        .home-page :global(input:focus-visible) { outline: 2px solid var(--red); outline-offset: 3px; }
+      `}</style>
       <HeroCarousel />
 
       {error && <div className="store-section data-alert home-data-alert">{error}</div>}

@@ -54,7 +54,12 @@ export default function VehiclesPage() {
   const selectedVehicle = vehicles.find((vehicle) => vehicle.manufacturer_name === manufacturer && vehicle.model_name === model && (!year || (vehicle.year_start ?? 0) <= Number(year)) && (!year || (vehicle.year_end ?? Number(year)) >= Number(year)));
 
   return (
-    <main className="page-shell">
+    <main className="page-shell vehicles-page">
+      <style jsx>{`
+        .vehicles-page :global(.finder-card) { border-top: 3px solid var(--red); }
+        .vehicles-page :global(select:focus-visible),
+        .vehicles-page :global(button:focus-visible) { outline: 2px solid var(--red); outline-offset: 2px; }
+      `}</style>
       <section className="page-intro">
         <p className="eyebrow">Fitment finder / live database</p>
         <h1>Start with the vehicle.</h1>
