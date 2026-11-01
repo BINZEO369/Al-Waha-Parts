@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { use, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { apiFetch } from '../../../../../packages/shared/src/api';
 import { formatAed } from '../../../../../packages/shared/src/currency';
+import { useCart } from '../../../components/CartProvider';
 
 type VehicleFitment = {
   id: string;
@@ -41,6 +43,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const [activeImage, setActiveImage] = useState('');
   const [error, setError] = useState('');
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const router = useRouter();
+  const { addItem } = useCart();
 
   useEffect(() => {
     if (!apiUrl) {
@@ -397,6 +401,21 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     .map((item) => item.vehicles)
     .filter(Boolean) as VehicleFitment[];
   const currentPrice = product.sale_price ?? product.price;
+  const outOfStock = product.stock_quantity === 0;
+
+  function startBooking() {
+    if (!product || outOfStock) return;
+    addItem({
+      part_id: product.id,
+      part_name: product.part_name,
+      sku: product.sku,
+      unit_price: currentPrice,
+      image_url: product.primary_image_url ?? product.image_urls?.[0],
+      stock_quantity: product.stock_quantity,
+      condition: product.condition,
+    });
+    router.push('/booking');
+  }
 
   return (
     <main className="product-page">
@@ -604,9 +623,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               {product.stock_quantity ? `${product.stock_quantity} in stock` : 'Available to order'}
             </span>
           </div>
-          <Link className="button" href={`/booking?part=${encodeURIComponent(product.sku)}`}>
-            Book this part <span>↗</span>
-          </Link>
+          <button className="button product-booking-button" type="button" disabled={outOfStock} onClick={startBooking}>
+            {outOfStock ? 'Out of stock' : 'Booking now'} <span>↗</span>
+          </button>
           <dl className="product-specs">
             <div>
               <dt>Brand</dt>

@@ -278,6 +278,8 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .part-add-to-cart { min-height: 36px; padding: 0 14px; }
 .part-add-to-cart:disabled { cursor: not-allowed; opacity: .55; }
 .part-request-link { margin-left: auto; color: var(--red); font-size: 11px; font-weight: 700; }
+.part-booking-button { width: 100%; min-height: 40px; margin-top: 17px; }
+.product-booking-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
 .empty-state { grid-column: 1 / -1; padding: 55px 20px; border: 1px dashed var(--line); color: #888; text-align: center; }
 .empty-state strong, .empty-state span { display: block; }
 .empty-state span { margin-top: 8px; font-size: 12px; }

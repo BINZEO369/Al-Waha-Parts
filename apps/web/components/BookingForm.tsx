@@ -88,7 +88,7 @@ export function BookingForm() {
       if (!response.ok) throw new Error(result?.error?.message || 'Unable to create the booking.');
       setState('success');
       setBookingNumber(result?.data?.booking_number || 'Submitted');
-      setMessage('Your request is safely recorded. Our parts desk will confirm fitment, stock and delivery shortly.');
+      setMessage('Your booking is safely recorded. Our parts desk will call you to confirm fitment, delivery method, timing and how the product will be handed over.');
       formElement.reset();
       setManualPartNumber('');
       setSelectedVehicle('');
@@ -157,9 +157,9 @@ export function BookingForm() {
       <label>Fitment details / message<textarea name="customer_note" rows={4} placeholder="Car year, engine, part condition or other fitment details." /></label>
       <div className="booking-form-actions">
         <button className="button" disabled={state === 'loading'}>{state === 'loading' ? 'Saving secure request…' : 'Submit booking request'}</button>
-        <span>No payment is taken online. The parts desk confirms the final quote.</span>
+        <span>No payment is taken online. After you submit, our parts desk will call to confirm the final quote, delivery method and handover details.</span>
       </div>
-      {state === 'success' && <div className="booking-status-panel success" role="status" aria-live="polite"><strong>Request received: {bookingNumber}</strong><span>{message}</span></div>}
+      {state === 'success' && <div className="booking-status-panel success" role="status" aria-live="polite"><strong>Booking received: {bookingNumber}</strong><span>{message}</span></div>}
       {state === 'error' && <div className="booking-status-panel error" role="alert">{message}</div>}
     </form>
   );

@@ -787,7 +787,7 @@ export default function Home() {
           <span>Use the vehicle finder</span>
         </div>
         <div>
-          <strong>Request a part</strong>
+          <strong>Booking desk</strong>
           <span>Booking goes to the parts desk</span>
         </div>
         <div>
