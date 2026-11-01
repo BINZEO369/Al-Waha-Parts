@@ -17,6 +17,7 @@ type Category = {
 
 type Part = {
   id: string;
+  slug?: string | null;
   part_name: string;
   brand_name?: string | null;
   sku: string;
@@ -177,14 +178,14 @@ export default function Home() {
           <div className="arrival-grid">
             {featuredParts.map((part) => (
               <article className="arrival-card" key={part.id}>
-                <Link href={`/booking?part=${encodeURIComponent(part.sku)}`} className="arrival-image">
+                <Link href={`/catalog/${part.slug ?? part.id}`} className="arrival-image" aria-label={`View ${part.part_name}`}>
                   <span className="sale-badge">{part.condition || 'Available'}</span>
                   {part.primary_image_url ? <img src={part.primary_image_url} alt={part.part_name} /> : <span className="database-image-empty">No product image</span>}
-                  <span className="quick-view">Request this part</span>
+                  <span className="quick-view">View product details</span>
                 </Link>
                 <div className="arrival-details">
                   <small>{part.parts_categories?.category_name || 'Database catalog'}</small>
-                  <h3>{part.part_name}</h3>
+                  <h3><Link href={`/catalog/${part.slug ?? part.id}`}>{part.part_name}</Link></h3>
                   <div className="rating" aria-label="Verified database item">Verified <span>· {part.sku}</span></div>
                   <div className="price-row">
                     <strong>{money(part.sale_price ?? part.price)}</strong>

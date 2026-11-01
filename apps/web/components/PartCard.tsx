@@ -18,7 +18,7 @@ export interface PartCardData {
 export function PartCard({ part }: { part: PartCardData }) {
   return (
     <article className="part-card">
-      <div className="part-card-media">
+      <Link className="part-card-media" href={`/catalog/${part.slug ?? part.id}`} aria-label={`View ${part.part_name}`}>
         <span className="part-tag">{part.condition ?? 'New'}</span>
         {part.primary_image_url || part.image_urls?.[0] ? (
           <img
@@ -29,7 +29,7 @@ export function PartCard({ part }: { part: PartCardData }) {
         ) : (
           <div className="part-glyph">AWP</div>
         )}
-      </div>
+      </Link>
       <div className="part-card-body">
         <div className="eyebrow">
           {part.brand_name || 'Al Waha Select'} · {part.sku}

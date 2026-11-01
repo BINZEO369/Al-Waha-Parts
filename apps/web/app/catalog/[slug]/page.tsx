@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { use, useEffect, useState } from 'react';
 import { apiFetch } from '../../../../../packages/shared/src/api';
+import styles from './ProductDetail.module.css';
 
 type VehicleFitment = {
   id: string;
@@ -55,10 +56,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   }, [apiUrl, slug]);
 
   if (error) {
-    return <main className="page-shell"><div className="data-alert">{error}<br /><Link className="text-link" href="/catalog">Back to catalog</Link></div></main>;
+    return <main className={styles.page}><div className="data-alert">{error}<br /><Link className="text-link" href="/catalog">Back to catalog</Link></div></main>;
   }
   if (!product) {
-    return <main className="page-shell"><div className="empty-state">Loading product details…</div></main>;
+    return <main className={styles.page}><div className="empty-state">Loading product details…</div></main>;
   }
 
   const images = [...new Set([product.primary_image_url, ...(product.image_urls ?? [])].filter(Boolean))] as string[];
@@ -66,23 +67,23 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const currentPrice = product.sale_price ?? product.price;
 
   return (
-    <main className="page-shell product-detail-page">
-      <Link className="back-link" href="/catalog">← Back to catalog</Link>
-      <div className="product-detail-grid">
+    <main className={styles.page}>
+      <Link className={styles.back} href="/catalog">← Back to catalog</Link>
+      <div className={styles.grid}>
         <section>
-          <div className="product-detail-image">
+          <div className={styles.image}>
             {activeImage ? <img src={activeImage} alt={product.part_name} /> : <span className="part-glyph">AWP</span>}
           </div>
-          {images.length > 1 && <div className="product-thumbnails">{images.map((image) => <button className={activeImage === image ? 'thumbnail active' : 'thumbnail'} key={image} onClick={() => setActiveImage(image)}><img src={image} alt="" /></button>)}</div>}
+          {images.length > 1 && <div className={styles.thumbnails}>{images.map((image) => <button className={activeImage === image ? `${styles.thumbnail} ${styles.active}` : styles.thumbnail} key={image} onClick={() => setActiveImage(image)}><img src={image} alt="" /></button>)}</div>}
         </section>
-        <section className="product-detail-copy">
+        <section className={styles.copy}>
           <span className="eyebrow">{product.parts_categories?.category_name ?? 'Al Waha Parts'} / {product.sku}</span>
           <h1>{product.part_name}</h1>
-          <p className="product-description">{product.description ?? 'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}</p>
-          <div className="product-price"><strong>{currentPrice} AED</strong>{product.sale_price && <del>{product.price} AED</del>}</div>
-          <div className="product-status"><span>{product.tested_status === 'tested' ? 'Tested' : 'Fitment checked'}</span><span>{product.stock_quantity ? `${product.stock_quantity} in stock` : 'Available to order'}</span></div>
+          <p className={styles.description}>{product.description ?? 'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}</p>
+          <div className={styles.price}><strong>{currentPrice} AED</strong>{product.sale_price && <del>{product.price} AED</del>}</div>
+          <div className={styles.status}><span>{product.tested_status === 'tested' ? 'Tested' : 'Fitment checked'}</span><span>{product.stock_quantity ? `${product.stock_quantity} in stock` : 'Available to order'}</span></div>
           <Link className="button" href={`/booking?part=${encodeURIComponent(product.sku)}`}>Book this part <span>↗</span></Link>
-          <dl className="spec-list">
+          <dl className={styles.specs}>
             <div><dt>Brand</dt><dd>{product.brand_name ?? 'Al Waha Select'}</dd></div>
             <div><dt>SKU</dt><dd>{product.sku}</dd></div>
             <div><dt>OEM number</dt><dd>{product.oem_number ?? 'On request'}</dd></div>
@@ -90,9 +91,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           </dl>
         </section>
       </div>
-      <section className="fitment-panel">
+      <section className={styles.fitment}>
         <div><span className="eyebrow">Compatibility</span><h2>Built for the right match.</h2></div>
-        {vehicles.length ? <div className="fitment-list">{vehicles.map((vehicle) => <div key={vehicle.id}><strong>{vehicle.manufacturer_name} {vehicle.model_name}</strong><span>{vehicle.year_start ?? '—'}–{vehicle.year_end ?? '—'} {vehicle.generation ? `· ${vehicle.generation}` : ''}</span></div>)}</div> : <p>Send your vehicle details with the booking and our parts desk will verify fitment before confirmation.</p>}
+        {vehicles.length ? <div className={styles.fitmentList}>{vehicles.map((vehicle) => <div key={vehicle.id}><strong>{vehicle.manufacturer_name} {vehicle.model_name}</strong><span>{vehicle.year_start ?? '—'}–{vehicle.year_end ?? '—'} {vehicle.generation ? `· ${vehicle.generation}` : ''}</span></div>)}</div> : <p>Send your vehicle details with the booking and our parts desk will verify fitment before confirmation.</p>}
       </section>
     </main>
   );

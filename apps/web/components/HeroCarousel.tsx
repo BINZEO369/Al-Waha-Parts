@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
+import styles from './HeroCarousel.module.css';
 
 type Banner = {
   id: string;
@@ -47,8 +48,8 @@ export function HeroCarousel() {
 
   const banner = banners[active] ?? fallback[0]!;
   return (
-    <section className="db-hero-carousel" aria-label="Featured parts banners">
-      <div className="db-hero-copy">
+    <section className={styles.root} aria-label="Featured parts banners">
+      <div className={styles.copy}>
         <p className="eyebrow">{banner.eyebrow}</p>
         <h1>{banner.title}</h1>
         <p className="hero-lede">{banner.description}</p>
@@ -56,11 +57,11 @@ export function HeroCarousel() {
           <Link className="button" href={banner.cta_href}>{banner.cta_label} <span>↗</span></Link>
           <Link className="text-link" href="/vehicles">Find by vehicle <span>→</span></Link>
         </div>
-        {banners.length > 1 && <div className="db-hero-dots" aria-label="Select banner">{banners.map((item, index) => <button key={item.id} className={index === active ? 'db-hero-dot active' : 'db-hero-dot'} onClick={() => setActive(index)} aria-label={`Show banner ${index + 1}`} />)}</div>}
+        {banners.length > 1 && <div className={styles.dots} aria-label="Select banner">{banners.map((item, index) => <button key={item.id} className={index === active ? `${styles.dot} ${styles.active}` : styles.dot} onClick={() => setActive(index)} aria-label={`Show banner ${index + 1}`} />)}</div>}
       </div>
-      <div className="db-hero-visual" style={{ backgroundImage: `url(${banner.image_url})` }}>
-        <div className="hero-visual-shade" />
-        <div className="db-hero-stamp">{banner.badge_text ?? 'AL WAHA PARTS'}<br /><b>UAE / 2026</b></div>
+      <div className={styles.visual} style={{ backgroundImage: `url(${banner.image_url})` }}>
+        <div className={styles.shade} />
+        <div className={styles.stamp}>{banner.badge_text ?? 'AL WAHA PARTS'}<br /><b>UAE / 2026</b></div>
       </div>
     </section>
   );

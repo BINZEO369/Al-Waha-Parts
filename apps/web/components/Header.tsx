@@ -6,7 +6,7 @@ import { FormEvent, useState } from 'react';
 
 const navItems = [
   { label: 'Home', href: '/' },
-  { label: 'Shop', href: '/catalog', dropdown: true },
+  { label: 'Categories', href: '/catalog', dropdown: true },
   { label: 'Blog', href: '/catalog', dropdown: true },
   { label: 'Pages', href: '/vehicles', dropdown: true },
   { label: 'About Us', href: '/contact' },
@@ -57,7 +57,7 @@ export function Header() {
   }
 
   return (
-    <>
+    <div className="site-chrome">
       <div className="utility-bar">
         <div className="utility-inner">
           <span>Welcome to our store!</span>
@@ -97,7 +97,7 @@ export function Header() {
           ))}
         </div>
       </nav>
-    </>
+    </div>
   );
 }
 
