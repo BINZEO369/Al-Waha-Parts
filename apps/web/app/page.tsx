@@ -16,15 +16,6 @@ type Banner = {
   mobile_image_url?: string | null;
 };
 
-const FALLBACK_BANNER: Banner = {
-  id: 'fallback-hero',
-  eyebrow: 'Al Waha Parts',
-  title: 'The right part for the right vehicle.',
-  description: 'Verified automotive parts with fitment support across the UAE.',
-  cta_label: 'Browse parts',
-  cta_href: '/catalog',
-};
-
 function HeroCarousel() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [active, setActive] = useState(0);
@@ -38,7 +29,7 @@ function HeroCarousel() {
     }
 
     apiFetch<Banner[]>(apiUrl, '/api/v1/banners')
-      .then((items) => setBanners(items))
+      .then((items) => setBanners(Array.isArray(items) ? items : []))
       .catch(() => setBanners([]))
       .finally(() => setLoading(false));
   }, [apiUrl]);
@@ -52,14 +43,71 @@ function HeroCarousel() {
     return () => window.clearInterval(timer);
   }, [banners.length]);
 
-  const banner = banners[active] ?? FALLBACK_BANNER;
+  /* ------------------------------------------------------------------
+   *  LOADING — শুধু shimmer placeholder দেখাবে (কোনো fallback data না)
+   * ------------------------------------------------------------------ */
+  if (loading) {
+    return (
+      <section
+        className="hero-carousel-root"
+        aria-label="Featured banners loading"
+        aria-busy="true"
+      >
+        <style jsx global>{`
+          .hero-carousel-root {
+            position: relative;
+            width: 100%;
+            height: 540px;
+            overflow: hidden;
+            background: #111;
+          }
+          .hero-carousel-loading {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+              90deg,
+              #1a1a1a 25%,
+              #262626 38%,
+              #1a1a1a 63%
+            );
+            background-size: 400% 100%;
+            animation: shimmer 1.25s ease infinite;
+          }
+          @keyframes shimmer {
+            to {
+              background-position: -100% 0;
+            }
+          }
+          @media (max-width: 800px) {
+            .hero-carousel-root {
+              height: 480px;
+            }
+          }
+          @media (max-width: 480px) {
+            .hero-carousel-root {
+              height: 420px;
+            }
+          }
+        `}</style>
+        <div className="hero-carousel-loading" />
+      </section>
+    );
+  }
+
+  /* ------------------------------------------------------------------
+   *  ডেটাবেজে কোনো ব্যানার নেই → হিরো সেকশন সম্পূর্ণ render হবে না
+   * ------------------------------------------------------------------ */
+  if (!banners.length) {
+    return null;
+  }
+
+  const banner = banners[active];
   const hasImage = Boolean(banner.image_url || banner.mobile_image_url);
 
   return (
     <section
       className="hero-carousel-root"
       aria-label="Featured parts banners"
-      aria-busy={loading}
     >
       <style jsx global>{`
         .hero-carousel-root {
@@ -67,10 +115,10 @@ function HeroCarousel() {
           width: 100%;
           min-height: 540px;
           overflow: hidden;
-          background: #151515;
+          background: #0d0d0d;
         }
 
-        /* One slide = full-bleed image + overlay + centered copy */
+        /* ---- Slide ---- */
         .hero-carousel-slide {
           position: relative;
           width: 100%;
@@ -80,10 +128,24 @@ function HeroCarousel() {
           animation: slide-fade 0.5s ease both;
         }
 
+        /* ---- Media (contained image, no zoom, no crop) ---- */
         .hero-carousel-media {
           position: absolute;
           inset: 0;
           z-index: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background:
+            radial-gradient(
+              circle at 70% 30%,
+              rgba(255, 255, 255, 0.05),
+              transparent 55%
+            ),
+            linear-gradient(135deg, #0e0e0e 0%, #171717 50%, #0a0a0a 100%);
+        }
+
+        .hero-carousel-media picture {
           display: block;
           width: 100%;
           height: 100%;
@@ -93,30 +155,35 @@ function HeroCarousel() {
           display: block;
           width: 100%;
           height: 100%;
-          object-fit: cover;
-          object-position: center;
+          object-fit: contain;     /* ← জুম বা ক্রপ হবে না */
+          object-position: center; /* ← মাঝখানে থাকবে */
         }
 
         .hero-carousel-bg-fallback {
           background:
-            radial-gradient(circle at 20% 30%, rgba(220, 38, 38, 0.35), transparent 60%),
+            radial-gradient(
+              circle at 20% 30%,
+              rgba(220, 38, 38, 0.32),
+              transparent 60%
+            ),
             linear-gradient(135deg, #1f1f1f, #2c2c2c 60%, #111);
         }
 
-        /* Dark gradient so text stays readable on any banner image */
+        /* ---- Overlay for text readability ---- */
         .hero-carousel-overlay {
           position: absolute;
           inset: 0;
           z-index: 1;
           background: linear-gradient(
             90deg,
-            rgba(0, 0, 0, 0.78) 0%,
-            rgba(0, 0, 0, 0.55) 42%,
-            rgba(0, 0, 0, 0.18) 75%,
+            rgba(0, 0, 0, 0.8) 0%,
+            rgba(0, 0, 0, 0.55) 38%,
+            rgba(0, 0, 0, 0.18) 72%,
             rgba(0, 0, 0, 0.05) 100%
           );
         }
 
+        /* ---- Copy ---- */
         .hero-carousel-copy {
           position: relative;
           z-index: 2;
@@ -191,6 +258,7 @@ function HeroCarousel() {
           transform: translateY(-2px);
         }
 
+        /* ---- Dots ---- */
         .hero-carousel-dots {
           position: absolute;
           left: 50%;
@@ -225,14 +293,6 @@ function HeroCarousel() {
           background: var(--red);
         }
 
-        .hero-carousel-loading {
-          width: 100%;
-          height: 540px;
-          background: linear-gradient(90deg, #1a1a1a 25%, #262626 38%, #1a1a1a 63%);
-          background-size: 400% 100%;
-          animation: shimmer 1.25s ease infinite;
-        }
-
         @keyframes slide-fade {
           from {
             opacity: 0;
@@ -244,31 +304,26 @@ function HeroCarousel() {
           }
         }
 
-        @keyframes shimmer {
-          to {
-            background-position: -100% 0;
-          }
-        }
-
+        /* ---- Responsive ---- */
         @media (max-width: 800px) {
           .hero-carousel-root,
           .hero-carousel-slide {
-            min-height: 520px;
+            min-height: 480px;
           }
 
           .hero-carousel-overlay {
             background: linear-gradient(
               180deg,
-              rgba(0, 0, 0, 0.6) 0%,
-              rgba(0, 0, 0, 0.55) 40%,
-              rgba(0, 0, 0, 0.8) 100%
+              rgba(0, 0, 0, 0.55) 0%,
+              rgba(0, 0, 0, 0.5) 40%,
+              rgba(0, 0, 0, 0.85) 100%
             );
           }
 
           .hero-carousel-copy {
-            padding: 72px 22px;
+            padding: 64px 22px;
             justify-content: flex-end;
-            min-height: 520px;
+            min-height: 480px;
           }
 
           .hero-carousel-copy > * {
@@ -278,21 +333,17 @@ function HeroCarousel() {
           .hero-carousel-copy h1 {
             font-size: clamp(36px, 9vw, 52px);
           }
-
-          .hero-carousel-loading {
-            height: 520px;
-          }
         }
 
         @media (max-width: 480px) {
           .hero-carousel-root,
-          .hero-carousel-slide,
-          .hero-carousel-copy {
-            min-height: 460px;
+          .hero-carousel-slide {
+            min-height: 420px;
           }
 
           .hero-carousel-copy {
-            padding: 56px 16px;
+            padding: 52px 16px;
+            min-height: 420px;
           }
 
           .hero-carousel-copy .eyebrow {
@@ -301,7 +352,7 @@ function HeroCarousel() {
           }
 
           .hero-carousel-copy h1 {
-            font-size: clamp(32px, 9.5vw, 40px);
+            font-size: clamp(30px, 9.5vw, 40px);
           }
 
           .hero-carousel-lede {
@@ -314,73 +365,73 @@ function HeroCarousel() {
             font-size: 11px;
           }
 
-          .hero-carousel-loading {
-            height: 460px;
+          .hero-carousel-dots {
+            bottom: 16px;
           }
         }
       `}</style>
 
-      {banner ? (
-        <>
-          <div className="hero-carousel-slide" key={banner.id}>
-            {hasImage ? (
-              <picture className="hero-carousel-media">
-                {banner.mobile_image_url && (
-                  <source media="(max-width: 700px)" srcSet={banner.mobile_image_url} />
-                )}
-                <img
-                  src={banner.image_url || banner.mobile_image_url || ''}
-                  alt=""
-                  aria-hidden="true"
-                />
-              </picture>
-            ) : (
-              <div
-                className="hero-carousel-media hero-carousel-bg-fallback"
-                aria-hidden="true"
-              />
+      <div className="hero-carousel-slide" key={banner.id}>
+        {hasImage ? (
+          <picture className="hero-carousel-media">
+            {banner.mobile_image_url && (
+              <source media="(max-width: 700px)" srcSet={banner.mobile_image_url} />
             )}
-            <div className="hero-carousel-overlay" aria-hidden="true" />
-            <div className="hero-carousel-copy">
-              <p className="eyebrow">{banner.eyebrow}</p>
-              <h1>{banner.title}</h1>
-              <span className="hero-carousel-rule" aria-hidden="true" />
-              {banner.description && (
-                <p className="hero-carousel-lede">{banner.description}</p>
-              )}
-              <div className="hero-carousel-actions">
-                <Link className="button" href={banner.cta_href}>
-                  {banner.cta_label}
-                </Link>
-              </div>
-            </div>
-          </div>
+            <img
+              src={banner.image_url || banner.mobile_image_url || ''}
+              alt=""
+              aria-hidden="true"
+            />
+          </picture>
+        ) : (
+          <div
+            className="hero-carousel-media hero-carousel-bg-fallback"
+            aria-hidden="true"
+          />
+        )}
 
-          {banners.length > 1 && (
-            <div className="hero-carousel-dots" aria-label="Select banner">
-              {banners.map((item, index) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={
-                    index === active ? 'hero-carousel-dot active' : 'hero-carousel-dot'
-                  }
-                  onClick={() => setActive(index)}
-                  aria-label={`Show banner ${index + 1}: ${item.title}`}
-                  aria-current={index === active ? 'true' : undefined}
-                />
-              ))}
-            </div>
+        <div className="hero-carousel-overlay" aria-hidden="true" />
+
+        <div className="hero-carousel-copy">
+          <p className="eyebrow">{banner.eyebrow}</p>
+          <h1>{banner.title}</h1>
+          <span className="hero-carousel-rule" aria-hidden="true" />
+          {banner.description && (
+            <p className="hero-carousel-lede">{banner.description}</p>
           )}
-        </>
-      ) : (
-        <div className="hero-carousel-loading" aria-hidden="true" />
+          <div className="hero-carousel-actions">
+            <Link className="button" href={banner.cta_href}>
+              {banner.cta_label}
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {banners.length > 1 && (
+        <div className="hero-carousel-dots" aria-label="Select banner">
+          {banners.map((item, index) => (
+            <button
+              key={item.id}
+              type="button"
+              className={
+                index === active
+                  ? 'hero-carousel-dot active'
+                  : 'hero-carousel-dot'
+              }
+              onClick={() => setActive(index)}
+              aria-label={`Show banner ${index + 1}: ${item.title}`}
+              aria-current={index === active ? 'true' : undefined}
+            />
+          ))}
+        </div>
       )}
     </section>
   );
 }
 
-/* ---------- নিচের সব কোড আগের মতোই আছে (কোনো পরিবর্তন নেই) ---------- */
+/* ==================================================================
+ *  নিচের সব কোড (Category, Part, Vehicle, Home) আগের মতোই আছে
+ * ================================================================== */
 
 type Category = {
   id: string;
@@ -443,7 +494,14 @@ function ArrowIcon() {
 function SearchIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="10.8" cy="10.8" r="6.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <circle
+        cx="10.8"
+        cy="10.8"
+        r="6.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
       <path
         d="m16 16 4.5 4.5"
         fill="none"
@@ -481,17 +539,24 @@ export default function Home() {
         setVehicles(nextVehicles);
       })
       .catch((cause) => {
-        setError(cause instanceof Error ? cause.message : 'Unable to load live database data.');
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : 'Unable to load live database data.',
+        );
       })
       .finally(() => setLoading(false));
   }, [apiUrl]);
 
   const homeSelectedParts = parts;
   const homeSelectedVehicles = vehicles;
+
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = search.trim();
-    window.location.href = value ? `/catalog?search=${encodeURIComponent(value)}` : '/catalog';
+    window.location.href = value
+      ? `/catalog?search=${encodeURIComponent(value)}`
+      : '/catalog';
   }
 
   return (
@@ -507,7 +572,9 @@ export default function Home() {
       `}</style>
       <HeroCarousel />
 
-      {error && <div className="store-section data-alert home-data-alert">{error}</div>}
+      {error && (
+        <div className="store-section data-alert home-data-alert">{error}</div>
+      )}
       {loading && (
         <div className="store-section home-loading">
           Loading categories, parts and vehicles from the database…
@@ -515,7 +582,10 @@ export default function Home() {
       )}
 
       {!loading && popularCategories.length > 0 && (
-        <section className="store-section category-promo-section" aria-label="Popular categories">
+        <section
+          className="store-section category-promo-section"
+          aria-label="Popular categories"
+        >
           <div className="section-heading">
             <div>
               <span className="section-kicker">Browse the live catalog</span>
@@ -535,7 +605,10 @@ export default function Home() {
                 <div>
                   <small>Popular category</small>
                   <strong>{category.category_name.trim()}</strong>
-                  <p>{category.description || 'Browse available parts and find the right fit.'}</p>
+                  <p>
+                    {category.description ||
+                      'Browse available parts and find the right fit.'}
+                  </p>
                   <span>
                     Browse parts <ArrowIcon />
                   </span>
@@ -566,18 +639,26 @@ export default function Home() {
                   className="arrival-image"
                   aria-label={`View ${part.part_name}`}
                 >
-                  <span className="sale-badge">{part.condition || 'Available'}</span>
+                  <span className="sale-badge">
+                    {part.condition || 'Available'}
+                  </span>
                   {part.primary_image_url ? (
                     <img src={part.primary_image_url} alt={part.part_name} />
                   ) : (
-                    <span className="database-image-empty">No product image</span>
+                    <span className="database-image-empty">
+                      No product image
+                    </span>
                   )}
                   <span className="quick-view">View product details</span>
                 </Link>
                 <div className="arrival-details">
-                  <small>{part.parts_categories?.category_name || 'Database catalog'}</small>
+                  <small>
+                    {part.parts_categories?.category_name || 'Database catalog'}
+                  </small>
                   <h3>
-                    <Link href={`/catalog/${part.slug ?? part.id}`}>{part.part_name}</Link>
+                    <Link href={`/catalog/${part.slug ?? part.id}`}>
+                      {part.part_name}
+                    </Link>
                   </h3>
                   <div className="rating" aria-label="Verified database item">
                     Verified <span>· {part.sku}</span>
@@ -606,7 +687,11 @@ export default function Home() {
           </div>
           <div className="vehicle-home-grid">
             {homeSelectedVehicles.map((vehicle) => (
-              <Link className="vehicle-home-card" href="/vehicles" key={vehicle.id}>
+              <Link
+                className="vehicle-home-card"
+                href="/vehicles"
+                key={vehicle.id}
+              >
                 {vehicle.cover_image_url ? (
                   <img
                     src={vehicle.cover_image_url}
@@ -621,8 +706,11 @@ export default function Home() {
                     {vehicle.manufacturer_name} {vehicle.model_name}
                   </strong>
                   <span>
-                    {vehicle.year_start || '—'}–{vehicle.year_end || 'present'} ·{' '}
-                    {vehicle.generation || vehicle.chassis_code || 'Fitment data'}
+                    {vehicle.year_start || '—'}–{vehicle.year_end || 'present'}{' '}
+                    ·{' '}
+                    {vehicle.generation ||
+                      vehicle.chassis_code ||
+                      'Fitment data'}
                   </span>
                 </div>
               </Link>
@@ -639,8 +727,8 @@ export default function Home() {
           <section className="store-section home-empty-state">
             <h2>No published database records yet.</h2>
             <p>
-              Categories, parts and vehicles will appear here after they are added to the live
-              database.
+              Categories, parts and vehicles will appear here after they are
+              added to the live database.
             </p>
           </section>
         )}
