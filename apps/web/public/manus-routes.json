@@ -3,6 +3,7 @@
     { "path": "/", "title": "Home" },
     { "path": "/catalog", "title": "Parts Catalog" },
     { "path": "/catalog/:slug", "title": "Product Details" },
+    { "path": "/category", "title": "Categories" },
     { "path": "/vehicles", "title": "Vehicle Finder" },
     { "path": "/booking", "title": "Booking Request" },
     { "path": "/contact", "title": "Contact" },

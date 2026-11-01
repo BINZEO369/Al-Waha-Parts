@@ -134,11 +134,11 @@ export default function Home() {
               <span className="section-kicker">Browse the live catalog</span>
               <h2>Popular Categories</h2>
             </div>
-            <Link className="section-link" href="/catalog">View all categories <ArrowIcon /></Link>
+            <Link className="section-link" href="/category">View all categories <ArrowIcon /></Link>
           </div>
           <div className="category-promo-grid">
             {promoCategories.map((category) => (
-              <Link className="promo-card promo-card-database category-promo-card" href={`/catalog?category=${category.id}`} key={category.id}>
+              <Link className="promo-card promo-card-database category-promo-card" href={`/category?category=${category.id}`} key={category.id}>
                 <div>
                   <small>Popular category</small>
                   <strong>{category.category_name.trim()}</strong>

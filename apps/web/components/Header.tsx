@@ -6,7 +6,7 @@ import { FormEvent, useState } from 'react';
 
 const navItems = [
   { label: 'Home', href: '/' },
-  { label: 'Categories', href: '/catalog', dropdown: true },
+  { label: 'Categories', href: '/category', dropdown: true },
   { label: 'Blog', href: '/catalog', dropdown: true },
   { label: 'Pages', href: '/vehicles', dropdown: true },
   { label: 'About Us', href: '/contact' },
