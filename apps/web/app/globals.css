@@ -510,3 +510,21 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .price-row { gap: 5px; }
   .vehicle-home-grid { grid-template-columns: 1fr; }
 }
+
+
+/* ---------- HOME: pure-white stages with Al Waha red category accents ---------- */
+.home-page { background: #fff; }
+.home-page .category-card {
+  border: 1px solid var(--red);
+  border-bottom-width: 2px;
+  background: #fff;
+}
+.home-page .category-card strong { color: var(--red); }
+.home-page .category-card:hover { border-color: var(--red-dark); background: var(--red); }
+.home-page .category-card:hover strong,
+.home-page .category-card:hover small { color: #fff; }
+.home-page .promo-card-database,
+.home-page .arrival-image,
+.home-page .arrival-card { background: #fff; }
+.home-page .promo-card-database { border-color: #ededed; }
+.home-page .promo-card-database:hover { background: #fff; }

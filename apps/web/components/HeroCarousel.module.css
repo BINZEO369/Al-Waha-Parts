@@ -218,3 +218,7 @@
     height: 205px;
   }
 }
+
+
+/* Final palette refinement: pure white stage behind the database banner. */
+.root { background: #fff; }
