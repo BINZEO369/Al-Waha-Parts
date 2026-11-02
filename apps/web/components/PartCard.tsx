@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { formatAed } from '../../../packages/shared/src/currency';
+import { formatSar } from '../../../packages/shared/src/currency';
 import { useCart } from './CartProvider';
 
 export interface PartCardData {
@@ -57,8 +57,8 @@ export function PartCard({ part }: { part: PartCardData }) {
           <span>{part.stock_quantity ? `${part.stock_quantity} in stock` : 'Available to order'}</span>
         </div>
         <div className="part-price">
-          <strong>{formatAed(part.sale_price ?? part.price)}</strong>
-          {part.sale_price && <del>{formatAed(part.price)}</del>}
+          <strong>{formatSar(part.sale_price ?? part.price)}</strong>
+          {part.sale_price && <del>{formatSar(part.price)}</del>}
         </div>
         <button className="button part-booking-button" type="button" disabled={outOfStock} onClick={startBooking}>
           {outOfStock ? 'Out of stock' : 'Booking now'}

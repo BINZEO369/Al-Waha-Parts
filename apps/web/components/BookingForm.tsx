@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { formatAed } from '../../../packages/shared/src/currency';
+import { formatSar } from '../../../packages/shared/src/currency';
 import { useCart } from './CartProvider';
 
 export function BookingForm() {
@@ -81,15 +81,15 @@ export function BookingForm() {
             {items.map((item) => (
               <article className="cart-item" key={item.part_id}>
                 <div className="cart-item-image">{item.image_url ? <img src={item.image_url} alt="" /> : <span>AWP</span>}</div>
-                <div className="cart-item-copy"><strong>{item.part_name}</strong><small>{item.sku} · {item.condition || 'Catalog product'}</small><span>{formatAed(item.unit_price)} each · {item.stock_quantity == null ? 'Available to order' : `${item.stock_quantity} in stock`}</span></div>
+                <div className="cart-item-copy"><strong>{item.part_name}</strong><small>{item.sku} · {item.condition || 'Catalog product'}</small><span>{formatSar(item.unit_price)} each · {item.stock_quantity == null ? 'Available to order' : `${item.stock_quantity} in stock`}</span></div>
                 <label className="cart-quantity">Qty<input aria-label={`Quantity for ${item.part_name}`} type="number" min="1" max={item.stock_quantity ?? 99} value={item.quantity} onChange={(event) => updateQuantity(item.part_id, Number(event.target.value))} /></label>
-                <strong className="cart-item-total">{formatAed(item.unit_price * item.quantity)}</strong>
+                <strong className="cart-item-total">{formatSar(item.unit_price * item.quantity)}</strong>
                 <button type="button" className="cart-remove" aria-label={`Remove ${item.part_name}`} onClick={() => removeItem(item.part_id)}>×</button>
               </article>
             ))}
           </div>
         ) : <div className="cart-empty">No product selected. Return to the catalog and press Booking now on the product you want.</div>}
-        <div className="cart-total"><span>Total booking amount <small>(AED, rechecked before save)</small></span><strong>{formatAed(subtotal)}</strong></div>
+        <div className="cart-total"><span>Total booking amount <small>(SAR, rechecked before save)</small></span><strong>{formatSar(subtotal)}</strong></div>
       </section>
 
       <div className="booking-contact-note"><strong>Product details are automatic; delivery details come from you.</strong><span>We do not ask you to choose a vehicle or enter product details again. Add the contact and delivery information needed for our parts desk to call and complete the handover.</span></div>
@@ -111,7 +111,7 @@ export function BookingForm() {
       <label>Note for the parts desk (optional)<textarea name="customer_note" rows={3} placeholder="Anything the team should know before calling?" /></label>
       <div className="booking-form-actions">
         <button className="button" disabled={state === 'loading' || !items.length}>{state === 'loading' ? 'Saving booking…' : 'Confirm booking'}</button>
-        <span>No online payment. The team will call to confirm the AED total, delivery method and handover.</span>
+        <span>No online payment. The team will call to confirm the SAR total, delivery method and handover.</span>
       </div>
       {state === 'success' && <div className="booking-status-panel success" role="status" aria-live="polite"><strong>Booking received: {bookingNumber}</strong><span>{message}</span></div>}
       {state === 'error' && <div className="booking-status-panel error" role="alert">{message}</div>}

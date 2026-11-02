@@ -9,7 +9,7 @@ VALUES
 ON CONFLICT (slug) DO UPDATE SET image_url = EXCLUDED.image_url, status = 'active', is_featured = true, updated_at = now();
 
 INSERT INTO public.parts (part_name, category_id, brand_name, sku, oem_number, description, condition, tested_status, price, sale_price, stock_quantity, status, slug, primary_image_url, image_urls, tags, is_featured, sort_order, warranty_months, currency)
-SELECT seed.part_name, category.id, seed.brand_name, seed.sku, seed.oem_number, seed.description, seed.condition, 'tested', seed.price, seed.sale_price, seed.stock_quantity, 'active', seed.slug, seed.image_url, jsonb_build_array(seed.image_url), seed.tags, true, seed.sort_order, seed.warranty_months, 'AED'
+SELECT seed.part_name, category.id, seed.brand_name, seed.sku, seed.oem_number, seed.description, seed.condition, 'tested', seed.price, seed.sale_price, seed.stock_quantity, 'active', seed.slug, seed.image_url, jsonb_build_array(seed.image_url), seed.tags, true, seed.sort_order, seed.warranty_months, 'SAR'
 FROM (VALUES
   ('Front Brake Pad Set','brakes-suspension','Brembo','AWP-BR-001','04465-33471','Premium ceramic front brake pad set','new',280::numeric,245::numeric,8,'front-brake-pad-set','https://files.manuscdn.com/search-media/310519663944260083/UbMvgpUBeEdUZmW9afB3AQ/wuTfX6XaptYuNd75uGVpAB.jpg',ARRAY['brakes','ceramic'],10,12),
   ('Oil Filter Housing','engine-filters','Mann','AWP-OF-044','15620-36020','Aluminum oil filter housing with seal kit','new',145::numeric,NULL::numeric,12,'oil-filter-housing','https://files.manuscdn.com/search-media/310519663944260083/UbMvgpUBeEdUZmW9afB3AQ/t3TgG2uRfxhk97wyfLGX3F.jpg',ARRAY['engine','filter'],20,6),

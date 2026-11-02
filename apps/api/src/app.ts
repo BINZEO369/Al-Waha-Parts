@@ -451,7 +451,7 @@ app.post(
         customer_email: customerEmail,
         customer_note: bookingNote,
         total_amount: totalAmount,
-        currency: 'AED',
+        currency: 'SAR',
         shipping_address: body.shipping_address?.trim() ?? null,
         customer_city: body.customer_city?.trim() ?? null,
         delivery_method: deliveryMethod,

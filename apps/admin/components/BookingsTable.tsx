@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
-import { formatAed } from '../../../packages/shared/src/currency';
+import { formatSar } from '../../../packages/shared/src/currency';
 
 type BookingItem = {
   quantity: number;
@@ -71,7 +71,7 @@ export function BookingsTable() {
             <div className="booking-cell booking-products">
               {items.length ? items.map((item, index) => <span key={`${row.id}-${index}`}><strong>{item.part_name_snapshot || item.parts?.part_name || 'Catalog product'}</strong><small>{item.sku_snapshot || item.parts?.sku || '—'} · Qty {item.quantity}</small></span>) : <small>No item snapshot</small>}
             </div>
-            <div className="booking-cell booking-total"><strong>{formatAed(Number(row.total_amount ?? 0))}</strong><small>{row.currency || 'AED'}</small></div>
+            <div className="booking-cell booking-total"><strong>{formatSar(Number(row.total_amount ?? 0))}</strong><small>{row.currency || 'SAR'}</small></div>
             <div className="booking-cell"><strong>{row.delivery_method === 'delivery' ? 'Delivery' : 'Pickup'}</strong><small>{row.customer_city || 'City not provided'}</small>{row.shipping_address && <small title={row.shipping_address}>{row.shipping_address}</small>}</div>
             <div className="booking-cell"><b className={`status ${row.booking_status}`}>{row.booking_status}</b><small>{new Date(row.created_at).toLocaleDateString()}</small></div>
           </div>

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
-import { formatAed } from '../../../packages/shared/src/currency';
+import { formatSar } from '../../../packages/shared/src/currency';
 
 /* ==================================================================
  *  TYPES
@@ -758,8 +758,8 @@ export default function Home() {
                     Verified <span>· {part.sku}</span>
                   </div>
                   <div className="price-row">
-                    <strong>{formatAed(part.sale_price ?? part.price)}</strong>
-                    {part.sale_price && <del>{formatAed(part.price)}</del>}
+                    <strong>{formatSar(part.sale_price ?? part.price)}</strong>
+                    {part.sale_price && <del>{formatSar(part.price)}</del>}
                   </div>
                 </div>
               </article>

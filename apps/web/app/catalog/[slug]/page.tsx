@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '../../../../../packages/shared/src/api';
-import { formatAed } from '../../../../../packages/shared/src/currency';
+import { formatSar } from '../../../../../packages/shared/src/currency';
 import { useCart } from '../../../components/CartProvider';
 
 type VehicleFitment = {
@@ -614,8 +614,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}
           </p>
           <div className="product-price">
-            <strong>{formatAed(currentPrice)}</strong>
-            {product.sale_price && <del>{formatAed(product.price)}</del>}
+            <strong>{formatSar(currentPrice)}</strong>
+            {product.sale_price && <del>{formatSar(product.price)}</del>}
           </div>
           <div className="product-status">
             <span>{product.tested_status === 'tested' ? 'Tested' : 'Fitment checked'}</span>

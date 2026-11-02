@@ -67,7 +67,7 @@ const translations: Record<string, string> = {
   'Note for the parts desk (optional)': 'ملاحظة لفريق القطع (اختياري)',
   'Confirm booking': 'تأكيد الحجز',
   'Saving booking…': 'جارٍ حفظ الحجز…',
-  'No online payment. The team will call to confirm the AED total, delivery method and handover.': 'لا يوجد دفع إلكتروني. سيتصل بك الفريق لتأكيد الإجمالي بالدرهم وطريقة التوصيل والتسليم.',
+  'No online payment. The team will call to confirm the SAR total, delivery method and handover.': 'لا يوجد دفع إلكتروني. سيتصل بك الفريق لتأكيد الإجمالي بالريال السعودي وطريقة التوصيل والتسليم.',
   'Live database request desk': 'مكتب طلبات قاعدة البيانات المباشرة',
   'Select a product once. Its live database details and total are attached automatically, then our parts desk will call you to confirm delivery and handover.': 'اختر المنتج مرة واحدة. ستتم إضافة تفاصيله وإجماليه من قاعدة البيانات تلقائياً، ثم سيتصل بك فريق القطع لتأكيد التوصيل والتسليم.',
   '01 · Select': '٠١ · اختر',
