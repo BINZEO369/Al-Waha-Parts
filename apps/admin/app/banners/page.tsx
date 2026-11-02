@@ -11,11 +11,18 @@ export default function HeroBanners() {
       />
       <section className="workspace-hero red-wash" aria-labelledby="hero-management-title">
         <div>
-          <span className="eyebrow"><b>08</b>Homepage presentation</span>
+          <span className="eyebrow">
+            <b>08</b>Homepage presentation
+          </span>
           <h2 id="hero-management-title">Shape the first impression.</h2>
-          <p>Edit a banner to update it, or permanently delete it from the database and live storefront.</p>
+          <p>
+            Edit a banner to update it, or permanently delete it from the database and live
+            storefront.
+          </p>
         </div>
-        <div className="hero-mark" aria-hidden="true">HB</div>
+        <div className="hero-mark" aria-hidden="true">
+          HB
+        </div>
       </section>
       <AdminResourcePanel kind="banners" />
     </div>

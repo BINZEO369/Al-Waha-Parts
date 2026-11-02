@@ -154,10 +154,7 @@ function summary(kind: ResourceKind, row: Resource) {
   };
 }
 
-function nextAvailabilityStatus(
-  kind: ResourceKind,
-  row: Resource,
-): 'active' | 'inactive' | null {
+function nextAvailabilityStatus(kind: ResourceKind, row: Resource): 'active' | 'inactive' | null {
   const current = String(row.status ?? '');
   if (current === 'active') return 'inactive';
   if (current === 'inactive') return 'active';
@@ -238,8 +235,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
       kind === 'banners'
         ? `Permanently delete ${title}? It will be removed from the database and live storefront. This cannot be undone.`
         : `Delete ${title}? This will hide it from the storefront and keep its history safe.`;
-    if (!window.confirm(confirmation))
-      return;
+    if (!window.confirm(confirmation)) return;
     setError('');
     try {
       await adminFetch(`${meta.endpoint}/${row.id}`, { method: 'DELETE' });

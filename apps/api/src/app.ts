@@ -974,10 +974,7 @@ app.get('/api/v1/admin/admins', { preHandler: requireAdmin as any }, async (requ
 app.patch(
   '/api/v1/admin/admins/:id',
   { preHandler: requireAdmin as any },
-  async (
-    request: FastifyRequest<{ Params: { id: string }; Body: { status?: string } }>,
-    reply,
-  ) => {
+  async (request: FastifyRequest<{ Params: { id: string }; Body: { status?: string } }>, reply) => {
     const caller = (request as FastifyRequest & { admin?: { id: string; role: string } }).admin;
     if (!caller || !['super_admin', 'admin'].includes(caller.role))
       return jsonError(reply, 403, 'Only an admin can change access status.');
