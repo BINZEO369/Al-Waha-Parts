@@ -88,16 +88,28 @@ app.get('/api/v1/categories', async (_request, reply) => {
 });
 
 app.get('/api/v1/popular-categories', async (_request, reply) => {
+  const importantCategorySlugs = [
+    'engine-engine-parts',
+    'transmission-drivetrain',
+    'suspension-steering',
+    'braking-system',
+    'electrical-electronics',
+    'cooling-system',
+    'fuel-system',
+    'air-intake-exhaust',
+    'battery-charging',
+    'filters-maintenance',
+  ];
   const { data, error } = await getSupabaseAdmin()
-    .from('popular_categories')
-    .select('display_order,category:parts_categories!inner(id,category_name,slug,description,image_url,status)')
-    .eq('is_active', true)
-    .eq('category.status', 'active')
-    .order('display_order', { ascending: true })
-    .limit(200);
+    .from('parts_categories')
+    .select('id,category_name,slug,description,image_url,status,sort_order')
+    .eq('status', 'active')
+    .in('slug', importantCategorySlugs)
+    .limit(10);
   if (error) return jsonError(reply, 500, error.message);
+  const order = new Map(importantCategorySlugs.map((slug, index) => [slug, index]));
   return {
-    data: (data ?? []).map((item) => ({ ...item.category, sort_order: item.display_order })),
+    data: (data ?? []).sort((left, right) => (order.get(left.slug) ?? 99) - (order.get(right.slug) ?? 99)),
   };
 });
 
