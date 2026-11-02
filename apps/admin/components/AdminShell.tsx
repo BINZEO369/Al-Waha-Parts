@@ -13,6 +13,7 @@ const links: Array<[string, string, string, string]> = [
   ['/bookings', 'Bookings', '05', 'Customer requests'],
   ['/admins', 'Admin access', '06', 'Team permissions'],
   ['/settings', 'Settings', '07', 'System health'],
+  ['/banners', 'Hero banners', '08', 'Storefront hero'],
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { adminFetch } from '../lib/auth';
 
-type ResourceKind = 'parts' | 'vehicles' | 'categories' | 'admins';
+type ResourceKind = 'parts' | 'vehicles' | 'categories' | 'admins' | 'banners';
 type Resource = Record<string, unknown> & { id: string };
 
 type Field = {
@@ -76,6 +76,25 @@ const config: Record<
       { key: 'is_featured', label: 'Featured category', type: 'checkbox' },
     ],
   },
+  banners: {
+    endpoint: '/api/v1/admin/banners',
+    title: 'Hero banner records',
+    empty: 'No hero banners found.',
+    search: 'Search hero title, slug, or CTA…',
+    fields: [
+      { key: 'slug', label: 'Slug', required: true },
+      { key: 'eyebrow', label: 'Eyebrow' },
+      { key: 'title', label: 'Headline', required: true },
+      { key: 'description', label: 'Description', type: 'textarea' },
+      { key: 'cta_label', label: 'CTA label', required: true },
+      { key: 'cta_href', label: 'CTA link', required: true },
+      { key: 'image_url', label: 'Desktop image URL', required: true },
+      { key: 'mobile_image_url', label: 'Mobile image URL' },
+      { key: 'badge_text', label: 'Badge text' },
+      { key: 'status', label: 'Status', type: 'select', options: ['draft', 'active', 'archived'] },
+      { key: 'sort_order', label: 'Display order', type: 'number' },
+    ],
+  },
   admins: {
     endpoint: '/api/v1/admin/admins',
     title: 'Team access records',
@@ -113,6 +132,13 @@ function summary(kind: ResourceKind, row: Resource) {
       title: text(row.category_name),
       meta: text(row.slug),
       detail: `${row.is_featured ? 'Featured' : 'Standard'} · order ${text(row.sort_order, '0')}`,
+      status: row.status,
+    };
+  if (kind === 'banners')
+    return {
+      title: text(row.title),
+      meta: `${text(row.slug)} · ${text(row.eyebrow, 'No eyebrow')}`,
+      detail: `${text(row.cta_label)} → ${text(row.cta_href)} · order ${text(row.sort_order, '0')}`,
       status: row.status,
     };
   return {
@@ -170,11 +196,11 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
   );
   const statuses = Array.from(new Set(rows.map((row) => String(row.status ?? '')).filter(Boolean)));
   async function remove(row: Resource, title: string) {
-    if (
-      !window.confirm(
-        `Delete ${title}? This will hide it from the storefront and keep its history safe.`,
-      )
-    )
+    const confirmation =
+      kind === 'banners'
+        ? `Delete ${title}? It will be archived and removed from the live storefront, but its record will be kept.`
+        : `Delete ${title}? This will hide it from the storefront and keep its history safe.`;
+    if (!window.confirm(confirmation))
       return;
     setError('');
     try {

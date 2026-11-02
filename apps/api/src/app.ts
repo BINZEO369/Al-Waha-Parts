@@ -590,6 +590,22 @@ app.get('/api/v1/admin/dashboard', { preHandler: requireAdmin as any }, async (_
   });
 });
 
+const editableBannerFields = [
+  'slug',
+  'eyebrow',
+  'title',
+  'description',
+  'cta_label',
+  'cta_href',
+  'image_url',
+  'mobile_image_url',
+  'badge_text',
+  'status',
+  'sort_order',
+  'starts_at',
+  'ends_at',
+] as const;
+
 app.get('/api/v1/admin/banners', { preHandler: requireAdmin as any }, async (_request, reply) => {
   const { data, error } = await getSupabaseAdmin()
     .from('hero_banners')
@@ -601,8 +617,15 @@ app.get('/api/v1/admin/banners', { preHandler: requireAdmin as any }, async (_re
 });
 
 app.post('/api/v1/admin/banners', { preHandler: requireAdmin as any }, async (request, reply) => {
-  const body = request.body as Record<string, unknown>;
-  if (!body.slug || !body.title || !body.image_url)
+  const body = pickFields((request.body ?? {}) as Record<string, unknown>, editableBannerFields);
+  if (
+    typeof body.slug !== 'string' ||
+    !body.slug.trim() ||
+    typeof body.title !== 'string' ||
+    !body.title.trim() ||
+    typeof body.image_url !== 'string' ||
+    !body.image_url.trim()
+  )
     return jsonError(reply, 400, 'slug, title and image_url are required');
   const { data, error } = await getSupabaseAdmin()
     .from('hero_banners')
@@ -620,13 +643,31 @@ app.patch(
     request: FastifyRequest<{ Params: { id: string }; Body: Record<string, unknown> }>,
     reply,
   ) => {
+    const body = pickFields(request.body ?? {}, editableBannerFields);
+    if (!Object.keys(body).length)
+      return jsonError(reply, 400, 'No editable banner fields provided');
     const { data, error } = await getSupabaseAdmin()
       .from('hero_banners')
-      .update(request.body)
+      .update(body)
       .eq('id', request.params.id)
       .select()
       .single();
     if (error) return jsonError(reply, 400, error.message);
+    return { data };
+  },
+);
+
+app.delete(
+  '/api/v1/admin/banners/:id',
+  { preHandler: requireAdmin as any },
+  async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+    const { data, error } = await getSupabaseAdmin()
+      .from('hero_banners')
+      .update({ status: 'archived', updated_at: new Date().toISOString() })
+      .eq('id', request.params.id)
+      .select('id,status')
+      .single();
+    if (error) return jsonError(reply, 404, 'Hero banner could not be deleted.');
     return { data };
   },
 );
