@@ -1,6 +1,32 @@
-import { PartsTable } from '../../components/PartsTable';
+import { AdminResourcePanel } from '../../components/AdminResourcePanel';
 import { SectionHeader, WorkspaceCard } from '../../components/AdminSection';
 
 export default function Parts() {
-  return <div className="admin-page"><SectionHeader eyebrow="Inventory / section 02" title="Parts library" description="Search live stock, review pricing, and keep every customer-facing part record accurate." action="Add new part" /><div className="toolbar-card"><div className="field-search"><span>⌕</span><input placeholder="Search part, SKU, OEM number…" /></div><select aria-label="Filter by category"><option>All categories</option></select><select aria-label="Filter by status"><option>All statuses</option></select><button className="secondary-button" type="button">Export CSV ↘</button></div><section className="content-section"><div className="section-title"><div><span className="eyebrow"><b>02</b>Live catalog</span><h2>Inventory records</h2></div><span className="section-meta">Connected to Supabase</span></div><PartsTable /></section><div className="workspace-grid"><WorkspaceCard number="02A" label="Stock control" title="Make availability obvious." description="Use stock, status, and pricing together to keep workshop decisions fast." action="Review stock" /><WorkspaceCard number="02B" label="Fitment" title="Match the right vehicle." description="Vehicle relationships keep catalog records useful and customer-ready." action="Open fitment" /></div></div>;
+  return (
+    <div className="admin-page">
+      <SectionHeader
+        eyebrow="Inventory / section 02"
+        title="Parts library"
+        description="Search live stock, pricing, SKU, brand, and availability without leaving the operations desk."
+        action="Add new part"
+      />
+      <AdminResourcePanel kind="parts" />
+      <div className="workspace-grid">
+        <WorkspaceCard
+          number="02A"
+          label="Stock control"
+          title="Make availability obvious."
+          description="Review stock quantity, sale price, currency, and catalog status together."
+          action="Review stock"
+        />
+        <WorkspaceCard
+          number="02B"
+          label="Fitment"
+          title="Match the right vehicle."
+          description="Keep vehicle relationships visible so the storefront and team can recommend confidently."
+          action="Open fitment"
+        />
+      </div>
+    </div>
+  );
 }

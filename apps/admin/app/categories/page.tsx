@@ -1,5 +1,45 @@
-import { SectionHeader, WorkspaceCard, InfoStrip } from '../../components/AdminSection';
+import { AdminResourcePanel } from '../../components/AdminResourcePanel';
+import { SectionHeader, WorkspaceCard } from '../../components/AdminSection';
 
 export default function Categories() {
-  return <div className="admin-page"><SectionHeader eyebrow="Catalog structure / section 04" title="Part categories" description="Organise the catalog with clear customer-facing groups, ordering, and featured collections." action="Add category" /><section className="workspace-hero red-wash"><div><span className="eyebrow"><b>04</b>Catalog architecture</span><h2>Make the next right part easy to find.</h2><p>Categories shape the storefront experience. Keep names, descriptions, imagery, and ordering consistent for customers and the parts desk.</p></div><div className="hero-mark">CT</div></section><div className="info-grid"><InfoStrip label="Navigation">Clear catalog paths</InfoStrip><InfoStrip label="Featured groups">Curated discovery</InfoStrip><InfoStrip label="Ordering">Intentional priority</InfoStrip></div><div className="workspace-grid"><WorkspaceCard number="04A" label="Customer-facing" title="Simple, useful labels." description="Keep category names direct and descriptions practical for real workshop searches." action="Manage groups" /><WorkspaceCard number="04B" label="Merchandising" title="Feature what matters." description="Set featured states and ordering to guide discovery without clutter." action="Review featured" /></div></div>;
+  return (
+    <div className="admin-page">
+      <SectionHeader
+        eyebrow="Catalog structure / section 04"
+        title="Part categories"
+        description="Organise the live catalog with clear names, slugs, featured states, and intentional ordering."
+        action="Add category"
+      />
+      <section className="workspace-hero red-wash">
+        <div>
+          <span className="eyebrow">
+            <b>04</b>Catalog architecture
+          </span>
+          <h2>Make the next right part easy to find.</h2>
+          <p>
+            Category records, search, active states, and featured flags are connected to the
+            production API.
+          </p>
+        </div>
+        <div className="hero-mark">CT</div>
+      </section>
+      <AdminResourcePanel kind="categories" />
+      <div className="workspace-grid">
+        <WorkspaceCard
+          number="04A"
+          label="Customer-facing"
+          title="Simple, useful labels."
+          description="Keep category names direct and descriptions practical for real workshop searches."
+          action="Manage groups"
+        />
+        <WorkspaceCard
+          number="04B"
+          label="Merchandising"
+          title="Feature what matters."
+          description="Use featured states and sort order to guide discovery without clutter."
+          action="Review featured"
+        />
+      </div>
+    </div>
+  );
 }
