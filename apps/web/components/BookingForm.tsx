@@ -101,11 +101,11 @@ export function BookingForm() {
         <label>Email (optional)<input type="email" name="customer_email" autoComplete="email" placeholder="you@company.com" /></label>
         <label>Delivery method<select name="delivery_method" value={deliveryMethod} onChange={(event) => setDeliveryMethod(event.target.value as 'pickup' | 'delivery')}>
           <option value="pickup">Pickup / confirm with parts desk</option>
-          <option value="delivery">Delivery in UAE</option>
+          <option value="delivery">Delivery in Saudi Arabia</option>
         </select></label>
       </div>
       <div className="form-grid">
-        <label>City<input name="customer_city" autoComplete="address-level2" placeholder="Dubai, Abu Dhabi …" /></label>
+        <label>City<input name="customer_city" autoComplete="address-level2" placeholder="Enter your city" /></label>
         <label>Delivery address<input name="shipping_address" autoComplete="street-address" required={deliveryMethod === 'delivery'} placeholder={deliveryMethod === 'delivery' ? 'Required for delivery' : 'Optional for pickup'} /></label>
       </div>
       <label>Note for the parts desk (optional)<textarea name="customer_note" rows={3} placeholder="Anything the team should know before calling?" /></label>

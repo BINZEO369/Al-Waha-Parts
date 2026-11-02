@@ -87,7 +87,7 @@ export function Footer() {
         </div>
         <div className="footer-column"><h3>Information</h3><Link href="/contact">About us</Link><Link href="/contact">Contact us</Link><Link href="/booking">Delivery information</Link></div>
         <div className="footer-column"><h3>Customer service</h3><Link href="/account">My account</Link><Link href="/vehicles">Vehicle finder</Link><Link href="/booking">Booking desk</Link></div>
-        <div className="footer-column"><h3>Contact us</h3><p>Dubai, United Arab Emirates</p><a href="tel:+971500000000">+971 50 000 0000</a><a href="mailto:hello@alwahaparts.com">hello@alwahaparts.com</a></div>
+        <div className="footer-column"><h3>Contact us</h3><p>Al Waha Car Scrap<br />Al Jubail 35428, Saudi Arabia</p><a href="mailto:hello@alwahaparts.com">hello@alwahaparts.com</a></div>
       </div>
       <div className="footer-bottom"><span>© 2026 Al Waha Parts. All rights reserved.</span><span>Right part. Right fit.</span></div>
     </footer>
