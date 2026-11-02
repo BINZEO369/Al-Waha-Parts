@@ -631,28 +631,22 @@ export default function Home() {
                 href={`/vehicles/${vehicle.id}`}
                 key={vehicle.id}
               >
-                {vehicle.cover_image_url ? (
-                  <img
-                    src={vehicle.cover_image_url}
-                    alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`}
-                  />
-                ) : (
-                  <span className="database-image-empty">
-                    No vehicle image
-                  </span>
-                )}
-                <div>
-                  <small>{vehicle.vehicle_type || 'Vehicle'}</small>
-                  <strong>
-                    {vehicle.manufacturer_name} {vehicle.model_name}
-                  </strong>
-                  <span>
-                    {vehicle.year_start || '—'}–{vehicle.year_end || 'present'}{' '}
-                    ·{' '}
-                    {vehicle.generation ||
-                      vehicle.chassis_code ||
-                      'Fitment data'}
-                  </span>
+                <div className="vehicle-home-card-top">
+                  <small>{vehicle.year_end || vehicle.year_start || '—'}</small>
+                  <strong>{vehicle.manufacturer_name} {vehicle.model_name}</strong>
+                  <span>{vehicle.generation || vehicle.chassis_code || vehicle.vehicle_type || 'Database fitment'}</span>
+                </div>
+                <div className="vehicle-home-card-image">
+                  {vehicle.cover_image_url ? (
+                    <img src={vehicle.cover_image_url} alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`} />
+                  ) : (
+                    <span className="database-image-empty">No vehicle image</span>
+                  )}
+                </div>
+                <div className="vehicle-home-card-specs">
+                  <span><small>Model years</small><b>{vehicle.year_start || '—'}–{vehicle.year_end || 'present'}</b></span>
+                  <span><small>Type</small><b>{vehicle.vehicle_type || 'Vehicle'}</b></span>
+                  <span><small>Fitment</small><b>View parts <span aria-hidden="true">↗</span></b></span>
                 </div>
               </Link>
             ))}
