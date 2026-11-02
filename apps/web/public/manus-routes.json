@@ -7,6 +7,7 @@
     { "path": "/vehicles/:slug", "title": "Vehicle Details" },
     { "path": "/map", "title": "Our Location" },
     { "path": "/booking", "title": "Booking Request" },
+    { "path": "/booking/track", "title": "Track Booking" },
     { "path": "/contact", "title": "Contact" }
   ]
 }

@@ -10,6 +10,7 @@ const navItems = [
   { label: 'Home', href: '/' },
   { label: 'Categories', href: '/category' },
   { label: 'Vehicle Finder', href: '/vehicles' },
+  { label: 'Track Booking', href: '/booking/track' },
   { label: 'Contact', href: '/contact' },
 ];
 
@@ -182,6 +183,7 @@ export function Footer() {
           <h3>Customer service</h3>
           <Link href="/vehicles">Vehicle finder</Link>
           <Link href="/booking">Booking desk</Link>
+          <Link href="/booking/track">Track booking</Link>
         </div>
         <div className="footer-column">
           <h3>Contact us</h3>

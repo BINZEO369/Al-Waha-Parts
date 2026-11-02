@@ -16,6 +16,7 @@ await app.register(cors, { origin: config.corsOrigins });
 type RateBucket = { count: number; resetAt: number };
 const publicBuckets = new Map<string, RateBucket>();
 const bookingBuckets = new Map<string, RateBucket>();
+const trackingBuckets = new Map<string, RateBucket>();
 const checkRate = (
   buckets: Map<string, RateBucket>,
   key: string,
@@ -35,9 +36,13 @@ const checkRate = (
 app.addHook('onRequest', async (request, reply) => {
   if (!request.url.startsWith('/api/v1')) return;
   const isBooking = request.method === 'POST' && request.url.split('?')[0] === '/api/v1/bookings';
+  const isTracking =
+    request.method === 'GET' && request.url.split('?')[0] === '/api/v1/bookings/track';
   const retryAfter = isBooking
     ? checkRate(bookingBuckets, request.ip, 5, 10 * 60 * 1000)
-    : checkRate(publicBuckets, request.ip, 120, 60 * 1000);
+    : isTracking
+      ? checkRate(trackingBuckets, request.ip, 20, 10 * 60 * 1000)
+      : checkRate(publicBuckets, request.ip, 120, 60 * 1000);
   if (retryAfter !== null) {
     reply.header('Retry-After', String(retryAfter));
     return reply
@@ -530,6 +535,40 @@ app.post(
       return jsonError(reply, 400, itemsError.message);
     }
     return reply.code(201).send({ data: { ...booking, items } });
+  },
+);
+
+app.get(
+  '/api/v1/bookings/track',
+  async (
+    request: FastifyRequest<{ Querystring: { booking_id?: string; phone?: string } }>,
+    reply,
+  ) => {
+    const bookingId = request.query.booking_id?.trim();
+    const phone = request.query.phone?.trim();
+    if (!bookingId || !phone)
+      return jsonError(reply, 400, 'Booking ID and phone number are required.');
+    if (bookingId.length > 80 || phone.length > 40)
+      return jsonError(reply, 400, 'Please check the booking ID and phone number.');
+    const supabase = getSupabaseAdmin();
+    const { data: booking, error: bookingError } = await supabase
+      .from('bookings')
+      .select(
+        'id,booking_number,booking_status,created_at,total_amount,currency,delivery_method,customer_city',
+      )
+      .eq('booking_number', bookingId)
+      .eq('customer_phone', phone)
+      .maybeSingle();
+    if (bookingError || !booking)
+      return jsonError(reply, 404, 'No booking matched that ID and phone number.');
+    const { data: items, error: itemsError } = await supabase
+      .from('booking_items')
+      .select('part_name_snapshot,sku_snapshot,vehicle_name_snapshot,quantity,line_total')
+      .eq('booking_id', booking.id)
+      .limit(50);
+    if (itemsError) return jsonError(reply, 500, 'Booking items could not be loaded.');
+    const { id: _bookingId, ...safeBooking } = booking;
+    return { data: { ...safeBooking, items: items ?? [] } };
   },
 );
 
