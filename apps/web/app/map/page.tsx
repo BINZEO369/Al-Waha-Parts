@@ -22,7 +22,7 @@ export default function MapPage() {
           <h1>Find our location.</h1>
           <p>Use the zoomed map below, then open the exact live Google Maps location for turn-by-turn directions.</p>
           <div className={styles.actions}>
-            <a className="button" href={locationUrl} target="_blank" rel="noreferrer">Open live location <span>↗</span></a>
+            <a className={styles.popularCarsButton} href={locationUrl} target="_blank" rel="noreferrer">Open live location <span>↗</span></a>
             <Link className="text-link" href="/contact">Contact the parts desk <span>→</span></Link>
           </div>
         </div>
