@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import styles from './MapPage.module.css';
 
-const locationUrl = 'https://maps.app.goo.gl/mBqvYy2GFiazoLx8A';
-const mapEmbedUrl = 'https://www.google.com/maps?q=30.9003452,75.85667325&z=18&output=embed';
+const locationUrl = 'https://www.google.com/maps/place/WM2V%2BJ9R+Al+waha+Car+Scrap,+Al+Jubail+35428,+Saudi+Arabia/@26.9016216,49.6933767,15z/data=!4m6!3m5!1s0x3e35980b13f58833:0xbe75d9e1b7fe66d!8m2!3d26.9016216!4d49.6933767!16s%2Fg%2F11gcpd4vcx?utm_campaign=ml-ardl&g_ep=Eg1tbF8yMDI2MTAyN18wIJvbDyoASAJQAQ%3D%3D';
+const mapEmbedUrl = 'https://www.google.com/maps?q=26.9016216,49.6933767&z=18&output=embed';
 
 function MapPinIcon() {
   return (
