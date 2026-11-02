@@ -284,7 +284,6 @@ a {
 .admin-alert { border-left: 3px solid #a35b50; color: #8b514a; }
 .booking-id small { white-space: nowrap; }
 .booking-cell .status { display: inline-block; }
-}
 .admin-lower {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
