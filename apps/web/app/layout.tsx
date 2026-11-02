@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Header, Footer } from '../components/Header';
 import { CartProvider } from '../components/CartProvider';
-const globalStyles = String.raw`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap');
+const globalStyles = String.raw`@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&display=swap');
 
 :root {
   --red: #e5232f;
@@ -671,6 +671,48 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   background: #fff;
   padding: 6px;
 }
+/* ---------- HOME: refined reference-style vehicle cards ---------- */
+.vehicle-home-section { padding: 36px 18px 64px; }
+.vehicle-home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.vehicle-home-card { display: grid; grid-template-rows: auto 1fr auto; min-height: 268px; border: 1px solid #eef0f1; border-radius: 2px; box-shadow: 0 1px 0 rgba(24, 31, 35, .02); }
+.vehicle-home-card:hover { transform: translateY(-4px); border-color: #dfe4e6; box-shadow: 0 14px 28px rgba(24, 31, 35, .1); }
+.vehicle-home-card-top { min-height: 75px; padding: 14px 15px 3px; gap: 5px; }
+.vehicle-home-card-top small { color: #5d686d; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .02em; }
+.vehicle-home-card-top strong { color: #20272b; font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 700; line-height: 1.08; letter-spacing: .045em; text-transform: uppercase; }
+.vehicle-home-card-top span { color: #7f898e; font-family: 'DM Sans', sans-serif; font-size: 8px; letter-spacing: .01em; }
+.vehicle-home-card-image { height: 145px; background: #fff; }
+.vehicle-home-card-image img { padding: 5px 8px; transition: transform .25s ease; }
+.vehicle-home-card:hover .vehicle-home-card-image img { transform: scale(1.035); }
+.vehicle-home-card-specs { min-height: 50px; padding: 10px 14px 12px; border-top: 1px solid #f1f2f3; }
+.vehicle-home-card-specs span { gap: 4px; }
+.vehicle-home-card-specs small { color: #8b9599; font-family: 'DM Sans', sans-serif; font-size: 7px; letter-spacing: .01em; }
+.vehicle-home-card-specs b { color: #394247; font-family: 'Manrope', sans-serif; font-size: 8px; font-weight: 600; }
+.vehicle-home-card-specs i { font-size: 10px; }
+@media (max-width: 700px) {
+  .vehicle-home-section { padding: 30px 14px 46px; }
+  .vehicle-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .vehicle-home-card { min-height: 226px; }
+  .vehicle-home-card-top { min-height: 64px; padding: 10px 10px 3px; gap: 4px; }
+  .vehicle-home-card-top strong { font-size: 11px; letter-spacing: .025em; }
+  .vehicle-home-card-top span { font-size: 7px; }
+  .vehicle-home-card-image { height: 122px; }
+  .vehicle-home-card-specs { min-height: 43px; padding: 8px 9px 10px; gap: 4px; }
+  .vehicle-home-card-specs small { font-size: 6px; }
+  .vehicle-home-card-specs b { font-size: 7px; }
+}
+@media (max-width: 480px) {
+  .vehicle-home-section { padding-left: 10px; padding-right: 10px; }
+  .vehicle-home-grid { gap: 7px; }
+  .vehicle-home-card { min-height: 207px; }
+  .vehicle-home-card-top { min-height: 59px; padding: 8px 8px 2px; }
+  .vehicle-home-card-top small { font-size: 7px; }
+  .vehicle-home-card-top strong { min-height: 23px; font-size: 9px; }
+  .vehicle-home-card-image { height: 108px; }
+  .vehicle-home-card-specs { min-height: 40px; padding: 7px 7px 8px; }
+  .vehicle-home-card-specs small { font-size: 5.5px; }
+  .vehicle-home-card-specs b { font-size: 6.5px; }
+}
+
 `;
 
 export const metadata: Metadata = {
