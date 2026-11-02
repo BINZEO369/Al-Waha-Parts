@@ -7,6 +7,7 @@ import { PartCard, type PartCardData } from '../../../components/PartCard';
 
 type Vehicle = {
   id: string;
+  slug: string;
   manufacturer_name: string;
   manufacturer_logo?: string | null;
   model_name: string;

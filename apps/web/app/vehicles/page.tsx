@@ -5,6 +5,7 @@ import { apiFetch } from '../../../../packages/shared/src/api';
 
 type Vehicle = {
   id: string;
+  slug: string;
   manufacturer_name: string;
   manufacturer_logo?: string | null;
   model_name: string;
@@ -92,9 +93,14 @@ export default function VehiclesPage() {
         {selectedVehicle?.cover_image_url && <img className="finder-vehicle-image" src={selectedVehicle.cover_image_url} alt={`${selectedVehicle.manufacturer_name} ${selectedVehicle.model_name}`} />}
         {error && <p className="form-error">{error}</p>}
         {!loading && !error && !vehicles.length && <p className="empty-state">No vehicles are published in the database yet.</p>}
-        <button className="button" disabled={loading || !selectedVehicle} onClick={() => { if (selectedVehicle) window.location.href = `/category?vehicle_id=${selectedVehicle.id}`; }}>
-          Show compatible parts <span>→</span>
-        </button>
+        <div className="finder-actions">
+          <button className="button" disabled={loading || !selectedVehicle} onClick={() => { if (selectedVehicle) window.location.href = `/vehicles/${selectedVehicle.slug}`; }}>
+            Open vehicle details <span>→</span>
+          </button>
+          {selectedVehicle && <button className="button button-light" onClick={() => { window.location.href = `/catalog?vehicle_id=${selectedVehicle.id}`; }}>
+            Show compatible parts
+          </button>}
+        </div>
       </div>
     </main>
   );
