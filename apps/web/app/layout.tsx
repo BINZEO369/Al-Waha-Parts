@@ -754,6 +754,11 @@ export const metadata: Metadata = {
   title: 'Al Waha Parts — New Car Parts in UAE',
   description:
     'Shop quality automotive parts, wheels, brakes and suspension with fitment support across the UAE.',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 };
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
