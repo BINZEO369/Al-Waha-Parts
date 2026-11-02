@@ -23,34 +23,52 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [authError, setAuthError] = useState('');
 
   useEffect(() => {
-    if (pathname === '/login') return;
+    if (pathname === '/login') {
+      setChecking(false);
+      return;
+    }
     let mounted = true;
     const client = supabase;
     async function verify() {
-      if (!client) { setAuthError('Supabase authentication is not configured.'); setChecking(false); return; }
-      const { data } = await client.auth.getSession();
-      if (!data.session) { router.replace('/login'); return; }
-      try {
-        await adminFetch<{ parts: number }>('/api/v1/admin/dashboard');
-        if (mounted) setAdminName(data.session.user.user_metadata?.full_name || data.session.user.email?.split('@')[0] || 'Admin user');
-      } catch (error) {
-        if (mounted) setAuthError(error instanceof Error ? error.message : 'Admin access could not be verified.');
-        await client.auth.signOut();
-        router.replace('/login');
+      if (!client) {
+        setAuthError('Supabase authentication is not configured.');
+        setChecking(false);
         return;
       }
-      if (mounted) setChecking(false);
+      const { data } = await client.auth.getSession();
+      if (!data.session) {
+        router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+        return;
+      }
+      try {
+        await adminFetch<{ parts: number }>('/api/v1/admin/dashboard');
+        if (mounted) {
+          setAdminName(data.session.user.user_metadata?.full_name || data.session.user.email?.split('@')[0] || 'Admin user');
+          setChecking(false);
+        }
+      } catch (error) {
+        if (mounted) setAuthError(error instanceof Error ? error.message : 'Admin access could not be verified.');
+        return;
+      }
     }
     void verify();
-    const listener = client?.auth.onAuthStateChange((event) => { if (event === 'SIGNED_OUT') router.replace('/login'); });
-    return () => { mounted = false; listener?.data.subscription.unsubscribe(); };
+    const listener = client?.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') router.replace('/login');
+    });
+    return () => {
+      mounted = false;
+      listener?.data.subscription.unsubscribe();
+    };
   }, [pathname, router]);
 
   if (pathname === '/login') return <>{children}</>;
   if (checking) return <div className="admin-loading"><div className="admin-loading-mark">AW</div><strong>Verifying secure access…</strong></div>;
   if (authError) return <div className="admin-loading"><strong>{authError}</strong><Link className="admin-button" href="/login">Return to login</Link></div>;
 
-  async function signOut() { await supabase?.auth.signOut(); router.replace('/login'); }
+  async function signOut() {
+    await supabase?.auth.signOut();
+    router.replace('/login');
+  }
 
   return (
     <div className="admin-app">

@@ -1,39 +1,40 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { adminFetch } from '../lib/auth';
-const fallback = [
-  {
-    id: '1',
-    part_name: 'Front brake pad set',
-    sku: 'AWP-BR-001',
-    brand_name: 'Brembo',
-    stock_quantity: 8,
-    price: 280,
-    status: 'active',
-  },
-  {
-    id: '2',
-    part_name: 'Oil filter housing',
-    sku: 'AWP-OF-044',
-    brand_name: 'Mann',
-    stock_quantity: 12,
-    price: 145,
-    status: 'active',
-  },
-  {
-    id: '3',
-    part_name: 'Alternator assembly',
-    sku: 'AWP-AL-208',
-    brand_name: 'Bosch',
-    stock_quantity: 3,
-    price: 640,
-    status: 'draft',
-  },
-];
+
+type PartRow = {
+  id: string;
+  part_name: string;
+  sku: string;
+  brand_name?: string;
+  stock_quantity: number;
+  price: number;
+  status: string;
+  primary_image_url?: string | null;
+};
+
 export function PartsTable() {
-  const [rows, setRows] = useState(fallback);
-  useEffect(() => { adminFetch<any[]>('/api/v1/admin/parts').then(setRows).catch(() => {}); }, []);
+  const [rows, setRows] = useState<PartRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let mounted = true;
+    adminFetch<PartRow[]>('/api/v1/admin/parts')
+      .then((data) => { if (mounted) setRows(data); })
+      .catch((reason: unknown) => {
+        if (mounted) setError(reason instanceof Error ? reason.message : 'Parts could not be loaded.');
+      })
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
+  }, []);
+
+  if (loading) return <div className="admin-loading"><strong>Loading live parts…</strong></div>;
+  if (error) return <div className="admin-alert" role="alert">{error}</div>;
+  if (!rows.length) return <div className="admin-empty">No parts found in the live catalog.</div>;
+
   return (
     <div className="data-table">
       <div className="table-head">
@@ -44,26 +45,17 @@ export function PartsTable() {
         <span>Status</span>
         <span />
       </div>
-      {rows.map((row: any) => (
+      {rows.map((row) => (
         <div className="table-row" key={row.id}>
           <div className="table-primary">
-            {row.primary_image_url ? (
-              <img className="mini-glyph" src={row.primary_image_url} alt="" />
-            ) : (
-              <div className="mini-glyph">AWP</div>
-            )}
+            {row.primary_image_url ? <img className="mini-glyph" src={row.primary_image_url} alt="" /> : <div className="mini-glyph">AWP</div>}
             <strong>{row.part_name}</strong>
           </div>
-          <span>
-            {row.sku}
-            <small>{row.brand_name}</small>
-          </span>
+          <span>{row.sku}<small>{row.brand_name ?? '—'}</small></span>
           <span>{row.stock_quantity} units</span>
           <span>{formatSar(row.price)}</span>
-          <span>
-            <b className={`status ${row.status}`}>{row.status}</b>
-          </span>
-          <button className="icon-button">···</button>
+          <span><b className={`status ${row.status}`}>{row.status}</b></span>
+          <button className="icon-button" type="button" aria-label={`Actions for ${row.part_name}`}>···</button>
         </div>
       ))}
     </div>

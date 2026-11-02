@@ -3,6 +3,12 @@
 import { FormEvent, useState } from 'react';
 import { supabase } from '../../lib/auth';
 
+function safeNextPath() {
+  if (typeof window === 'undefined') return '/dashboard';
+  const next = new URLSearchParams(window.location.search).get('next');
+  return next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard';
+}
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,11 +18,18 @@ export default function Login() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
-    if (!supabase) { setError('Authentication is not configured. Add Supabase public environment variables in Vercel.'); return; }
+    if (!supabase) {
+      setError('Authentication is not configured. Add Supabase public environment variables in Vercel.');
+      return;
+    }
     setLoading(true);
     const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    if (signInError) { setError('Email or password is incorrect, or this account is not enabled.'); setLoading(false); return; }
-    window.location.href = '/dashboard';
+    if (signInError) {
+      setError('Email or password is incorrect, or this account is not enabled.');
+      setLoading(false);
+      return;
+    }
+    window.location.assign(safeNextPath());
   }
 
   return (
