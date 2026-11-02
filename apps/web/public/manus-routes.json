@@ -4,6 +4,7 @@
     { "path": "/catalog/:slug", "title": "Product Details" },
     { "path": "/category", "title": "Categories" },
     { "path": "/vehicles", "title": "Vehicle Finder" },
+    { "path": "/vehicles/:slug", "title": "Vehicle Details" },
     { "path": "/booking", "title": "Booking Request" },
     { "path": "/contact", "title": "Contact" },
     { "path": "/account", "title": "Account" }

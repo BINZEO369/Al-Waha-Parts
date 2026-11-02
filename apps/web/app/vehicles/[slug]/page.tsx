@@ -21,8 +21,8 @@ type Vehicle = {
 
 type VehicleDetail = { vehicle: Vehicle; parts: PartCardData[] };
 
-export default function VehicleDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function VehicleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const [detail, setDetail] = useState<VehicleDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,11 +34,11 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ id: st
       setLoading(false);
       return;
     }
-    apiFetch<VehicleDetail>(apiUrl, `/api/v1/vehicles/${encodeURIComponent(id)}`)
+    apiFetch<VehicleDetail>(apiUrl, `/api/v1/vehicles/slug/${encodeURIComponent(slug)}`)
       .then(setDetail)
       .catch((cause: unknown) => setError(cause instanceof Error ? cause.message : 'Unable to load vehicle details.'))
       .finally(() => setLoading(false));
-  }, [apiUrl, id]);
+  }, [apiUrl, slug]);
 
   if (loading) return <main className="page-shell"><div className="empty-state">Loading vehicle details and compatible products…</div></main>;
   if (error || !detail) return <main className="page-shell"><div className="data-alert">{error || 'Vehicle not found.'}</div><Link className="button" href="/vehicles">Back to vehicle finder</Link></main>;

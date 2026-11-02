@@ -142,13 +142,13 @@ app.get(
 );
 
 app.get(
-  '/api/v1/vehicles/:id',
-  async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+  '/api/v1/vehicles/slug/:slug',
+  async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
     const supabase = getSupabaseAdmin();
     const { data: vehicle, error: vehicleError } = await supabase
       .from('vehicles')
       .select('*')
-      .eq('id', request.params.id)
+      .eq('slug', request.params.slug)
       .eq('status', 'active')
       .maybeSingle();
     if (vehicleError) return jsonError(reply, 500, vehicleError.message);
@@ -157,7 +157,7 @@ app.get(
     const { data: parts, error: partsError } = await supabase
       .from('parts')
       .select('*,parts_categories(id,category_name,slug),part_vehicles!inner(vehicle_id)')
-      .eq('part_vehicles.vehicle_id', request.params.id)
+      .eq('part_vehicles.vehicle_id', vehicle.id)
       .eq('status', 'active')
       .order('position')
       .order('part_name')
@@ -170,7 +170,7 @@ app.get(
 app.get('/api/v1/homepage-selected-vehicles', async (_request, reply) => {
   const { data, error } = await getSupabaseAdmin()
     .from('homepage_selected_vehicles')
-    .select('display_order,vehicle:vehicles!inner(id,manufacturer_name,manufacturer_logo,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,status)')
+    .select('display_order,vehicle:vehicles!inner(id,slug,manufacturer_name,manufacturer_logo,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,status)')
     .eq('is_active', true)
     .eq('vehicle.status', 'active')
     .order('display_order', { ascending: true })

@@ -50,6 +50,7 @@ type Part = {
 
 type Vehicle = {
   id: string;
+  slug?: string | null;
   manufacturer_name: string;
   manufacturer_logo?: string | null;
   model_name: string;
@@ -648,7 +649,7 @@ export default function Home() {
             {homeSelectedVehicles.map((vehicle) => (
               <Link
                 className="vehicle-home-card"
-                href={`/vehicles/${vehicle.id}`}
+                href={vehicle.slug ? `/vehicles/${vehicle.slug}` : '/vehicles'}
                 key={vehicle.id}
               >
                 <div className="vehicle-home-card-top">
