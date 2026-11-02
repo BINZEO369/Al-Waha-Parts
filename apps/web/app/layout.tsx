@@ -59,6 +59,8 @@ h1, h2, h3, p { margin-top: 0; }
 .icon-action { display: inline-flex; align-items: center; gap: 4px; color: var(--ink); position: relative; }
 .icon-action svg { width: 22px; height: 22px; }
 .icon-action span { min-width: 14px; height: 14px; padding: 0 3px; display: grid; place-items: center; border-radius: 50%; background: var(--red); color: #fff; font-size: 8px; }
+.location-action { color: var(--red); }
+.location-action span { min-width: auto; height: auto; padding: 0; border-radius: 0; background: transparent; color: var(--ink); font-size: 10px; }
 .menu-toggle { display: none; padding: 0; border: 0; background: transparent; color: var(--ink); }
 .menu-toggle svg { width: 25px; height: 25px; }
 .main-nav { background: var(--dark); color: #fff; }

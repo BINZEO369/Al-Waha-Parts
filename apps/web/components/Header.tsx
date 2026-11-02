@@ -33,7 +33,16 @@ function HeartIcon() {
 function CartIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3.5 4h2l1.6 10.1a1.5 1.5 0 0 0 1.5 1.3h8.9a1.5 1.5 0 0 0 1.5-1.2L20.5 7H6.1M9 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm10 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3.5 4h2l1.6 10.1a1.5 1.5 0 0 0 1.5 1.3h8.9a1.5 1.5 0 0 0 1.5-1.2L20.5 7H6.1M9 20a1 1 0 1 1-2 0 1 1 0 0 0 2 0Zm10 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function LocationIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M19 10.2c0 5-7 10-7 10s-7-5-7-10a7 7 0 1 1 14 0Z" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="12" cy="10" r="2.2" fill="none" stroke="currentColor" strokeWidth="1.7" />
     </svg>
   );
 }
@@ -74,6 +83,7 @@ export function Header() {
           <button className="search-trigger" type="button" onClick={() => setSearchOpen(true)} aria-label="Open catalog search">
             <SearchIcon /><span>Search</span>
           </button>
+          <Link href="/map" aria-label="Our location" className="icon-action location-action" title="Our location"><LocationIcon /><span>Location</span></Link>
           <Link href="/account" aria-label="Wishlist" className="icon-action"><HeartIcon /><span>0</span></Link>
           <Link href="/booking" aria-label={`Shopping cart, ${itemCount} items`} className="icon-action"><CartIcon /><span>{itemCount}</span></Link>
           <button className="menu-toggle" type="button" onClick={() => setMenuOpen((value) => !value)} aria-label="Toggle navigation" aria-expanded={menuOpen}><MenuIcon open={menuOpen} /></button>

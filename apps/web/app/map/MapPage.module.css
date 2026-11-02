@@ -1,0 +1,19 @@
+.page { max-width: 1200px; padding: 64px 18px 90px; margin: 0 auto; }
+.intro { display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: end; padding-bottom: 38px; border-bottom: 1px solid #f0c4c7; }
+.intro h1 { margin: 12px 0 16px; color: #151515; font-family: Montserrat, sans-serif; font-size: clamp(42px, 6vw, 76px); line-height: .95; letter-spacing: -.06em; }
+.intro p { max-width: 520px; color: #555; line-height: 1.7; }
+.actions { display: flex; align-items: center; gap: 24px; margin-top: 26px; }
+.badge { min-width: 210px; display: grid; gap: 8px; padding: 22px; border: 1px solid var(--red); color: #171717; }
+.badge svg, .note svg { width: 28px; height: 28px; color: var(--red); }
+.badge span { color: #555; font-size: 12px; }
+.mapCard { height: min(62vw, 560px); min-height: 360px; margin-top: 34px; overflow: hidden; border: 1px solid #f0c4c7; background: #fff; }
+.mapCard iframe { width: 100%; height: 100%; border: 0; }
+.note { display: flex; gap: 16px; align-items: flex-start; max-width: 620px; padding: 22px 0; color: #171717; }
+.note p { margin: 5px 0 0; color: #555; font-size: 12px; line-height: 1.6; }
+@media (max-width: 700px) {
+  .page { padding: 45px 18px 65px; }
+  .intro { grid-template-columns: 1fr; gap: 25px; }
+  .actions { align-items: flex-start; flex-direction: column; gap: 14px; }
+  .badge { min-width: 0; }
+  .mapCard { min-height: 330px; height: 78vw; }
+}
