@@ -953,7 +953,7 @@ app.delete(
   },
 );
 
-app.get('/api/v1/admin/admins', { preHandler: requireAdmin as any }, async (_request, reply) => {
+app.get('/api/v1/admin/admins', { preHandler: requireAdmin as any }, async (request, reply) => {
   const { data, error } = await getSupabaseAdmin()
     .from('admins')
     .select(
@@ -961,8 +961,62 @@ app.get('/api/v1/admin/admins', { preHandler: requireAdmin as any }, async (_req
     )
     .order('created_at');
   if (error) return jsonError(reply, 500, error.message);
-  return { data: data ?? [] };
+  const caller = (request as FastifyRequest & { admin?: { id: string; role: string } }).admin;
+  const canManageAccess = caller?.role === 'super_admin' || caller?.role === 'admin';
+  return {
+    data: (data ?? []).map((admin) => ({
+      ...admin,
+      can_manage_access: canManageAccess && admin.id !== caller?.id,
+    })),
+  };
 });
+
+app.patch(
+  '/api/v1/admin/admins/:id',
+  { preHandler: requireAdmin as any },
+  async (
+    request: FastifyRequest<{ Params: { id: string }; Body: { status?: string } }>,
+    reply,
+  ) => {
+    const caller = (request as FastifyRequest & { admin?: { id: string; role: string } }).admin;
+    if (!caller || !['super_admin', 'admin'].includes(caller.role))
+      return jsonError(reply, 403, 'Only an admin can change access status.');
+    const status = request.body?.status;
+    if (status !== 'active' && status !== 'inactive')
+      return jsonError(reply, 400, 'status must be active or inactive');
+    if (request.params.id === caller.id && status === 'inactive')
+      return jsonError(reply, 400, 'You cannot deactivate your own admin access.');
+
+    const supabase = getSupabaseAdmin();
+    const { data: target, error: targetError } = await supabase
+      .from('admins')
+      .select('id,role,status')
+      .eq('id', request.params.id)
+      .maybeSingle();
+    if (targetError) return jsonError(reply, 500, 'Admin record could not be loaded.');
+    if (!target) return jsonError(reply, 404, 'Admin record not found.');
+
+    if (target.role === 'super_admin' && target.status === 'active' && status === 'inactive') {
+      const { count, error: countError } = await supabase
+        .from('admins')
+        .select('id', { count: 'exact', head: true })
+        .eq('role', 'super_admin')
+        .eq('status', 'active');
+      if (countError) return jsonError(reply, 500, 'Admin access could not be verified.');
+      if ((count ?? 0) <= 1)
+        return jsonError(reply, 400, 'The last active super admin cannot be deactivated.');
+    }
+
+    const { data, error } = await supabase
+      .from('admins')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', request.params.id)
+      .select('id,status')
+      .single();
+    if (error) return jsonError(reply, 400, 'Admin access status could not be updated.');
+    return { data };
+  },
+);
 
 app.setErrorHandler((error, _request, reply) => {
   app.log.error(error);

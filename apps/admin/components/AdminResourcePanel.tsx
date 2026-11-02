@@ -91,7 +91,12 @@ const config: Record<
       { key: 'image_url', label: 'Desktop image URL', required: true },
       { key: 'mobile_image_url', label: 'Mobile image URL' },
       { key: 'badge_text', label: 'Badge text' },
-      { key: 'status', label: 'Status', type: 'select', options: ['draft', 'active', 'archived'] },
+      {
+        key: 'status',
+        label: 'Status',
+        type: 'select',
+        options: ['draft', 'active', 'inactive', 'archived'],
+      },
       { key: 'sort_order', label: 'Display order', type: 'number' },
     ],
   },
@@ -149,6 +154,22 @@ function summary(kind: ResourceKind, row: Resource) {
   };
 }
 
+function nextAvailabilityStatus(
+  kind: ResourceKind,
+  row: Resource,
+): 'active' | 'inactive' | null {
+  const current = String(row.status ?? '');
+  if (current === 'active') return 'inactive';
+  if (current === 'inactive') return 'active';
+  if (
+    current === 'draft' ||
+    current === 'archived' ||
+    (kind === 'admins' && current === 'suspended')
+  )
+    return 'active';
+  return null;
+}
+
 function initialValues(fields: Field[], row?: Resource | null) {
   return Object.fromEntries(
     fields.map((field) => [
@@ -164,6 +185,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
   const [status, setStatus] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
   const [editing, setEditing] = useState<Resource | null>(null);
   const [creating, setCreating] = useState(false);
   const meta = config[kind];
@@ -171,6 +193,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
   const load = () => {
     setLoading(true);
     setError('');
+    setActionError('');
     adminFetch<Resource[]>(meta.endpoint)
       .then(setRows)
       .catch((cause: unknown) =>
@@ -195,6 +218,21 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
     [rows, query, status],
   );
   const statuses = Array.from(new Set(rows.map((row) => String(row.status ?? '')).filter(Boolean)));
+  const activeCount = rows.filter((row) => row.status === 'active').length;
+  const inactiveCount = rows.filter((row) => row.status === 'inactive').length;
+  const otherStatuses = statuses.filter((value) => value !== 'active' && value !== 'inactive');
+  async function setAvailability(row: Resource, nextStatus: 'active' | 'inactive') {
+    setActionError('');
+    try {
+      await adminFetch(`${meta.endpoint}/${row.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      load();
+    } catch (cause) {
+      setActionError(cause instanceof Error ? cause.message : 'Status could not be updated.');
+    }
+  }
   async function remove(row: Resource, title: string) {
     const confirmation =
       kind === 'banners'
@@ -223,13 +261,15 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
                   ? '03'
                   : kind === 'categories'
                     ? '04'
-                    : '06'}
+                    : kind === 'admins'
+                      ? '06'
+                      : '08'}
             </b>
             {meta.title}
           </span>
           <h2 id={`${kind}-records`}>{meta.title}</h2>
           <p>
-            {filtered.length} of {rows.length} live records
+            {filtered.length} of {rows.length} records shown
           </p>
         </div>
         <div className="section-actions">
@@ -258,18 +298,44 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
             aria-label={meta.search}
           />
         </div>
-        <select
-          value={status}
-          onChange={(event) => setStatus(event.target.value)}
-          aria-label="Filter by status"
-        >
-          <option value="all">All statuses</option>
-          {statuses.map((value) => (
-            <option key={value} value={value}>
-              {value.replace(/_/g, ' ')}
-            </option>
-          ))}
-        </select>
+        <div className="availability-filter" role="group" aria-label="Filter records by status">
+          <button
+            className="availability-filter-button"
+            type="button"
+            aria-pressed={status === 'all'}
+            onClick={() => setStatus('all')}
+          >
+            All <span>{rows.length}</span>
+          </button>
+          <button
+            className="availability-filter-button"
+            type="button"
+            aria-pressed={status === 'active'}
+            onClick={() => setStatus('active')}
+          >
+            Active <span>{activeCount}</span>
+          </button>
+          <button
+            className="availability-filter-button"
+            type="button"
+            aria-pressed={status === 'inactive'}
+            onClick={() => setStatus('inactive')}
+          >
+            Inactive <span>{inactiveCount}</span>
+          </button>
+          <select
+            value={otherStatuses.includes(status) ? status : 'all'}
+            onChange={(event) => setStatus(event.target.value)}
+            aria-label="Filter by another status"
+          >
+            <option value="all">Other statuses</option>
+            {otherStatuses.map((value) => (
+              <option key={value} value={value}>
+                {value.replace(/_/g, ' ')}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
       {loading && (
         <div className="empty-table-state loading-state">
@@ -281,6 +347,11 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
           {error}
         </div>
       )}
+      {!loading && actionError && (
+        <div className="admin-alert" role="alert">
+          {actionError}
+        </div>
+      )}
       {!loading && !error && !filtered.length && (
         <div className="empty-table-state">
           {rows.length ? 'No records match your search or filter.' : meta.empty}
@@ -290,6 +361,8 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
         <div className="resource-list">
           {filtered.map((row) => {
             const item = summary(kind, row);
+            const nextStatus = nextAvailabilityStatus(kind, row);
+            const canToggleStatus = kind !== 'admins' || row.can_manage_access === true;
             return (
               <article className="resource-row" key={row.id}>
                 <div className="resource-avatar">{item.title.slice(0, 2).toUpperCase()}</div>
@@ -310,29 +383,41 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
                 <span className={statusClass(item.status)}>
                   {text(item.status, 'unknown').replace(/_/g, ' ')}
                 </span>
-                {meta.fields.length > 0 ? (
-                  <div className="resource-actions">
+                <div className="resource-actions">
+                  {nextStatus && canToggleStatus && (
                     <button
-                      className="edit-button"
+                      className={`availability-action-button ${nextStatus === 'active' ? 'activate' : 'deactivate'}`}
                       type="button"
-                      onClick={() => {
-                        setCreating(false);
-                        setEditing(row);
-                      }}
+                      onClick={() => void setAvailability(row, nextStatus)}
                     >
-                      Edit
+                      {nextStatus === 'active' ? 'Set active' : 'Set inactive'}
                     </button>
-                    <button
-                      className="delete-button"
-                      type="button"
-                      onClick={() => void remove(row, item.title)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ) : (
-                  <span className="read-only-label">Read only</span>
-                )}
+                  )}
+                  {meta.fields.length > 0 && (
+                    <>
+                      <button
+                        className="edit-button"
+                        type="button"
+                        onClick={() => {
+                          setCreating(false);
+                          setEditing(row);
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="delete-button"
+                        type="button"
+                        onClick={() => void remove(row, item.title)}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
+                  {meta.fields.length === 0 && !(nextStatus && canToggleStatus) && (
+                    <span className="read-only-label">Read only</span>
+                  )}
+                </div>
               </article>
             );
           })}

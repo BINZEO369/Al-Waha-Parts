@@ -7,7 +7,7 @@ export default function Admins() {
       <SectionHeader
         eyebrow="Team access / section 06"
         title="Admin access"
-        description="Review who can enter the operations desk, which role they hold, and whether their access is active."
+        description="Review who can enter the operations desk, which role they hold, and whether their access is active. Admins with elevated access can activate or deactivate records."
         action="Invite admin"
       />
       <section className="workspace-hero dark-wash">
