@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Header, Footer } from '../components/Header';
 import { CartProvider } from '../components/CartProvider';
+import { LanguageProvider } from '../components/LanguageProvider';
 const globalStyles = String.raw`@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&display=swap');
 
 :root {
@@ -676,9 +677,9 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .vehicle-home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .vehicle-home-card { display: grid; grid-template-rows: auto auto auto; min-height: 0; border: 1px solid #f1d0d3; border-top: 3px solid var(--red); border-radius: 2px; background: #fff; box-shadow: 0 1px 0 rgba(24, 31, 35, .02); }
 .vehicle-home-card:hover { transform: translateY(-4px); border-color: var(--red); box-shadow: 0 14px 28px rgba(229, 35, 47, .14); }
-.vehicle-home-card-top { min-height: 61px; padding: 7px 15px 1px; gap: 2px; }
-.vehicle-home-card-top small { color: var(--red); font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: .02em; }
-.vehicle-home-card-top strong { color: #20272b; font-family: 'Manrope', sans-serif; font-size: 21px; font-weight: 800; line-height: 1; letter-spacing: .02em; text-transform: uppercase; }
+.vehicle-home-card-top { min-height: 58px; padding: 4px 15px 0; gap: 1px; }
+.vehicle-home-card-top small { color: var(--red); font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: .02em; }
+.vehicle-home-card-top strong { color: #20272b; font-family: 'Manrope', sans-serif; font-size: 24px; font-weight: 800; line-height: .98; letter-spacing: .015em; text-transform: uppercase; }
 .vehicle-home-card-top span { width: 100%; color: #b51d28; font-family: 'DM Sans', sans-serif; font-size: 9px; letter-spacing: .01em; }
 .vehicle-home-card-image { width: 100%; height: 145px; background: #fff; }
 .vehicle-home-card-image img { width: 100%; height: 100%; padding: 0; object-fit: cover; object-position: center; transition: transform .25s ease; }
@@ -692,9 +693,9 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .vehicle-home-section { padding: 30px 14px 46px; }
   .vehicle-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
   .vehicle-home-card { min-height: 0; }
-  .vehicle-home-card-top { min-height: 54px; padding: 6px 10px 1px; gap: 2px; }
-  .vehicle-home-card-top small { font-size: 10px; }
-  .vehicle-home-card-top strong { font-size: 15px; letter-spacing: .015em; }
+  .vehicle-home-card-top { min-height: 52px; padding: 4px 10px 0; gap: 1px; }
+  .vehicle-home-card-top small { font-size: 11px; }
+  .vehicle-home-card-top strong { font-size: 17px; letter-spacing: .01em; }
   .vehicle-home-card-top span { font-size: 8px; }
   .vehicle-home-card-image { height: 118px; }
   .vehicle-home-card-specs { min-height: 39px; padding: 6px 9px 7px; gap: 4px; }
@@ -705,15 +706,30 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .vehicle-home-section { padding-left: 10px; padding-right: 10px; }
   .vehicle-home-grid { gap: 7px; }
   .vehicle-home-card { min-height: 0; }
-  .vehicle-home-card-top { min-height: 50px; padding: 5px 8px 1px; }
-  .vehicle-home-card-top small { font-size: 9px; }
-  .vehicle-home-card-top strong { min-height: 20px; font-size: 13px; }
+  .vehicle-home-card-top { min-height: 48px; padding: 3px 8px 0; }
+  .vehicle-home-card-top small { font-size: 10px; }
+  .vehicle-home-card-top strong { min-height: 18px; font-size: 15px; }
   .vehicle-home-card-top span { font-size: 7px; }
   .vehicle-home-card-image { height: 108px; }
   .vehicle-home-card-specs { min-height: 36px; padding: 5px 7px 6px; }
   .vehicle-home-card-specs small { font-size: 5.5px; }
   .vehicle-home-card-specs b { font-size: 6.5px; }
 }
+
+.language-toggle { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0 14px; margin: 5px 10px 5px 8px; border: 1px solid rgba(255,255,255,.65); border-radius: 2px; background: #fff; color: var(--red); font-size: 10px; font-weight: 700; white-space: nowrap; }
+.language-toggle:hover { background: var(--red); color: #fff; border-color: var(--red); }
+html[dir='rtl'] body { font-family: 'DM Sans', Tahoma, Arial, sans-serif; }
+html[dir='rtl'] .main-nav-inner { direction: rtl; }
+html[dir='rtl'] .language-toggle { margin-right: 8px; margin-left: 10px; font-family: Tahoma, Arial, sans-serif; }
+html[dir='rtl'] .search-drawer, html[dir='rtl'] .main-nav { text-align: right; }
+html[dir='rtl'] .search-drawer { right: auto; left: 0; box-shadow: 14px 0 38px rgba(0,0,0,.16); }
+html[dir='rtl'] .drawer-search-form > div { direction: rtl; }
+html[dir='rtl'] .drawer-search-form button { order: -1; }
+html[dir='rtl'] .section-heading, html[dir='rtl'] .booking-form-heading, html[dir='rtl'] .cart-panel-heading, html[dir='rtl'] .cart-total { direction: rtl; }
+html[dir='rtl'] .vehicle-home-card, html[dir='rtl'] .vehicle-home-card-top, html[dir='rtl'] .vehicle-home-card-specs { text-align: right; }
+html[dir='rtl'] .vehicle-home-card-specs { direction: rtl; }
+html[dir='rtl'] .footer-main, html[dir='rtl'] .footer-bottom { direction: rtl; }
+html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-align: right; }
 
 `;
 
@@ -727,11 +743,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body>
         <style>{globalStyles}</style>
-      <CartProvider>
-        <Header />
-        {children}
-        <Footer />
-      </CartProvider>
+      <LanguageProvider>
+        <CartProvider>
+          <Header />
+          {children}
+          <Footer />
+        </CartProvider>
+      </LanguageProvider>
       </body>
     </html>
   );

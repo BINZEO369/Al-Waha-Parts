@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import { useCart } from './CartProvider';
+import { useLanguage } from './LanguageProvider';
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -50,6 +51,7 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const { itemCount } = useCart();
+  const { locale, toggle: toggleLanguage } = useLanguage();
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -85,8 +87,11 @@ export function Header() {
             <Link className={index === 0 ? 'active' : ''} href={item.href} key={item.label} onClick={closePanels}>{item.label}</Link>
           ))}
           <button className="nav-search-button" type="button" onClick={() => { setMenuOpen(false); setSearchOpen(true); }}><SearchIcon /> Search catalog</button>
+          <button className="language-toggle" type="button" data-no-translate onClick={toggleLanguage} aria-label={locale === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}>
+            {locale === 'ar' ? 'English' : 'العربية (السعودية)'}
+          </button>
         </div>
-      </nav>
+          </nav>
       {menuOpen && <button className="menu-drawer-backdrop" type="button" aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
 
       {searchOpen && (
