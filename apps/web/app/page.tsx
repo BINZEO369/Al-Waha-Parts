@@ -597,8 +597,28 @@ export default function Home() {
           text-align: center;
         }
         .popular-cars-title-box::after { display: none; }
+        .popular-categories-heading {
+          width: 100%;
+          align-items: center;
+          flex-direction: row;
+          justify-content: center !important;
+          margin-bottom: 22px;
+        }
+        .popular-categories-title-box {
+          display: inline-block;
+          margin: 0;
+          padding: 12px 22px;
+          border: 1px solid var(--red);
+          color: var(--red);
+          font-family: Montserrat, sans-serif;
+          font-size: 21px;
+          letter-spacing: -.03em;
+          text-align: center;
+        }
+        .popular-categories-title-box::after { display: none; }
         @media (max-width: 520px) {
           .popular-cars-title-box { padding: 10px 16px; font-size: 18px; }
+          .popular-categories-title-box { padding: 10px 16px; font-size: 18px; }
         }
       `}</style>
 
@@ -662,14 +682,8 @@ export default function Home() {
           className="store-section category-promo-section"
           aria-label="Popular categories"
         >
-          <div className="section-heading">
-            <div>
-              <span className="section-kicker">Browse the live catalog</span>
-              <h2>Popular Categories</h2>
-            </div>
-            <Link className="section-link" href="/category">
-              View all categories <ArrowIcon />
-            </Link>
+          <div className="section-heading popular-categories-heading">
+            <h2 className="popular-categories-title-box">Popular Categories</h2>
           </div>
           <div className="category-promo-grid">
             {popularCategories.map((category) => (
