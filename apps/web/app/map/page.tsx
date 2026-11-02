@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import styles from './MapPage.module.css';
 
-const locationUrl = 'https://maps.app.goo.gl/mBqvYy2GFiazoLx8AA';
-const mapEmbedUrl = 'https://www.google.com/maps?q=Al%20Waha%20Parts%20UAE&output=embed';
+const locationUrl = 'https://maps.app.goo.gl/mBqvYy2GFiazoLx8A';
+const mapEmbedUrl = 'https://www.google.com/maps?q=30.9003452,75.85667325&z=18&output=embed';
 
 function MapPinIcon() {
   return (
@@ -20,13 +20,13 @@ export default function MapPage() {
         <div>
           <span className="section-kicker">Al Waha Parts / UAE</span>
           <h1>Find our location.</h1>
-          <p>Use the map preview below, then open the exact live Google Maps location for turn-by-turn directions.</p>
+          <p>Use the zoomed map below, then open the exact live Google Maps location for turn-by-turn directions.</p>
           <div className={styles.actions}>
             <a className="button" href={locationUrl} target="_blank" rel="noreferrer">Open live location <span>↗</span></a>
             <Link className="text-link" href="/contact">Contact the parts desk <span>→</span></Link>
           </div>
         </div>
-        <div className={styles.badge}><MapPinIcon /><strong>Our location</strong><span>Dubai, United Arab Emirates</span></div>
+        <div className={styles.badge}><MapPinIcon /><strong>Our location</strong><span>Al Waha Car Scrap, Al Jubail 35428, Saudi Arabia</span></div>
       </section>
       <section className={styles.mapCard} aria-label="Al Waha Parts map">
         <iframe title="Al Waha Parts location map" src={mapEmbedUrl} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
