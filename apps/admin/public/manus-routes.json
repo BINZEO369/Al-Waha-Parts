@@ -5,6 +5,7 @@
     { "path": "/parts", "title": "Parts" },
     { "path": "/vehicles", "title": "Vehicles" },
     { "path": "/categories", "title": "Categories" },
+    { "path": "/banners", "title": "Hero banners" },
     { "path": "/bookings", "title": "Bookings" },
     { "path": "/admins", "title": "Admins" },
     { "path": "/settings", "title": "Settings" },

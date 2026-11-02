@@ -438,6 +438,15 @@ button {
   color: var(--red);
   background: var(--red-pale);
 }
+.status.inactive,
+.status.suspended {
+  color: #95616a;
+  background: #f7e8eb;
+}
+.status.archived {
+  color: #6e737b;
+  background: #eff0f2;
+}
 .status.cancelled {
   color: #95616a;
   background: #f7e8eb;
@@ -654,6 +663,18 @@ button {
   font-size: 23px;
   font-weight: 800;
   box-shadow: 0 15px 28px rgba(229, 35, 47, 0.2);
+}
+.admin-dashboard-hero {
+  margin-bottom: 24px;
+}
+.dashboard-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+.dashboard-hero-actions a {
+  min-height: 44px;
 }
 .info-grid {
   grid-template-columns: repeat(3, 1fr);
@@ -1057,6 +1078,37 @@ button {
 .resource-toolbar {
   margin-bottom: 14px;
 }
+.availability-filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+@media (max-width: 1050px) {
+  .resource-toolbar .availability-filter {
+    grid-column: 1 / -1;
+  }
+}
+.availability-filter-button {
+  padding: 10px 11px;
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.availability-filter-button[aria-pressed='true'] {
+  color: var(--red);
+  border-color: #f3bcc1;
+  background: var(--red-pale);
+}
+.availability-filter-button span {
+  margin-left: 3px;
+  color: #a0a3a8;
+  font: 9px 'DM Mono';
+}
 .resource-list {
   display: grid;
   gap: 0;
@@ -1068,7 +1120,7 @@ button {
 }
 .resource-row {
   display: grid;
-  grid-template-columns: 42px minmax(180px, 1.5fr) minmax(180px, 1fr) auto 28px;
+  grid-template-columns: 42px minmax(180px, 1.5fr) minmax(180px, 1fr) auto minmax(190px, auto);
   align-items: center;
   gap: 15px;
   min-height: 76px;
@@ -1255,6 +1307,15 @@ select:focus-visible {
   }
   .resource-detail {
     grid-column: 2 / 3;
+  }
+  .resource-toolbar .availability-filter {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .availability-filter select {
+    grid-column: 1 / -1;
+    width: 100%;
   }
   .resource-row > .status {
     grid-column: 3;
@@ -1455,7 +1516,27 @@ select:focus-visible {
 .resource-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 6px;
+}
+.availability-action-button {
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.availability-action-button.activate {
+  color: var(--green);
+  background: var(--green-pale);
+  border-color: #ccebd8;
+}
+.availability-action-button.deactivate {
+  color: #9a4c56;
+  background: var(--red-pale);
+  border-color: #f0cdd1;
 }
 .delete-button {
   padding: 7px 10px;

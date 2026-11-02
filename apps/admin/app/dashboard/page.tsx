@@ -16,6 +16,18 @@ export default function Dashboard() {
   return (
     <div className="admin-page">
       <SectionHeader eyebrow="Operations overview" title="Good morning, parts desk." description="A live view of your catalog, customer requests, and access-controlled operations." action="Add new part" actionHref="/parts" />
+      <section className="workspace-hero red-wash admin-dashboard-hero" aria-labelledby="dashboard-hero-title">
+        <div>
+          <span className="eyebrow"><b>AL WAHA</b>Operations desk</span>
+          <h2 id="dashboard-hero-title">Keep the right parts moving.</h2>
+          <p>Review live inventory, vehicle fitment, and customer requests from one secure workspace.</p>
+          <div className="dashboard-hero-actions">
+            <Link className="primary-button" href="/bookings">Review bookings <span>↗</span></Link>
+            <Link className="secondary-button" href="/parts">Manage inventory <span>↗</span></Link>
+          </div>
+        </div>
+        <div className="hero-mark" aria-hidden="true">AW</div>
+      </section>
       {error && <div className="admin-alert" role="alert">{error}</div>}
       <section className="metric-grid" aria-label="Live totals">
         <MetricCard label="Parts indexed" value={data?.parts ?? '—'} note="Live catalog records" />
