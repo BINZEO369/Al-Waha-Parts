@@ -645,8 +645,8 @@ export default function Home() {
                 </div>
                 <div className="vehicle-home-card-specs">
                   <span><small>Model years</small><b>{vehicle.year_start || '—'}–{vehicle.year_end || 'present'}</b></span>
-                  <span><small>Type</small><b>{vehicle.vehicle_type || 'Vehicle'}</b></span>
-                  <span><small>Fitment</small><b>View parts <span aria-hidden="true">↗</span></b></span>
+                  <span><small>Vehicle type</small><b>{vehicle.vehicle_type || 'Vehicle'}</b></span>
+                  <span><small>Fitment</small><b>View parts <i aria-hidden="true">↗</i></b></span>
                 </div>
               </Link>
             ))}
