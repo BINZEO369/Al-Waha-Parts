@@ -1451,3 +1451,30 @@ select:focus-visible {
     width: 100%;
   }
 }
+
+.resource-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.delete-button {
+  padding: 7px 10px;
+  color: #9a4c56;
+  background: #fff;
+  border: 1px solid #f0cdd1;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+}
+.delete-button:hover {
+  color: #fff;
+  background: #b91521;
+  border-color: #b91521;
+}
+@media (max-width: 760px) {
+  .resource-actions {
+    grid-column: 2 / 4;
+    grid-row: 2;
+    justify-self: end;
+  }
+}

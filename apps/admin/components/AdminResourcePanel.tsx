@@ -168,6 +168,21 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
     [rows, query, status],
   );
   const statuses = Array.from(new Set(rows.map((row) => String(row.status ?? '')).filter(Boolean)));
+  async function remove(row: Resource, title: string) {
+    if (
+      !window.confirm(
+        `Delete ${title}? This will hide it from the storefront and keep its history safe.`,
+      )
+    )
+      return;
+    setError('');
+    try {
+      await adminFetch(`${meta.endpoint}/${row.id}`, { method: 'DELETE' });
+      load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'This record could not be deleted.');
+    }
+  }
 
   return (
     <section className="resource-panel content-section" aria-labelledby={`${kind}-records`}>
@@ -269,16 +284,25 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
                   {text(item.status, 'unknown').replace(/_/g, ' ')}
                 </span>
                 {meta.fields.length > 0 ? (
-                  <button
-                    className="edit-button"
-                    type="button"
-                    onClick={() => {
-                      setCreating(false);
-                      setEditing(row);
-                    }}
-                  >
-                    Edit
-                  </button>
+                  <div className="resource-actions">
+                    <button
+                      className="edit-button"
+                      type="button"
+                      onClick={() => {
+                        setCreating(false);
+                        setEditing(row);
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="delete-button"
+                      type="button"
+                      onClick={() => void remove(row, item.title)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 ) : (
                   <span className="read-only-label">Read only</span>
                 )}
