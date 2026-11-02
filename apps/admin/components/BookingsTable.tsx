@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { apiFetch } from '../../../packages/shared/src/api';
 import { formatSar } from '../../../packages/shared/src/currency';
+import { adminFetch } from '../lib/auth';
 
 type BookingItem = {
   quantity: number;
@@ -36,13 +36,7 @@ export function BookingsTable() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      setError('Admin API is not configured.');
-      setLoading(false);
-      return;
-    }
-    apiFetch<BookingRow[]>(apiUrl, '/api/v1/admin/bookings?limit=100')
+    adminFetch<BookingRow[]>('/api/v1/admin/bookings?limit=100')
       .then(setRows)
       .catch((cause: unknown) => setError(cause instanceof Error ? cause.message : 'Unable to load bookings.'))
       .finally(() => setLoading(false));

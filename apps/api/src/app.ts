@@ -583,6 +583,79 @@ app.get('/api/v1/admin/parts', { preHandler: requireAdmin as any }, async (_requ
   return { data: data ?? [] };
 });
 
+const editablePartFields = [
+  'part_name', 'category_id', 'brand_name', 'sku', 'oem_number', 'part_number', 'description',
+  'condition', 'tested_status', 'price', 'sale_price', 'stock_quantity', 'position', 'status',
+  'slug', 'primary_image_url', 'image_urls', 'tags', 'is_featured', 'sort_order', 'warranty_months',
+  'min_order_quantity', 'reorder_level', 'storage_location', 'currency', 'seo_title', 'seo_description',
+] as const;
+function pickFields(body: Record<string, unknown>, fields: readonly string[]) {
+  return Object.fromEntries(Object.entries(body).filter(([key]) => fields.includes(key)));
+}
+
+app.post('/api/v1/admin/parts', { preHandler: requireAdmin as any }, async (request, reply) => {
+  const body = pickFields((request.body ?? {}) as Record<string, unknown>, editablePartFields);
+  if (!body.part_name || !body.sku || body.price === undefined) return jsonError(reply, 400, 'part_name, sku and price are required');
+  const { data, error } = await getSupabaseAdmin().from('parts').insert(body).select('*,parts_categories(id,category_name,slug)').single();
+  if (error) return jsonError(reply, 400, error.message);
+  return reply.code(201).send({ data });
+});
+
+app.patch('/api/v1/admin/parts/:id', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string }; Body: Record<string, unknown> }>, reply) => {
+  const body = pickFields(request.body ?? {}, editablePartFields);
+  const { data, error } = await getSupabaseAdmin().from('parts').update(body).eq('id', request.params.id).select('*,parts_categories(id,category_name,slug)').single();
+  if (error) return jsonError(reply, 400, error.message);
+  return { data };
+});
+
+const editableVehicleFields = [
+  'manufacturer_name', 'manufacturer_logo', 'vehicle_images', 'model_name', 'generation', 'chassis_code',
+  'year_start', 'year_end', 'engine_code', 'engine_capacity', 'fuel_type', 'transmission', 'vehicle_type',
+  'status', 'slug', 'cover_image_url', 'gallery_images', 'is_featured', 'sort_order', 'seo_title', 'seo_description',
+] as const;
+app.get('/api/v1/admin/vehicles', { preHandler: requireAdmin as any }, async (_request, reply) => {
+  const { data, error } = await getSupabaseAdmin().from('vehicles').select('*').order('sort_order').order('manufacturer_name').order('model_name').limit(500);
+  if (error) return jsonError(reply, 500, error.message);
+  return { data: data ?? [] };
+});
+app.post('/api/v1/admin/vehicles', { preHandler: requireAdmin as any }, async (request, reply) => {
+  const body = pickFields((request.body ?? {}) as Record<string, unknown>, editableVehicleFields);
+  if (!body.manufacturer_name || !body.model_name) return jsonError(reply, 400, 'manufacturer_name and model_name are required');
+  const { data, error } = await getSupabaseAdmin().from('vehicles').insert(body).select().single();
+  if (error) return jsonError(reply, 400, error.message);
+  return reply.code(201).send({ data });
+});
+app.patch('/api/v1/admin/vehicles/:id', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string }; Body: Record<string, unknown> }>, reply) => {
+  const { data, error } = await getSupabaseAdmin().from('vehicles').update(pickFields(request.body ?? {}, editableVehicleFields)).eq('id', request.params.id).select().single();
+  if (error) return jsonError(reply, 400, error.message);
+  return { data };
+});
+
+const editableCategoryFields = ['category_name', 'slug', 'description', 'status', 'image_url', 'icon_name', 'is_featured', 'sort_order', 'seo_title', 'seo_description'] as const;
+app.get('/api/v1/admin/categories', { preHandler: requireAdmin as any }, async (_request, reply) => {
+  const { data, error } = await getSupabaseAdmin().from('parts_categories').select('*').order('sort_order').order('category_name').limit(500);
+  if (error) return jsonError(reply, 500, error.message);
+  return { data: data ?? [] };
+});
+app.post('/api/v1/admin/categories', { preHandler: requireAdmin as any }, async (request, reply) => {
+  const body = pickFields((request.body ?? {}) as Record<string, unknown>, editableCategoryFields);
+  if (!body.category_name || !body.slug) return jsonError(reply, 400, 'category_name and slug are required');
+  const { data, error } = await getSupabaseAdmin().from('parts_categories').insert(body).select().single();
+  if (error) return jsonError(reply, 400, error.message);
+  return reply.code(201).send({ data });
+});
+app.patch('/api/v1/admin/categories/:id', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string }; Body: Record<string, unknown> }>, reply) => {
+  const { data, error } = await getSupabaseAdmin().from('parts_categories').update(pickFields(request.body ?? {}, editableCategoryFields)).eq('id', request.params.id).select().single();
+  if (error) return jsonError(reply, 400, error.message);
+  return { data };
+});
+
+app.get('/api/v1/admin/admins', { preHandler: requireAdmin as any }, async (_request, reply) => {
+  const { data, error } = await getSupabaseAdmin().from('admins').select('id,name,email,role,status,phone,avatar_url,permissions,last_login_at,last_seen_at,created_at,updated_at').order('created_at');
+  if (error) return jsonError(reply, 500, error.message);
+  return { data: data ?? [] };
+});
+
 app.setErrorHandler((error, _request, reply) => {
   app.log.error(error);
   return jsonError(reply, 500, 'Internal server error');

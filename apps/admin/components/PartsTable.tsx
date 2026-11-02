@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { apiFetch } from '../../../packages/shared/src/api';
 import { formatSar } from '../../../packages/shared/src/currency';
+import { adminFetch } from '../lib/auth';
 const fallback = [
   {
     id: '1',
@@ -33,12 +33,7 @@ const fallback = [
 ];
 export function PartsTable() {
   const [rows, setRows] = useState(fallback);
-  useEffect(() => {
-    if (process.env.NEXT_PUBLIC_API_URL)
-      apiFetch<any[]>(process.env.NEXT_PUBLIC_API_URL, '/api/v1/admin/parts')
-        .then(setRows)
-        .catch(() => {});
-  }, []);
+  useEffect(() => { adminFetch<any[]>('/api/v1/admin/parts').then(setRows).catch(() => {}); }, []);
   return (
     <div className="data-table">
       <div className="table-head">
