@@ -690,7 +690,7 @@ export default function Home() {
             {popularCategories.map((category) => (
               <Link
                 className="promo-card promo-card-database category-promo-card"
-                href={`/category?category=${category.id}`}
+                href={category.slug ? `/category/${category.slug}` : '/category'}
                 key={category.id}
               >
                 <div>

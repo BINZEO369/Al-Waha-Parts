@@ -87,6 +87,32 @@ app.get('/api/v1/categories', async (_request, reply) => {
   return { data: data ?? [] };
 });
 
+app.get(
+  '/api/v1/categories/slug/:slug',
+  async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
+    const supabase = getSupabaseAdmin();
+    const { data: category, error: categoryError } = await supabase
+      .from('parts_categories')
+      .select('id,category_name,slug,description,status,image_url,icon_name,is_featured,sort_order')
+      .eq('slug', request.params.slug)
+      .eq('status', 'active')
+      .maybeSingle();
+    if (categoryError) return jsonError(reply, 500, categoryError.message);
+    if (!category) return jsonError(reply, 404, 'Category not found');
+
+    const { data: parts, error: partsError } = await supabase
+      .from('parts')
+      .select('*,parts_categories(id,category_name,slug),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))')
+      .eq('category_id', category.id)
+      .eq('status', 'active')
+      .order('position')
+      .order('part_name')
+      .limit(200);
+    if (partsError) return jsonError(reply, 500, partsError.message);
+    return { data: { category, parts: parts ?? [] } };
+  },
+);
+
 app.get('/api/v1/popular-categories', async (_request, reply) => {
   const importantCategorySlugs = [
     'engine-engine-parts',

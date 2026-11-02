@@ -226,6 +226,18 @@ h1, h2, h3, p { margin-top: 0; }
 .fitment-ok { color: #287d58; }
 .vehicle-products-section { padding-bottom: 30px; }
 .vehicle-products-count { color: #999; font-size: 11px; }
+.category-detail-hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); min-height: 380px; border: 1px solid var(--line); background: #fff; box-shadow: 0 12px 35px rgba(0,0,0,.04); }
+.category-detail-media { min-height: 380px; background: #f7f7f7; }
+.category-detail-media img { width: 100%; height: 100%; min-height: 380px; display: block; object-fit: cover; }
+.category-detail-placeholder { height: 100%; min-height: 380px; display: grid; place-items: center; color: var(--red); font-family: Montserrat, sans-serif; font-size: 45px; font-weight: 800; }
+.category-detail-copy { display: flex; flex-direction: column; justify-content: center; padding: 42px; }
+.category-detail-copy h1 { max-width: 480px; margin: 9px 0 12px; font-family: Montserrat, sans-serif; font-size: clamp(30px, 4vw, 48px); line-height: 1.02; letter-spacing: -.06em; }
+.category-detail-copy p { max-width: 440px; margin: 0 0 26px; color: #777; font-size: 13px; line-height: 1.7; }
+.category-detail-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; padding: 15px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.category-detail-stats div { display: grid; gap: 5px; }
+.category-detail-stats small { color: #999; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
+.category-detail-stats strong { font-size: 12px; }
+.category-products-section { padding: 58px 0 30px; }
 
 /* ---------- FOOTER ---------- */
 .store-footer { background: var(--red); color: #fff; }
@@ -377,6 +389,11 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .vehicle-detail-copy { padding: 26px 20px; }
   .vehicle-detail-specs { gap: 8px; }
   .vehicle-info-strip { grid-template-columns: 1fr 1fr; margin-bottom: 40px; padding: 16px; }
+  .category-detail-hero { grid-template-columns: 1fr; }
+  .category-detail-media, .category-detail-media img, .category-detail-placeholder { min-height: 250px; height: 250px; }
+  .category-detail-copy { padding: 26px 20px; }
+  .category-detail-stats { gap: 8px; }
+  .category-products-section { padding-top: 40px; }
   .wide-feature { margin: 0 14px 42px; padding: 35px 24px 10px; display: block; }
   .wide-feature-art { height: 190px; }
   .wide-feature-art img { height: 200px; }
