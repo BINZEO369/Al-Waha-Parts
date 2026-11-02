@@ -1,21 +1,5 @@
-export default function Page() {
-  return (
-    <div className="admin-page">
-      <header className="admin-topbar">
-        <div>
-          <span className="admin-kicker">Operations</span>
-          <h1>Vehicle library.</h1>
-        </div>
-        <button className="admin-button">+ Add new</button>
-      </header>
-      <div className="placeholder-panel">
-        <div className="placeholder-icon">AWP</div>
-        <h2>Manage manufacturers, generations and fitment data.</h2>
-        <p>
-          This workspace is connected to the database schema and ready for the next data-management
-          action.
-        </p>
-      </div>
-    </div>
-  );
+import { SectionHeader, WorkspaceCard, InfoStrip } from '../../components/AdminSection';
+
+export default function Vehicles() {
+  return <div className="admin-page"><SectionHeader eyebrow="Fitment library / section 03" title="Vehicle library" description="Keep manufacturers, generations, and fitment relationships ready for confident part matching." action="Add vehicle" /><section className="workspace-hero"><div><span className="eyebrow"><b>03</b>Fitment foundation</span><h2>Every part starts with the right vehicle.</h2><p>This workspace is connected to the live vehicle schema. Build a clean fitment library that helps customers and staff find the right match quickly.</p></div><div className="hero-mark">VH</div></section><div className="info-grid"><InfoStrip label="Manufacturers">Organised by make</InfoStrip><InfoStrip label="Generations">Ready for fitment</InfoStrip><InfoStrip label="Relationships">Linked to parts</InfoStrip></div><div className="workspace-grid"><WorkspaceCard number="03A" label="Vehicle records" title="Manufacturers and models." description="Add clean names, years, chassis codes, and media for every supported vehicle." action="Manage records" /><WorkspaceCard number="03B" label="Fitment links" title="Make matching dependable." description="Connect vehicles to active parts so the catalog can answer with confidence." action="Open relationships" /></div></div>;
 }

@@ -1,21 +1,5 @@
-export default function Page() {
-  return (
-    <div className="admin-page">
-      <header className="admin-topbar">
-        <div>
-          <span className="admin-kicker">Operations</span>
-          <h1>Part categories.</h1>
-        </div>
-        <button className="admin-button">+ Add new</button>
-      </header>
-      <div className="placeholder-panel">
-        <div className="placeholder-icon">AWP</div>
-        <h2>Organise the catalog with clean customer-facing categories.</h2>
-        <p>
-          This workspace is connected to the database schema and ready for the next data-management
-          action.
-        </p>
-      </div>
-    </div>
-  );
+import { SectionHeader, WorkspaceCard, InfoStrip } from '../../components/AdminSection';
+
+export default function Categories() {
+  return <div className="admin-page"><SectionHeader eyebrow="Catalog structure / section 04" title="Part categories" description="Organise the catalog with clear customer-facing groups, ordering, and featured collections." action="Add category" /><section className="workspace-hero red-wash"><div><span className="eyebrow"><b>04</b>Catalog architecture</span><h2>Make the next right part easy to find.</h2><p>Categories shape the storefront experience. Keep names, descriptions, imagery, and ordering consistent for customers and the parts desk.</p></div><div className="hero-mark">CT</div></section><div className="info-grid"><InfoStrip label="Navigation">Clear catalog paths</InfoStrip><InfoStrip label="Featured groups">Curated discovery</InfoStrip><InfoStrip label="Ordering">Intentional priority</InfoStrip></div><div className="workspace-grid"><WorkspaceCard number="04A" label="Customer-facing" title="Simple, useful labels." description="Keep category names direct and descriptions practical for real workshop searches." action="Manage groups" /><WorkspaceCard number="04B" label="Merchandising" title="Feature what matters." description="Set featured states and ordering to guide discovery without clutter." action="Review featured" /></div></div>;
 }

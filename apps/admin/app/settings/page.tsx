@@ -1,21 +1,5 @@
-export default function Page() {
-  return (
-    <div className="admin-page">
-      <header className="admin-topbar">
-        <div>
-          <span className="admin-kicker">Operations</span>
-          <h1>Workspace settings.</h1>
-        </div>
-        <button className="admin-button">+ Add new</button>
-      </header>
-      <div className="placeholder-panel">
-        <div className="placeholder-icon">AWP</div>
-        <h2>API, Supabase and environment settings are managed in Vercel.</h2>
-        <p>
-          This workspace is connected to the database schema and ready for the next data-management
-          action.
-        </p>
-      </div>
-    </div>
-  );
+import { SectionHeader, WorkspaceCard, InfoStrip } from '../../components/AdminSection';
+
+export default function Settings() {
+  return <div className="admin-page"><SectionHeader eyebrow="System health / section 07" title="Workspace settings" description="Understand the connections behind the operations desk and keep production configuration intentional." /><section className="workspace-hero dark-wash"><div><span className="eyebrow"><b>07</b>Production readiness</span><h2>Quiet systems. Clear signals.</h2><p>Environment variables and deployment controls stay managed in Vercel. This page gives the team a simple place to understand system state.</p></div><div className="hero-mark">ST</div></section><div className="info-grid"><InfoStrip label="API">Healthy</InfoStrip><InfoStrip label="Supabase">Connected</InfoStrip><InfoStrip label="Deployment">Production live</InfoStrip></div><div className="workspace-grid"><WorkspaceCard number="07A" label="Connections" title="One source of truth." description="The admin, API, and storefront use the same production Supabase project and deployment configuration." action="View runbook" /><WorkspaceCard number="07B" label="Operations" title="Keep the desk dependable." description="Use health checks, clear environment names, and explicit releases when making changes." action="Open deployment notes" /></div></div>;
 }

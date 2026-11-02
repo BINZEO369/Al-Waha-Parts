@@ -1,21 +1,5 @@
-export default function Page() {
-  return (
-    <div className="admin-page">
-      <header className="admin-topbar">
-        <div>
-          <span className="admin-kicker">Operations</span>
-          <h1>Admin access.</h1>
-        </div>
-        <button className="admin-button">+ Add new</button>
-      </header>
-      <div className="placeholder-panel">
-        <div className="placeholder-icon">AWP</div>
-        <h2>Manage who can access the Al Waha Parts operations desk.</h2>
-        <p>
-          This workspace is connected to the database schema and ready for the next data-management
-          action.
-        </p>
-      </div>
-    </div>
-  );
+import { SectionHeader, WorkspaceCard, InfoStrip } from '../../components/AdminSection';
+
+export default function Admins() {
+  return <div className="admin-page"><SectionHeader eyebrow="Team access / section 06" title="Admin access" description="Control who can enter the operations desk and keep every role accountable." action="Invite admin" /><section className="workspace-hero dark-wash"><div><span className="eyebrow"><b>06</b>Access control</span><h2>Secure access, clear responsibility.</h2><p>Only confirmed Supabase users with an active admin record can access live operations. Keep the team small, current, and easy to review.</p></div><div className="hero-mark">AD</div></section><div className="info-grid"><InfoStrip label="Authentication">Supabase verified</InfoStrip><InfoStrip label="Authorisation">Active admin records</InfoStrip><InfoStrip label="Session">Bearer protected</InfoStrip></div><div className="workspace-grid"><WorkspaceCard number="06A" label="People" title="Know who is inside." description="Review names, emails, roles, and active status before granting access." action="Review admins" /><WorkspaceCard number="06B" label="Permissions" title="Match access to responsibility." description="Keep admin, operations, and catalog responsibilities clear as the team grows." action="Review roles" /></div></div>;
 }

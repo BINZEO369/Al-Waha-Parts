@@ -27,3 +27,9 @@
 ## Storefront currency and responsive polish are consistent
 - Product and booking amounts must display in AED, matching the database currency.
 - Cart rows, the menu search drawer, hero CTA, and form controls must remain usable at mobile widths without changing the established Al Waha visual language.
+
+## Admin dashboard becomes responsive and production-ready
+- The admin shell must use a clearly named red-and-white section navigation on desktop and a touch-friendly mobile navigation on small screens.
+- Dashboard, inventory, bookings, vehicles, categories, admin access, and settings must each have a clear heading, purpose copy, primary action, responsive cards or panels, and honest live/loading/empty/error states.
+- Tables, cards, filters, buttons, forms, status badges, and spacing must remain legible and usable on both phone and desktop widths.
+- The visual system must consistently use white surfaces, charcoal text, and Al Waha red for active states and actions.

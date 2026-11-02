@@ -28,3 +28,16 @@
 - **Brand voice:** “Send what you know. We’ll confirm the match.” / “No payment is taken online.”
 - **Wordmark:** preserve the existing Al Waha Parts wordmark and layout.
 - **Signature brand color:** the existing red accent.
+
+
+# Admin redesign addendum
+
+## Design direction
+
+**Style options:** editorial operations desk (0.06), monochrome control room (0.08), red-white service console (0.86). Chosen: red-white service console.
+
+- Swiss-style operations dashboard with automotive service energy.
+- White surfaces keep inventory readable; charcoal creates structure; Al Waha red is reserved for action, active navigation, and alerts.
+- Fixed desktop rail with compact mobile header and horizontally scrollable section navigation.
+- Every section gets a clear title, purpose, primary action, and explicit loading/empty/error state.
+- Manrope handles interface text; DM Mono handles labels, codes, statuses, and metadata.
