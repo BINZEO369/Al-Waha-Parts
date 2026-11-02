@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
-  <title>Al Waha Parts</title>
-  <rect width="64" height="64" rx="14" fill="#e5232f"/>
-  <path d="M12 45 24 16h8l12 29h-8l-2.5-7H22.5L20 45Zm13-13h6l-3-8.5Z" fill="#fff"/>
-  <path d="M43 16h5.5C54.3 16 58 19 58 24s-3.7 8-9.5 8H50v13h-7Zm7 10c1.5 0 2.5-.7 2.5-2s-1-2-2.5-2H50v4Z" fill="#fff"/>
-</svg>

@@ -755,9 +755,9 @@ export const metadata: Metadata = {
   description:
     'Shop quality automotive parts, wheels, brakes and suspension with fitment support across the UAE.',
   icons: {
-    icon: '/icon.svg',
-    shortcut: '/icon.svg',
-    apple: '/icon.svg',
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
   },
 };
 export default function RootLayout({ children }: { children: ReactNode }) {
