@@ -13,7 +13,7 @@ export default function HeroBanners() {
         <div>
           <span className="eyebrow"><b>08</b>Homepage presentation</span>
           <h2 id="hero-management-title">Shape the first impression.</h2>
-          <p>Edit a banner to update it, or delete it to archive it and remove it from the live storefront.</p>
+          <p>Edit a banner to update it, or permanently delete it from the database and live storefront.</p>
         </div>
         <div className="hero-mark" aria-hidden="true">HB</div>
       </section>

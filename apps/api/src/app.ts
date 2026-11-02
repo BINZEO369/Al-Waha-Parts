@@ -663,9 +663,9 @@ app.delete(
   async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
     const { data, error } = await getSupabaseAdmin()
       .from('hero_banners')
-      .update({ status: 'archived', updated_at: new Date().toISOString() })
+      .delete()
       .eq('id', request.params.id)
-      .select('id,status')
+      .select('id')
       .single();
     if (error) return jsonError(reply, 404, 'Hero banner could not be deleted.');
     return { data };

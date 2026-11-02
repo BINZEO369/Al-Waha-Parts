@@ -198,7 +198,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
   async function remove(row: Resource, title: string) {
     const confirmation =
       kind === 'banners'
-        ? `Delete ${title}? It will be archived and removed from the live storefront, but its record will be kept.`
+        ? `Permanently delete ${title}? It will be removed from the database and live storefront. This cannot be undone.`
         : `Delete ${title}? This will hide it from the storefront and keep its history safe.`;
     if (!window.confirm(confirmation))
       return;
