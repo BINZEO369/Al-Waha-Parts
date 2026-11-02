@@ -146,7 +146,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = locale === 'ar' ? 'ar-SA' : 'en';
-    document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+    // Translate text only. The approved storefront composition, menu order and spacing stay LTR.
+    document.documentElement.dir = 'ltr';
     window.localStorage.setItem(STORAGE_KEY, locale);
     translateDocument(locale);
     const observer = new MutationObserver(() => translateDocument(locale));
