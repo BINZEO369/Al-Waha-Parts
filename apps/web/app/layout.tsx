@@ -590,8 +590,16 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .vehicle-home-card-specs { padding: 8px 10px 11px; gap: 5px; }
 }
 @media (max-width: 480px) {
-  .vehicle-home-grid { grid-template-columns: 1fr; }
-  .vehicle-home-card-image { height: 180px; }
+  .vehicle-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .vehicle-home-card-top { min-height: 62px; padding: 9px 9px 3px; gap: 3px; }
+  .vehicle-home-card-top small { font-size: 8px; }
+  .vehicle-home-card-top strong { min-height: 26px; font-size: 10px; line-height: 1.08; letter-spacing: .02em; }
+  .vehicle-home-card-top span { font-size: 7px; }
+  .vehicle-home-card-image { height: 105px; }
+  .vehicle-home-card-image img { padding: 4px; }
+  .vehicle-home-card-specs { padding: 7px 7px 9px; gap: 3px; }
+  .vehicle-home-card-specs small { font-size: 6px; }
+  .vehicle-home-card-specs b { font-size: 7px; }
 }
 
 
