@@ -1,0 +1,122 @@
+[
+  {
+    "sort_order": 1,
+    "name": "Engine & Engine Parts",
+    "slug": "engine-engine-parts",
+    "image_url": "/categories/img1.png"
+  },
+  {
+    "sort_order": 2,
+    "name": "Transmission & Drivetrain",
+    "slug": "transmission-drivetrain",
+    "image_url": "/categories/img2.png"
+  },
+  {
+    "sort_order": 3,
+    "name": "Suspension & Steering",
+    "slug": "suspension-steering",
+    "image_url": "/categories/img3.png"
+  },
+  {
+    "sort_order": 4,
+    "name": "Braking System",
+    "slug": "braking-system",
+    "image_url": "/categories/img4.png"
+  },
+  {
+    "sort_order": 5,
+    "name": "Electrical & Electronics",
+    "slug": "electrical-electronics",
+    "image_url": "/categories/img5.png"
+  },
+  {
+    "sort_order": 6,
+    "name": "Cooling System",
+    "slug": "cooling-system",
+    "image_url": "/categories/img6.png"
+  },
+  {
+    "sort_order": 7,
+    "name": "Fuel System",
+    "slug": "fuel-system",
+    "image_url": "/categories/img7.png"
+  },
+  {
+    "sort_order": 8,
+    "name": "Air Intake & Exhaust",
+    "slug": "air-intake-exhaust",
+    "image_url": "/categories/img8.png"
+  },
+  {
+    "sort_order": 9,
+    "name": "Body Parts & Exterior",
+    "slug": "body-parts-exterior",
+    "image_url": "/categories/img9.png"
+  },
+  {
+    "sort_order": 10,
+    "name": "Interior Parts & Accessories",
+    "slug": "interior-parts-accessories",
+    "image_url": "/categories/img10.png"
+  },
+  {
+    "sort_order": 11,
+    "name": "Lighting & Lamps",
+    "slug": "lighting-lamps",
+    "image_url": "/categories/img11.png"
+  },
+  {
+    "sort_order": 12,
+    "name": "Wheels & Tyres",
+    "slug": "wheels-tyres",
+    "image_url": "/categories/img12.png"
+  },
+  {
+    "sort_order": 13,
+    "name": "Battery & Charging",
+    "slug": "battery-charging",
+    "image_url": "/categories/img13.png"
+  },
+  {
+    "sort_order": 14,
+    "name": "Filters & Maintenance",
+    "slug": "filters-maintenance",
+    "image_url": "/categories/img14.png"
+  },
+  {
+    "sort_order": 15,
+    "name": "HVAC & Air Conditioning",
+    "slug": "hvac-air-conditioning",
+    "image_url": "/categories/img15.png"
+  },
+  {
+    "sort_order": 16,
+    "name": "Safety & Security",
+    "slug": "safety-security",
+    "image_url": "/categories/img16.png"
+  },
+  {
+    "sort_order": 17,
+    "name": "Performance Parts",
+    "slug": "performance-parts",
+    "image_url": "/categories/img17.png"
+  },
+  {
+    "sort_order": 18,
+    "name": "Car Accessories",
+    "slug": "car-accessories",
+    "image_url": "/categories/img18.png"
+  },
+  {
+    "sort_order": 19,
+    "name": "Oils & Fluids",
+    "slug": "oils-fluids",
+    "image_url": "/categories/img19.png"
+  },
+  {
+    "sort_order": 20,
+    "name": "Tools & Equipment",
+    "slug": "tools-equipment",
+    "image_url": "/categories/img20.png"
+  }
+]
