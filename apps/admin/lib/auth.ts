@@ -1,11 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+const key =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+  '';
 
-export const supabase = url && key
-  ? createClient(url, key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } })
-  : null;
+export const supabase =
+  url && key
+    ? createClient(url, key, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+      })
+    : null;
 
 function redirectToLogin() {
   if (typeof window === 'undefined') return;
@@ -14,16 +20,18 @@ function redirectToLogin() {
 }
 
 async function requestWithSession(path: string, init: RequestInit, accessToken: string) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!apiUrl) throw new Error('Admin API is not configured.');
-  return fetch(`${apiUrl.replace(/\/$/, '')}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-      ...(init.headers ?? {}),
-    },
-  });
+  try {
+    return await fetch(`/api/proxy${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        ...(init.headers ?? {}),
+      },
+    });
+  } catch {
+    throw new Error('Unable to reach the admin API. Check the API deployment and API_URL setting.');
+  }
 }
 
 export async function adminFetch<T>(path: string, init: RequestInit = {}): Promise<T> {

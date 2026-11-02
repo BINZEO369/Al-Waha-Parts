@@ -144,6 +144,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
 
   const load = () => {
     setLoading(true);
+    setError('');
     adminFetch<Resource[]>(meta.endpoint)
       .then(setRows)
       .catch((cause: unknown) =>
