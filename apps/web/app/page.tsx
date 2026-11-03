@@ -583,7 +583,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           align-items: center;
           justify-content: center;
           gap: 12px;
-          border: 2px solid #d8d8d8;
+          border: 1px solid var(--red);
           border-radius: 2px;
           background: #fff;
           color: inherit;
