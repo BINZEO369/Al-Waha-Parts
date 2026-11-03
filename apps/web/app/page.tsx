@@ -30,13 +30,6 @@ type Category = {
   sort_order?: number;
 };
 
-type Brand = {
-  name: string;
-  slug: string;
-  logo_url?: string | null;
-  product_count?: number;
-};
-
 type Part = {
   id: string;
   slug?: string | null;
@@ -567,7 +560,6 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 export default function Home() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const [popularCategories, setPopularCategories] = useState<Category[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
   const [parts, setParts] = useState<Part[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [carBrands, setCarBrands] = useState<CarBrand[]>([]);
@@ -586,13 +578,11 @@ export default function Home() {
 
     Promise.all([
       apiFetch<Category[]>(apiUrl, '/api/v1/popular-categories?limit=200'),
-      apiFetch<Brand[]>(apiUrl, '/api/v1/brands?limit=12'),
       apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=200&featured_only=true'),
       apiFetch<Vehicle[]>(apiUrl, '/api/v1/homepage-selected-vehicles?limit=200'),
     ])
-      .then(([nextPopularCategories, nextBrands, nextParts, nextVehicles]) => {
+      .then(([nextPopularCategories, nextParts, nextVehicles]) => {
         setPopularCategories(nextPopularCategories);
-        setBrands(nextBrands);
         setParts(nextParts);
         setVehicles(nextVehicles);
       })
@@ -748,22 +738,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* 5. POPULAR BRANDS */}
-      {!loading && brands.length > 0 && (
-        <section className="store-section home-brands-section" aria-label="Popular brands">
-          <div className="section-heading"><div><span className="section-kicker">Trusted inventory</span><h2>Popular Brands</h2></div></div>
-          <div className="home-brands-grid">
-            {brands.map((brand) => (
-              <Link className="home-brand-card" href={`/brands/${brand.slug}`} key={brand.slug}>
-                <div className="home-brand-logo">{brand.name.slice(0, 2).toUpperCase()}</div>
-                <strong>{brand.name}</strong>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 6. NEW ARRIVALS / PARTS */}
+      {/* 5. NEW ARRIVALS / PARTS */}
       {!loading && homeSelectedParts.length > 0 && (
         <section className="store-section arrivals-section">
           <div className="section-heading arrivals-heading">
@@ -818,7 +793,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* 7. EMPTY STATE */}
+      {/* 6. EMPTY STATE */}
       {!loading &&
         !popularCategories.length &&
         !homeSelectedParts.length &&
@@ -833,7 +808,7 @@ export default function Home() {
           </section>
         )}
 
-      {/* 8. SERVICE STRIP */}
+      {/* 7. SERVICE STRIP */}
       <section className="store-section service-strip">
         <div>
           <strong>Database-first catalog</strong>
