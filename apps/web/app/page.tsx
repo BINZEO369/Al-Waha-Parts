@@ -98,12 +98,28 @@ function ArrowIcon() {
   );
 }
 
+const HeroIcons = () => (
+  <div className="hero-icon-strip">
+    {[
+      { name: 'Tires', icon: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z' },
+      { name: 'Engine', icon: 'M4 10h2l2-4h8l2 4h2v6h-2v2h-4v-2H8v2H4v-2H2v-6h2zm4 0h4v2H8v-2z' },
+      { name: 'Battery', icon: 'M4 6h16v12H4V6zm2 4v4h4v-4H6zm6 0v4h4v-4h-4z' },
+      { name: 'Oil', icon: 'M12 2C8 2 4 6 4 10c0 5 4 10 8 12 4-2 8-7 8-12 0-4-4-8-8-8zm0 14a4 4 0 1 1 0-8 4 4 0 0 1 0 8z' },
+      { name: 'Brake', icon: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12z' },
+      { name: 'Diagnostics', icon: 'M3 12h4l3 8 4-16 3 8h4' }
+    ].map((item) => (
+      <div className="hero-icon-item" key={item.name}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d={item.icon} strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span>{item.name}</span>
+      </div>
+    ))}
+  </div>
+);
+
 /* ==================================================================
  *  HERO CAROUSEL
- *  - শুধু ডেটাবেজ থেকে (কোনো fallback নেই)
- *  - টেক্সট ইমেজের উপরে overlay
- *  - object-fit: contain → কোনো জুম / ক্রপ হবে না
- *  - ডেটা না থাকলে সেকশন সম্পূর্ণ hide
  * ================================================================== */
 
 function HeroCarousel() {
@@ -112,7 +128,6 @@ function HeroCarousel() {
   const [loading, setLoading] = useState(true);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  /* ---- API থেকে ব্যানার লোড ---- */
   useEffect(() => {
     if (!apiUrl) {
       setLoading(false);
@@ -125,7 +140,6 @@ function HeroCarousel() {
       .finally(() => setLoading(false));
   }, [apiUrl]);
 
-  /* ---- অটো স্লাইড ---- */
   useEffect(() => {
     if (banners.length < 2) return;
     const timer = window.setInterval(
@@ -135,544 +149,244 @@ function HeroCarousel() {
     return () => window.clearInterval(timer);
   }, [banners.length]);
 
-  /* ------------------------------------------------------------------
-   *  LOADING — শুধু shimmer skeleton (কোনো fallback ডেটা না)
-   *  ⚠️ এখানে return করার আগে সব hook কল হয়ে গেছে — safe
-   * ------------------------------------------------------------------ */
   if (loading) {
     return (
-      <section
-        className="hero-carousel-root"
-        aria-label="Featured banners loading"
-        aria-busy="true"
-      >
+      <section className="hero-carousel-root" aria-label="Featured banners loading" aria-busy="true">
         <style jsx global>{`
           .hero-carousel-root {
             position: relative;
             width: 100%;
-            height: 500px;
-            overflow: hidden;
+            height: 600px;
             background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
-          .hero-carousel-loading {
+          .shimmer {
             width: 100%;
             height: 100%;
-            background: linear-gradient(
-              90deg,
-              #1a1a1a 25%,
-              #262626 38%,
-              #1a1a1a 63%
-            );
+            background: linear-gradient(90deg, #1a1a1a 25%, #262626 38%, #1a1a1a 63%);
             background-size: 400% 100%;
             animation: shimmer 1.25s ease infinite;
           }
-          @keyframes shimmer {
-            to {
-              background-position: -100% 0;
-            }
-          }
-          @media (max-width: 800px) {
-            .hero-carousel-root {
-              height: 420px;
-            }
-          }
-          @media (max-width: 480px) {
-            .hero-carousel-root {
-              height: 360px;
-            }
-          }
+          @keyframes shimmer { to { background-position: -100% 0; } }
         `}</style>
-        <div className="hero-carousel-loading" aria-hidden="true" />
+        <div className="shimmer" aria-hidden="true" />
       </section>
     );
   }
 
-  /* ------------------------------------------------------------------
-   *  ডেটাবেজে কোনো ব্যানার নেই → হিরো সেকশন সম্পূর্ণ render হবে না
-   * ------------------------------------------------------------------ */
-  if (!banners.length) {
-    return null;
-  }
+  if (!banners.length) return null;
 
-  // The active index can briefly be stale while fresh API data replaces the list.
   const banner = banners[active];
-  if (!banner) {
-    return null;
-  }
+  if (!banner) return null;
+
   const hasImage = Boolean(banner.image_url || banner.mobile_image_url);
 
   return (
-    <section
-      className="hero-carousel-root"
-      aria-label="Featured parts banners"
-    >
+    <section className="hero-carousel-root" aria-label="Featured parts banners">
       <style jsx global>{`
         .hero-carousel-root {
           position: relative;
           width: 100%;
-          height: 500px;
+          height: 600px;
           overflow: hidden;
           background: #0d0d0d;
         }
 
-        /* ---- Slide ---- */
         .hero-carousel-slide {
           position: relative;
           width: 100%;
           height: 100%;
           display: flex;
-          align-items: center;
+          align-items: flex-end;
           animation: slide-fade 0.5s ease both;
         }
 
-        /* ---- Media: contain (no zoom, no crop) ---- */
         .hero-carousel-media {
           position: absolute;
           inset: 0;
           z-index: 0;
-          display: block;
           width: 100%;
           height: 100%;
-          overflow: hidden;
-          background:
-            radial-gradient(
-              circle at 70% 30%,
-              rgba(255, 255, 255, 0.05),
-              transparent 55%
-            ),
-            linear-gradient(135deg, #0e0e0e 0%, #171717 50%, #0a0a0a 100%);
         }
 
         .hero-carousel-media img {
-          display: block;
           width: 100%;
           height: 100%;
           object-fit: cover;
-          object-position: center;
+          object-position: center right;
         }
 
-        .hero-carousel-bg-fallback {
-          background:
-            radial-gradient(
-              circle at 20% 30%,
-              rgba(220, 38, 38, 0.32),
-              transparent 60%
-            ),
-            linear-gradient(135deg, #1f1f1f, #2c2c2c 60%, #111);
-        }
-
-        /* ---- Overlay (টেক্সট পড়ার জন্য) ---- */
         .hero-carousel-overlay {
           position: absolute;
           inset: 0;
           z-index: 1;
           background: linear-gradient(
             90deg,
-            rgba(0, 0, 0, 0.8) 0%,
-            rgba(0, 0, 0, 0.55) 38%,
-            rgba(0, 0, 0, 0.18) 72%,
-            rgba(0, 0, 0, 0.05) 100%
+            rgba(0, 0, 0, 0.85) 0%,
+            rgba(0, 0, 0, 0.6) 40%,
+            rgba(0, 0, 0, 0.1) 100%
           );
         }
 
-        /* ---- Copy ---- */
-        .hero-carousel-copy {
+        .hero-carousel-content {
           position: relative;
           z-index: 2;
           width: 100%;
-          height: 100%;
-          box-sizing: border-box;
-          padding: 64px max(22px, calc((100vw - var(--max)) / 2 + 22px));
+          max-width: var(--max);
+          margin: 0 auto;
+          padding: 0 24px 40px;
           color: #fff;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
         }
 
-        .hero-carousel-copy > * {
-          max-width: 560px;
+        .hero-text-area {
+          max-width: 600px;
+          margin-bottom: 60px;
         }
 
-        .hero-carousel-copy .eyebrow {
-          margin: 0 0 14px;
-          color: rgba(255, 255, 255, 0.88);
+        .hero-text-area .eyebrow {
+          margin: 0 0 16px;
+          color: rgba(255, 255, 255, 0.7);
           font-size: 13px;
           font-weight: 500;
-          letter-spacing: 0.02em;
-          line-height: 1.4;
-          text-transform: none;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
         }
 
-        .hero-carousel-copy h1 {
-          margin: 0;
-          color: #fff;
+        .hero-text-area h1 {
+          margin: 0 0 20px;
           font-family: Montserrat, sans-serif;
-          font-size: clamp(40px, 5.4vw, 66px);
-          font-weight: 800;
-          line-height: 1;
-          letter-spacing: -0.04em;
-          text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
-        }
-
-        .hero-carousel-rule {
-          display: block;
-          width: 52px;
-          height: 2px;
-          margin: 18px 0;
-          background: var(--red);
-        }
-
-        .hero-carousel-lede {
-          margin: 0 0 26px;
-          color: rgba(255, 255, 255, 0.88);
-          font-size: 14px;
-          line-height: 1.7;
-        }
-
-        .hero-carousel-actions {
-          display: flex;
-          justify-content: center;
-          width: 100%;
-        }
-        .hero-carousel-actions .button {
-          min-width: 140px;
-          min-height: 46px;
-          padding: 0 24px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid var(--red);
-          background: var(--red);
-          color: #fff;
-          font-size: 12px;
+          font-size: clamp(42px, 5vw, 64px);
           font-weight: 700;
-          text-transform: none;
-          white-space: nowrap;
-          border-radius: 2px;
-          transition:
-            background 0.18s ease,
-            transform 0.18s ease;
+          line-height: 1.1;
+          letter-spacing: -0.02em;
         }
 
-        .hero-carousel-actions :global(.button:hover) {
-          background: var(--red-dark);
-          transform: translateY(-2px);
+        .hero-text-area p {
+          margin: 0 0 32px;
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 15px;
+          line-height: 1.6;
         }
 
-        /* ---- Dots ---- */
-        .hero-carousel-dots {
-          position: absolute;
-          left: 50%;
-          bottom: 22px;
-          z-index: 3;
+        .hero-actions {
           display: flex;
           align-items: center;
-          gap: 9px;
-          transform: translateX(-50%);
+          gap: 24px;
         }
 
-        .hero-carousel-dot {
-          width: 10px;
-          height: 10px;
-          padding: 0;
-          border: 1px solid rgba(255, 255, 255, 0.65);
-          border-radius: 50%;
-          background: transparent;
+        .hero-actions .button {
+          padding: 14px 32px;
+          background: #e51c23;
+          color: #fff;
+          border-radius: 30px;
+          font-size: 14px;
+          font-weight: 600;
+          text-decoration: none;
+          transition: background 0.2s ease;
+        }
+
+        .hero-actions .button:hover {
+          background: #c4161c;
+        }
+
+        .hero-actions .link {
+          color: #fff;
+          font-size: 14px;
+          font-weight: 500;
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        
+        .hero-actions .link:hover {
+          text-decoration: underline;
+        }
+
+        .hero-icon-strip {
+          display: flex;
+          justify-content: flex-start;
+          gap: 40px;
+          padding-top: 30px;
+          border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .hero-icon-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          color: rgba(255, 255, 255, 0.7);
           cursor: pointer;
-          transition:
-            background 0.18s ease,
-            border-color 0.18s ease,
-            transform 0.18s ease;
+          transition: color 0.2s ease;
         }
 
-        .hero-carousel-dot:hover {
-          transform: scale(1.15);
+        .hero-icon-item:hover {
+          color: #fff;
         }
 
-        .hero-carousel-dot.active {
-          border-color: var(--red);
-          background: var(--red);
+        .hero-icon-item svg {
+          width: 28px;
+          height: 28px;
+        }
+
+        .hero-icon-item span {
+          font-size: 11px;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
         @keyframes slide-fade {
-          from {
-            opacity: 0;
-            transform: scale(1.01);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
+          from { opacity: 0; transform: scale(1.02); }
+          to { opacity: 1; transform: scale(1); }
         }
 
-        /* ---- Responsive ---- */
-        @media (max-width: 800px) {
-          .hero-carousel-root,
-          .hero-carousel-slide {
-            height: 420px;
-            min-height: 0;
-          }
-
-          .hero-carousel-overlay {
-            background: linear-gradient(
-              180deg,
-              rgba(0, 0, 0, 0.55) 0%,
-              rgba(0, 0, 0, 0.5) 40%,
-              rgba(0, 0, 0, 0.85) 100%
-            );
-          }
-
-          .hero-carousel-copy {
-            padding: 44px 22px;
-            justify-content: flex-end;
-            min-height: 0;
-          }
-
-          .hero-carousel-copy > * {
-            max-width: 100%;
-          }
-
-          .hero-carousel-copy h1 {
-            font-size: clamp(36px, 9vw, 52px);
-          }
+        @media (max-width: 900px) {
+          .hero-carousel-root { height: 500px; }
+          .hero-text-area { margin-bottom: 40px; }
+          .hero-icon-strip { gap: 20px; overflow-x: auto; padding-bottom: 10px; }
+          .hero-icon-item { flex-shrink: 0; }
         }
 
-        @media (max-width: 480px) {
-          .hero-carousel-root,
-          .hero-carousel-slide {
-            height: 360px;
-            min-height: 0;
-          }
-
-          .hero-carousel-copy {
-            padding: 32px 16px;
-            min-height: 0;
-          }
-
-          .hero-carousel-copy .eyebrow {
-            font-size: 11px;
-            margin-bottom: 10px;
-          }
-
-          .hero-carousel-copy h1 {
-            font-size: clamp(30px, 9.5vw, 40px);
-          }
-
-          .hero-carousel-lede {
-            font-size: 12px;
-            margin-bottom: 20px;
-          }
-
-          .hero-carousel-actions .button {
-            min-height: 42px;
-            font-size: 11px;
-          }
-
-          .hero-carousel-dots {
-            bottom: 16px;
-          }
+        @media (max-width: 600px) {
+          .hero-carousel-root { height: auto; min-height: 600px; }
+          .hero-carousel-slide { padding-top: 100px; }
+          .hero-text-area h1 { font-size: 36px; }
+          .hero-actions { flex-direction: column; align-items: flex-start; gap: 16px; }
+          .hero-icon-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         }
       `}</style>
 
       <div className="hero-carousel-slide" key={banner.id}>
         {hasImage ? (
-          <picture className="hero-carousel-media">
-            {banner.mobile_image_url && (
-              <source
-                media="(max-width: 700px)"
-                srcSet={banner.mobile_image_url}
-              />
-            )}
-            <img
-              src={banner.image_url || banner.mobile_image_url || ''}
-              alt=""
-              aria-hidden="true"
-            />
-          </picture>
+          <div className="hero-carousel-media">
+            <img src={banner.image_url || banner.mobile_image_url || ''} alt="" aria-hidden="true" />
+          </div>
         ) : (
-          <div
-            className="hero-carousel-media hero-carousel-bg-fallback"
-            aria-hidden="true"
-          />
+          <div className="hero-carousel-media" style={{ background: '#222' }} aria-hidden="true" />
         )}
 
         <div className="hero-carousel-overlay" aria-hidden="true" />
 
-        <div className="hero-carousel-copy">
-          <p className="eyebrow">{banner.eyebrow}</p>
-          <h1>{banner.title}</h1>
-          <span className="hero-carousel-rule" aria-hidden="true" />
-          {banner.description && (
-            <p className="hero-carousel-lede">{banner.description}</p>
-          )}
-          <div className="hero-carousel-actions">
-            <Link className="button" href={banner.cta_href}>
-              {banner.cta_label}
-            </Link>
+        <div className="hero-carousel-content">
+          <div className="hero-text-area">
+            <p className="eyebrow">{banner.eyebrow}</p>
+            <h1>{banner.title}</h1>
+            {banner.description && <p>{banner.description}</p>}
+            <div className="hero-actions">
+              <Link className="button" href={banner.cta_href}>
+                {banner.cta_label}
+              </Link>
+              <Link className="link" href={banner.cta_href}>
+                Shop Now <ArrowIcon />
+              </Link>
+            </div>
           </div>
-        </div>
-      </div>
-
-      {banners.length > 1 && (
-        <div className="hero-carousel-dots" aria-label="Select banner">
-          {banners.map((item, index) => (
-            <button
-              key={item.id}
-              type="button"
-              className={
-                index === active
-                  ? 'hero-carousel-dot active'
-                  : 'hero-carousel-dot'
-              }
-              onClick={() => setActive(index)}
-              aria-label={`Show banner ${index + 1}: ${item.title}`}
-              aria-current={index === active ? 'true' : undefined}
-            />
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
-  if (brands.length === 0) return null;
-
-  return (
-    <section className="car-brand-strip" aria-labelledby="car-brand-strip-title">
-      <style jsx>{`
-        .car-brand-strip {
-          box-sizing: border-box;
-          width: 100%;
-          padding: 22px max(18px, calc((100vw - var(--max)) / 2 + 22px)) 28px;
-          border-bottom: 1px solid #ededed;
-          background: #fff;
-        }
-
-        .car-brand-strip-inner {
-          max-width: var(--max);
-          margin: 0 auto;
-        }
-
-        .car-brand-strip h2 {
-          width: fit-content;
-          margin: 0 auto 22px;
-          padding: 12px 22px;
-          border: 1px solid var(--red);
-          color: var(--red);
-          font-family: Montserrat, sans-serif;
-          font-size: 21px;
-          font-weight: 700;
-          letter-spacing: -.03em;
-          text-align: center;
-          text-transform: none;
-        }
-
-        .car-brand-grid {
-          display: grid;
-          grid-template-columns: repeat(8, minmax(0, 1fr));
-          gap: 12px;
-        }
-
-        .car-brand-item {
-          width: 100%;
-          max-width: 150px;
-          min-height: 118px;
-          justify-self: center;
-          box-sizing: border-box;
-          padding: 18px 12px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-          border: 1px solid var(--red);
-          border-radius: 2px;
-          background: #fff;
-          color: inherit;
-          text-decoration: none;
-          box-shadow: none;
-          transform: none;
-          transition: none;
-        }
-
-        .car-brand-item img {
-          display: block;
-          width: 34px;
-          height: 22px;
-          object-fit: contain;
-        }
-
-        .car-brand-item span {
-          color: #414141;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.035em;
-          line-height: 1.2;
-          text-align: center;
-          text-transform: uppercase;
-        }
-
-        @media (max-width: 900px) {
-          .car-brand-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-          }
-        }
-
-        @media (max-width: 520px) {
-          .car-brand-strip {
-            padding: 18px 14px 22px;
-          }
-
-          .car-brand-strip h2 {
-            padding: 10px 16px;
-            font-size: 18px;
-          }
-
-          .car-brand-grid {
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 8px;
-          }
-
-          .car-brand-item {
-            max-width: none;
-            min-height: 100px;
-            padding: 10px 4px;
-            gap: 7px;
-          }
-
-          .car-brand-item img {
-            width: 28px;
-            height: 18px;
-          }
-
-          .car-brand-item span {
-            font-size: 11px;
-          }
-        }
-      `}</style>
-      <div className="car-brand-strip-inner">
-        <h2 id="car-brand-strip-title">Browse by car brand</h2>
-        <div className="car-brand-grid">
-            {brands.map((brand) => (
-              <Link
-                className="car-brand-item"
-                href={`/car-brands/${brand.slug}`}
-                key={brand.id}
-                aria-label={`View ${brand.manufacturer_name} vehicles`}
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  backgroundColor: '#fff',
-                  boxShadow: 'none',
-                  transform: 'none',
-                }}
-              >
-              <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
-              <span>{brand.manufacturer_name}</span>
-            </Link>
-          ))}
+          
+          <HeroIcons />
         </div>
       </div>
     </section>
@@ -681,22 +395,12 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 
 /* ==================================================================
  *  HOME PAGE
- *  সেকশন অর্ডার:
- *    1. Hero Banner
- *    2. Database car-brand logos
- *    3. Popular Vehicles
- *    4. Popular Categories
- *    5. New Arrivals (Parts)
- *    6. Service Strip
  * ================================================================== */
 
 export default function Home() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const [popularCategories, setPopularCategories] = useState<Category[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
   const [parts, setParts] = useState<Part[]>([]);
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [carBrands, setCarBrands] = useState<CarBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -706,287 +410,278 @@ export default function Home() {
       setLoading(false);
       return;
     }
-    void apiFetch<CarBrand[]>(apiUrl, '/api/v1/car-brands')
-      .then((items) => setCarBrands(Array.isArray(items) ? items.slice(0, 10) : []))
-      .catch(() => setCarBrands([]));
 
     Promise.all([
-      apiFetch<Category[]>(apiUrl, '/api/v1/popular-categories?limit=200'),
-      apiFetch<Brand[]>(apiUrl, '/api/v1/brands?limit=12'),
-      apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=200&featured_only=true'),
-      apiFetch<Vehicle[]>(apiUrl, '/api/v1/homepage-selected-vehicles?limit=200'),
+      apiFetch<Category[]>(apiUrl, '/api/v1/popular-categories?limit=5'),
+      apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=4&featured_only=true'),
     ])
-      .then(([nextPopularCategories, nextBrands, nextParts, nextVehicles]) => {
+      .then(([nextPopularCategories, nextParts]) => {
         setPopularCategories(nextPopularCategories);
-        setBrands(nextBrands);
         setParts(nextParts);
-        setVehicles(nextVehicles);
       })
       .catch((cause) => {
         setError(
-          cause instanceof Error
-            ? cause.message
-            : 'Unable to load live database data.',
+          cause instanceof Error ? cause.message : 'Unable to load live database data.'
         );
       })
       .finally(() => setLoading(false));
   }, [apiUrl]);
 
   const homeSelectedParts = parts;
-  const homeSelectedVehicles = vehicles;
 
   return (
     <main className="home-page">
       <style jsx>{`
-        .home-page :global(.section-link:focus-visible),
-        .home-page :global(a:focus-visible),
-        .home-page :global(button:focus-visible),
-        .home-page :global(input:focus-visible) {
-          outline: 2px solid var(--red);
-          outline-offset: 3px;
+        .home-page {
+          background-color: #ffffff;
+          color: #111;
         }
-        .popular-cars-heading {
-          width: 100%;
-          align-items: center;
-          flex-direction: row;
-          justify-content: center !important;
-          margin-bottom: 22px;
+
+        /* Common Section Styles */
+        .section-container {
+          max-width: var(--max);
+          margin: 0 auto;
+          padding: 80px 24px;
         }
-        .popular-cars-title-box {
-          display: inline-block;
+
+        .section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          margin-bottom: 32px;
+        }
+
+        .section-header h2 {
           margin: 0;
-          padding: 12px 22px;
-          border: 1px solid var(--red);
-          color: var(--red);
           font-family: Montserrat, sans-serif;
-          font-size: 21px;
-          letter-spacing: -.03em;
-          text-align: center;
+          font-size: 28px;
+          font-weight: 600;
+          letter-spacing: -0.02em;
         }
-        .popular-cars-title-box::after { display: none; }
-        .popular-categories-heading {
-          width: 100%;
+
+        .view-all-link {
+          display: flex;
           align-items: center;
-          flex-direction: row;
-          justify-content: center !important;
-          margin-bottom: 22px;
+          gap: 8px;
+          color: #666;
+          font-size: 13px;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          text-decoration: none;
         }
-        .popular-categories-title-box {
-          display: inline-block;
-          margin: 0;
-          padding: 12px 22px;
-          border: 1px solid var(--red);
-          color: var(--red);
-          font-family: Montserrat, sans-serif;
-          font-size: 21px;
-          letter-spacing: -.03em;
+
+        .view-all-link:hover {
+          color: #111;
+        }
+
+        .view-all-link svg {
+          width: 16px;
+          height: 16px;
+        }
+
+        /* Browse by Categories Grid */
+        .category-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 20px;
+        }
+
+        .category-card {
+          background: #f8f9fa;
+          border-radius: 8px;
+          padding: 24px 20px;
+          display: flex;
+          flex-direction: column;
+          text-decoration: none;
+          color: inherit;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .category-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .category-card h3 {
+          margin: 0 0 4px;
+          font-size: 16px;
+          font-weight: 600;
+        }
+
+        .category-card p {
+          margin: 0 0 16px;
+          font-size: 12px;
+          color: #666;
+        }
+
+        .category-card .shop-link {
+          font-size: 12px;
+          font-weight: 600;
+          color: #111;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          margin-bottom: 24px;
+        }
+
+        .category-card .shop-link svg {
+          width: 14px;
+          height: 14px;
+        }
+
+        .category-card .category-image {
+          width: 100%;
+          height: 120px;
+          margin-top: auto;
+          object-fit: contain;
+        }
+
+        /* Featured Products Grid */
+        .product-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px;
+        }
+
+        .product-card {
+          background: #fff;
+          border: 1px solid #eee;
+          border-radius: 8px;
+          padding: 20px;
           text-align: center;
+          text-decoration: none;
+          color: inherit;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
-        .popular-categories-title-box::after { display: none; }
-        @media (max-width: 520px) {
-          .popular-cars-title-box { padding: 10px 16px; font-size: 18px; }
-          .popular-categories-title-box { padding: 10px 16px; font-size: 18px; }
+
+        .product-card:hover {
+          border-color: #ddd;
+          box-shadow: 0 10px 20px rgba(0,0,0,0.03);
+        }
+
+        .product-card .product-image-wrap {
+          height: 200px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 20px;
+        }
+
+        .product-card img {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+        }
+
+        .product-card h3 {
+          margin: 0;
+          font-size: 15px;
+          font-weight: 500;
+          color: #333;
+        }
+
+        @media (max-width: 1024px) {
+          .category-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+          .product-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
+        @media (max-width: 768px) {
+          .category-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .product-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 480px) {
+          .category-grid {
+            grid-template-columns: 1fr;
+          }
+          .product-grid {
+            grid-template-columns: 1fr;
+          }
+          .section-header h2 {
+            font-size: 24px;
+          }
         }
       `}</style>
 
-      {/* ----------------------------------------------------------------
-       *  1. HERO BANNER
-       * ---------------------------------------------------------------- */}
+      {/* 1. HERO BANNER */}
       <HeroCarousel />
 
-      {/* 2. CAR BRAND LOGOS (loaded from the database) */}
-      <CarBrandStrip brands={carBrands} />
-
       {error && (
-        <div className="store-section data-alert home-data-alert">{error}</div>
-      )}
-      {loading && (
-        <div className="store-section home-loading">
-          Loading categories, parts and vehicles from the database…
+        <div className="section-container" style={{ color: 'red', textAlign: 'center' }}>
+          {error}
         </div>
       )}
 
-      {/* ----------------------------------------------------------------
-       *  3. POPULAR VEHICLES (car brand logos-এর পরে)
-       * ---------------------------------------------------------------- */}
-      {!loading && homeSelectedVehicles.length > 0 && (
-        <section className="store-section vehicle-home-section">
-          <div className="section-heading popular-cars-heading">
-            <h2 className="popular-cars-title-box">Popular Cars</h2>
-          </div>
-          <div className="vehicle-home-grid">
-            {homeSelectedVehicles.map((vehicle) => (
-              <Link
-                className="vehicle-home-card"
-                href={vehicle.slug ? `/vehicles/${vehicle.slug}` : '/vehicles'}
-                key={vehicle.id}
-              >
-                <div className="vehicle-home-card-top">
-                  <small>{vehicle.year_end || vehicle.year_start || '—'}</small>
-                  <strong>{vehicle.manufacturer_name} {vehicle.model_name}</strong>
-                  <span>{vehicle.generation || vehicle.chassis_code || vehicle.vehicle_type || 'Database fitment'}</span>
-                </div>
-                <div className="vehicle-home-card-image">
-                  {vehicle.cover_image_url ? (
-                    <img src={vehicle.cover_image_url} alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`} />
-                  ) : (
-                    <span className="database-image-empty">No vehicle image</span>
-                  )}
-                </div>
-                <div className="vehicle-home-card-specs">
-                  <span><small>Model years</small><b>{vehicle.year_start || '—'}–{vehicle.year_end || 'present'}</b></span>
-                  <span><small>Vehicle type</small><b>{vehicle.vehicle_type || 'Vehicle'}</b></span>
-                  <span><small>Explore</small><b>View parts <i aria-hidden="true">↗</i></b></span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ----------------------------------------------------------------
-       *  4. POPULAR CATEGORIES (ভেহিকেলের পরে)
-       * ---------------------------------------------------------------- */}
+      {/* 2. BROWSE BY CATEGORIES */}
       {!loading && popularCategories.length > 0 && (
-        <section
-          className="store-section category-promo-section"
-          aria-label="Popular categories"
-        >
-          <div className="section-heading popular-categories-heading">
-            <h2 className="popular-categories-title-box">Popular Categories</h2>
+        <section className="section-container">
+          <div className="section-header">
+            <h2>Browse by Categories</h2>
+            <Link href="/category" className="view-all-link">
+              View All <ArrowIcon />
+            </Link>
           </div>
-          <div className="category-promo-grid">
+          <div className="category-grid">
             {popularCategories.map((category) => (
               <Link
-                className="promo-card promo-card-database category-promo-card"
+                className="category-card"
                 href={category.slug ? `/category/${category.slug}` : '/category'}
                 key={category.id}
               >
-                <div>
-                  <small>Popular category</small>
-                  <strong>{category.category_name.trim()}</strong>
-                  <p>
-                    {category.description ||
-                      'Browse available parts and find the right fit.'}
-                  </p>
-                  <span>
-                    Browse parts <ArrowIcon />
-                  </span>
-                </div>
-                {category.image_url && <img src={category.image_url} alt="" />}
+                <h3>{category.category_name.trim()}</h3>
+                <p>Save 20% off</p>
+                <span className="shop-link">
+                  Shop Now <ArrowIcon />
+                </span>
+                {category.image_url ? (
+                  <img src={category.image_url} alt="" className="category-image" />
+                ) : (
+                  <div className="category-image" style={{ background: '#eee', borderRadius: '4px' }} />
+                )}
               </Link>
             ))}
           </div>
         </section>
       )}
 
-      {!loading && brands.length > 0 && (
-        <section className="store-section home-brands-section" aria-label="Popular brands">
-          <div className="section-heading"><div><span className="section-kicker">Trusted inventory</span><h2>Popular Brands</h2></div></div>
-          <div className="home-brands-grid">
-            {brands.map((brand) => (
-              <Link className="home-brand-card" href={`/brands/${brand.slug}`} key={brand.slug}>
-                <div className="home-brand-logo">{brand.name.slice(0, 2).toUpperCase()}</div>
-                <strong>{brand.name}</strong>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ----------------------------------------------------------------
-       *  5. NEW ARRIVALS / PARTS (ক্যাটাগরির পরে)
-       * ---------------------------------------------------------------- */}
+      {/* 3. FEATURED PRODUCTS */}
       {!loading && homeSelectedParts.length > 0 && (
-        <section className="store-section arrivals-section">
-          <div className="section-heading arrivals-heading">
-            <div>
-              <span className="section-kicker">From the live catalog</span>
-              <h2>New Arrivals</h2>
-            </div>
-            <Link className="section-link" href="/category">
-              Open full catalog <ArrowIcon />
+        <section className="section-container">
+          <div className="section-header">
+            <h2>Featured Products</h2>
+            <Link href="/category" className="view-all-link">
+              View All <ArrowIcon />
             </Link>
           </div>
-          <div className="arrival-grid">
+          <div className="product-grid">
             {homeSelectedParts.map((part) => (
-              <article className="arrival-card" key={part.id}>
-                <Link
-                  href={`/catalog/${part.slug ?? part.id}`}
-                  className="arrival-image"
-                  aria-label={`View ${part.part_name}`}
-                >
-                  <span className="sale-badge">
-                    {part.condition || 'Available'}
-                  </span>
+              <Link 
+                href={`/catalog/${part.slug ?? part.id}`} 
+                className="product-card" 
+                key={part.id}
+              >
+                <div className="product-image-wrap">
                   {part.primary_image_url ? (
                     <img src={part.primary_image_url} alt={part.part_name} />
                   ) : (
-                    <span className="database-image-empty">
-                      No product image
-                    </span>
+                    <span style={{ color: '#999', fontSize: '14px' }}>No Image</span>
                   )}
-                  <span className="quick-view">View product details</span>
-                </Link>
-                <div className="arrival-details">
-                  <small>
-                    {part.parts_categories?.category_name || 'Database catalog'}
-                  </small>
-                  <h3>
-                    <Link href={`/catalog/${part.slug ?? part.id}`}>
-                      {part.part_name}
-                    </Link>
-                  </h3>
-                  <div className="rating" aria-label="Verified database item">
-                    Verified <span>· {part.sku}</span>
-                  </div>
-                  <div className="price-row">
-                    <strong>{formatSar(part.sale_price ?? part.price)}</strong>
-                    {part.sale_price && <del>{formatSar(part.price)}</del>}
-                  </div>
                 </div>
-              </article>
+                <h3>{part.part_name}</h3>
+              </Link>
             ))}
           </div>
         </section>
       )}
-
-      {/* ---- সব খালি হলে empty state ---- */}
-      {!loading &&
-        !popularCategories.length &&
-        !homeSelectedParts.length &&
-        !homeSelectedVehicles.length &&
-        !error && (
-          <section className="store-section home-empty-state">
-            <h2>No published database records yet.</h2>
-            <p>
-              Categories, parts and vehicles will appear here after they are
-              added to the live database.
-            </p>
-          </section>
-        )}
-
-      {/* ----------------------------------------------------------------
-       *  6. SERVICE STRIP
-       * ---------------------------------------------------------------- */}
-      <section className="store-section service-strip">
-        <div>
-          <strong>Database-first catalog</strong>
-          <span>Only published records appear</span>
-        </div>
-        <div>
-          <strong>Fitment support</strong>
-          <span>Use the vehicle finder</span>
-        </div>
-        <div>
-          <strong>Booking desk</strong>
-          <span>Booking goes to the parts desk</span>
-        </div>
-        <div>
-          <strong>Live availability</strong>
-          <span>Stock comes from the catalog</span>
-        </div>
-      </section>
 
     </main>
   );
