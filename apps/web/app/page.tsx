@@ -91,28 +91,8 @@ function ArrowIcon() {
   );
 }
 
-const HeroIcons = () => (
-  <div className="hero-icon-strip">
-    {[
-      { name: 'Tires', icon: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z' },
-      { name: 'Engine', icon: 'M4 10h2l2-4h8l2 4h2v6h-2v2h-4v-2H8v2H4v-2H2v-6h2zm4 0h4v2H8v-2z' },
-      { name: 'Battery', icon: 'M4 6h16v12H4V6zm2 4v4h4v-4H6zm6 0v4h4v-4h-4z' },
-      { name: 'Oil', icon: 'M12 2C8 2 4 6 4 10c0 5 4 10 8 12 4-2 8-7 8-12 0-4-4-8-8-8zm0 14a4 4 0 1 1 0-8 4 4 0 0 1 0 8z' },
-      { name: 'Brake', icon: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12z' },
-      { name: 'Diagnostics', icon: 'M3 12h4l3 8 4-16 3 8h4' }
-    ].map((item) => (
-      <div className="hero-icon-item" key={item.name}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d={item.icon} strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <span>{item.name}</span>
-      </div>
-    ))}
-  </div>
-);
-
 /* ==================================================================
- *  HERO CAROUSEL (নতুন ডিজাইন)
+ *  HERO CAROUSEL (আপডেট করা ডিজাইন)
  * ================================================================== */
 
 function HeroCarousel() {
@@ -192,7 +172,7 @@ function HeroCarousel() {
           width: 100%;
           height: 100%;
           display: flex;
-          align-items: flex-end;
+          align-items: center; /* টেক্সট মাঝখানে রাখার জন্য */
           animation: slide-fade 0.5s ease both;
         }
 
@@ -204,11 +184,12 @@ function HeroCarousel() {
           height: 100%;
         }
 
+        /* ইমেজ যেভাবেই থাকুক না কেন পুরো সেকশন কভার করবে */
         .hero-carousel-media img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          object-position: center right;
+          object-position: center;
         }
 
         .hero-carousel-overlay {
@@ -229,13 +210,12 @@ function HeroCarousel() {
           width: 100%;
           max-width: var(--max);
           margin: 0 auto;
-          padding: 0 24px 40px;
+          padding: 0 24px;
           color: #fff;
         }
 
         .hero-text-area {
           max-width: 600px;
-          margin-bottom: 60px;
         }
 
         .hero-text-area .eyebrow {
@@ -266,9 +246,9 @@ function HeroCarousel() {
         .hero-actions {
           display: flex;
           align-items: center;
-          gap: 24px;
         }
 
+        /* লাল রঙের মূল বাটন */
         .hero-actions .button {
           padding: 14px 32px;
           background: #e51c23;
@@ -284,54 +264,6 @@ function HeroCarousel() {
           background: #c4161c;
         }
 
-        .hero-actions .link {
-          color: #fff;
-          font-size: 14px;
-          font-weight: 500;
-          text-decoration: none;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-        
-        .hero-actions .link:hover {
-          text-decoration: underline;
-        }
-
-        .hero-icon-strip {
-          display: flex;
-          justify-content: flex-start;
-          gap: 40px;
-          padding-top: 30px;
-          border-top: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        .hero-icon-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-          color: rgba(255, 255, 255, 0.7);
-          cursor: pointer;
-          transition: color 0.2s ease;
-        }
-
-        .hero-icon-item:hover {
-          color: #fff;
-        }
-
-        .hero-icon-item svg {
-          width: 28px;
-          height: 28px;
-        }
-
-        .hero-icon-item span {
-          font-size: 11px;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-
         @keyframes slide-fade {
           from { opacity: 0; transform: scale(1.02); }
           to { opacity: 1; transform: scale(1); }
@@ -339,17 +271,11 @@ function HeroCarousel() {
 
         @media (max-width: 900px) {
           .hero-carousel-root { height: 500px; }
-          .hero-text-area { margin-bottom: 40px; }
-          .hero-icon-strip { gap: 20px; overflow-x: auto; padding-bottom: 10px; }
-          .hero-icon-item { flex-shrink: 0; }
         }
 
         @media (max-width: 600px) {
-          .hero-carousel-root { height: auto; min-height: 600px; }
-          .hero-carousel-slide { padding-top: 100px; }
+          .hero-carousel-root { height: 450px; }
           .hero-text-area h1 { font-size: 36px; }
-          .hero-actions { flex-direction: column; align-items: flex-start; gap: 16px; }
-          .hero-icon-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         }
       `}</style>
 
@@ -373,13 +299,8 @@ function HeroCarousel() {
               <Link className="button" href={banner.cta_href}>
                 {banner.cta_label}
               </Link>
-              <Link className="link" href={banner.cta_href}>
-                Shop Now <ArrowIcon />
-              </Link>
             </div>
           </div>
-          
-          <HeroIcons />
         </div>
       </div>
 
@@ -653,7 +574,7 @@ export default function Home() {
         }
       `}</style>
 
-      {/* 1. HERO BANNER (নতুন ডিজাইন) */}
+      {/* 1. HERO BANNER */}
       <HeroCarousel />
 
       {/* 2. CAR BRAND LOGOS */}
