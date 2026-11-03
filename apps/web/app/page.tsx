@@ -644,8 +644,21 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
       <div className="car-brand-strip-inner">
         <h2 id="car-brand-strip-title">Browse by car brand</h2>
         <div className="car-brand-grid">
-          {brands.map((brand) => (
-            <Link className="car-brand-item" href={`/car-brands/${brand.slug}`} key={brand.id} aria-label={`View ${brand.manufacturer_name} vehicles`}>
+            {brands.map((brand) => (
+              <Link
+                className="car-brand-item"
+                href={`/car-brands/${brand.slug}`}
+                key={brand.id}
+                aria-label={`View ${brand.manufacturer_name} vehicles`}
+                style={{
+                  border: '2px solid #333',
+                  borderRadius: 2,
+                  minHeight: 92,
+                  backgroundColor: '#fff',
+                  boxShadow: 'none',
+                  transform: 'none',
+                }}
+              >
               <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
               <span>{brand.manufacturer_name}</span>
             </Link>
