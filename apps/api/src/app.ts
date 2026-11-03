@@ -99,6 +99,18 @@ app.get('/api/v1/categories', async (_request, reply) => {
   return { data: data ?? [] };
 });
 
+app.get('/api/v1/car-brands', async (_request, reply) => {
+  const { data, error } = await getSupabaseAdmin()
+    .from('car_brands')
+    .select('id,manufacturer_name,slug,logo_url,sort_order')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true })
+    .order('manufacturer_name', { ascending: true })
+    .limit(10);
+  if (error) return jsonError(reply, 500, error.message);
+  return { data: data ?? [] };
+});
+
 app.get(
   '/api/v1/categories/slug/:slug',
   async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
