@@ -15,6 +15,12 @@
 - Homepage banners, categories, products, and selected vehicles must remain database-driven; empty database sections must stay hidden rather than showing invented records.
 - Public vehicle responses must default to `status=active` so inactive records cannot appear in the finder or booking form.
 
+## Homepage car-brand logos are database-driven
+- Show exactly ten default car-brand logos directly below the homepage hero banner: Toyota, Nissan, Honda, Hyundai, Kia, Mitsubishi, Mazda, BMW, Ford, and Chevrolet.
+- Seed the brand names, sort order, active state, and logo paths in Supabase; serve active records through the public API.
+- The frontend must render brand names and logo URLs returned by the database/API, not a hardcoded brand list, and hide the strip when no database records are available.
+- Keep the ten logo assets local and reference each asset by its database-stored path.
+
 ## Navigation and search are focused
 - Remove the “Welcome to our store!” utility text and placeholder Blog/Pages/Compare/Setting controls.
 - Keep only the real Home, Categories, Vehicle Finder, and Contact navigation items plus the booking/cart actions.

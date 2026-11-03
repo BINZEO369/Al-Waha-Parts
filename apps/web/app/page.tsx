@@ -64,6 +64,14 @@ type Vehicle = {
   sort_order?: number;
 };
 
+type CarBrand = {
+  id: string;
+  manufacturer_name: string;
+  slug: string;
+  logo_url: string;
+  sort_order: number;
+};
+
 /* ==================================================================
  *  ICONS
  * ================================================================== */
@@ -520,15 +528,126 @@ function HeroCarousel() {
   );
 }
 
+function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
+  if (brands.length === 0) return null;
+
+  return (
+    <section className="car-brand-strip" aria-labelledby="car-brand-strip-title">
+      <style jsx>{`
+        .car-brand-strip {
+          box-sizing: border-box;
+          width: 100%;
+          padding: 22px max(18px, calc((100vw - var(--max)) / 2 + 22px)) 28px;
+          border-bottom: 1px solid #ededed;
+          background: #fff;
+        }
+
+        .car-brand-strip-inner {
+          max-width: var(--max);
+          margin: 0 auto;
+        }
+
+        .car-brand-strip h2 {
+          margin: 0 0 16px;
+          color: #292929;
+          font-family: Montserrat, sans-serif;
+          font-size: 14px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-align: center;
+          text-transform: uppercase;
+        }
+
+        .car-brand-grid {
+          display: grid;
+          grid-template-columns: repeat(10, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .car-brand-item {
+          min-height: 92px;
+          padding: 12px 6px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 9px;
+          border: 1px solid #e7e7e7;
+          background: #fff;
+        }
+
+        .car-brand-item img {
+          display: block;
+          width: 56px;
+          height: 36px;
+          object-fit: contain;
+        }
+
+        .car-brand-item span {
+          color: #414141;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.035em;
+          line-height: 1.2;
+          text-align: center;
+          text-transform: uppercase;
+        }
+
+        @media (max-width: 900px) {
+          .car-brand-grid {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+          }
+        }
+
+        @media (max-width: 520px) {
+          .car-brand-strip {
+            padding: 18px 14px 22px;
+          }
+
+          .car-brand-grid {
+            gap: 8px;
+          }
+
+          .car-brand-item {
+            min-height: 82px;
+            padding: 10px 4px;
+            gap: 8px;
+          }
+
+          .car-brand-item img {
+            width: 44px;
+            height: 30px;
+          }
+
+          .car-brand-item span {
+            font-size: 9px;
+          }
+        }
+      `}</style>
+      <div className="car-brand-strip-inner">
+        <h2 id="car-brand-strip-title">Browse by car brand</h2>
+        <div className="car-brand-grid">
+          {brands.map((brand) => (
+            <div className="car-brand-item" key={brand.id}>
+              <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
+              <span>{brand.manufacturer_name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ==================================================================
  *  HOME PAGE
  *  সেকশন অর্ডার:
  *    1. Hero Banner
- *    2. Popular Vehicles
- *    3. Popular Categories
- *    4. New Arrivals (Parts)
- *    5. Service Strip
- *    6. Search Newsletter
+ *    2. Database car-brand logos
+ *    3. Popular Vehicles
+ *    4. Popular Categories
+ *    5. New Arrivals (Parts)
+ *    6. Service Strip
  * ================================================================== */
 
 export default function Home() {
@@ -536,6 +655,7 @@ export default function Home() {
   const [popularCategories, setPopularCategories] = useState<Category[]>([]);
   const [parts, setParts] = useState<Part[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [carBrands, setCarBrands] = useState<CarBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -545,6 +665,10 @@ export default function Home() {
       setLoading(false);
       return;
     }
+    void apiFetch<CarBrand[]>(apiUrl, '/api/v1/car-brands')
+      .then((items) => setCarBrands(Array.isArray(items) ? items.slice(0, 10) : []))
+      .catch(() => setCarBrands([]));
+
     Promise.all([
       apiFetch<Category[]>(apiUrl, '/api/v1/popular-categories?limit=200'),
       apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=200&featured_only=true'),
@@ -627,6 +751,9 @@ export default function Home() {
        * ---------------------------------------------------------------- */}
       <HeroCarousel />
 
+      {/* 2. CAR BRAND LOGOS (loaded from the database) */}
+      <CarBrandStrip brands={carBrands} />
+
       {error && (
         <div className="store-section data-alert home-data-alert">{error}</div>
       )}
@@ -637,7 +764,7 @@ export default function Home() {
       )}
 
       {/* ----------------------------------------------------------------
-       *  2. POPULAR VEHICLES (হিরোর ঠিক নিচে)
+       *  3. POPULAR VEHICLES (car brand logos-এর পরে)
        * ---------------------------------------------------------------- */}
       {!loading && homeSelectedVehicles.length > 0 && (
         <section className="store-section vehicle-home-section">
@@ -675,7 +802,7 @@ export default function Home() {
       )}
 
       {/* ----------------------------------------------------------------
-       *  3. POPULAR CATEGORIES (ভেহিকেলের পরে)
+       *  4. POPULAR CATEGORIES (ভেহিকেলের পরে)
        * ---------------------------------------------------------------- */}
       {!loading && popularCategories.length > 0 && (
         <section
@@ -711,7 +838,7 @@ export default function Home() {
       )}
 
       {/* ----------------------------------------------------------------
-       *  4. NEW ARRIVALS / PARTS (ক্যাটাগরির পরে)
+       *  5. NEW ARRIVALS / PARTS (ক্যাটাগরির পরে)
        * ---------------------------------------------------------------- */}
       {!loading && homeSelectedParts.length > 0 && (
         <section className="store-section arrivals-section">
@@ -783,7 +910,7 @@ export default function Home() {
         )}
 
       {/* ----------------------------------------------------------------
-       *  5. SERVICE STRIP
+       *  6. SERVICE STRIP
        * ---------------------------------------------------------------- */}
       <section className="store-section service-strip">
         <div>
