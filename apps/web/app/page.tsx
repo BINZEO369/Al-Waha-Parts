@@ -567,14 +567,14 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 
         .car-brand-grid {
           display: grid;
-          grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: 16px;
+          grid-template-columns: repeat(8, minmax(0, 1fr));
+          gap: 12px;
         }
 
         .car-brand-item {
           width: 100%;
-          max-width: 190px;
-          min-height: 132px;
+          max-width: 150px;
+          min-height: 118px;
           justify-self: center;
           box-sizing: border-box;
           padding: 18px 12px;
@@ -612,7 +612,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 
         @media (max-width: 900px) {
           .car-brand-grid {
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
           }
         }
 
@@ -622,20 +622,20 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           }
 
           .car-brand-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 8px;
           }
 
           .car-brand-item {
             max-width: none;
-            min-height: 116px;
-            padding: 14px 8px;
-            gap: 10px;
+            min-height: 100px;
+            padding: 10px 4px;
+            gap: 7px;
           }
 
           .car-brand-item img {
-            width: 58px;
-            height: 38px;
+            width: 48px;
+            height: 32px;
           }
 
           .car-brand-item span {
@@ -655,7 +655,6 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
                 style={{
                   border: '2px solid #333',
                   borderRadius: 2,
-                  minHeight: 132,
                   justifyContent: 'center',
                   alignItems: 'center',
                   textAlign: 'center',
