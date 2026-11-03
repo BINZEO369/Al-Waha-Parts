@@ -565,8 +565,12 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
         }
 
         .car-brand-item {
-          min-height: 92px;
-          padding: 12px 6px;
+          width: 100%;
+          max-width: 120px;
+          min-height: 82px;
+          justify-self: center;
+          box-sizing: border-box;
+          padding: 10px 6px;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -580,8 +584,8 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 
         .car-brand-item img {
           display: block;
-          width: 56px;
-          height: 36px;
+          width: 48px;
+          height: 30px;
           object-fit: contain;
         }
 
