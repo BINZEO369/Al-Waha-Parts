@@ -135,7 +135,7 @@ function HeroCarousel() {
           .hero-carousel-root {
             position: relative;
             width: 100%;
-            height: 540px;
+            height: 500px;
             overflow: hidden;
             background: #111;
           }
@@ -158,12 +158,12 @@ function HeroCarousel() {
           }
           @media (max-width: 800px) {
             .hero-carousel-root {
-              height: 480px;
+              height: 420px;
             }
           }
           @media (max-width: 480px) {
             .hero-carousel-root {
-              height: 420px;
+              height: 360px;
             }
           }
         `}</style>
@@ -195,7 +195,7 @@ function HeroCarousel() {
         .hero-carousel-root {
           position: relative;
           width: 100%;
-          min-height: 540px;
+          height: 500px;
           overflow: hidden;
           background: #0d0d0d;
         }
@@ -204,7 +204,7 @@ function HeroCarousel() {
         .hero-carousel-slide {
           position: relative;
           width: 100%;
-          min-height: 540px;
+          height: 100%;
           display: flex;
           align-items: center;
           animation: slide-fade 0.5s ease both;
@@ -215,9 +215,10 @@ function HeroCarousel() {
           position: absolute;
           inset: 0;
           z-index: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: block;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
           background:
             radial-gradient(
               circle at 70% 30%,
@@ -227,17 +228,11 @@ function HeroCarousel() {
             linear-gradient(135deg, #0e0e0e 0%, #171717 50%, #0a0a0a 100%);
         }
 
-        .hero-carousel-media picture {
-          display: block;
-          width: 100%;
-          height: 100%;
-        }
-
         .hero-carousel-media img {
           display: block;
           width: 100%;
           height: 100%;
-          object-fit: contain;      /* ← জুম / ক্রপ হবে না */
+          object-fit: cover;
           object-position: center;
         }
 
@@ -270,7 +265,9 @@ function HeroCarousel() {
           position: relative;
           z-index: 2;
           width: 100%;
-          padding: 84px max(22px, calc((100vw - var(--max)) / 2 + 22px));
+          height: 100%;
+          box-sizing: border-box;
+          padding: 64px max(22px, calc((100vw - var(--max)) / 2 + 22px));
           color: #fff;
           display: flex;
           flex-direction: column;
@@ -397,7 +394,8 @@ function HeroCarousel() {
         @media (max-width: 800px) {
           .hero-carousel-root,
           .hero-carousel-slide {
-            min-height: 480px;
+            height: 420px;
+            min-height: 0;
           }
 
           .hero-carousel-overlay {
@@ -410,9 +408,9 @@ function HeroCarousel() {
           }
 
           .hero-carousel-copy {
-            padding: 64px 22px;
+            padding: 44px 22px;
             justify-content: flex-end;
-            min-height: 480px;
+            min-height: 0;
           }
 
           .hero-carousel-copy > * {
@@ -427,12 +425,13 @@ function HeroCarousel() {
         @media (max-width: 480px) {
           .hero-carousel-root,
           .hero-carousel-slide {
-            min-height: 420px;
+            height: 360px;
+            min-height: 0;
           }
 
           .hero-carousel-copy {
-            padding: 52px 16px;
-            min-height: 420px;
+            padding: 32px 16px;
+            min-height: 0;
           }
 
           .hero-carousel-copy .eyebrow {
