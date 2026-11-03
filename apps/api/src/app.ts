@@ -176,6 +176,35 @@ app.get(
   },
 );
 
+function brandSlug(name: string) {
+  return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+app.get('/api/v1/brands', async (request: FastifyRequest<{ Querystring: { limit?: string } }>, reply) => {
+  const { data, error } = await getSupabaseAdmin()
+    .from('parts').select('brand_name').eq('status', 'active').not('brand_name', 'is', null).order('brand_name').limit(200);
+  if (error) return jsonError(reply, 500, error.message);
+  const brands = new Map<string, { name: string; slug: string; product_count: number }>();
+  for (const row of data ?? []) {
+    const name = row.brand_name?.trim();
+    if (!name) continue;
+    const slug = brandSlug(name);
+    const existing = brands.get(slug);
+    brands.set(slug, { name, slug, product_count: (existing?.product_count ?? 0) + 1 });
+  }
+  return { data: [...brands.values()].slice(0, limit(request.query.limit) || 12) };
+});
+
+app.get('/api/v1/brands/:slug', async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
+  const { data, error } = await getSupabaseAdmin()
+    .from('parts').select('*,parts_categories(id,category_name,slug),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))')
+    .eq('status', 'active').not('brand_name', 'is', null).limit(200);
+  if (error) return jsonError(reply, 500, error.message);
+  const parts = (data ?? []).filter((part) => part.brand_name && brandSlug(part.brand_name) === request.params.slug);
+  if (!parts.length) return jsonError(reply, 404, 'Brand not found');
+  return { data: { brand: { name: parts[0]?.brand_name, slug: request.params.slug, product_count: parts.length }, parts } };
+});
+
 app.get('/api/v1/popular-categories', async (_request, reply) => {
   const importantCategorySlugs = [
     'engine-engine-parts',

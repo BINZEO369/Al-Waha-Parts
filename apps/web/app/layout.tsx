@@ -240,6 +240,17 @@ h1, h2, h3, p { margin-top: 0; }
 .category-detail-stats small { color: #999; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
 .category-detail-stats strong { font-size: 12px; }
 .category-products-section { padding: 58px 0 30px; }
+.home-brands-section { padding-top: 18px; padding-bottom: 58px; }
+.home-brands-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.home-brand-card { display: grid; gap: 9px; min-width: 0; padding: 12px 10px 11px; border: 1px solid #e5e5e5; background: #fff; text-align: center; }
+.home-brand-card:hover { color: inherit; }
+.home-brand-logo { width: 72px; height: 42px; display: grid; place-items: center; justify-self: center; border: 1px solid #d9d9d9; color: var(--ink); font-family: Montserrat, sans-serif; font-size: 15px; font-weight: 800; letter-spacing: -.04em; }
+.home-brand-card strong { overflow: hidden; color: var(--ink); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.brand-detail-hero { display: grid; grid-template-columns: 180px 1fr; gap: 32px; align-items: center; padding: 36px; border: 1px solid var(--line); border-top: 3px solid var(--red); background: #fff; }
+.brand-detail-logo { width: 150px; height: 96px; display: grid; place-items: center; border: 2px solid var(--red); color: var(--red); font-family: Montserrat, sans-serif; font-size: 32px; font-weight: 800; }
+.brand-detail-hero h1 { margin: 8px 0 10px; font-family: Montserrat, sans-serif; font-size: clamp(30px, 4vw, 48px); letter-spacing: -.06em; }
+.brand-detail-hero p { margin: 0 0 12px; color: #777; font-size: 13px; }
+.brand-products-section { padding: 58px 0 30px; }
 
 /* ---------- FOOTER ---------- */
 .store-footer { background: var(--red); color: #fff; }
@@ -396,6 +407,11 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .category-detail-copy { padding: 26px 20px; }
   .category-detail-stats { gap: 8px; }
   .category-products-section { padding-top: 40px; }
+  .home-brands-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+  .home-brand-card { padding: 10px 6px; }
+  .brand-detail-hero { grid-template-columns: 1fr; gap: 22px; padding: 26px 20px; }
+  .brand-detail-logo { width: 112px; height: 72px; font-size: 25px; }
+  .brand-products-section { padding-top: 40px; }
   .wide-feature { margin: 0 14px 42px; padding: 35px 24px 10px; display: block; }
   .wide-feature-art { height: 190px; }
   .wide-feature-art img { height: 200px; }
@@ -757,9 +773,9 @@ export const metadata: Metadata = {
   description:
     'Shop quality automotive parts, wheels, brakes and suspension with fitment support across the UAE.',
   icons: {
-    icon: '/logo.png',
-    shortcut: '/logo.png',
-    apple: '/logo.png',
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
   },
 };
 export default function RootLayout({ children }: { children: ReactNode }) {
