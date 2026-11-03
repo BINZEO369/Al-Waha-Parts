@@ -583,23 +583,14 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           align-items: center;
           justify-content: center;
           gap: 12px;
-          border: 1px solid #d7d7d7;
-          border-radius: 0;
+          border: 2px solid #d8d8d8;
+          border-radius: 2px;
           background: #fff;
           color: inherit;
           text-decoration: none;
           box-shadow: none;
           transform: none;
           transition: none;
-        }
-
-        .car-brand-logo-frame {
-          width: 92px;
-          height: 58px;
-          display: grid;
-          place-items: center;
-          border: 1px solid #e5232f;
-          background: #fff;
         }
 
         .car-brand-item img {
@@ -610,7 +601,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
         }
 
         .car-brand-item span {
-          color: #292929;
+          color: #414141;
           font-size: 12px;
           font-weight: 700;
           letter-spacing: 0.035em;
@@ -647,11 +638,6 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
             height: 38px;
           }
 
-          .car-brand-logo-frame {
-            width: 78px;
-            height: 50px;
-          }
-
           .car-brand-item span {
             font-size: 11px;
           }
@@ -667,8 +653,8 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
                 key={brand.id}
                 aria-label={`View ${brand.manufacturer_name} vehicles`}
                 style={{
-                  border: '1px solid #d7d7d7',
-                  borderRadius: 0,
+                  border: '2px solid #333',
+                  borderRadius: 2,
                   minHeight: 132,
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -678,10 +664,8 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
                   transform: 'none',
                 }}
               >
-                <span className="car-brand-logo-frame">
-                  <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
-                </span>
-                <span>{brand.manufacturer_name}</span>
+              <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
+              <span>{brand.manufacturer_name}</span>
             </Link>
           ))}
         </div>
