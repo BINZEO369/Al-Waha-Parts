@@ -119,7 +119,7 @@ const HeroIcons = () => (
 );
 
 /* ==================================================================
- *  HERO CAROUSEL
+ *  HERO CAROUSEL (নতুন ডিজাইন)
  * ================================================================== */
 
 function HeroCarousel() {
@@ -389,6 +389,173 @@ function HeroCarousel() {
           <HeroIcons />
         </div>
       </div>
+
+      {banners.length > 1 && (
+        <div className="hero-carousel-dots" aria-label="Select banner">
+          {banners.map((item, index) => (
+            <button
+              key={item.id}
+              type="button"
+              className={
+                index === active
+                  ? 'hero-carousel-dot active'
+                  : 'hero-carousel-dot'
+              }
+              onClick={() => setActive(index)}
+              aria-label={`Show banner ${index + 1}: ${item.title}`}
+              aria-current={index === active ? 'true' : undefined}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* ==================================================================
+ *  CAR BRAND STRIP
+ * ================================================================== */
+
+function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
+  if (brands.length === 0) return null;
+
+  return (
+    <section className="car-brand-strip" aria-labelledby="car-brand-strip-title">
+      <style jsx>{`
+        .car-brand-strip {
+          box-sizing: border-box;
+          width: 100%;
+          padding: 22px max(18px, calc((100vw - var(--max)) / 2 + 22px)) 28px;
+          border-bottom: 1px solid #ededed;
+          background: #fff;
+        }
+
+        .car-brand-strip-inner {
+          max-width: var(--max);
+          margin: 0 auto;
+        }
+
+        .car-brand-strip h2 {
+          width: fit-content;
+          margin: 0 auto 22px;
+          padding: 12px 22px;
+          border: 1px solid var(--red);
+          color: var(--red);
+          font-family: Montserrat, sans-serif;
+          font-size: 21px;
+          font-weight: 700;
+          letter-spacing: -.03em;
+          text-align: center;
+          text-transform: none;
+        }
+
+        .car-brand-grid {
+          display: grid;
+          grid-template-columns: repeat(8, minmax(0, 1fr));
+          gap: 12px;
+        }
+
+        .car-brand-item {
+          width: 100%;
+          max-width: 150px;
+          min-height: 118px;
+          justify-self: center;
+          box-sizing: border-box;
+          padding: 18px 12px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          border: 1px solid var(--red);
+          border-radius: 2px;
+          background: #fff;
+          color: inherit;
+          text-decoration: none;
+          box-shadow: none;
+          transform: none;
+          transition: none;
+        }
+
+        .car-brand-item img {
+          display: block;
+          width: 34px;
+          height: 22px;
+          object-fit: contain;
+        }
+
+        .car-brand-item span {
+          color: #414141;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.035em;
+          line-height: 1.2;
+          text-align: center;
+          text-transform: uppercase;
+        }
+
+        @media (max-width: 900px) {
+          .car-brand-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+          }
+        }
+
+        @media (max-width: 520px) {
+          .car-brand-strip {
+            padding: 18px 14px 22px;
+          }
+
+          .car-brand-strip h2 {
+            padding: 10px 16px;
+            font-size: 18px;
+          }
+
+          .car-brand-grid {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 8px;
+          }
+
+          .car-brand-item {
+            max-width: none;
+            min-height: 100px;
+            padding: 10px 4px;
+            gap: 7px;
+          }
+
+          .car-brand-item img {
+            width: 28px;
+            height: 18px;
+          }
+
+          .car-brand-item span {
+            font-size: 11px;
+          }
+        }
+      `}</style>
+      <div className="car-brand-strip-inner">
+        <h2 id="car-brand-strip-title">Browse by car brand</h2>
+        <div className="car-brand-grid">
+            {brands.map((brand) => (
+              <Link
+                className="car-brand-item"
+                href={`/car-brands/${brand.slug}`}
+                key={brand.id}
+                aria-label={`View ${brand.manufacturer_name} vehicles`}
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  backgroundColor: '#fff',
+                  boxShadow: 'none',
+                  transform: 'none',
+                }}
+              >
+              <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
+              <span>{brand.manufacturer_name}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
@@ -400,7 +567,10 @@ function HeroCarousel() {
 export default function Home() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const [popularCategories, setPopularCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [parts, setParts] = useState<Part[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [carBrands, setCarBrands] = useState<CarBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -410,278 +580,278 @@ export default function Home() {
       setLoading(false);
       return;
     }
+    void apiFetch<CarBrand[]>(apiUrl, '/api/v1/car-brands')
+      .then((items) => setCarBrands(Array.isArray(items) ? items.slice(0, 10) : []))
+      .catch(() => setCarBrands([]));
 
     Promise.all([
-      apiFetch<Category[]>(apiUrl, '/api/v1/popular-categories?limit=5'),
-      apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=4&featured_only=true'),
+      apiFetch<Category[]>(apiUrl, '/api/v1/popular-categories?limit=200'),
+      apiFetch<Brand[]>(apiUrl, '/api/v1/brands?limit=12'),
+      apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=200&featured_only=true'),
+      apiFetch<Vehicle[]>(apiUrl, '/api/v1/homepage-selected-vehicles?limit=200'),
     ])
-      .then(([nextPopularCategories, nextParts]) => {
+      .then(([nextPopularCategories, nextBrands, nextParts, nextVehicles]) => {
         setPopularCategories(nextPopularCategories);
+        setBrands(nextBrands);
         setParts(nextParts);
+        setVehicles(nextVehicles);
       })
       .catch((cause) => {
         setError(
-          cause instanceof Error ? cause.message : 'Unable to load live database data.'
+          cause instanceof Error
+            ? cause.message
+            : 'Unable to load live database data.',
         );
       })
       .finally(() => setLoading(false));
   }, [apiUrl]);
 
   const homeSelectedParts = parts;
+  const homeSelectedVehicles = vehicles;
 
   return (
     <main className="home-page">
       <style jsx>{`
-        .home-page {
-          background-color: #ffffff;
-          color: #111;
+        .home-page :global(.section-link:focus-visible),
+        .home-page :global(a:focus-visible),
+        .home-page :global(button:focus-visible),
+        .home-page :global(input:focus-visible) {
+          outline: 2px solid var(--red);
+          outline-offset: 3px;
         }
-
-        /* Common Section Styles */
-        .section-container {
-          max-width: var(--max);
-          margin: 0 auto;
-          padding: 80px 24px;
-        }
-
-        .section-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          margin-bottom: 32px;
-        }
-
-        .section-header h2 {
-          margin: 0;
-          font-family: Montserrat, sans-serif;
-          font-size: 28px;
-          font-weight: 600;
-          letter-spacing: -0.02em;
-        }
-
-        .view-all-link {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #666;
-          font-size: 13px;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          text-decoration: none;
-        }
-
-        .view-all-link:hover {
-          color: #111;
-        }
-
-        .view-all-link svg {
-          width: 16px;
-          height: 16px;
-        }
-
-        /* Browse by Categories Grid */
-        .category-grid {
-          display: grid;
-          grid-template-columns: repeat(5, 1fr);
-          gap: 20px;
-        }
-
-        .category-card {
-          background: #f8f9fa;
-          border-radius: 8px;
-          padding: 24px 20px;
-          display: flex;
-          flex-direction: column;
-          text-decoration: none;
-          color: inherit;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .category-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-        }
-
-        .category-card h3 {
-          margin: 0 0 4px;
-          font-size: 16px;
-          font-weight: 600;
-        }
-
-        .category-card p {
-          margin: 0 0 16px;
-          font-size: 12px;
-          color: #666;
-        }
-
-        .category-card .shop-link {
-          font-size: 12px;
-          font-weight: 600;
-          color: #111;
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          margin-bottom: 24px;
-        }
-
-        .category-card .shop-link svg {
-          width: 14px;
-          height: 14px;
-        }
-
-        .category-card .category-image {
+        .popular-cars-heading {
           width: 100%;
-          height: 120px;
-          margin-top: auto;
-          object-fit: contain;
-        }
-
-        /* Featured Products Grid */
-        .product-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 24px;
-        }
-
-        .product-card {
-          background: #fff;
-          border: 1px solid #eee;
-          border-radius: 8px;
-          padding: 20px;
-          text-align: center;
-          text-decoration: none;
-          color: inherit;
-          transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .product-card:hover {
-          border-color: #ddd;
-          box-shadow: 0 10px 20px rgba(0,0,0,0.03);
-        }
-
-        .product-card .product-image-wrap {
-          height: 200px;
-          display: flex;
           align-items: center;
-          justify-content: center;
-          margin-bottom: 20px;
+          flex-direction: row;
+          justify-content: center !important;
+          margin-bottom: 22px;
         }
-
-        .product-card img {
-          max-width: 100%;
-          max-height: 100%;
-          object-fit: contain;
-        }
-
-        .product-card h3 {
+        .popular-cars-title-box {
+          display: inline-block;
           margin: 0;
-          font-size: 15px;
-          font-weight: 500;
-          color: #333;
+          padding: 12px 22px;
+          border: 1px solid var(--red);
+          color: var(--red);
+          font-family: Montserrat, sans-serif;
+          font-size: 21px;
+          letter-spacing: -.03em;
+          text-align: center;
         }
-
-        @media (max-width: 1024px) {
-          .category-grid {
-            grid-template-columns: repeat(3, 1fr);
-          }
-          .product-grid {
-            grid-template-columns: repeat(3, 1fr);
-          }
+        .popular-cars-title-box::after { display: none; }
+        .popular-categories-heading {
+          width: 100%;
+          align-items: center;
+          flex-direction: row;
+          justify-content: center !important;
+          margin-bottom: 22px;
         }
-
-        @media (max-width: 768px) {
-          .category-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-          .product-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
+        .popular-categories-title-box {
+          display: inline-block;
+          margin: 0;
+          padding: 12px 22px;
+          border: 1px solid var(--red);
+          color: var(--red);
+          font-family: Montserrat, sans-serif;
+          font-size: 21px;
+          letter-spacing: -.03em;
+          text-align: center;
         }
-
-        @media (max-width: 480px) {
-          .category-grid {
-            grid-template-columns: 1fr;
-          }
-          .product-grid {
-            grid-template-columns: 1fr;
-          }
-          .section-header h2 {
-            font-size: 24px;
-          }
+        .popular-categories-title-box::after { display: none; }
+        @media (max-width: 520px) {
+          .popular-cars-title-box { padding: 10px 16px; font-size: 18px; }
+          .popular-categories-title-box { padding: 10px 16px; font-size: 18px; }
         }
       `}</style>
 
-      {/* 1. HERO BANNER */}
+      {/* 1. HERO BANNER (নতুন ডিজাইন) */}
       <HeroCarousel />
 
+      {/* 2. CAR BRAND LOGOS */}
+      <CarBrandStrip brands={carBrands} />
+
       {error && (
-        <div className="section-container" style={{ color: 'red', textAlign: 'center' }}>
-          {error}
+        <div className="store-section data-alert home-data-alert">{error}</div>
+      )}
+      {loading && (
+        <div className="store-section home-loading">
+          Loading categories, parts and vehicles from the database…
         </div>
       )}
 
-      {/* 2. BROWSE BY CATEGORIES */}
-      {!loading && popularCategories.length > 0 && (
-        <section className="section-container">
-          <div className="section-header">
-            <h2>Browse by Categories</h2>
-            <Link href="/category" className="view-all-link">
-              View All <ArrowIcon />
-            </Link>
+      {/* 3. POPULAR VEHICLES */}
+      {!loading && homeSelectedVehicles.length > 0 && (
+        <section className="store-section vehicle-home-section">
+          <div className="section-heading popular-cars-heading">
+            <h2 className="popular-cars-title-box">Popular Cars</h2>
           </div>
-          <div className="category-grid">
-            {popularCategories.map((category) => (
+          <div className="vehicle-home-grid">
+            {homeSelectedVehicles.map((vehicle) => (
               <Link
-                className="category-card"
-                href={category.slug ? `/category/${category.slug}` : '/category'}
-                key={category.id}
+                className="vehicle-home-card"
+                href={vehicle.slug ? `/vehicles/${vehicle.slug}` : '/vehicles'}
+                key={vehicle.id}
               >
-                <h3>{category.category_name.trim()}</h3>
-                <p>Save 20% off</p>
-                <span className="shop-link">
-                  Shop Now <ArrowIcon />
-                </span>
-                {category.image_url ? (
-                  <img src={category.image_url} alt="" className="category-image" />
-                ) : (
-                  <div className="category-image" style={{ background: '#eee', borderRadius: '4px' }} />
-                )}
+                <div className="vehicle-home-card-top">
+                  <small>{vehicle.year_end || vehicle.year_start || '—'}</small>
+                  <strong>{vehicle.manufacturer_name} {vehicle.model_name}</strong>
+                  <span>{vehicle.generation || vehicle.chassis_code || vehicle.vehicle_type || 'Database fitment'}</span>
+                </div>
+                <div className="vehicle-home-card-image">
+                  {vehicle.cover_image_url ? (
+                    <img src={vehicle.cover_image_url} alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`} />
+                  ) : (
+                    <span className="database-image-empty">No vehicle image</span>
+                  )}
+                </div>
+                <div className="vehicle-home-card-specs">
+                  <span><small>Model years</small><b>{vehicle.year_start || '—'}–{vehicle.year_end || 'present'}</b></span>
+                  <span><small>Vehicle type</small><b>{vehicle.vehicle_type || 'Vehicle'}</b></span>
+                  <span><small>Explore</small><b>View parts <i aria-hidden="true">↗</i></b></span>
+                </div>
               </Link>
             ))}
           </div>
         </section>
       )}
 
-      {/* 3. FEATURED PRODUCTS */}
-      {!loading && homeSelectedParts.length > 0 && (
-        <section className="section-container">
-          <div className="section-header">
-            <h2>Featured Products</h2>
-            <Link href="/category" className="view-all-link">
-              View All <ArrowIcon />
-            </Link>
+      {/* 4. POPULAR CATEGORIES */}
+      {!loading && popularCategories.length > 0 && (
+        <section
+          className="store-section category-promo-section"
+          aria-label="Popular categories"
+        >
+          <div className="section-heading popular-categories-heading">
+            <h2 className="popular-categories-title-box">Popular Categories</h2>
           </div>
-          <div className="product-grid">
-            {homeSelectedParts.map((part) => (
-              <Link 
-                href={`/catalog/${part.slug ?? part.id}`} 
-                className="product-card" 
-                key={part.id}
+          <div className="category-promo-grid">
+            {popularCategories.map((category) => (
+              <Link
+                className="promo-card promo-card-database category-promo-card"
+                href={category.slug ? `/category/${category.slug}` : '/category'}
+                key={category.id}
               >
-                <div className="product-image-wrap">
-                  {part.primary_image_url ? (
-                    <img src={part.primary_image_url} alt={part.part_name} />
-                  ) : (
-                    <span style={{ color: '#999', fontSize: '14px' }}>No Image</span>
-                  )}
+                <div>
+                  <small>Popular category</small>
+                  <strong>{category.category_name.trim()}</strong>
+                  <p>
+                    {category.description ||
+                      'Browse available parts and find the right fit.'}
+                  </p>
+                  <span>
+                    Browse parts <ArrowIcon />
+                  </span>
                 </div>
-                <h3>{part.part_name}</h3>
+                {category.image_url && <img src={category.image_url} alt="" />}
               </Link>
             ))}
           </div>
         </section>
       )}
+
+      {/* 5. POPULAR BRANDS */}
+      {!loading && brands.length > 0 && (
+        <section className="store-section home-brands-section" aria-label="Popular brands">
+          <div className="section-heading"><div><span className="section-kicker">Trusted inventory</span><h2>Popular Brands</h2></div></div>
+          <div className="home-brands-grid">
+            {brands.map((brand) => (
+              <Link className="home-brand-card" href={`/brands/${brand.slug}`} key={brand.slug}>
+                <div className="home-brand-logo">{brand.name.slice(0, 2).toUpperCase()}</div>
+                <strong>{brand.name}</strong>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 6. NEW ARRIVALS / PARTS */}
+      {!loading && homeSelectedParts.length > 0 && (
+        <section className="store-section arrivals-section">
+          <div className="section-heading arrivals-heading">
+            <div>
+              <span className="section-kicker">From the live catalog</span>
+              <h2>New Arrivals</h2>
+            </div>
+            <Link className="section-link" href="/category">
+              Open full catalog <ArrowIcon />
+            </Link>
+          </div>
+          <div className="arrival-grid">
+            {homeSelectedParts.map((part) => (
+              <article className="arrival-card" key={part.id}>
+                <Link
+                  href={`/catalog/${part.slug ?? part.id}`}
+                  className="arrival-image"
+                  aria-label={`View ${part.part_name}`}
+                >
+                  <span className="sale-badge">
+                    {part.condition || 'Available'}
+                  </span>
+                  {part.primary_image_url ? (
+                    <img src={part.primary_image_url} alt={part.part_name} />
+                  ) : (
+                    <span className="database-image-empty">
+                      No product image
+                    </span>
+                  )}
+                  <span className="quick-view">View product details</span>
+                </Link>
+                <div className="arrival-details">
+                  <small>
+                    {part.parts_categories?.category_name || 'Database catalog'}
+                  </small>
+                  <h3>
+                    <Link href={`/catalog/${part.slug ?? part.id}`}>
+                      {part.part_name}
+                    </Link>
+                  </h3>
+                  <div className="rating" aria-label="Verified database item">
+                    Verified <span>· {part.sku}</span>
+                  </div>
+                  <div className="price-row">
+                    <strong>{formatSar(part.sale_price ?? part.price)}</strong>
+                    {part.sale_price && <del>{formatSar(part.price)}</del>}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 7. EMPTY STATE */}
+      {!loading &&
+        !popularCategories.length &&
+        !homeSelectedParts.length &&
+        !homeSelectedVehicles.length &&
+        !error && (
+          <section className="store-section home-empty-state">
+            <h2>No published database records yet.</h2>
+            <p>
+              Categories, parts and vehicles will appear here after they are
+              added to the live database.
+            </p>
+          </section>
+        )}
+
+      {/* 8. SERVICE STRIP */}
+      <section className="store-section service-strip">
+        <div>
+          <strong>Database-first catalog</strong>
+          <span>Only published records appear</span>
+        </div>
+        <div>
+          <strong>Fitment support</strong>
+          <span>Use the vehicle finder</span>
+        </div>
+        <div>
+          <strong>Booking desk</strong>
+          <span>Booking goes to the parts desk</span>
+        </div>
+        <div>
+          <strong>Live availability</strong>
+          <span>Stock comes from the catalog</span>
+        </div>
+      </section>
 
     </main>
   );
