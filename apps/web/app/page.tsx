@@ -653,8 +653,6 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
                 key={brand.id}
                 aria-label={`View ${brand.manufacturer_name} vehicles`}
                 style={{
-                  border: '2px solid #333',
-                  borderRadius: 2,
                   justifyContent: 'center',
                   alignItems: 'center',
                   textAlign: 'center',
