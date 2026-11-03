@@ -555,14 +555,17 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
         }
 
         .car-brand-strip h2 {
-          margin: 0 0 16px;
-          color: #292929;
+          width: fit-content;
+          margin: 0 auto 22px;
+          padding: 12px 22px;
+          border: 1px solid var(--red);
+          color: var(--red);
           font-family: Montserrat, sans-serif;
-          font-size: 14px;
+          font-size: 21px;
           font-weight: 700;
-          letter-spacing: 0.08em;
+          letter-spacing: -.03em;
           text-align: center;
-          text-transform: uppercase;
+          text-transform: none;
         }
 
         .car-brand-grid {
@@ -619,6 +622,11 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
         @media (max-width: 520px) {
           .car-brand-strip {
             padding: 18px 14px 22px;
+          }
+
+          .car-brand-strip h2 {
+            padding: 10px 16px;
+            font-size: 18px;
           }
 
           .car-brand-grid {
