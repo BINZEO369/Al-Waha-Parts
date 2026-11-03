@@ -576,9 +576,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           background: #fff;
           color: inherit;
           text-decoration: none;
-          transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
         }
-        .car-brand-item:hover { border-color: var(--red); box-shadow: 0 7px 16px rgba(229,35,47,.12); transform: translateY(-2px); }
 
         .car-brand-item img {
           display: block;
