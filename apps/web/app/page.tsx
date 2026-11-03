@@ -567,22 +567,22 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 
         .car-brand-grid {
           display: grid;
-          grid-template-columns: repeat(10, minmax(0, 1fr));
-          gap: 10px;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 16px;
         }
 
         .car-brand-item {
           width: 100%;
-          max-width: 120px;
-          min-height: 92px;
+          max-width: 190px;
+          min-height: 132px;
           justify-self: center;
           box-sizing: border-box;
-          padding: 12px 8px;
+          padding: 18px 12px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 9px;
+          gap: 12px;
           border: 2px solid #d8d8d8;
           border-radius: 2px;
           background: #fff;
@@ -595,14 +595,14 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 
         .car-brand-item img {
           display: block;
-          width: 48px;
-          height: 30px;
+          width: 68px;
+          height: 44px;
           object-fit: contain;
         }
 
         .car-brand-item span {
           color: #414141;
-          font-size: 10px;
+          font-size: 12px;
           font-weight: 700;
           letter-spacing: 0.035em;
           line-height: 1.2;
@@ -622,22 +622,24 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           }
 
           .car-brand-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 8px;
           }
 
           .car-brand-item {
-            min-height: 88px;
-            padding: 10px 4px;
-            gap: 8px;
+            max-width: none;
+            min-height: 116px;
+            padding: 14px 8px;
+            gap: 10px;
           }
 
           .car-brand-item img {
-            width: 44px;
-            height: 30px;
+            width: 58px;
+            height: 38px;
           }
 
           .car-brand-item span {
-            font-size: 9px;
+            font-size: 11px;
           }
         }
       `}</style>
@@ -653,7 +655,10 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
                 style={{
                   border: '2px solid #333',
                   borderRadius: 2,
-                  minHeight: 92,
+                  minHeight: 132,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  textAlign: 'center',
                   backgroundColor: '#fff',
                   boxShadow: 'none',
                   transform: 'none',
