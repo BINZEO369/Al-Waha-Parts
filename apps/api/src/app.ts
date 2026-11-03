@@ -123,13 +123,26 @@ app.get(
       .maybeSingle();
     if (brandError) return jsonError(reply, 500, brandError.message);
     if (!brand) return jsonError(reply, 404, 'Car brand not found');
-    const { data: vehicles, error: vehiclesError } = await supabase
+    let { data: vehicles, error: vehiclesError } = await supabase
       .from('vehicles')
       .select('id,slug,manufacturer_name,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,vehicle_images,car_brand_id')
       .eq('car_brand_id', brand.id)
       .eq('status', 'active')
       .order('model_name')
       .order('year_start');
+    // Older production databases may not have the relation column yet.
+    // Keep the brand page working by matching its canonical manufacturer name.
+    if (vehiclesError?.message.includes('car_brand_id')) {
+      const fallback = await supabase
+        .from('vehicles')
+        .select('id,slug,manufacturer_name,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,vehicle_images')
+        .eq('manufacturer_name', brand.manufacturer_name)
+        .eq('status', 'active')
+        .order('model_name')
+        .order('year_start');
+      vehicles = fallback.data as typeof vehicles;
+      vehiclesError = fallback.error;
+    }
     if (vehiclesError) return jsonError(reply, 500, vehiclesError.message);
     return { data: { brand, vehicles: vehicles ?? [] } };
   },
@@ -218,7 +231,7 @@ app.get(
     const q = request.query;
     let query = getSupabaseAdmin()
       .from('vehicles')
-      .select('*,car_brands(id,manufacturer_name,slug,logo_url,sort_order)')
+      .select('*')
       .order('manufacturer_name')
       .order('model_name')
       .range(Number(q.offset) || 0, (Number(q.offset) || 0) + limit(q.limit) - 1);
@@ -239,7 +252,7 @@ app.get(
     const supabase = getSupabaseAdmin();
     const { data: vehicle, error: vehicleError } = await supabase
       .from('vehicles')
-      .select('*,car_brands(id,manufacturer_name,slug,logo_url,sort_order)')
+      .select('*')
       .eq('slug', request.params.slug)
       .eq('status', 'active')
       .maybeSingle();
@@ -263,7 +276,7 @@ app.get('/api/v1/homepage-selected-vehicles', async (_request, reply) => {
   const { data, error } = await getSupabaseAdmin()
     .from('homepage_selected_vehicles')
     .select(
-      'display_order,vehicle:vehicles!inner(id,slug,manufacturer_name,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,status,car_brand_id,car_brands(id,manufacturer_name,slug,logo_url,sort_order))',
+      'display_order,vehicle:vehicles!inner(id,slug,manufacturer_name,manufacturer_logo,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,status)',
     )
     .eq('is_active', true)
     .eq('vehicle.status', 'active')
