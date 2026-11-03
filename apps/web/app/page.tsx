@@ -574,19 +574,23 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
         .car-brand-item {
           width: 100%;
           max-width: 120px;
-          min-height: 82px;
+          min-height: 92px;
           justify-self: center;
           box-sizing: border-box;
-          padding: 10px 6px;
+          padding: 12px 8px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           gap: 9px;
-          border: 1px solid #e7e7e7;
+          border: 2px solid #d8d8d8;
+          border-radius: 2px;
           background: #fff;
           color: inherit;
           text-decoration: none;
+          box-shadow: none;
+          transform: none;
+          transition: none;
         }
 
         .car-brand-item img {
@@ -622,7 +626,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           }
 
           .car-brand-item {
-            min-height: 82px;
+            min-height: 88px;
             padding: 10px 4px;
             gap: 8px;
           }
