@@ -112,6 +112,30 @@ app.get('/api/v1/car-brands', async (_request, reply) => {
 });
 
 app.get(
+  '/api/v1/car-brands/slug/:slug',
+  async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
+    const supabase = getSupabaseAdmin();
+    const { data: brand, error: brandError } = await supabase
+      .from('car_brands')
+      .select('id,manufacturer_name,slug,logo_url,sort_order')
+      .eq('slug', request.params.slug)
+      .eq('is_active', true)
+      .maybeSingle();
+    if (brandError) return jsonError(reply, 500, brandError.message);
+    if (!brand) return jsonError(reply, 404, 'Car brand not found');
+    const { data: vehicles, error: vehiclesError } = await supabase
+      .from('vehicles')
+      .select('id,slug,manufacturer_name,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,vehicle_images,car_brand_id')
+      .eq('car_brand_id', brand.id)
+      .eq('status', 'active')
+      .order('model_name')
+      .order('year_start');
+    if (vehiclesError) return jsonError(reply, 500, vehiclesError.message);
+    return { data: { brand, vehicles: vehicles ?? [] } };
+  },
+);
+
+app.get(
   '/api/v1/categories/slug/:slug',
   async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
     const supabase = getSupabaseAdmin();
@@ -194,7 +218,7 @@ app.get(
     const q = request.query;
     let query = getSupabaseAdmin()
       .from('vehicles')
-      .select('*')
+      .select('*,car_brands(id,manufacturer_name,slug,logo_url,sort_order)')
       .order('manufacturer_name')
       .order('model_name')
       .range(Number(q.offset) || 0, (Number(q.offset) || 0) + limit(q.limit) - 1);
@@ -215,7 +239,7 @@ app.get(
     const supabase = getSupabaseAdmin();
     const { data: vehicle, error: vehicleError } = await supabase
       .from('vehicles')
-      .select('*')
+      .select('*,car_brands(id,manufacturer_name,slug,logo_url,sort_order)')
       .eq('slug', request.params.slug)
       .eq('status', 'active')
       .maybeSingle();
@@ -239,7 +263,7 @@ app.get('/api/v1/homepage-selected-vehicles', async (_request, reply) => {
   const { data, error } = await getSupabaseAdmin()
     .from('homepage_selected_vehicles')
     .select(
-      'display_order,vehicle:vehicles!inner(id,slug,manufacturer_name,manufacturer_logo,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,status)',
+      'display_order,vehicle:vehicles!inner(id,slug,manufacturer_name,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,status,car_brand_id,car_brands(id,manufacturer_name,slug,logo_url,sort_order))',
     )
     .eq('is_active', true)
     .eq('vehicle.status', 'active')

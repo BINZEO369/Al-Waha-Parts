@@ -574,7 +574,11 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           gap: 9px;
           border: 1px solid #e7e7e7;
           background: #fff;
+          color: inherit;
+          text-decoration: none;
+          transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
         }
+        .car-brand-item:hover { border-color: var(--red); box-shadow: 0 7px 16px rgba(229,35,47,.12); transform: translateY(-2px); }
 
         .car-brand-item img {
           display: block;
@@ -628,10 +632,10 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
         <h2 id="car-brand-strip-title">Browse by car brand</h2>
         <div className="car-brand-grid">
           {brands.map((brand) => (
-            <div className="car-brand-item" key={brand.id}>
+            <Link className="car-brand-item" href={`/car-brands/${brand.slug}`} key={brand.id} aria-label={`View ${brand.manufacturer_name} vehicles`}>
               <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
               <span>{brand.manufacturer_name}</span>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
