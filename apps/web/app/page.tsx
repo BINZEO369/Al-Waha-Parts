@@ -595,8 +595,8 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 
         .car-brand-item img {
           display: block;
-          width: 68px;
-          height: 44px;
+          width: 48px;
+          height: 32px;
           object-fit: contain;
         }
 
@@ -634,8 +634,8 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           }
 
           .car-brand-item img {
-            width: 48px;
-            height: 32px;
+            width: 36px;
+            height: 24px;
           }
 
           .car-brand-item span {
