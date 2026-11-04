@@ -470,91 +470,114 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 }
 
 /* ==================================================================
- *  CATEGORY SHOWCASE (নতুন প্রিমিয়াম ডিজাইন - ছবির মতো)
+ *  CATEGORY SHOWCASE (সবসময় টেক্সট বামে, ছবি ডানে)
  * ================================================================== */
 
 function CategoryShowcase({ categories }: { categories: Category[] }) {
   if (!categories || categories.length === 0) return null;
 
-  // শুধু প্রথম ৩টি ক্যাটাগরি দেখাবে যাতে পেজ খুব বেশি লম্বা না হয়
+  // ডেমো ছবির মতো লুক দিতে প্রথম ৩টি ক্যাটাগরি নেওয়া হলো
   const displayCategories = categories.slice(0, 3);
 
   return (
     <section className="showcase-section">
       <style jsx>{`
+        /* মূল সেকশন স্টাইল - ছবির মতো হালকা অফ-হোয়াইট ব্যাকগ্রাউন্ড */
         .showcase-section {
           width: 100%;
-          background-color: #ffffff;
-          padding: 100px 0;
+          background-color: #f8f9fa;
+          padding: 120px 0;
           overflow: hidden;
         }
 
         .showcase-container {
-          max-width: var(--max);
+          max-width: 1400px;
           margin: 0 auto;
-          padding: 0 24px;
+          padding: 0 40px;
           display: flex;
           flex-direction: column;
-          gap: 120px; /* প্রতিটি সেকশনের মাঝে বিশাল গ্যাপ */
+          gap: 160px; /* বিশাল গ্যাপ, যা ছবির ডিজাইনের প্রাণ */
         }
 
+        /* ফ্লেক্স রো - সবসময় লেখা বামে, ছবি ডানে থাকবে */
         .showcase-row {
           display: flex;
+          flex-direction: row; 
           align-items: center;
-          gap: 80px;
-        }
-
-        /* জোড়-বিজোড় সেকশনের জন্য ডিজাইন উল্টে যাবে (Image left/right) */
-        .showcase-row:nth-child(even) {
-          flex-direction: row-reverse;
+          justify-content: space-between;
+          gap: 100px;
         }
 
         /* টেক্সট এরিয়া */
         .showcase-content {
           flex: 1;
-          max-width: 480px;
+          max-width: 450px;
         }
 
         .showcase-content .eyebrow {
-          font-size: 13px;
-          font-weight: 600;
+          font-size: 11px;
+          font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 2px;
-          color: #888;
-          margin-bottom: 16px;
+          letter-spacing: 3px;
+          color: #999;
+          margin-bottom: 20px;
           display: block;
         }
 
         .showcase-content h2 {
           font-family: Montserrat, sans-serif;
-          font-size: clamp(36px, 4vw, 48px);
-          font-weight: 700;
+          font-size: clamp(38px, 4.5vw, 56px);
+          font-weight: 600;
           color: #111;
-          line-height: 1.1;
+          line-height: 1.05;
           margin: 0 0 24px 0;
-          letter-spacing: -0.03em;
+          letter-spacing: -0.02em;
         }
 
         .showcase-content p {
-          font-size: 16px;
-          color: #666;
-          line-height: 1.6;
+          font-size: 15px;
+          color: #777;
+          line-height: 1.7;
           margin: 0 0 40px 0;
+          max-width: 380px;
         }
 
+        /* স্লাইডার/পেজিনেশন ইন্ডিকেটর (ছবির মতো) */
+        .showcase-pagination {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 40px;
+          color: #111;
+          font-family: monospace;
+          font-size: 12px;
+          letter-spacing: 1px;
+        }
+        
+        .showcase-pagination .line {
+          width: 40px;
+          height: 1px;
+          background-color: #ddd;
+        }
+
+        .showcase-pagination .active-num {
+          font-weight: 700;
+        }
+
+        /* লিঙ্ক */
         .showcase-link {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          font-size: 14px;
-          font-weight: 600;
+          font-size: 13px;
+          font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 1px;
           color: #111;
           text-decoration: none;
-          border-bottom: 2px solid #111;
-          padding-bottom: 6px;
-          transition: all 0.2s ease;
+          border-bottom: 1px solid #111;
+          padding-bottom: 4px;
+          transition: all 0.3s ease;
         }
 
         .showcase-link:hover {
@@ -565,47 +588,47 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
 
         /* ইমেজ এরিয়া */
         .showcase-image-wrapper {
-          flex: 1.2;
+          flex: 1.3;
           display: flex;
           align-items: center;
           justify-content: center;
           position: relative;
-        }
-
-        /* ছবির পেছনে হালকা ব্যাকগ্রাউন্ড ও শ্যাডো */
-        .showcase-image-wrapper::before {
-          content: '';
-          position: absolute;
-          width: 80%;
-          height: 80%;
-          background: radial-gradient(circle, rgba(0,0,0,0.03) 0%, rgba(255,255,255,0) 70%);
-          border-radius: 50%;
-          z-index: 0;
+          min-height: 400px;
         }
 
         .showcase-image-wrapper img {
           width: 100%;
-          max-width: 600px;
+          max-width: 650px;
           height: auto;
-          max-height: 450px;
+          max-height: 500px;
           object-fit: contain;
           position: relative;
           z-index: 1;
-          /* ইমেজকে প্রিমিয়াম লুক দিতে ড্রপ-শ্যাডো */
-          filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.12));
-          transition: transform 0.4s ease;
+          /* ফ্লোটিং 3D লুক দেওয়ার জন্য ড্রপ-শ্যাডো */
+          filter: drop-shadow(0px 30px 40px rgba(0, 0, 0, 0.15));
+          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .showcase-row:hover .showcase-image-wrapper img {
-          transform: translateY(-8px) scale(1.02);
+          transform: translateY(-15px) scale(1.02);
         }
 
-        /* মোবাইল রেসপন্সিভ */
-        @media (max-width: 992px) {
+        /* মোবাইল রেসপন্সিভ (মোবাইলে ছবি নিচে, লেখা উপরে থাকবে) */
+        @media (max-width: 1024px) {
           .showcase-container {
-            gap: 80px;
+            gap: 100px;
+            padding: 0 24px;
           }
-          .showcase-row, .showcase-row:nth-child(even) {
+          .showcase-row {
+            gap: 40px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .showcase-section {
+            padding: 80px 0;
+          }
+          .showcase-row {
             flex-direction: column;
             gap: 40px;
             text-align: center;
@@ -616,58 +639,64 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
             flex-direction: column;
             align-items: center;
           }
+          .showcase-content p {
+            max-width: 100%;
+          }
           .showcase-image-wrapper img {
-            max-height: 300px;
-          }
-        }
-
-        @media (max-width: 600px) {
-          .showcase-section {
-            padding: 60px 0;
-          }
-          .showcase-container {
-            gap: 60px;
-          }
-          .showcase-content h2 {
-            font-size: 32px;
+            max-height: 350px;
+            filter: drop-shadow(0px 20px 30px rgba(0, 0, 0, 0.1));
           }
         }
       `}</style>
 
       <div className="showcase-container">
-        {displayCategories.map((category) => (
+        {displayCategories.map((category, index) => (
           <div className="showcase-row" key={category.id}>
+            {/* বাম পাশ: টেক্সট */}
             <div className="showcase-content">
-              <span className="eyebrow">Premium Category</span>
+              <span className="eyebrow">Explore Collections</span>
               <h2>{category.category_name}</h2>
               <p>
                 {category.description ||
-                  `Explore our premium selection of ${category.category_name.toLowerCase()}. Engineered for performance, built for reliability, and sourced from the best manufacturers.`}
+                  `Discover our premium selection of ${category.category_name.toLowerCase()}. Engineered for ultimate performance and built to last, sourced directly from top manufacturers.`}
               </p>
-              <Link 
-                href={category.slug ? `/category/${category.slug}` : '/category'} 
-                className="showcase-link"
-              >
-                Shop Collection <ArrowIcon />
-              </Link>
+              
+              {/* ছবির মতো পেজিনেশন ইন্ডিকেটর */}
+              <div className="showcase-pagination">
+                <span>&lt;</span>
+                <span className="line"></span>
+                <span className="active-num">0{index + 1}</span>
+                <span className="line"></span>
+                <span>&gt;</span>
+              </div>
+
+              <div>
+                <Link 
+                  href={category.slug ? `/category/${category.slug}` : '/category'} 
+                  className="showcase-link"
+                >
+                  Shop Collection <ArrowIcon />
+                </Link>
+              </div>
             </div>
             
+            {/* ডান পাশ: ইমেজ */}
             <div className="showcase-image-wrapper">
               {category.image_url ? (
                 <img src={category.image_url} alt={category.category_name} loading="lazy" />
               ) : (
-                // ইমেজ না থাকলে একটি প্লেসহোল্ডার
                 <div style={{ 
-                  width: '100%', 
+                  width: '80%', 
                   height: '300px', 
-                  background: '#f5f5f5', 
-                  borderRadius: '12px',
+                  background: '#eee', 
+                  borderRadius: '20px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#999'
+                  color: '#999',
+                  fontSize: '14px'
                 }}>
-                  No Image Available
+                  Image Not Available
                 </div>
               )}
             </div>
@@ -809,7 +838,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* 4. PREMIUM CATEGORY SHOWCASE (নতুন ডিজাইন) */}
+      {/* 4. PREMIUM CATEGORY SHOWCASE (টেক্সট বামে, ছবি ডানে) */}
       {!loading && popularCategories.length > 0 && (
         <CategoryShowcase categories={popularCategories} />
       )}
