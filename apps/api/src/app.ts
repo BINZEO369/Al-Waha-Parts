@@ -56,6 +56,46 @@ const limit = (value: unknown, fallback = 50) =>
 const jsonError = (reply: FastifyReply, statusCode: number, message: string) =>
   reply.code(statusCode).send({ error: { message } });
 
+type CarBrandRecord = Record<string, unknown>;
+
+const firstValue = (row: CarBrandRecord, keys: string[]) =>
+  keys
+    .map((key) => row[key])
+    .find((value) => value !== undefined && value !== null && value !== '');
+
+const normalizeCarBrand = (row: CarBrandRecord, index: number) => ({
+  id: String(firstValue(row, ['id', 'brand_id', 'car_brand_id']) ?? `car-brand-${index}`),
+  manufacturer_name: String(
+    firstValue(row, ['manufacturer_name', 'brand_name', 'car_brand', 'brand', 'make', 'name']) ??
+      'Unknown brand',
+  ),
+  manufacturer_logo:
+    firstValue(row, ['manufacturer_logo', 'brand_logo', 'logo_url', 'logo']) ?? null,
+  model_name: String(firstValue(row, ['model_name', 'model', 'car_model']) ?? 'All models'),
+  generation: firstValue(row, ['generation', 'variant', 'trim']) ?? null,
+  chassis_code: firstValue(row, ['chassis_code', 'chassis']) ?? null,
+  year_start: firstValue(row, ['year_start', 'from_year', 'start_year']) ?? null,
+  year_end: firstValue(row, ['year_end', 'to_year', 'end_year']) ?? null,
+  vehicle_type: firstValue(row, ['vehicle_type', 'type', 'body_type']) ?? 'Vehicle',
+  cover_image_url: firstValue(row, ['cover_image_url', 'image_url', 'cover_image']) ?? null,
+  status:
+    firstValue(row, ['is_active']) === false
+      ? 'inactive'
+      : String(firstValue(row, ['status']) ?? 'active'),
+});
+
+async function readCarBrands() {
+  const supabase = getSupabaseAdmin();
+  let lastError: string | null = null;
+  for (const table of ['Car brand', 'car_brand', 'car_brands']) {
+    const { data, error } = await supabase.from(table).select('*').limit(1000);
+    if (!error)
+      return (data ?? []).map((row, index) => normalizeCarBrand(row as CarBrandRecord, index));
+    lastError = error.message;
+  }
+  throw new Error(lastError ?? 'Car brand table was not found.');
+}
+
 async function requireAdmin(request: FastifyRequest, reply: FastifyReply) {
   const token = request.headers.authorization?.replace(/^Bearer\s+/i, '');
   if (!token) return jsonError(reply, 401, 'Bearer token required');
@@ -126,7 +166,9 @@ app.get(
     if (!brand) return jsonError(reply, 404, 'Car brand not found');
     let { data: vehicles, error: vehiclesError } = await supabase
       .from('vehicles')
-      .select('id,slug,manufacturer_name,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,vehicle_images,car_brand_id')
+      .select(
+        'id,slug,manufacturer_name,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,vehicle_images,car_brand_id',
+      )
       .eq('car_brand_id', brand.id)
       .eq('status', 'active')
       .order('model_name')
@@ -136,7 +178,9 @@ app.get(
     if (vehiclesError?.message.includes('car_brand_id')) {
       const fallback = await supabase
         .from('vehicles')
-        .select('id,slug,manufacturer_name,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,vehicle_images')
+        .select(
+          'id,slug,manufacturer_name,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,vehicle_images',
+        )
         .eq('manufacturer_name', brand.manufacturer_name)
         .eq('status', 'active')
         .order('model_name')
@@ -178,33 +222,64 @@ app.get(
 );
 
 function brandSlug(name: string) {
-  return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
-app.get('/api/v1/brands', async (request: FastifyRequest<{ Querystring: { limit?: string } }>, reply) => {
-  const { data, error } = await getSupabaseAdmin()
-    .from('parts').select('brand_name').eq('status', 'active').not('brand_name', 'is', null).order('brand_name').limit(200);
-  if (error) return jsonError(reply, 500, error.message);
-  const brands = new Map<string, { name: string; slug: string; product_count: number }>();
-  for (const row of data ?? []) {
-    const name = row.brand_name?.trim();
-    if (!name) continue;
-    const slug = brandSlug(name);
-    const existing = brands.get(slug);
-    brands.set(slug, { name, slug, product_count: (existing?.product_count ?? 0) + 1 });
-  }
-  return { data: [...brands.values()].slice(0, limit(request.query.limit) || 12) };
-});
+app.get(
+  '/api/v1/brands',
+  async (request: FastifyRequest<{ Querystring: { limit?: string } }>, reply) => {
+    const { data, error } = await getSupabaseAdmin()
+      .from('parts')
+      .select('brand_name')
+      .eq('status', 'active')
+      .not('brand_name', 'is', null)
+      .order('brand_name')
+      .limit(200);
+    if (error) return jsonError(reply, 500, error.message);
+    const brands = new Map<string, { name: string; slug: string; product_count: number }>();
+    for (const row of data ?? []) {
+      const name = row.brand_name?.trim();
+      if (!name) continue;
+      const slug = brandSlug(name);
+      const existing = brands.get(slug);
+      brands.set(slug, { name, slug, product_count: (existing?.product_count ?? 0) + 1 });
+    }
+    return { data: [...brands.values()].slice(0, limit(request.query.limit) || 12) };
+  },
+);
 
-app.get('/api/v1/brands/:slug', async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
-  const { data, error } = await getSupabaseAdmin()
-    .from('parts').select('*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))')
-    .eq('status', 'active').not('brand_name', 'is', null).limit(200);
-  if (error) return jsonError(reply, 500, error.message);
-  const parts = (data ?? []).filter((part) => part.brand_name && brandSlug(part.brand_name) === request.params.slug);
-  if (!parts.length) return jsonError(reply, 404, 'Brand not found');
-  return { data: { brand: { name: parts[0]?.brand_name, slug: request.params.slug, product_count: parts.length }, parts } };
-});
+app.get(
+  '/api/v1/brands/:slug',
+  async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
+    const { data, error } = await getSupabaseAdmin()
+      .from('parts')
+      .select(
+        '*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))',
+      )
+      .eq('status', 'active')
+      .not('brand_name', 'is', null)
+      .limit(200);
+    if (error) return jsonError(reply, 500, error.message);
+    const parts = (data ?? []).filter(
+      (part) => part.brand_name && brandSlug(part.brand_name) === request.params.slug,
+    );
+    if (!parts.length) return jsonError(reply, 404, 'Brand not found');
+    return {
+      data: {
+        brand: {
+          name: parts[0]?.brand_name,
+          slug: request.params.slug,
+          product_count: parts.length,
+        },
+        parts,
+      },
+    };
+  },
+);
 
 app.get('/api/v1/popular-categories', async (_request, reply) => {
   const importantCategorySlugs = [
@@ -259,20 +334,31 @@ app.get(
     reply,
   ) => {
     const q = request.query;
-    let query = getSupabaseAdmin()
-      .from('vehicles')
-      .select('*')
-      .order('manufacturer_name')
-      .order('model_name')
-      .range(Number(q.offset) || 0, (Number(q.offset) || 0) + limit(q.limit) - 1);
-    query = query.eq('status', q.status ?? 'active');
-    if (q.search)
-      query = query.or(
-        `manufacturer_name.ilike.%${q.search}%,model_name.ilike.%${q.search}%,chassis_code.ilike.%${q.search}%`,
+    try {
+      let data = await readCarBrands();
+      if (q.status) data = data.filter((item) => item.status === q.status);
+      if (q.search) {
+        const search = q.search.toLowerCase();
+        data = data.filter((item) =>
+          [item.manufacturer_name, item.model_name, item.chassis_code]
+            .filter(Boolean)
+            .some((value) => String(value).toLowerCase().includes(search)),
+        );
+      }
+      data.sort((a, b) =>
+        `${a.manufacturer_name} ${a.model_name}`.localeCompare(
+          `${b.manufacturer_name} ${b.model_name}`,
+        ),
       );
-    const { data, error } = await query;
-    if (error) return jsonError(reply, 500, error.message);
-    return { data: data ?? [] };
+      const start = Number(q.offset) || 0;
+      return { data: data.slice(start, start + limit(q.limit)) };
+    } catch (error) {
+      return jsonError(
+        reply,
+        500,
+        error instanceof Error ? error.message : 'Unable to load Car brand data.',
+      );
+    }
   },
 );
 
@@ -291,7 +377,9 @@ app.get(
 
     const { data: parts, error: partsError } = await supabase
       .from('parts')
-      .select('*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles!inner(vehicle_id)')
+      .select(
+        '*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles!inner(vehicle_id)',
+      )
       .eq('part_vehicles.vehicle_id', vehicle.id)
       .eq('status', 'active')
       .order('position')
@@ -303,19 +391,16 @@ app.get(
 );
 
 app.get('/api/v1/homepage-selected-vehicles', async (_request, reply) => {
-  const { data, error } = await getSupabaseAdmin()
-    .from('homepage_selected_vehicles')
-    .select(
-      'display_order,vehicle:vehicles!inner(id,slug,manufacturer_name,manufacturer_logo,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,status)',
-    )
-    .eq('is_active', true)
-    .eq('vehicle.status', 'active')
-    .order('display_order', { ascending: true })
-    .limit(200);
-  if (error) return jsonError(reply, 500, error.message);
-  return {
-    data: (data ?? []).map((item) => ({ ...item.vehicle, sort_order: item.display_order })),
-  };
+  try {
+    const data = await readCarBrands();
+    return { data: data.filter((item) => item.status === 'active').slice(0, 200) };
+  } catch (error) {
+    return jsonError(
+      reply,
+      500,
+      error instanceof Error ? error.message : 'Unable to load Car brand data.',
+    );
+  }
 });
 
 app.get(
@@ -338,7 +423,9 @@ app.get(
     const start = Number(q.offset) || 0;
     let query = getSupabaseAdmin()
       .from('parts')
-      .select('*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles!inner(vehicle_id)')
+      .select(
+        '*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles!inner(vehicle_id)',
+      )
       .order('position')
       .order('part_name')
       .range(start, start + limit(q.limit) - 1);
@@ -377,19 +464,43 @@ app.get(
     if (error?.message.includes('part_vehicle_fitments')) {
       const legacy = await getSupabaseAdmin()
         .from('parts')
-        .select('*,parts_categories(id,category_name,slug,image_url),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))')
+        .select(
+          '*,parts_categories(id,category_name,slug,image_url),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))',
+        )
         .eq('slug', request.params.slug)
         .eq('status', 'active')
         .maybeSingle();
       if (legacy.data) {
         const legacyFitment = legacy.data.part_vehicles?.[0];
         const legacyVehicle = legacyFitment?.vehicles;
-        const compatibleYears = legacyVehicle?.year_start && legacyVehicle?.year_end
-          ? Array.from({ length: Math.max(0, legacyVehicle.year_end - legacyVehicle.year_start + 1) }, (_, index) => legacyVehicle.year_start + index)
-          : legacyVehicle?.year_start ? [legacyVehicle.year_start] : [];
+        const compatibleYears =
+          legacyVehicle?.year_start && legacyVehicle?.year_end
+            ? Array.from(
+                { length: Math.max(0, legacyVehicle.year_end - legacyVehicle.year_start + 1) },
+                (_, index) => legacyVehicle.year_start + index,
+              )
+            : legacyVehicle?.year_start
+              ? [legacyVehicle.year_start]
+              : [];
         data = {
           ...legacy.data,
-          part_vehicle_fitments: legacyFitment ? [{ vehicle_id: legacyFitment.vehicle_id, compatible_years: compatibleYears, vehicles: legacyVehicle ? { id: legacyVehicle.id, manufacturer_name: legacyVehicle.manufacturer_name, model_name: legacyVehicle.model_name, generation: legacyVehicle.generation, chassis_code: legacyVehicle.chassis_code } : null }] : [],
+          part_vehicle_fitments: legacyFitment
+            ? [
+                {
+                  vehicle_id: legacyFitment.vehicle_id,
+                  compatible_years: compatibleYears,
+                  vehicles: legacyVehicle
+                    ? {
+                        id: legacyVehicle.id,
+                        manufacturer_name: legacyVehicle.manufacturer_name,
+                        model_name: legacyVehicle.model_name,
+                        generation: legacyVehicle.generation,
+                        chassis_code: legacyVehicle.chassis_code,
+                      }
+                    : null,
+                },
+              ]
+            : [],
         };
         error = legacy.error;
       }
@@ -816,7 +927,9 @@ app.patch(
 app.get('/api/v1/admin/parts', { preHandler: requireAdmin as any }, async (_request, reply) => {
   const { data, error } = await getSupabaseAdmin()
     .from('parts')
-    .select('*,parts_categories(id,category_name,slug),part_vehicle_fitments(vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code))')
+    .select(
+      '*,parts_categories(id,category_name,slug),part_vehicle_fitments(vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code))',
+    )
     .order('created_at', { ascending: false });
   if (error) return jsonError(reply, 500, error.message);
   return { data: data ?? [] };
@@ -862,7 +975,9 @@ app.post('/api/v1/admin/parts', { preHandler: requireAdmin as any }, async (requ
   const { data, error } = await getSupabaseAdmin()
     .from('parts')
     .insert(body)
-    .select('*,parts_categories(id,category_name,slug),part_vehicle_fitments(vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code))')
+    .select(
+      '*,parts_categories(id,category_name,slug),part_vehicle_fitments(vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code))',
+    )
     .single();
   if (error) return jsonError(reply, 400, error.message);
   return reply.code(201).send({ data });
@@ -880,7 +995,9 @@ app.patch(
       .from('parts')
       .update(body)
       .eq('id', request.params.id)
-      .select('*,parts_categories(id,category_name,slug),part_vehicle_fitments(vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code))')
+      .select(
+        '*,parts_categories(id,category_name,slug),part_vehicle_fitments(vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code))',
+      )
       .single();
     if (error) return jsonError(reply, 400, error.message);
     return { data };
@@ -901,36 +1018,75 @@ app.delete(
   },
 );
 
-app.get('/api/v1/admin/parts/:id/fitment', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
-  const { data, error } = await getSupabaseAdmin()
-    .from('part_vehicle_fitments')
-    .select('id,part_id,vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code)')
-    .eq('part_id', request.params.id)
-    .maybeSingle();
-  if (error) return jsonError(reply, 500, error.message);
-  return { data: data ?? null };
-});
+app.get(
+  '/api/v1/admin/parts/:id/fitment',
+  { preHandler: requireAdmin as any },
+  async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+    const { data, error } = await getSupabaseAdmin()
+      .from('part_vehicle_fitments')
+      .select(
+        'id,part_id,vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code)',
+      )
+      .eq('part_id', request.params.id)
+      .maybeSingle();
+    if (error) return jsonError(reply, 500, error.message);
+    return { data: data ?? null };
+  },
+);
 
-app.put('/api/v1/admin/parts/:id/fitment', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string }; Body: { vehicle_id?: string; compatible_years?: unknown } }>, reply) => {
-  const body = request.body ?? {};
-  const years = Array.isArray(body.compatible_years)
-    ? [...new Set(body.compatible_years.map(Number).filter((year) => Number.isInteger(year) && year >= 1900 && year <= 2200))].sort((a, b) => a - b)
-    : [];
-  if (!body.vehicle_id) return jsonError(reply, 400, 'Choose one vehicle model for this part.');
-  const { data, error } = await getSupabaseAdmin()
-    .from('part_vehicle_fitments')
-    .upsert({ part_id: request.params.id, vehicle_id: body.vehicle_id, compatible_years: years, updated_at: new Date().toISOString() }, { onConflict: 'part_id' })
-    .select('id,part_id,vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code)')
-    .single();
-  if (error) return jsonError(reply, 400, error.message);
-  return { data };
-});
+app.put(
+  '/api/v1/admin/parts/:id/fitment',
+  { preHandler: requireAdmin as any },
+  async (
+    request: FastifyRequest<{
+      Params: { id: string };
+      Body: { vehicle_id?: string; compatible_years?: unknown };
+    }>,
+    reply,
+  ) => {
+    const body = request.body ?? {};
+    const years = Array.isArray(body.compatible_years)
+      ? [
+          ...new Set(
+            body.compatible_years
+              .map(Number)
+              .filter((year) => Number.isInteger(year) && year >= 1900 && year <= 2200),
+          ),
+        ].sort((a, b) => a - b)
+      : [];
+    if (!body.vehicle_id) return jsonError(reply, 400, 'Choose one vehicle model for this part.');
+    const { data, error } = await getSupabaseAdmin()
+      .from('part_vehicle_fitments')
+      .upsert(
+        {
+          part_id: request.params.id,
+          vehicle_id: body.vehicle_id,
+          compatible_years: years,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'part_id' },
+      )
+      .select(
+        'id,part_id,vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code)',
+      )
+      .single();
+    if (error) return jsonError(reply, 400, error.message);
+    return { data };
+  },
+);
 
-app.delete('/api/v1/admin/parts/:id/fitment', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
-  const { error } = await getSupabaseAdmin().from('part_vehicle_fitments').delete().eq('part_id', request.params.id);
-  if (error) return jsonError(reply, 400, error.message);
-  return { data: null };
-});
+app.delete(
+  '/api/v1/admin/parts/:id/fitment',
+  { preHandler: requireAdmin as any },
+  async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+    const { error } = await getSupabaseAdmin()
+      .from('part_vehicle_fitments')
+      .delete()
+      .eq('part_id', request.params.id);
+    if (error) return jsonError(reply, 400, error.message);
+    return { data: null };
+  },
+);
 
 const editableVehicleFields = [
   'manufacturer_name',
