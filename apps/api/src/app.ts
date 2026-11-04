@@ -56,6 +56,18 @@ const limit = (value: unknown, fallback = 50) =>
 const jsonError = (reply: FastifyReply, statusCode: number, message: string) =>
   reply.code(statusCode).send({ error: { message } });
 
+const publicImageUrl = (value: unknown) => {
+  if (typeof value !== 'string' || !value.trim()) return null;
+  const image = value.trim();
+  if (/^(https?:|data:|blob:|\/\/)/i.test(image)) return image;
+  if (image.startsWith('/')) return image;
+  if (image.startsWith('public/')) return `/${image.slice('public/'.length)}`;
+  if (/^(car-brands|vehicle|hero|categories)\//i.test(image)) return `/${image}`;
+  if (image.startsWith('storage/v1/object/public/'))
+    return `${config.supabaseUrl.replace(/\/$/, '')}/${image}`;
+  return `${config.supabaseUrl.replace(/\/$/, '')}/storage/v1/object/public/${image}`;
+};
+
 type CarBrandRecord = Record<string, unknown>;
 
 const firstValue = (row: CarBrandRecord, keys: string[]) =>
@@ -71,15 +83,16 @@ const normalizeCarBrand = (row: CarBrandRecord, index: number) => ({
     firstValue(row, ['manufacturer_name', 'brand_name', 'car_brand', 'brand', 'make', 'name']) ??
       'Unknown brand',
   ),
-  manufacturer_logo:
-    firstValue(row, ['manufacturer_logo', 'brand_logo', 'logo_url', 'logo']) ?? null,
+  manufacturer_logo: publicImageUrl(
+    firstValue(row, ['manufacturer_logo', 'brand_logo', 'logo_url', 'logo']),
+  ),
   model_name: String(firstValue(row, ['model_name', 'model', 'car_model']) ?? 'All models'),
   generation: firstValue(row, ['generation', 'variant', 'trim']) ?? null,
   chassis_code: firstValue(row, ['chassis_code', 'chassis']) ?? null,
   year_start: firstValue(row, ['year_start', 'from_year', 'start_year']) ?? null,
   year_end: firstValue(row, ['year_end', 'to_year', 'end_year']) ?? null,
   vehicle_type: firstValue(row, ['vehicle_type', 'type', 'body_type']) ?? 'Vehicle',
-  cover_image_url: firstValue(row, ['cover_image_url', 'image_url', 'cover_image']) ?? null,
+  cover_image_url: publicImageUrl(firstValue(row, ['cover_image_url', 'image_url', 'cover_image'])),
   status:
     firstValue(row, ['is_active']) === false
       ? 'inactive'
@@ -151,7 +164,9 @@ app.get('/api/v1/car-brands', async (_request, reply) => {
     .order('manufacturer_name', { ascending: true })
     .limit(10);
   if (error) return jsonError(reply, 500, error.message);
-  return { data: data ?? [] };
+  return {
+    data: (data ?? []).map((brand) => ({ ...brand, logo_url: publicImageUrl(brand.logo_url) })),
+  };
 });
 
 app.get(
@@ -191,7 +206,15 @@ app.get(
       vehiclesError = fallback.error;
     }
     if (vehiclesError) return jsonError(reply, 500, vehiclesError.message);
-    return { data: { brand, vehicles: vehicles ?? [] } };
+    return {
+      data: {
+        brand: { ...brand, logo_url: publicImageUrl(brand.logo_url) },
+        vehicles: (vehicles ?? []).map((vehicle) => ({
+          ...vehicle,
+          cover_image_url: publicImageUrl(vehicle.cover_image_url),
+        })),
+      },
+    };
   },
 );
 
@@ -388,7 +411,18 @@ app.get(
       .order('part_name')
       .limit(200);
     if (partsError) return jsonError(reply, 500, partsError.message);
-    return { data: { vehicle, parts: parts ?? [] } };
+    return {
+      data: {
+        vehicle: {
+          ...vehicle,
+          cover_image_url: publicImageUrl(vehicle.cover_image_url),
+          vehicle_images: Array.isArray(vehicle.vehicle_images)
+            ? vehicle.vehicle_images.map((image: unknown) => publicImageUrl(image)).filter(Boolean)
+            : vehicle.vehicle_images,
+        },
+        parts: parts ?? [],
+      },
+    };
   },
 );
 
