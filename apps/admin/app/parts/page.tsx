@@ -1,5 +1,6 @@
 import { AdminResourcePanel } from '../../components/AdminResourcePanel';
 import { SectionHeader, WorkspaceCard } from '../../components/AdminSection';
+import { PartFitmentEditor } from '../../components/PartFitmentEditor';
 
 export default function Parts() {
   return (
@@ -11,6 +12,7 @@ export default function Parts() {
         action="Add new part"
       />
       <AdminResourcePanel kind="parts" />
+      <PartFitmentEditor />
       <div className="workspace-grid">
         <WorkspaceCard
           number="02A"

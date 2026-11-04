@@ -52,8 +52,7 @@ const config: Record<
       { key: 'model_name', label: 'Model', required: true },
       { key: 'generation', label: 'Generation' },
       { key: 'chassis_code', label: 'Chassis code' },
-      { key: 'year_start', label: 'Year from', type: 'number' },
-      { key: 'year_end', label: 'Year to', type: 'number' },
+      { key: 'car_brand_id', label: 'Car brand logo ID' },
       { key: 'vehicle_type', label: 'Vehicle type' },
       { key: 'slug', label: 'URL slug' },
       { key: 'status', label: 'Status', type: 'select', options: ['active', 'inactive', 'draft'] },
@@ -129,7 +128,7 @@ function summary(kind: ResourceKind, row: Resource) {
     return {
       title: `${text(row.manufacturer_name)} ${text(row.model_name)}`,
       meta: `${text(row.generation, 'Generation not set')} · ${text(row.chassis_code, 'No chassis')}`,
-      detail: `${text(row.year_start, '—')}–${text(row.year_end, '—')} · ${text(row.vehicle_type, 'Vehicle')}`,
+      detail: `${text(row.vehicle_type, 'Vehicle')} · logo ID ${text(row.car_brand_id, 'not linked')}`,
       status: row.status,
     };
   if (kind === 'categories')

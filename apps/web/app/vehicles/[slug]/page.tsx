@@ -46,7 +46,6 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ slug: 
 
   const { vehicle, parts } = detail;
   const title = `${vehicle.manufacturer_name} ${vehicle.model_name}`;
-  const years = `${vehicle.year_start || '—'}–${vehicle.year_end || 'present'}`;
   const gallery = [vehicle.cover_image_url, ...(vehicle.gallery_images ?? [])].filter(Boolean) as string[];
 
   return (
@@ -66,7 +65,6 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ slug: 
           <h1>{title}</h1>
           <p className="vehicle-detail-subtitle">{vehicle.generation || vehicle.chassis_code || 'Verified fitment record'}</p>
           <div className="vehicle-detail-specs">
-            <div><small>Years</small><strong>{years}</strong></div>
             <div><small>Type</small><strong>{vehicle.vehicle_type || 'Passenger vehicle'}</strong></div>
             <div><small>Products</small><strong>{parts.length} compatible</strong></div>
           </div>

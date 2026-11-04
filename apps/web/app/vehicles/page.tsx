@@ -19,7 +19,6 @@ export default function VehiclesPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [manufacturer, setManufacturer] = useState('');
   const [model, setModel] = useState('');
-  const [year, setYear] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -44,15 +43,7 @@ export default function VehiclesPage() {
     () => [...new Set(vehicles.filter((vehicle) => !manufacturer || vehicle.manufacturer_name === manufacturer).map((vehicle) => vehicle.model_name).filter(Boolean))],
     [vehicles, manufacturer],
   );
-  const years = useMemo(
-    () => [...new Set(vehicles.filter((vehicle) => (!manufacturer || vehicle.manufacturer_name === manufacturer) && (!model || vehicle.model_name === model)).flatMap((vehicle) => {
-      if (!vehicle.year_start) return [];
-      const end = vehicle.year_end ?? vehicle.year_start;
-      return Array.from({ length: Math.min(end - vehicle.year_start + 1, 50) }, (_, index) => end - index);
-    }))].sort().reverse(),
-    [vehicles, manufacturer, model],
-  );
-  const selectedVehicle = vehicles.find((vehicle) => vehicle.manufacturer_name === manufacturer && vehicle.model_name === model && (!year || (vehicle.year_start ?? 0) <= Number(year)) && (!year || (vehicle.year_end ?? Number(year)) >= Number(year)));
+  const selectedVehicle = vehicles.find((vehicle) => vehicle.manufacturer_name === manufacturer && vehicle.model_name === model);
 
   return (
     <main className="page-shell vehicles-page">
@@ -70,25 +61,19 @@ export default function VehiclesPage() {
         <div className="form-grid">
           <label>
             Manufacturer
-            <select value={manufacturer} onChange={(event) => { setManufacturer(event.target.value); setModel(''); setYear(''); }}>
+            <select value={manufacturer} onChange={(event) => { setManufacturer(event.target.value); setModel(''); }}>
               <option value="">Select manufacturer</option>
               {manufacturers.map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
           </label>
           <label>
             Model
-            <select value={model} onChange={(event) => { setModel(event.target.value); setYear(''); }} disabled={!manufacturer}>
+            <select value={model} onChange={(event) => setModel(event.target.value)} disabled={!manufacturer}>
               <option value="">Select model</option>
               {models.map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
           </label>
-          <label>
-            Year
-            <select value={year} onChange={(event) => setYear(event.target.value)} disabled={!model}>
-              <option value="">Select year</option>
-              {years.map((item) => <option key={item} value={String(item)}>{item}</option>)}
-            </select>
-          </label>
+          <p className="finder-model-note">Compatible years are shown on each product details page.</p>
         </div>
         {selectedVehicle?.cover_image_url && <img className="finder-vehicle-image" src={selectedVehicle.cover_image_url} alt={`${selectedVehicle.manufacturer_name} ${selectedVehicle.model_name}`} />}
         {error && <p className="form-error">{error}</p>}

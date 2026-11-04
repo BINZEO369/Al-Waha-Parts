@@ -11,10 +11,13 @@ type VehicleFitment = {
   id: string;
   manufacturer_name: string;
   model_name: string;
-  year_start?: number | null;
-  year_end?: number | null;
   generation?: string | null;
   chassis_code?: string | null;
+};
+type PartFitment = {
+  vehicle_id: string;
+  compatible_years?: number[] | null;
+  vehicles?: VehicleFitment | null;
 };
 
 type Product = {
@@ -35,7 +38,7 @@ type Product = {
   image_urls?: string[] | null;
   parts_categories?: { category_name?: string | null; slug?: string | null } | null;
   car_brands?: { id?: string; manufacturer_name?: string | null; slug?: string | null; logo_url?: string | null } | null;
-  part_vehicles?: Array<{ vehicles?: VehicleFitment | null }>;
+  part_vehicle_fitments?: PartFitment | PartFitment[] | null;
 };
 
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -398,9 +401,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const images = [
     ...new Set([product.primary_image_url, ...(product.image_urls ?? [])].filter(Boolean)),
   ] as string[];
-  const vehicles = (product.part_vehicles ?? [])
-    .map((item) => item.vehicles)
-    .filter(Boolean) as VehicleFitment[];
+  const rawFitment = product.part_vehicle_fitments;
+  const fitment = Array.isArray(rawFitment) ? rawFitment[0] : rawFitment;
+  const vehicle = fitment?.vehicles;
+  const compatibleYears = [...new Set((fitment?.compatible_years ?? []).map(Number))].sort((a, b) => a - b);
   const currentPrice = product.sale_price ?? product.price;
   const outOfStock = product.stock_quantity === 0;
 
@@ -648,12 +652,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         }
       `}</style>
 
-      {vehicles[0] && (
+      {vehicle && (
         <div className="product-vehicle-bar">
           <span className="product-vehicle-mark">
-            {product.car_brands?.logo_url ? <img src={product.car_brands.logo_url} alt={product.car_brands.manufacturer_name ?? vehicles[0].manufacturer_name} /> : vehicles[0].manufacturer_name.slice(0, 2).toUpperCase()}
+            {product.car_brands?.logo_url ? <img src={product.car_brands.logo_url} alt={product.car_brands.manufacturer_name ?? vehicle.manufacturer_name} /> : vehicle.manufacturer_name.slice(0, 2).toUpperCase()}
           </span>
-          <span><strong>{vehicles[0].manufacturer_name} {vehicles[0].model_name}</strong><small>{vehicles[0].year_start ?? '—'}–{vehicles[0].year_end ?? 'present'}{vehicles[0].generation ? ` · ${vehicles[0].generation}` : ''}</small></span>
+          <span><strong>{vehicle.manufacturer_name} {vehicle.model_name}</strong><small>{compatibleYears.length ? compatibleYears.join(', ') : 'Year not specified'}{vehicle.generation ? ` · ${vehicle.generation}` : ''}</small></span>
         </div>
       )}
       <div className="product-grid">
@@ -730,21 +734,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           <h2>Compatible vehicles</h2>
           <p>This product is listed for the following vehicle models and production years.</p>
         </div>
-        {vehicles.length ? (
+        {vehicle ? (
           <div className="product-fitmentList">
-            {vehicles.map((vehicle) => (
               <div key={vehicle.id}>
                 <small>Vehicle fitment</small>
                 <strong>
                   {vehicle.manufacturer_name} {vehicle.model_name}
                 </strong>
                 <span>
-                  Model years: {vehicle.year_start ?? '—'}–{vehicle.year_end ?? 'present'}
+                  Compatible years: {compatibleYears.length ? compatibleYears.join(', ') : 'Year not specified'}
                   {vehicle.generation ? ` · ${vehicle.generation}` : ''}
                   {vehicle.chassis_code ? ` · ${vehicle.chassis_code}` : ''}
                 </span>
               </div>
-            ))}
           </div>
         ) : (
           <p>

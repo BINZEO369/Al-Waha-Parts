@@ -366,14 +366,34 @@ app.get(
 app.get(
   '/api/v1/parts/slug/:slug',
   async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
-    const { data, error } = await getSupabaseAdmin()
+    let { data, error } = await getSupabaseAdmin()
       .from('parts')
       .select(
-        '*,parts_categories(id,category_name,slug,image_url),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))',
+        '*,parts_categories(id,category_name,slug,image_url),car_brands(id,manufacturer_name,slug,logo_url),part_vehicle_fitments(vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code))',
       )
       .eq('slug', request.params.slug)
       .eq('status', 'active')
       .maybeSingle();
+    if (error?.message.includes('part_vehicle_fitments')) {
+      const legacy = await getSupabaseAdmin()
+        .from('parts')
+        .select('*,parts_categories(id,category_name,slug,image_url),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))')
+        .eq('slug', request.params.slug)
+        .eq('status', 'active')
+        .maybeSingle();
+      if (legacy.data) {
+        const legacyFitment = legacy.data.part_vehicles?.[0];
+        const legacyVehicle = legacyFitment?.vehicles;
+        const compatibleYears = legacyVehicle?.year_start && legacyVehicle?.year_end
+          ? Array.from({ length: Math.max(0, legacyVehicle.year_end - legacyVehicle.year_start + 1) }, (_, index) => legacyVehicle.year_start + index)
+          : legacyVehicle?.year_start ? [legacyVehicle.year_start] : [];
+        data = {
+          ...legacy.data,
+          part_vehicle_fitments: legacyFitment ? [{ vehicle_id: legacyFitment.vehicle_id, compatible_years: compatibleYears, vehicles: legacyVehicle ? { id: legacyVehicle.id, manufacturer_name: legacyVehicle.manufacturer_name, model_name: legacyVehicle.model_name, generation: legacyVehicle.generation, chassis_code: legacyVehicle.chassis_code } : null }] : [],
+        };
+        error = legacy.error;
+      }
+    }
     if (error) return jsonError(reply, 500, error.message);
     if (!data) return jsonError(reply, 404, 'Part not found');
     return { data };
@@ -796,7 +816,7 @@ app.patch(
 app.get('/api/v1/admin/parts', { preHandler: requireAdmin as any }, async (_request, reply) => {
   const { data, error } = await getSupabaseAdmin()
     .from('parts')
-    .select('*,parts_categories(id,category_name,slug)')
+    .select('*,parts_categories(id,category_name,slug),part_vehicle_fitments(vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code))')
     .order('created_at', { ascending: false });
   if (error) return jsonError(reply, 500, error.message);
   return { data: data ?? [] };
@@ -842,7 +862,7 @@ app.post('/api/v1/admin/parts', { preHandler: requireAdmin as any }, async (requ
   const { data, error } = await getSupabaseAdmin()
     .from('parts')
     .insert(body)
-    .select('*,parts_categories(id,category_name,slug)')
+    .select('*,parts_categories(id,category_name,slug),part_vehicle_fitments(vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code))')
     .single();
   if (error) return jsonError(reply, 400, error.message);
   return reply.code(201).send({ data });
@@ -860,7 +880,7 @@ app.patch(
       .from('parts')
       .update(body)
       .eq('id', request.params.id)
-      .select('*,parts_categories(id,category_name,slug)')
+      .select('*,parts_categories(id,category_name,slug),part_vehicle_fitments(vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code))')
       .single();
     if (error) return jsonError(reply, 400, error.message);
     return { data };
@@ -881,15 +901,44 @@ app.delete(
   },
 );
 
+app.get('/api/v1/admin/parts/:id/fitment', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+  const { data, error } = await getSupabaseAdmin()
+    .from('part_vehicle_fitments')
+    .select('id,part_id,vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code)')
+    .eq('part_id', request.params.id)
+    .maybeSingle();
+  if (error) return jsonError(reply, 500, error.message);
+  return { data: data ?? null };
+});
+
+app.put('/api/v1/admin/parts/:id/fitment', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string }; Body: { vehicle_id?: string; compatible_years?: unknown } }>, reply) => {
+  const body = request.body ?? {};
+  const years = Array.isArray(body.compatible_years)
+    ? [...new Set(body.compatible_years.map(Number).filter((year) => Number.isInteger(year) && year >= 1900 && year <= 2200))].sort((a, b) => a - b)
+    : [];
+  if (!body.vehicle_id) return jsonError(reply, 400, 'Choose one vehicle model for this part.');
+  const { data, error } = await getSupabaseAdmin()
+    .from('part_vehicle_fitments')
+    .upsert({ part_id: request.params.id, vehicle_id: body.vehicle_id, compatible_years: years, updated_at: new Date().toISOString() }, { onConflict: 'part_id' })
+    .select('id,part_id,vehicle_id,compatible_years,vehicles(id,manufacturer_name,model_name,generation,chassis_code)')
+    .single();
+  if (error) return jsonError(reply, 400, error.message);
+  return { data };
+});
+
+app.delete('/api/v1/admin/parts/:id/fitment', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+  const { error } = await getSupabaseAdmin().from('part_vehicle_fitments').delete().eq('part_id', request.params.id);
+  if (error) return jsonError(reply, 400, error.message);
+  return { data: null };
+});
+
 const editableVehicleFields = [
   'manufacturer_name',
-  'manufacturer_logo',
+  'car_brand_id',
   'vehicle_images',
   'model_name',
   'generation',
   'chassis_code',
-  'year_start',
-  'year_end',
   'engine_code',
   'engine_capacity',
   'fuel_type',
