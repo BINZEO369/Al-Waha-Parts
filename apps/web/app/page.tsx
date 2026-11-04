@@ -78,7 +78,7 @@ type CarBrand = {
 
 function ArrowIcon() {
   return (
-    <svg viewBox="0 0 20 20" aria-hidden="true">
+    <svg viewBox="0 0 20 20" aria-hidden="true" width="16" height="16">
       <path
         d="M4 10h11M10 5l5 5-5 5"
         fill="none"
@@ -92,7 +92,7 @@ function ArrowIcon() {
 }
 
 /* ==================================================================
- *  HERO CAROUSEL (আপডেট করা ডিজাইন)
+ *  HERO CAROUSEL (আগের মতোই)
  * ================================================================== */
 
 function HeroCarousel() {
@@ -325,7 +325,7 @@ function HeroCarousel() {
 }
 
 /* ==================================================================
- *  CAR BRAND STRIP (লোগো ছোট ও সুন্দর করা হয়েছে)
+ *  CAR BRAND STRIP (আগের মতোই)
  * ================================================================== */
 
 function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
@@ -470,6 +470,215 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 }
 
 /* ==================================================================
+ *  CATEGORY SHOWCASE (নতুন প্রিমিয়াম ডিজাইন - ছবির মতো)
+ * ================================================================== */
+
+function CategoryShowcase({ categories }: { categories: Category[] }) {
+  if (!categories || categories.length === 0) return null;
+
+  // শুধু প্রথম ৩টি ক্যাটাগরি দেখাবে যাতে পেজ খুব বেশি লম্বা না হয়
+  const displayCategories = categories.slice(0, 3);
+
+  return (
+    <section className="showcase-section">
+      <style jsx>{`
+        .showcase-section {
+          width: 100%;
+          background-color: #ffffff;
+          padding: 100px 0;
+          overflow: hidden;
+        }
+
+        .showcase-container {
+          max-width: var(--max);
+          margin: 0 auto;
+          padding: 0 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 120px; /* প্রতিটি সেকশনের মাঝে বিশাল গ্যাপ */
+        }
+
+        .showcase-row {
+          display: flex;
+          align-items: center;
+          gap: 80px;
+        }
+
+        /* জোড়-বিজোড় সেকশনের জন্য ডিজাইন উল্টে যাবে (Image left/right) */
+        .showcase-row:nth-child(even) {
+          flex-direction: row-reverse;
+        }
+
+        /* টেক্সট এরিয়া */
+        .showcase-content {
+          flex: 1;
+          max-width: 480px;
+        }
+
+        .showcase-content .eyebrow {
+          font-size: 13px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          color: #888;
+          margin-bottom: 16px;
+          display: block;
+        }
+
+        .showcase-content h2 {
+          font-family: Montserrat, sans-serif;
+          font-size: clamp(36px, 4vw, 48px);
+          font-weight: 700;
+          color: #111;
+          line-height: 1.1;
+          margin: 0 0 24px 0;
+          letter-spacing: -0.03em;
+        }
+
+        .showcase-content p {
+          font-size: 16px;
+          color: #666;
+          line-height: 1.6;
+          margin: 0 0 40px 0;
+        }
+
+        .showcase-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          color: #111;
+          text-decoration: none;
+          border-bottom: 2px solid #111;
+          padding-bottom: 6px;
+          transition: all 0.2s ease;
+        }
+
+        .showcase-link:hover {
+          color: var(--red);
+          border-color: var(--red);
+          gap: 12px;
+        }
+
+        /* ইমেজ এরিয়া */
+        .showcase-image-wrapper {
+          flex: 1.2;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+        }
+
+        /* ছবির পেছনে হালকা ব্যাকগ্রাউন্ড ও শ্যাডো */
+        .showcase-image-wrapper::before {
+          content: '';
+          position: absolute;
+          width: 80%;
+          height: 80%;
+          background: radial-gradient(circle, rgba(0,0,0,0.03) 0%, rgba(255,255,255,0) 70%);
+          border-radius: 50%;
+          z-index: 0;
+        }
+
+        .showcase-image-wrapper img {
+          width: 100%;
+          max-width: 600px;
+          height: auto;
+          max-height: 450px;
+          object-fit: contain;
+          position: relative;
+          z-index: 1;
+          /* ইমেজকে প্রিমিয়াম লুক দিতে ড্রপ-শ্যাডো */
+          filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.12));
+          transition: transform 0.4s ease;
+        }
+
+        .showcase-row:hover .showcase-image-wrapper img {
+          transform: translateY(-8px) scale(1.02);
+        }
+
+        /* মোবাইল রেসপন্সিভ */
+        @media (max-width: 992px) {
+          .showcase-container {
+            gap: 80px;
+          }
+          .showcase-row, .showcase-row:nth-child(even) {
+            flex-direction: column;
+            gap: 40px;
+            text-align: center;
+          }
+          .showcase-content {
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          .showcase-image-wrapper img {
+            max-height: 300px;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .showcase-section {
+            padding: 60px 0;
+          }
+          .showcase-container {
+            gap: 60px;
+          }
+          .showcase-content h2 {
+            font-size: 32px;
+          }
+        }
+      `}</style>
+
+      <div className="showcase-container">
+        {displayCategories.map((category) => (
+          <div className="showcase-row" key={category.id}>
+            <div className="showcase-content">
+              <span className="eyebrow">Premium Category</span>
+              <h2>{category.category_name}</h2>
+              <p>
+                {category.description ||
+                  `Explore our premium selection of ${category.category_name.toLowerCase()}. Engineered for performance, built for reliability, and sourced from the best manufacturers.`}
+              </p>
+              <Link 
+                href={category.slug ? `/category/${category.slug}` : '/category'} 
+                className="showcase-link"
+              >
+                Shop Collection <ArrowIcon />
+              </Link>
+            </div>
+            
+            <div className="showcase-image-wrapper">
+              {category.image_url ? (
+                <img src={category.image_url} alt={category.category_name} loading="lazy" />
+              ) : (
+                // ইমেজ না থাকলে একটি প্লেসহোল্ডার
+                <div style={{ 
+                  width: '100%', 
+                  height: '300px', 
+                  background: '#f5f5f5', 
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#999'
+                }}>
+                  No Image Available
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ==================================================================
  *  HOME PAGE
  * ================================================================== */
 
@@ -544,28 +753,8 @@ export default function Home() {
           text-align: center;
         }
         .popular-cars-title-box::after { display: none; }
-        .popular-categories-heading {
-          width: 100%;
-          align-items: center;
-          flex-direction: row;
-          justify-content: center !important;
-          margin-bottom: 22px;
-        }
-        .popular-categories-title-box {
-          display: inline-block;
-          margin: 0;
-          padding: 12px 22px;
-          border: 1px solid var(--red);
-          color: var(--red);
-          font-family: Montserrat, sans-serif;
-          font-size: 21px;
-          letter-spacing: -.03em;
-          text-align: center;
-        }
-        .popular-categories-title-box::after { display: none; }
         @media (max-width: 520px) {
           .popular-cars-title-box { padding: 10px 16px; font-size: 18px; }
-          .popular-categories-title-box { padding: 10px 16px; font-size: 18px; }
         }
       `}</style>
 
@@ -586,7 +775,7 @@ export default function Home() {
 
       {/* 3. POPULAR VEHICLES */}
       {!loading && homeSelectedVehicles.length > 0 && (
-        <section className="store-section vehicle-home-section">
+        <section className="store-section vehicle-home-section" style={{ paddingTop: '60px', paddingBottom: '20px' }}>
           <div className="section-heading popular-cars-heading">
             <h2 className="popular-cars-title-box">Popular Cars</h2>
           </div>
@@ -620,38 +809,9 @@ export default function Home() {
         </section>
       )}
 
-      {/* 4. POPULAR CATEGORIES */}
+      {/* 4. PREMIUM CATEGORY SHOWCASE (নতুন ডিজাইন) */}
       {!loading && popularCategories.length > 0 && (
-        <section
-          className="store-section category-promo-section"
-          aria-label="Popular categories"
-        >
-          <div className="section-heading popular-categories-heading">
-            <h2 className="popular-categories-title-box">Popular Categories</h2>
-          </div>
-          <div className="category-promo-grid">
-            {popularCategories.map((category) => (
-              <Link
-                className="promo-card promo-card-database category-promo-card"
-                href={category.slug ? `/category/${category.slug}` : '/category'}
-                key={category.id}
-              >
-                <div>
-                  <small>Popular category</small>
-                  <strong>{category.category_name.trim()}</strong>
-                  <p>
-                    {category.description ||
-                      'Browse available parts and find the right fit.'}
-                  </p>
-                  <span>
-                    Browse parts <ArrowIcon />
-                  </span>
-                </div>
-                {category.image_url && <img src={category.image_url} alt="" />}
-              </Link>
-            ))}
-          </div>
-        </section>
+        <CategoryShowcase categories={popularCategories} />
       )}
 
       {/* 5. NEW ARRIVALS / PARTS */}
