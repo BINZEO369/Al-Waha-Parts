@@ -211,7 +211,9 @@ app.get('/api/v1/car-brands', async (_request, reply) => {
   const { data, error } = await getSupabaseAdmin()
     .from('car_brands')
     .select('id,manufacturer_name,slug,logo_url,sort_order')
+    .eq('record_type', 'brand')
     .eq('is_active', true)
+    .eq('status', 'active')
     .order('sort_order', { ascending: true })
     .order('manufacturer_name', { ascending: true })
     .limit(10);
