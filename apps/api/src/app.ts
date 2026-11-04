@@ -213,6 +213,9 @@ app.get(
         vehicles: (vehicles ?? []).map((vehicle) => ({
           ...vehicle,
           cover_image_url: publicImageUrl(vehicle.cover_image_url),
+          vehicle_images: Array.isArray(vehicle.vehicle_images)
+            ? vehicle.vehicle_images.map((image: unknown) => publicImageUrl(image)).filter(Boolean)
+            : vehicle.vehicle_images,
         })),
       },
     };
@@ -401,16 +404,30 @@ app.get(
     if (vehicleError) return jsonError(reply, 500, vehicleError.message);
     if (!vehicle) return jsonError(reply, 404, 'Vehicle not found');
 
-    const { data: parts, error: partsError } = await supabase
+    let { data: parts, error: partsError } = await supabase
       .from('parts')
       .select(
-        '*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles!inner(vehicle_id)',
+        '*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicle_fitments!inner(vehicle_id)',
       )
-      .eq('part_vehicles.vehicle_id', vehicle.id)
+      .eq('part_vehicle_fitments.vehicle_id', vehicle.id)
       .eq('status', 'active')
       .order('position')
       .order('part_name')
       .limit(200);
+    if (partsError?.message.includes('part_vehicle_fitments')) {
+      const legacy = await supabase
+        .from('parts')
+        .select(
+          '*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles!inner(vehicle_id)',
+        )
+        .eq('part_vehicles.vehicle_id', vehicle.id)
+        .eq('status', 'active')
+        .order('position')
+        .order('part_name')
+        .limit(200);
+      parts = legacy.data;
+      partsError = legacy.error;
+    }
     if (partsError) return jsonError(reply, 500, partsError.message);
     return {
       data: {

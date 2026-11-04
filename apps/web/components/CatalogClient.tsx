@@ -4,13 +4,19 @@ import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { PartCard, type PartCardData } from './PartCard';
 
-type Category = { id: string; category_name: string; slug?: string | null; image_url?: string | null };
+type Category = {
+  id: string;
+  category_name: string;
+  slug?: string | null;
+  image_url?: string | null;
+};
 
 export function CatalogClient() {
   const [parts, setParts] = useState<PartCardData[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [vehicleId, setVehicleId] = useState('');
   const [carBrandId, setCarBrandId] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -20,7 +26,8 @@ export function CatalogClient() {
     const params = new URLSearchParams(window.location.search);
     setSearch(params.get('search') ?? '');
     setCategoryId(params.get('category') ?? '');
-    setCarBrandId(params.get('car_brand_id') ?? params.get('vehicle_id') ?? '');
+    setCarBrandId(params.get('car_brand_id') ?? '');
+    setVehicleId(params.get('vehicle_id') ?? '');
   }, []);
 
   useEffect(() => {
@@ -34,7 +41,7 @@ export function CatalogClient() {
     Promise.all([
       apiFetch<PartCardData[]>(
         apiUrl,
-        `/api/v1/parts?limit=100&search=${encodeURIComponent(search)}${categoryId ? `&category_id=${categoryId}` : ''}${carBrandId ? `&car_brand_id=${carBrandId}` : ''}`,
+        `/api/v1/parts?limit=100&search=${encodeURIComponent(search)}${categoryId ? `&category_id=${categoryId}` : ''}${carBrandId ? `&car_brand_id=${carBrandId}` : ''}${vehicleId ? `&vehicle_id=${vehicleId}` : ''}`,
       ),
       apiFetch<Category[]>(apiUrl, '/api/v1/categories'),
     ])
@@ -47,7 +54,7 @@ export function CatalogClient() {
         setError(cause instanceof Error ? cause.message : 'Unable to load the live catalog.');
       })
       .finally(() => setLoading(false));
-  }, [apiUrl, search, categoryId, carBrandId]);
+  }, [apiUrl, search, categoryId, carBrandId, vehicleId]);
 
   return (
     <>
@@ -66,7 +73,10 @@ export function CatalogClient() {
         </div>
       </div>
       <div className="category-list" aria-label="Part categories">
-        <button className={!categoryId ? 'category-chip active' : 'category-chip'} onClick={() => setCategoryId('')}>
+        <button
+          className={!categoryId ? 'category-chip active' : 'category-chip'}
+          onClick={() => setCategoryId('')}
+        >
           All categories
         </button>
         {categories.map((category) => (
@@ -75,7 +85,9 @@ export function CatalogClient() {
             key={category.id}
             onClick={() => setCategoryId(category.id)}
           >
-            {category.image_url && <img className="category-chip-image" src={category.image_url} alt="" />}
+            {category.image_url && (
+              <img className="category-chip-image" src={category.image_url} alt="" />
+            )}
             {category.category_name}
           </button>
         ))}
@@ -89,7 +101,9 @@ export function CatalogClient() {
         ) : (
           <div className="empty-state">
             <strong>No parts are published yet.</strong>
-            <span>When an active part is added in Supabase, it will appear here automatically.</span>
+            <span>
+              When an active part is added in Supabase, it will appear here automatically.
+            </span>
           </div>
         )}
       </div>
