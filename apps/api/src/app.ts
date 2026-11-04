@@ -65,6 +65,8 @@ const firstValue = (row: CarBrandRecord, keys: string[]) =>
 
 const normalizeCarBrand = (row: CarBrandRecord, index: number) => ({
   id: String(firstValue(row, ['id', 'brand_id', 'car_brand_id']) ?? `car-brand-${index}`),
+  car_brand_id: String(firstValue(row, ['id', 'brand_id', 'car_brand_id']) ?? `car-brand-${index}`),
+  slug: firstValue(row, ['slug', 'brand_slug']) ?? null,
   manufacturer_name: String(
     firstValue(row, ['manufacturer_name', 'brand_name', 'car_brand', 'brand', 'make', 'name']) ??
       'Unknown brand',
@@ -411,6 +413,7 @@ app.get(
         search?: string;
         category_id?: string;
         vehicle_id?: string;
+        car_brand_id?: string;
         status?: string;
         featured_only?: string;
         limit?: string;
@@ -421,6 +424,18 @@ app.get(
   ) => {
     const q = request.query;
     const start = Number(q.offset) || 0;
+    let vehicleIds: string[] | null = null;
+    if (q.car_brand_id) {
+      const { data: brandVehicles, error: brandVehiclesError } = await getSupabaseAdmin()
+        .from('vehicles')
+        .select('id')
+        .eq('car_brand_id', q.car_brand_id)
+        .eq('status', 'active')
+        .limit(1000);
+      if (brandVehiclesError) return jsonError(reply, 500, brandVehiclesError.message);
+      vehicleIds = (brandVehicles ?? []).map((vehicle) => vehicle.id);
+    }
+    const hasFitmentFilter = Boolean(q.vehicle_id || q.car_brand_id);
     let query = getSupabaseAdmin()
       .from('parts')
       .select(
@@ -429,7 +444,7 @@ app.get(
       .order('position')
       .order('part_name')
       .range(start, start + limit(q.limit) - 1);
-    if (!q.vehicle_id)
+    if (!hasFitmentFilter)
       query = getSupabaseAdmin()
         .from('parts')
         .select('*,parts_categories(id,category_name,slug)')
@@ -442,6 +457,7 @@ app.get(
       );
     if (q.category_id) query = query.eq('category_id', q.category_id);
     if (q.vehicle_id) query = query.eq('part_vehicles.vehicle_id', q.vehicle_id);
+    if (vehicleIds) query = query.in('part_vehicles.vehicle_id', vehicleIds);
     if (q.featured_only === 'true') query = query.eq('is_featured', true);
     query = query.eq('status', q.status ?? 'active');
     const { data, error } = await query;
