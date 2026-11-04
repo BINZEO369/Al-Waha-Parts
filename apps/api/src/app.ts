@@ -93,7 +93,8 @@ app.get('/api/v1/categories', async (_request, reply) => {
     .from('parts_categories')
     .select('id,category_name,slug,description,status,image_url,icon_name,is_featured,sort_order')
     .eq('status', 'active')
-    .order('category_name')
+    .order('sort_order', { ascending: true, nullsFirst: false })
+    .order('category_name', { ascending: true })
     .limit(200);
   if (error) return jsonError(reply, 500, error.message);
   return { data: data ?? [] };

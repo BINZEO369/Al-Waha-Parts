@@ -805,6 +805,7 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .button, .red-button, .part-booking-button { font-size: var(--size-button); font-weight: var(--weight-semibold); }
 .part-card h3, .arrival-details h3 { font-size: var(--size-product); font-weight: var(--weight-semibold); }
 .part-price strong, .price, .product-price { font-size: var(--size-price); font-weight: var(--weight-bold); }
+.category-start-card strong { max-width: 175px; font-size: clamp(12px, 1.05vw, 15px); line-height: 1.25; font-weight: var(--weight-semibold); }
 html[dir='rtl'] body { font-family: var(--brand-font); }
 html[dir='rtl'] .main-nav-inner { direction: rtl; }
 html[dir='rtl'] .language-toggle { margin-right: 8px; margin-left: 10px; font-family: var(--brand-font); }
@@ -817,7 +818,9 @@ html[dir='rtl'] .vehicle-home-card, html[dir='rtl'] .vehicle-home-card-top, html
 html[dir='rtl'] .vehicle-home-card-specs { direction: rtl; }
 html[dir='rtl'] .footer-main, html[dir='rtl'] .footer-bottom { direction: rtl; }
 html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-align: right; }
-
+@media (max-width: 700px) {
+  .category-start-card strong { max-width: 115px; font-size: 11px; line-height: 1.2; }
+}
 `;
 
 export const metadata: Metadata = {
