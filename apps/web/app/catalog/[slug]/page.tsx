@@ -582,6 +582,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         .product-genuine { display: inline-flex; align-items: center; gap: 10px; padding: 7px 18px; border: 1px solid #ddd; border-radius: 14px; background: #fff; font-size: 22px; }
         .product-genuine b { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 50%; background: #2166d1; color: #fff; }
         .product-vehicle-bar { display: none; }
+        .product-vehicle-bar strong, .product-vehicle-bar small { display: block; }
+        .product-vehicle-bar small { margin-top: 4px; color: #777; font-size: 14px; }
         .product-grid { display: block; }
         .product-reference-media { position: relative; }
         .product-image { min-height: 560px; background: #f2f3f5; }
@@ -610,6 +612,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         .product-details-copy { padding: 42px 0 0; }
         .product-details-copy h2 { margin: 0 0 22px; font-size: 28px; }
         .product-details-copy p { margin: 0; color: #444; font-size: 22px; line-height: 1.65; }
+        .product-vehicle-information { gap: 42px; padding-top: 60px; }
+        .product-vehicle-information > div:first-child p { max-width: 330px; margin-top: 18px; color: #777; font-size: 16px; line-height: 1.55; }
+        .product-fitmentList div { display: grid; gap: 6px; border-radius: 12px; }
+        .product-fitmentList small { color: var(--red); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+        .product-fitmentList strong { font-size: 20px; }
+        .product-fitmentList span { margin-top: 0; font-size: 14px; line-height: 1.45; }
         @media (max-width: 800px) {
           .product-reference-page { padding: 18px 0 50px; }
           .product-breadcrumb, .product-reference-heading { padding-left: 32px; padding-right: 32px; }
@@ -622,6 +630,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           .product-vehicle-bar { display: flex; align-items: center; gap: 14px; min-height: 86px; padding: 14px 32px; margin-top: 22px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; background: #fff; font-size: 20px; }
           .product-vehicle-mark { display: grid; width: 64px; height: 48px; place-items: center; border-radius: 12px; background: #f2f2f2; font-size: 16px; }
           .product-vehicle-edit { margin-left: auto; font-size: 28px; }
+          .product-vehicle-bar small { font-size: 13px; }
           .product-image, .product-image img { min-height: 280px; height: 280px; }
           .product-media-control, .product-favorite { top: 18px; width: 56px; height: 56px; font-size: 22px; }
           .product-media-control { left: 26px; }
@@ -639,6 +648,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           .product-benefits { gap: 8px; font-size: 13px; }
           .product-seller { font-size: 15px; }
           .product-details-copy p { font-size: 19px; }
+          .product-vehicle-information { gap: 24px; padding-top: 42px; }
+          .product-vehicle-information > div:first-child p { font-size: 14px; }
+          .product-fitmentList { grid-template-columns: 1fr; }
+          .product-fitmentList strong { font-size: 17px; }
+          .product-fitmentList span { font-size: 12px; }
         }
       `}</style>
 
@@ -655,9 +669,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         <span className="product-sku-badge">#{product.oem_number ?? product.sku}</span>
       </header>
       {vehicles[0] && (
-        <Link className="product-vehicle-bar" href={vehicles[0].id ? `/vehicles/${vehicles[0].id}` : '/vehicles'}>
+        <Link className="product-vehicle-bar" href="/vehicles">
           <span className="product-vehicle-mark">{vehicles[0].manufacturer_name.slice(0, 2).toUpperCase()}</span>
-          <strong>{vehicles[0].manufacturer_name} {vehicles[0].model_name} {vehicles[0].year_start ?? ''}</strong>
+          <span><strong>{vehicles[0].manufacturer_name} {vehicles[0].model_name}</strong><small>{vehicles[0].year_start ?? '—'}–{vehicles[0].year_end ?? 'present'}{vehicles[0].generation ? ` · ${vehicles[0].generation}` : ''}</small></span>
           <span className="product-vehicle-edit" aria-hidden="true">⌕</span>
         </Link>
       )}
@@ -737,21 +751,24 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           </dl>
         </section>
       </div>
-      <section className="product-fitment">
+      <section className="product-fitment product-vehicle-information">
         <div>
           <span className="eyebrow">Compatibility</span>
-          <h2>Built for the right match.</h2>
+          <h2>Compatible vehicles</h2>
+          <p>This product is listed for the following vehicle models and production years.</p>
         </div>
         {vehicles.length ? (
           <div className="product-fitmentList">
             {vehicles.map((vehicle) => (
               <div key={vehicle.id}>
+                <small>Vehicle fitment</small>
                 <strong>
                   {vehicle.manufacturer_name} {vehicle.model_name}
                 </strong>
                 <span>
-                  {vehicle.year_start ?? '—'}–{vehicle.year_end ?? '—'}{' '}
-                  {vehicle.generation ? `· ${vehicle.generation}` : ''}
+                  Model years: {vehicle.year_start ?? '—'}–{vehicle.year_end ?? 'present'}
+                  {vehicle.generation ? ` · ${vehicle.generation}` : ''}
+                  {vehicle.chassis_code ? ` · ${vehicle.chassis_code}` : ''}
                 </span>
               </div>
             ))}
