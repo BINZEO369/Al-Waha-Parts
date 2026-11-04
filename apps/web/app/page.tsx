@@ -937,7 +937,26 @@ export default function Home() {
 
       {/* 4. ULTIMATE PREMIUM CATEGORY SHOWCASE */}
       {!loading && popularCategories.length > 0 && (
-        <CategoryShowcase categories={popularCategories} />
+        <section className="store-section category-start-section" aria-label="Start from a category">
+          <div className="category-start-heading">
+            <h2>Start from a category</h2>
+            <Link className="category-start-view-all" href="/category">View all <span aria-hidden="true">›</span></Link>
+          </div>
+          <div className="category-start-grid">
+            {popularCategories.map((category) => (
+              <Link
+                className="category-start-card"
+                href={category.slug ? `/category/${category.slug}` : '/category'}
+                key={category.id}
+              >
+                <div className="category-start-image">
+                  {category.image_url ? <img src={category.image_url} alt="" /> : <span aria-hidden="true">⌁</span>}
+                </div>
+                <strong>{category.category_name.trim()}</strong>
+              </Link>
+            ))}
+          </div>
+        </section>
       )}
 
       {/* 5. NEW ARRIVALS / PARTS */}
