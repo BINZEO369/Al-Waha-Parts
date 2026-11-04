@@ -711,9 +711,10 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 /* ---------- HOME: reference-style category grid ---------- */
 .category-start-section { padding-top: 42px; padding-bottom: 54px; background: #fff; }
 .category-start-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
-.category-start-heading h2 { margin: 0; color: #202124; font-family: Montserrat, sans-serif; font-size: clamp(28px, 3.2vw, 44px); font-weight: 700; letter-spacing: -.055em; line-height: 1; }
+.category-start-heading h1, .category-start-heading h2 { margin: 0; color: #202124; font-family: Montserrat, sans-serif; font-size: clamp(28px, 3.2vw, 44px); font-weight: 700; letter-spacing: -.055em; line-height: 1; }
 .category-start-view-all { display: inline-flex; align-items: center; gap: 12px; color: #696969; font-size: clamp(17px, 1.8vw, 25px); white-space: nowrap; }
 .category-start-view-all span { color: #454545; font-size: 38px; font-weight: 300; line-height: .5; }
+.category-count { color: #696969; font-size: 15px; }
 .category-start-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 42px; row-gap: 42px; }
 .category-start-card { display: grid; justify-items: center; gap: 18px; min-width: 0; color: #202124; text-align: center; }
 .category-start-card:hover { color: #202124; }
@@ -724,7 +725,8 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 @media (max-width: 700px) {
   .category-start-section { padding-top: 32px; padding-bottom: 42px; }
   .category-start-heading { margin-bottom: 22px; }
-  .category-start-heading h2 { font-size: 29px; }
+  .category-start-heading h1, .category-start-heading h2 { font-size: 29px; }
+  .category-count { font-size: 13px; }
   .category-start-view-all { gap: 5px; font-size: 16px; }
   .category-start-view-all span { font-size: 28px; }
   .category-start-grid { column-gap: 18px; row-gap: 32px; }
