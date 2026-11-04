@@ -111,6 +111,93 @@ async function readCarBrands() {
   throw new Error(lastError ?? 'Car brand table was not found.');
 }
 
+const normalizeModel = (row: CarBrandRecord, brand: CarBrandRecord, index: number) => ({
+  id: String(firstValue(row, ['id', 'model_id', 'vehicle_id']) ?? `model-${index}`),
+  slug: firstValue(row, ['slug', 'model_slug', 'vehicle_slug']) ?? null,
+  manufacturer_name: String(
+    firstValue(row, ['manufacturer_name', 'brand_name', 'car_brand', 'make']) ??
+      brand.manufacturer_name,
+  ),
+  model_name: String(firstValue(row, ['model_name', 'model', 'car_model', 'name']) ?? ''),
+  generation: firstValue(row, ['generation', 'variant', 'trim']) ?? null,
+  chassis_code: firstValue(row, ['chassis_code', 'chassis']) ?? null,
+  year_start: firstValue(row, ['year_start', 'from_year', 'start_year']) ?? null,
+  year_end: firstValue(row, ['year_end', 'to_year', 'end_year']) ?? null,
+  vehicle_type: firstValue(row, ['vehicle_type', 'type', 'body_type']) ?? null,
+  cover_image_url: publicImageUrl(firstValue(row, ['cover_image_url', 'image_url', 'cover_image'])),
+  vehicle_images: Array.isArray(row.vehicle_images)
+    ? row.vehicle_images.map((image: unknown) => publicImageUrl(image)).filter(Boolean)
+    : null,
+  car_brand_id: String(firstValue(row, ['car_brand_id', 'brand_id']) ?? brand.id),
+  status: String(firstValue(row, ['status']) ?? 'active'),
+});
+
+async function readBrandModels(brand: CarBrandRecord) {
+  const sources = [
+    'Car brand models',
+    'car_brand_models',
+    'car_models',
+    'vehicle_models',
+    'models',
+    'cars',
+  ];
+  for (const table of sources) {
+    const { data, error } = await getSupabaseAdmin().from(table).select('*').limit(1000);
+    if (error) continue;
+    const models = (data ?? [])
+      .map((row, index) => normalizeModel(row as CarBrandRecord, brand, index))
+      .filter((model) => {
+        const row = data?.find(
+          (candidate) => String((candidate as CarBrandRecord).id ?? '') === model.id,
+        ) as CarBrandRecord | undefined;
+        const sourceBrandId = firstValue(row ?? {}, ['car_brand_id', 'brand_id']);
+        const sourceBrandName = firstValue(row ?? {}, [
+          'manufacturer_name',
+          'brand_name',
+          'car_brand',
+          'make',
+        ]);
+        return (
+          model.model_name &&
+          model.model_name !== 'All models' &&
+          (String(sourceBrandId ?? '') === String(brand.id) ||
+            String(sourceBrandName ?? '').toLowerCase() ===
+              String(brand.manufacturer_name).toLowerCase())
+        );
+      })
+      .filter((model) => model.status === 'active');
+    if (models.length) return models;
+  }
+  return [];
+}
+
+async function readModelBySlug(slug: string) {
+  const sources = [
+    'Car brand models',
+    'car_brand_models',
+    'car_models',
+    'vehicle_models',
+    'models',
+    'cars',
+  ];
+  for (const table of sources) {
+    const { data, error } = await getSupabaseAdmin().from(table).select('*').limit(1000);
+    if (error) continue;
+    const model = (data ?? [])
+      .map((row, index) => {
+        const record = row as CarBrandRecord;
+        const brandName = String(
+          firstValue(record, ['manufacturer_name', 'brand_name', 'car_brand', 'make']) ?? '',
+        );
+        const brandId = String(firstValue(record, ['car_brand_id', 'brand_id']) ?? '');
+        return normalizeModel(record, { id: brandId, manufacturer_name: brandName }, index);
+      })
+      .find((item) => item.slug === slug && item.model_name && item.model_name !== 'All models');
+    if (model) return model;
+  }
+  return null;
+}
+
 async function requireAdmin(request: FastifyRequest, reply: FastifyReply) {
   const token = request.headers.authorization?.replace(/^Bearer\s+/i, '');
   if (!token) return jsonError(reply, 401, 'Bearer token required');
@@ -205,6 +292,16 @@ app.get(
         .order('year_start');
       vehicles = fallback.data as typeof vehicles;
       vehiclesError = fallback.error;
+    }
+    if (vehiclesError || !vehicles?.length) {
+      const modelRows = await readBrandModels(brand as CarBrandRecord);
+      if (modelRows.length) {
+        vehicles = modelRows as typeof vehicles;
+        vehiclesError = null;
+      } else if (vehiclesError?.message.includes("could not find the table 'public.vehicles'")) {
+        vehicles = [];
+        vehiclesError = null;
+      }
     }
     if (vehiclesError) return jsonError(reply, 500, vehiclesError.message);
     return {
@@ -395,12 +492,17 @@ app.get(
   '/api/v1/vehicles/slug/:slug',
   async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
     const supabase = getSupabaseAdmin();
-    const { data: vehicle, error: vehicleError } = await supabase
+    let { data: vehicle, error: vehicleError } = await supabase
       .from('vehicles')
       .select('*')
       .eq('slug', request.params.slug)
       .eq('status', 'active')
       .maybeSingle();
+    if (vehicleError?.message.includes("could not find the table 'public.vehicles'")) {
+      const alternateModel = await readModelBySlug(request.params.slug);
+      vehicle = alternateModel as typeof vehicle;
+      vehicleError = null;
+    }
     if (vehicleError) return jsonError(reply, 500, vehicleError.message);
     if (!vehicle) return jsonError(reply, 404, 'Vehicle not found');
 
@@ -427,6 +529,14 @@ app.get(
         .limit(200);
       parts = legacy.data;
       partsError = legacy.error;
+    }
+    if (
+      partsError &&
+      (partsError.message.includes("could not find the table 'public.part_vehicle_fitments'") ||
+        partsError.message.includes("could not find the table 'public.part_vehicles'"))
+    ) {
+      parts = [];
+      partsError = null;
     }
     if (partsError) return jsonError(reply, 500, partsError.message);
     return {
