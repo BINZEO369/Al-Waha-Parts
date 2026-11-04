@@ -165,7 +165,7 @@ app.get(
     const { data: parts, error: partsError } = await supabase
       .from('parts')
       .select(
-        '*,parts_categories(id,category_name,slug),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))',
+        '*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))',
       )
       .eq('category_id', category.id)
       .eq('status', 'active')
@@ -198,7 +198,7 @@ app.get('/api/v1/brands', async (request: FastifyRequest<{ Querystring: { limit?
 
 app.get('/api/v1/brands/:slug', async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
   const { data, error } = await getSupabaseAdmin()
-    .from('parts').select('*,parts_categories(id,category_name,slug),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))')
+    .from('parts').select('*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))')
     .eq('status', 'active').not('brand_name', 'is', null).limit(200);
   if (error) return jsonError(reply, 500, error.message);
   const parts = (data ?? []).filter((part) => part.brand_name && brandSlug(part.brand_name) === request.params.slug);
@@ -291,7 +291,7 @@ app.get(
 
     const { data: parts, error: partsError } = await supabase
       .from('parts')
-      .select('*,parts_categories(id,category_name,slug),part_vehicles!inner(vehicle_id)')
+      .select('*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles!inner(vehicle_id)')
       .eq('part_vehicles.vehicle_id', vehicle.id)
       .eq('status', 'active')
       .order('position')
@@ -338,7 +338,7 @@ app.get(
     const start = Number(q.offset) || 0;
     let query = getSupabaseAdmin()
       .from('parts')
-      .select('*,parts_categories(id,category_name,slug),part_vehicles!inner(vehicle_id)')
+      .select('*,parts_categories(id,category_name,slug),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles!inner(vehicle_id)')
       .order('position')
       .order('part_name')
       .range(start, start + limit(q.limit) - 1);
@@ -369,7 +369,7 @@ app.get(
     const { data, error } = await getSupabaseAdmin()
       .from('parts')
       .select(
-        '*,parts_categories(id,category_name,slug,image_url),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))',
+        '*,parts_categories(id,category_name,slug,image_url),car_brands(id,manufacturer_name,slug,logo_url),part_vehicles(vehicle_id,vehicles(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code))',
       )
       .eq('slug', request.params.slug)
       .eq('status', 'active')

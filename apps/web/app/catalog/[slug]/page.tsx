@@ -34,6 +34,7 @@ type Product = {
   primary_image_url?: string | null;
   image_urls?: string[] | null;
   parts_categories?: { category_name?: string | null; slug?: string | null } | null;
+  car_brands?: { id?: string; manufacturer_name?: string | null; slug?: string | null; logo_url?: string | null } | null;
   part_vehicles?: Array<{ vehicles?: VehicleFitment | null }>;
 };
 
@@ -584,6 +585,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         .product-vehicle-bar { display: flex; align-items: center; gap: 14px; min-height: 86px; padding: 14px 24px; margin-bottom: 22px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; background: #fff; font-size: 20px; }
         .product-vehicle-bar strong, .product-vehicle-bar small { display: block; }
         .product-vehicle-bar small { margin-top: 4px; color: #777; font-size: 14px; }
+        .product-vehicle-mark img { width: 42px; height: 32px; object-fit: contain; }
         .product-grid { display: block; }
         .product-reference-media { position: relative; }
         .product-image { min-height: 560px; background: #f2f3f5; }
@@ -623,6 +625,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           .product-genuine b { width: 22px; height: 22px; }
           .product-vehicle-bar { padding-left: 32px; padding-right: 32px; margin-bottom: 0; }
           .product-vehicle-mark { display: grid; width: 64px; height: 48px; place-items: center; border-radius: 12px; background: #f2f2f2; font-size: 16px; }
+          .product-vehicle-mark img { width: 42px; height: 30px; }
           .product-vehicle-edit { margin-left: auto; font-size: 28px; }
           .product-vehicle-bar small { font-size: 13px; }
           .product-image, .product-image img { min-height: 280px; height: 280px; }
@@ -647,12 +650,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
       {vehicles[0] && (
         <div className="product-vehicle-bar">
-          <span className="product-vehicle-mark">{vehicles[0].manufacturer_name.slice(0, 2).toUpperCase()}</span>
+          <span className="product-vehicle-mark">
+            {product.car_brands?.logo_url ? <img src={product.car_brands.logo_url} alt={product.car_brands.manufacturer_name ?? vehicles[0].manufacturer_name} /> : vehicles[0].manufacturer_name.slice(0, 2).toUpperCase()}
+          </span>
           <span><strong>{vehicles[0].manufacturer_name} {vehicles[0].model_name}</strong><small>{vehicles[0].year_start ?? '—'}–{vehicles[0].year_end ?? 'present'}{vehicles[0].generation ? ` · ${vehicles[0].generation}` : ''}</small></span>
         </div>
       )}
       <div className="product-grid">
-        <section className="product-reference-media">
+        <div className="product-reference-media">
           <div className="product-image">
             {activeImage ? (
               <img src={activeImage} alt={product.part_name} />
@@ -675,7 +680,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               ))}
             </div>
           )}
-        </section>
+        </div>
         <section className="product-copy">
           <p className="product-description">
             {product.description ??
