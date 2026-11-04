@@ -172,7 +172,7 @@ function HeroCarousel() {
           width: 100%;
           height: 100%;
           display: flex;
-          align-items: center; /* টেক্সট মাঝখানে রাখার জন্য */
+          align-items: center;
           animation: slide-fade 0.5s ease both;
         }
 
@@ -184,7 +184,6 @@ function HeroCarousel() {
           height: 100%;
         }
 
-        /* ইমেজ যেভাবেই থাকুক না কেন পুরো সেকশন কভার করবে */
         .hero-carousel-media img {
           width: 100%;
           height: 100%;
@@ -248,7 +247,6 @@ function HeroCarousel() {
           align-items: center;
         }
 
-        /* লাল রঙের মূল বাটন */
         .hero-actions .button {
           padding: 14px 32px;
           background: #e51c23;
@@ -327,7 +325,7 @@ function HeroCarousel() {
 }
 
 /* ==================================================================
- *  CAR BRAND STRIP
+ *  CAR BRAND STRIP (লোগো ছোট ও সুন্দর করা হয়েছে)
  * ================================================================== */
 
 function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
@@ -352,15 +350,16 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
         .car-brand-strip h2 {
           width: fit-content;
           margin: 0 auto 22px;
-          padding: 12px 22px;
+          padding: 10px 20px;
           border: 1px solid var(--red);
           color: var(--red);
           font-family: Montserrat, sans-serif;
-          font-size: 21px;
+          font-size: 18px;
           font-weight: 700;
-          letter-spacing: -.03em;
+          letter-spacing: -.02em;
           text-align: center;
           text-transform: none;
+          border-radius: 4px;
         }
 
         .car-brand-grid {
@@ -371,38 +370,43 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 
         .car-brand-item {
           width: 100%;
-          max-width: 150px;
-          min-height: 118px;
+          max-width: 130px;
+          min-height: 85px;
           justify-self: center;
           box-sizing: border-box;
-          padding: 18px 12px;
+          padding: 10px 8px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 12px;
-          border: 1px solid var(--red);
-          border-radius: 2px;
+          gap: 8px;
+          border: 1px solid #ebebeb;
+          border-radius: 6px;
           background: #fff;
           color: inherit;
           text-decoration: none;
-          box-shadow: none;
-          transform: none;
-          transition: none;
+          transition: all 0.2s ease;
+        }
+
+        .car-brand-item:hover {
+          border-color: var(--red);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          transform: translateY(-2px);
         }
 
         .car-brand-item img {
           display: block;
-          width: 34px;
-          height: 22px;
+          width: auto;
+          max-width: 100%;
+          height: 20px;
           object-fit: contain;
         }
 
         .car-brand-item span {
-          color: #414141;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.035em;
+          color: #555;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.02em;
           line-height: 1.2;
           text-align: center;
           text-transform: uppercase;
@@ -420,50 +424,41 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           }
 
           .car-brand-strip h2 {
-            padding: 10px 16px;
-            font-size: 18px;
+            padding: 8px 14px;
+            font-size: 16px;
           }
 
           .car-brand-grid {
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 8px;
           }
 
           .car-brand-item {
             max-width: none;
-            min-height: 100px;
-            padding: 10px 4px;
-            gap: 7px;
+            min-height: 70px;
+            padding: 8px 4px;
+            gap: 6px;
           }
 
           .car-brand-item img {
-            width: 28px;
-            height: 18px;
+            height: 16px;
           }
 
           .car-brand-item span {
-            font-size: 11px;
+            font-size: 10px;
           }
         }
       `}</style>
       <div className="car-brand-strip-inner">
         <h2 id="car-brand-strip-title">Browse by car brand</h2>
         <div className="car-brand-grid">
-            {brands.map((brand) => (
-              <Link
-                className="car-brand-item"
-                href={`/car-brands/${brand.slug}`}
-                key={brand.id}
-                aria-label={`View ${brand.manufacturer_name} vehicles`}
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  backgroundColor: '#fff',
-                  boxShadow: 'none',
-                  transform: 'none',
-                }}
-              >
+          {brands.map((brand) => (
+            <Link
+              className="car-brand-item"
+              href={`/car-brands/${brand.slug}`}
+              key={brand.id}
+              aria-label={`View ${brand.manufacturer_name} vehicles`}
+            >
               <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
               <span>{brand.manufacturer_name}</span>
             </Link>
@@ -752,4 +747,3 @@ export default function Home() {
     </main>
   );
 }
-//
