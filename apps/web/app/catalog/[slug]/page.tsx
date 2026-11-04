@@ -588,9 +588,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         .product-reference-media { position: relative; }
         .product-image { min-height: 560px; background: #f2f3f5; }
         .product-image img { height: 560px; object-fit: contain; }
-        .product-media-control, .product-favorite { position: absolute; z-index: 2; top: 30px; display: grid; width: 74px; height: 74px; place-items: center; border: 1px solid #ddd; border-radius: 50%; background: #fff; color: #444; font-size: 30px; }
-        .product-media-control { left: 28px; }
-        .product-favorite { right: 28px; font-size: 42px; }
         .product-copy { padding: 54px 16px 0; }
         .product-copy h1, .product-copy > .product-status, .product-copy > .product-specs { display: none; }
         .product-description { display: none; }
@@ -606,9 +603,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         .product-stock { margin-left: 18px; color: #239955; }
         .product-fitment-ok { padding: 17px 22px; margin: 28px 0 18px; border-radius: 10px; background: #edfff4; color: #257d50; font-size: 20px; font-weight: 600; }
         .product-booking-button { width: 100%; min-height: 72px; border-radius: 22px; background: #f3444a; font-size: 24px; }
-        .product-benefits { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 34px 0; color: #292929; font-size: 16px; line-height: 1.35; }
-        .product-seller { display: flex; align-items: center; gap: 16px; padding: 22px 0; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; font-size: 18px; }
-        .product-seller span { color: #777; }
         .product-details-copy { padding: 42px 0 0; }
         .product-details-copy h2 { margin: 0 0 22px; font-size: 28px; }
         .product-details-copy p { margin: 0; color: #444; font-size: 22px; line-height: 1.65; }
@@ -632,9 +626,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           .product-vehicle-edit { margin-left: auto; font-size: 28px; }
           .product-vehicle-bar small { font-size: 13px; }
           .product-image, .product-image img { min-height: 280px; height: 280px; }
-          .product-media-control, .product-favorite { top: 18px; width: 56px; height: 56px; font-size: 22px; }
-          .product-media-control { left: 26px; }
-          .product-favorite { right: 26px; font-size: 32px; }
           .product-copy { padding: 40px 32px 0; }
           .product-price strong { font-size: 42px; }
           .product-price span { font-size: 18px; }
@@ -645,8 +636,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           .product-delivery { font-size: 20px; }
           .product-fitment-ok { font-size: 17px; }
           .product-booking-button { min-height: 64px; font-size: 22px; }
-          .product-benefits { gap: 8px; font-size: 13px; }
-          .product-seller { font-size: 15px; }
           .product-details-copy p { font-size: 19px; }
           .product-vehicle-information { gap: 24px; padding-top: 42px; }
           .product-vehicle-information > div:first-child p { font-size: 14px; }
@@ -677,8 +666,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       )}
       <div className="product-grid">
         <section className="product-reference-media">
-          <button className="product-media-control" type="button" aria-label="Product options">◉</button>
-          <button className="product-favorite" type="button" aria-label="Add to favourites">♡</button>
           <div className="product-image">
             {activeImage ? (
               <img src={activeImage} alt={product.part_name} />
@@ -722,10 +709,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             </span>
           </div>
           <button className="button product-booking-button" type="button" disabled={outOfStock} onClick={startBooking}>
-            {outOfStock ? 'Out of stock' : 'Add to cart'} <span>↗</span>
+            {outOfStock ? 'Out of stock' : 'Booking now'}
           </button>
-          <div className="product-benefits"><span>♙ Secure<br />payment</span><span>ↄ 7-day<br />return</span><span>♧ Warranty</span><span>▣ Shipping to all<br />cities</span></div>
-          <div className="product-seller"><strong>Al Waha Parts</strong><span>● Active seller · 10,000+ orders</span></div>
           <section className="product-details-copy"><h2>Details</h2><p>{product.description ?? 'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}</p></section>
           <dl className="product-specs">
             <div>
