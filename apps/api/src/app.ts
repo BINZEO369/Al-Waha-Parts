@@ -190,15 +190,16 @@ app.get(
       .eq('status', 'active')
       .order('model_name')
       .order('year_start');
-    // Older production databases may not have the relation column yet.
-    // Keep the brand page working by matching its canonical manufacturer name.
-    if (vehiclesError?.message.includes('car_brand_id')) {
+    // Some production rows were created before car_brand_id was backfilled.
+    // Keep every brand page working by matching its canonical manufacturer name
+    // when the relation is missing or currently returns no models.
+    if (vehiclesError?.message.includes('car_brand_id') || !vehicles?.length) {
       const fallback = await supabase
         .from('vehicles')
         .select(
           'id,slug,manufacturer_name,model_name,generation,chassis_code,year_start,year_end,vehicle_type,cover_image_url,vehicle_images',
         )
-        .eq('manufacturer_name', brand.manufacturer_name)
+        .ilike('manufacturer_name', brand.manufacturer_name)
         .eq('status', 'active')
         .order('model_name')
         .order('year_start');
