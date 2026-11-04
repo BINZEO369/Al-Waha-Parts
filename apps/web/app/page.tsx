@@ -325,7 +325,7 @@ function HeroCarousel() {
 }
 
 /* ==================================================================
- *  CAR BRAND STRIP (অপরিবর্তিত)
+ *  CAR BRAND STRIP (শুধু লোগো)
  * ================================================================== */
 
 function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
@@ -337,7 +337,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
         .car-brand-strip {
           box-sizing: border-box;
           width: 100%;
-          padding: 22px max(18px, calc((100vw - var(--max)) / 2 + 22px)) 28px;
+          padding: 30px max(18px, calc((100vw - var(--max)) / 2 + 22px)) 40px;
           border-bottom: 1px solid #ededed;
           background: #fff;
         }
@@ -349,7 +349,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 
         .car-brand-strip h2 {
           width: fit-content;
-          margin: 0 auto 22px;
+          margin: 0 auto 30px;
           padding: 10px 20px;
           border: 1px solid var(--red);
           color: var(--red);
@@ -363,89 +363,79 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
         }
 
         .car-brand-grid {
-          display: grid;
-          grid-template-columns: repeat(8, minmax(0, 1fr));
-          gap: 12px;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          align-items: center;
+          gap: 24px 32px;
         }
 
         .car-brand-item {
-          width: 100%;
-          max-width: 130px;
-          min-height: 85px;
-          justify-self: center;
-          box-sizing: border-box;
-          padding: 10px 8px;
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-          border: 1px solid #ebebeb;
-          border-radius: 6px;
-          background: #fff;
-          color: inherit;
+          width: 100px;
+          height: 60px;
+          padding: 12px;
+          border-radius: 8px;
+          background: transparent;
           text-decoration: none;
-          transition: all 0.2s ease;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .car-brand-item:hover {
-          border-color: var(--red);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-          transform: translateY(-2px);
+          background: #f8f9fa;
+          transform: translateY(-4px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
         }
 
         .car-brand-item img {
-          display: block;
-          width: auto;
-          max-width: 100%;
-          height: 20px;
+          width: 100%;
+          height: 100%;
+          max-height: 24px;
           object-fit: contain;
+          filter: grayscale(100%) opacity(0.6);
+          transition: all 0.3s ease;
         }
 
-        .car-brand-item span {
-          color: #555;
-          font-size: 11px;
-          font-weight: 600;
-          letter-spacing: 0.02em;
-          line-height: 1.2;
-          text-align: center;
-          text-transform: uppercase;
+        .car-brand-item:hover img {
+          filter: grayscale(0%) opacity(1);
+          transform: scale(1.1);
         }
 
         @media (max-width: 900px) {
           .car-brand-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px 20px;
+          }
+          .car-brand-item {
+            width: 80px;
+            height: 50px;
+            padding: 8px;
+          }
+          .car-brand-item img {
+            max-height: 20px;
           }
         }
 
         @media (max-width: 520px) {
           .car-brand-strip {
-            padding: 18px 14px 22px;
+            padding: 20px 14px 30px;
           }
-
           .car-brand-strip h2 {
             padding: 8px 14px;
             font-size: 16px;
+            margin-bottom: 20px;
           }
-
           .car-brand-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 8px;
+            gap: 12px 16px;
           }
-
           .car-brand-item {
-            max-width: none;
-            min-height: 70px;
-            padding: 8px 4px;
-            gap: 6px;
+            width: 70px;
+            height: 45px;
+            padding: 6px;
           }
-
           .car-brand-item img {
-            height: 16px;
-          }
-
-          .car-brand-item span {
-            font-size: 10px;
+            max-height: 18px;
           }
         }
       `}</style>
@@ -458,9 +448,9 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
               href={`/car-brands/${brand.slug}`}
               key={brand.id}
               aria-label={`View ${brand.manufacturer_name} vehicles`}
+              title={brand.manufacturer_name}
             >
-              <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
-              <span>{brand.manufacturer_name}</span>
+              <img src={brand.logo_url} alt={brand.manufacturer_name} loading="lazy" />
             </Link>
           ))}
         </div>
@@ -470,7 +460,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 }
 
 /* ==================================================================
- *  ULTIMATE PREMIUM CATEGORY SHOWCASE (Mobile: Image Left, Text Right)
+ *  PREMIUM CATEGORY SHOWCASE (মোবাইলে ইমেজ বামে, টেক্সট ডানে)
  * ================================================================== */
 
 function CategoryShowcase({ categories }: { categories: Category[] }) {
@@ -481,7 +471,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
   return (
     <section className="ultimate-showcase">
       <style jsx>{`
-        /* --- মূল সেকশন ও আর্কিটেকচারাল গ্রিড --- */
         .ultimate-showcase {
           position: relative;
           width: 100%;
@@ -492,14 +481,13 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           border-bottom: 1px solid #eee;
         }
 
-        /* সূক্ষ্ম ব্যাকগ্রাউন্ড গ্রিড লাইন (ছবির মতো টেকনিক্যাল লুক) */
         .ultimate-showcase::before {
           content: '';
           position: absolute;
           inset: 0;
           background-image: 
             linear-gradient(to right, rgba(0,0,0,0.02) 1px, transparent 1px);
-          background-size: 25% 100%; /* ৪টি কলাম */
+          background-size: 25% 100%;
           pointer-events: none;
         }
 
@@ -514,7 +502,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           z-index: 1;
         }
 
-        /* --- রো লেআউট: লেখা বামে, ছবি ডানে --- */
+        /* ডেস্কটপ ভিউ */
         .showcase-row {
           display: flex;
           align-items: center;
@@ -522,7 +510,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           gap: 80px;
         }
 
-        /* --- বাম পাশ: টেক্সট ও কন্ট্রোল --- */
         .showcase-text {
           flex: 0 0 45%;
           max-width: 500px;
@@ -570,7 +557,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           font-weight: 400;
         }
 
-        /* --- কাস্টম স্লাইডার --- */
         .custom-pagination {
           display: flex;
           align-items: center;
@@ -606,7 +592,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           letter-spacing: 0.1em;
         }
 
-        /* --- প্রিমিয়াম টেক্সট বাটন --- */
         .catalogue-btn {
           display: inline-flex;
           align-items: center;
@@ -635,7 +620,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           transform: translateX(8px);
         }
 
-        /* --- ডান পাশ: 3D ফ্লোটিং ইমেজ --- */
         .showcase-visual {
           flex: 1;
           display: flex;
@@ -645,7 +629,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           min-height: 500px;
         }
 
-        /* ইমেজের পেছনে স্টুডিও লাইটিং গ্লো */
         .showcase-visual::before {
           content: '';
           position: absolute;
@@ -676,7 +659,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           filter: drop-shadow(0px 40px 60px rgba(0, 0, 0, 0.18)) drop-shadow(0px 15px 20px rgba(0, 0, 0, 0.08));
         }
 
-        /* --- ট্যাবলেট রেসপন্সিভ --- */
         @media (max-width: 1024px) {
           .ultimate-showcase::before { background-size: 50% 100%; }
           .showcase-container { gap: 120px; }
@@ -684,67 +666,79 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           .showcase-text { flex: 0 0 50%; }
         }
 
-        /* --- মোবাইল রেসপন্সিভ (ইমেজ বামে, টেক্সট ডানে) --- */
+        /* -------------------------------------------------------------
+         * মোবাইল ভিউ (max-width: 768px) 
+         * ইমেজ বামে, টেক্সট ডানে এবং উপরে-নিচে কোনো এক্সট্রা স্পেস নেই
+         * ------------------------------------------------------------- */
         @media (max-width: 768px) {
-          .ultimate-showcase { padding: 60px 0; }
+          .ultimate-showcase { padding: 40px 0; }
           .ultimate-showcase::before { background-size: 100% 100%; } 
-          .showcase-container { gap: 60px; padding: 0 16px; }
+          
+          .showcase-container { 
+            gap: 40px; /* সেকশনগুলোর মাঝে গ্যাপ কমানো হয়েছে */
+            padding: 0 16px; 
+          }
           
           .showcase-row {
-            flex-direction: row; /* মোবাইলেও রো লেআউট থাকবে */
-            align-items: center;
+            flex-direction: row; /* পাশাপাশি থাকবে */
+            flex-wrap: nowrap; /* ভেঙে উপরে-নিচে হবে না */
+            align-items: center; /* মাঝ বরাবর অ্যালাইন হবে */
             gap: 16px; 
+            width: 100%;
           }
           
           .showcase-visual {
-            flex: 0 0 40%; /* ইমেজ ৪০% জায়গা নেবে */
-            order: -1; /* DOM এ টেক্সট আগে থাকলেও ইমেজ বামে আসবে */
-            min-height: 200px;
+            flex: 0 0 35%; /* ইমেজ বাম পাশে ৩৫% জায়গা নেবে */
+            order: -1; /* ইমেজ সবসময় বামে থাকবে */
+            min-height: auto; /* উপরে-নিচে এক্সট্রা স্পেস রিমুভ করা হলো */
+            padding: 0;
           }
 
           .showcase-visual img {
-            max-height: 180px;
+            max-height: 140px; /* মোবাইলে ইমেজ ছোট করা হয়েছে */
+            width: 100%;
             filter: drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.1));
           }
 
           .showcase-text {
-            flex: 1; /* টেক্সট বাকি ৬০% জায়গা নেবে */
+            flex: 1; /* টেক্সট ডান পাশে ৬৫% জায়গা নেবে */
             width: auto;
-            align-items: flex-start; /* টেক্সট বাম দিক থেকে শুরু হবে */
+            align-items: flex-start;
             text-align: left;
+            padding: 0;
           }
 
           .showcase-text .eyebrow { 
             justify-content: flex-start; 
             font-size: 9px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
           }
           .showcase-text .eyebrow::before { display: none; }
 
           .showcase-text h2 {
-            font-size: 22px;
-            margin-bottom: 12px;
-            letter-spacing: -0.02em;
+            font-size: 20px;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
           }
 
           .showcase-text p {
             font-size: 12px;
-            line-height: 1.5;
-            margin-bottom: 16px;
+            line-height: 1.4;
+            margin-bottom: 12px;
             display: -webkit-box;
-            -webkit-line-clamp: 3; /* মোবাইলে টেক্সট ৩ লাইনে সীমিত */
+            -webkit-line-clamp: 3; /* ৩ লাইনের পর ... হয়ে যাবে */
             -webkit-box-orient: vertical;
             overflow: hidden;
           }
           
           .custom-pagination {
-            display: none; /* মোবাইলে জায়গা বাঁচাতে স্লাইডার কন্ট্রোল হাইড */
+            display: none; /* মোবাইলে স্লাইডার কন্ট্রোল হাইড */
           }
 
           .catalogue-btn {
             font-size: 10px;
             padding-bottom: 2px;
-            gap: 8px;
+            gap: 6px;
           }
         }
       `}</style>
@@ -752,7 +746,8 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
       <div className="showcase-container">
         {displayCategories.map((category, index) => (
           <div className="showcase-row" key={category.id}>
-            {/* বাম পাশ: টেক্সট */}
+            
+            {/* টেক্সট কন্টেন্ট (মোবাইলে order: -1 এর কারণে ডানে থাকবে) */}
             <div className="showcase-text">
               <span className="eyebrow">Explore Collections</span>
               <h2>{category.category_name}</h2>
@@ -761,7 +756,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
                   `Full development, repair and tuning. Discover our premium selection of ${category.category_name.toLowerCase()}, engineered for ultimate precision and performance.`}
               </p>
               
-              {/* প্রিমিয়াম স্লাইডার কন্ট্রোল */}
               <div className="custom-pagination">
                 <span className="nav-arrow">&lt;</span>
                 <span className="line"></span>
@@ -778,7 +772,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
               </Link>
             </div>
             
-            {/* ডান পাশ: হিউজ ফ্লোটিং ইমেজ */}
+            {/* ইমেজ কন্টেন্ট (মোবাইলে order: -1 এর কারণে বামে থাকবে) */}
             <div className="showcase-visual">
               {category.image_url ? (
                 <img src={category.image_url} alt={category.category_name} loading="lazy" />
@@ -793,10 +787,11 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
                   fontSize: '14px',
                   fontFamily: 'monospace'
                 }}>
-                  [ IMAGE NOT FOUND ]
+                  [ NO IMG ]
                 </div>
               )}
             </div>
+            
           </div>
         ))}
       </div>
@@ -824,7 +819,7 @@ export default function Home() {
       return;
     }
     void apiFetch<CarBrand[]>(apiUrl, '/api/v1/car-brands')
-      .then((items) => setCarBrands(Array.isArray(items) ? items.slice(0, 10) : []))
+      .then((items) => setCarBrands(Array.isArray(items) ? items.slice(0, 12) : []))
       .catch(() => setCarBrands([]));
 
     Promise.all([
