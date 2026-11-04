@@ -470,7 +470,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 }
 
 /* ==================================================================
- *  ULTIMATE PREMIUM CATEGORY SHOWCASE (Murphy's Masterpiece Style)
+ *  ULTIMATE PREMIUM CATEGORY SHOWCASE (Mobile: Image Left, Text Right)
  * ================================================================== */
 
 function CategoryShowcase({ categories }: { categories: Category[] }) {
@@ -532,7 +532,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
         }
 
         .showcase-text .eyebrow {
-          font-family: 'Courier New', Courier, monospace; /* মনোস্পেস ফন্ট */
+          font-family: 'Courier New', Courier, monospace;
           font-size: 11px;
           font-weight: 700;
           text-transform: uppercase;
@@ -555,7 +555,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
         .showcase-text h2 {
           font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
           font-size: clamp(44px, 5vw, 64px);
-          font-weight: 300; /* অত্যন্ত স্লিম ও প্রিমিয়াম */
+          font-weight: 300;
           color: #0a0a0a;
           line-height: 1.05;
           margin: 0 0 32px 0;
@@ -570,7 +570,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           font-weight: 400;
         }
 
-        /* --- ছবির মতো কাস্টম স্লাইডার --- */
+        /* --- কাস্টম স্লাইডার --- */
         .custom-pagination {
           display: flex;
           align-items: center;
@@ -667,7 +667,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           object-fit: contain;
           position: relative;
           z-index: 2;
-          /* ছবির মতো গভীর ও নরম 3D ড্রপ-শ্যাডো */
           filter: drop-shadow(0px 30px 50px rgba(0, 0, 0, 0.12)) drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.05));
           transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -677,7 +676,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           filter: drop-shadow(0px 40px 60px rgba(0, 0, 0, 0.18)) drop-shadow(0px 15px 20px rgba(0, 0, 0, 0.08));
         }
 
-        /* --- মোবাইল রেসপন্সিভ --- */
+        /* --- ট্যাবলেট রেসপন্সিভ --- */
         @media (max-width: 1024px) {
           .ultimate-showcase::before { background-size: 50% 100%; }
           .showcase-container { gap: 120px; }
@@ -685,29 +684,68 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           .showcase-text { flex: 0 0 50%; }
         }
 
+        /* --- মোবাইল রেসপন্সিভ (ইমেজ বামে, টেক্সট ডানে) --- */
         @media (max-width: 768px) {
-          .ultimate-showcase { padding: 80px 0; }
-          .ultimate-showcase::before { background-size: 100% 100%; } /* মোবাইলে গ্রিড লাইন অফ */
-          .showcase-container { gap: 80px; padding: 0 24px; }
+          .ultimate-showcase { padding: 60px 0; }
+          .ultimate-showcase::before { background-size: 100% 100%; } 
+          .showcase-container { gap: 60px; padding: 0 16px; }
           
           .showcase-row {
-            flex-direction: column;
-            gap: 48px;
-            text-align: center;
-          }
-          .showcase-text {
-            flex: 1;
-            width: 100%;
+            flex-direction: row; /* মোবাইলেও রো লেআউট থাকবে */
             align-items: center;
+            gap: 16px; 
           }
-          .showcase-text .eyebrow { justify-content: center; }
+          
+          .showcase-visual {
+            flex: 0 0 40%; /* ইমেজ ৪০% জায়গা নেবে */
+            order: -1; /* DOM এ টেক্সট আগে থাকলেও ইমেজ বামে আসবে */
+            min-height: 200px;
+          }
+
+          .showcase-visual img {
+            max-height: 180px;
+            filter: drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.1));
+          }
+
+          .showcase-text {
+            flex: 1; /* টেক্সট বাকি ৬০% জায়গা নেবে */
+            width: auto;
+            align-items: flex-start; /* টেক্সট বাম দিক থেকে শুরু হবে */
+            text-align: left;
+          }
+
+          .showcase-text .eyebrow { 
+            justify-content: flex-start; 
+            font-size: 9px;
+            margin-bottom: 8px;
+          }
+          .showcase-text .eyebrow::before { display: none; }
+
+          .showcase-text h2 {
+            font-size: 22px;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+          }
+
+          .showcase-text p {
+            font-size: 12px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* মোবাইলে টেক্সট ৩ লাইনে সীমিত */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
           
           .custom-pagination {
-            max-width: 260px;
-            margin: 0 auto 40px auto;
+            display: none; /* মোবাইলে জায়গা বাঁচাতে স্লাইডার কন্ট্রোল হাইড */
           }
-          .showcase-visual { min-height: 300px; }
-          .showcase-visual img { max-height: 350px; }
+
+          .catalogue-btn {
+            font-size: 10px;
+            padding-bottom: 2px;
+            gap: 8px;
+          }
         }
       `}</style>
 
