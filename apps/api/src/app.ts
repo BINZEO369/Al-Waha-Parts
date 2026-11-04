@@ -224,6 +224,7 @@ app.get('/api/v1/car-brands', async (_request, reply) => {
 app.get(
   '/api/v1/car-brands/slug/:slug',
   async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
+    reply.header('Cache-Control', 'no-store, max-age=0');
     const supabase = getSupabaseAdmin();
     const { data: brand, error: brandError } = await supabase
       .from('car_brands')
@@ -390,6 +391,7 @@ app.get(
     }>,
     reply,
   ) => {
+    reply.header('Cache-Control', 'no-store, max-age=0');
     const q = request.query;
     try {
       const vehicleQuery = await getSupabaseAdmin()
@@ -441,6 +443,7 @@ app.get(
 app.get(
   '/api/v1/vehicles/slug/:slug',
   async (request: FastifyRequest<{ Params: { slug: string } }>, reply) => {
+    reply.header('Cache-Control', 'no-store, max-age=0');
     const supabase = getSupabaseAdmin();
     const { data: vehicle, error: vehicleError } = await supabase
       .from('car_brands')

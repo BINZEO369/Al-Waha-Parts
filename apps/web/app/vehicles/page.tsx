@@ -83,7 +83,7 @@ export default function VehiclesPage() {
           <button className="button" disabled={loading || !selectedVehicle} onClick={() => { if (selectedVehicle) window.location.href = `/vehicles/${selectedVehicle.slug}`; }}>
             Open vehicle details <span>→</span>
           </button>
-          {selectedVehicle && <button className="button button-light" onClick={() => { window.location.href = `/catalog?car_brand_id=${selectedVehicle.car_brand_id}`; }}>
+          {selectedVehicle && <button className="button button-light" onClick={() => { window.location.href = `/catalog?vehicle_id=${selectedVehicle.id}`; }}>
             Show compatible parts
           </button>}
         </div>
