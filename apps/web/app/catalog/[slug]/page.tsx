@@ -117,7 +117,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           }
           .product-copy h1 {
             margin: 15px 0 18px;
-            font-family: Montserrat, sans-serif;
+            font-family: 'Montserrat';
             font-size: clamp(38px, 5vw, 66px);
             line-height: 1;
             letter-spacing: -0.06em;
@@ -179,7 +179,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           }
           .product-fitment h2 {
             margin: 12px 0 0;
-            font-family: Montserrat, sans-serif;
+            font-family: 'Montserrat';
             font-size: 36px;
             line-height: 1.05;
           }
@@ -286,7 +286,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           }
           .product-copy h1 {
             margin: 15px 0 18px;
-            font-family: Montserrat, sans-serif;
+            font-family: 'Montserrat';
             font-size: clamp(38px, 5vw, 66px);
             line-height: 1;
             letter-spacing: -0.06em;
@@ -348,7 +348,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           }
           .product-fitment h2 {
             margin: 12px 0 0;
-            font-family: Montserrat, sans-serif;
+            font-family: 'Montserrat';
             font-size: 36px;
             line-height: 1.05;
           }
@@ -472,7 +472,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         }
         .product-copy h1 {
           margin: 15px 0 18px;
-          font-family: Montserrat, sans-serif;
+          font-family: 'Montserrat';
           font-size: clamp(38px, 5vw, 66px);
           line-height: 1;
           letter-spacing: -0.06em;
@@ -534,7 +534,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         }
         .product-fitment h2 {
           margin: 12px 0 0;
-          font-family: Montserrat, sans-serif;
+          font-family: 'Montserrat';
           font-size: 36px;
           line-height: 1.05;
         }

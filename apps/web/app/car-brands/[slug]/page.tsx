@@ -27,7 +27,7 @@ export default function CarBrandPage({ params }: { params: Promise<{ slug: strin
         .car-brand-page .brand-hero { display:grid; grid-template-columns:150px 1fr; gap:28px; align-items:center; padding:28px; margin-bottom:42px; border-top:3px solid var(--red); background:#fff; box-shadow:0 10px 28px rgba(0,0,0,.05); }
         .car-brand-page .brand-logo { width:120px; height:120px; display:grid; place-items:center; border:1px solid #f0c4c7; border-radius:50%; }
         .car-brand-page .brand-logo img { width:82px; height:82px; object-fit:contain; }
-        .car-brand-page h1 { margin:7px 0 8px; font-family:Montserrat,sans-serif; font-size:clamp(34px,5vw,58px); line-height:1; }
+        .car-brand-page h1 { margin:7px 0 8px; font-family: 'Montserrat'; font-size:clamp(34px,5vw,58px); line-height:1; }
         .car-brand-page .brand-vehicles { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
         .car-brand-page .brand-vehicle { overflow:hidden; border:1px solid #f0c4c7; background:#fff; transition:transform .2s ease,box-shadow .2s ease; }
         .car-brand-page .brand-vehicle:hover { transform:translateY(-3px); box-shadow:0 9px 22px rgba(229,35,47,.12); }

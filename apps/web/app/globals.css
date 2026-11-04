@@ -81,7 +81,7 @@
   padding: 8px 10px;
   color: #9a4c56;
   background: #fff0f2;
-  font: 10px 'DM Mono';
+  font: 10px 'Montserrat';
   text-transform: uppercase;
 }
 .tracker-status.confirmed,
@@ -109,7 +109,7 @@
 .tracker-facts small,
 .tracker-items > small {
   color: var(--muted);
-  font: 10px 'DM Mono';
+  font: 10px 'Montserrat';
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -131,7 +131,7 @@
 }
 .tracker-items > div span {
   color: var(--muted);
-  font: 10px 'DM Mono';
+  font: 10px 'Montserrat';
 }
 .tracker-items p {
   color: var(--muted);

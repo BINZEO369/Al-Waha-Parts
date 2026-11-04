@@ -228,7 +228,7 @@ function HeroCarousel() {
 
         .hero-text-area h1 {
           margin: 0 0 20px;
-          font-family: Montserrat, sans-serif;
+          font-family: 'Montserrat';
           font-size: clamp(42px, 5vw, 64px);
           font-weight: 700;
           line-height: 1.1;
@@ -353,7 +353,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           padding: 10px 20px;
           border: 1px solid var(--red);
           color: var(--red);
-          font-family: Montserrat, sans-serif;
+          font-family: 'Montserrat';
           font-size: 18px;
           font-weight: 700;
           letter-spacing: -.02em;
@@ -532,7 +532,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
         }
 
         .showcase-text .eyebrow {
-          font-family: 'Courier New', Courier, monospace;
+          font-family: 'Montserrat';
           font-size: 11px;
           font-weight: 700;
           text-transform: uppercase;
@@ -553,7 +553,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
         }
 
         .showcase-text h2 {
-          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+          font-family: 'Montserrat';
           font-size: clamp(44px, 5vw, 64px);
           font-weight: 300;
           color: #0a0a0a;
@@ -585,7 +585,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           color: #999;
           cursor: pointer;
           transition: color 0.3s;
-          font-family: monospace;
+          font-family: 'Montserrat';
         }
 
         .custom-pagination .nav-arrow:hover {
@@ -599,7 +599,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
         }
 
         .custom-pagination .page-num {
-          font-family: 'Courier New', Courier, monospace;
+          font-family: 'Montserrat';
           font-size: 13px;
           font-weight: 700;
           color: #0a0a0a;
@@ -791,7 +791,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
                   justifyContent: 'center',
                   color: '#ccc',
                   fontSize: '14px',
-                  fontFamily: 'monospace'
+                  fontFamily: 'Montserrat'
                 }}>
                   [ IMAGE NOT FOUND ]
                 </div>
@@ -873,7 +873,7 @@ export default function Home() {
           padding: 12px 22px;
           border: 1px solid var(--red);
           color: var(--red);
-          font-family: Montserrat, sans-serif;
+          font-family: 'Montserrat';
           font-size: 21px;
           letter-spacing: -.03em;
           text-align: center;

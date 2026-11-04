@@ -14,7 +14,7 @@ export default function BookingPage() {
         .booking-page :global(textarea:focus-visible) { outline: 2px solid var(--red); outline-offset: 2px; }
         .booking-page :global(.booking-steps) { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin: 0 0 30px; border: 1px solid var(--line); background: var(--line); }
         .booking-page :global(.booking-step) { min-height: 82px; padding: 16px 18px; background: #fff; }
-        .booking-page :global(.booking-step strong) { display: block; margin-bottom: 5px; color: var(--ink); font-family: Montserrat, sans-serif; font-size: 12px; }
+        .booking-page :global(.booking-step strong) { display: block; margin-bottom: 5px; color: var(--ink); font-family: 'Montserrat'; font-size: 12px; }
         .booking-page :global(.booking-step span) { color: var(--muted); font-size: 11px; line-height: 1.5; }
         @media (max-width: 700px) {
           .booking-page { padding-top: 42px; }
