@@ -92,7 +92,7 @@ function ArrowIcon() {
 }
 
 /* ==================================================================
- *  HERO CAROUSEL (অপরিবর্তিত)
+ *  HERO CAROUSEL
  * ================================================================== */
 
 function HeroCarousel() {
@@ -325,7 +325,7 @@ function HeroCarousel() {
 }
 
 /* ==================================================================
- *  CAR BRAND STRIP (শুধু লোগো)
+ *  CAR BRAND STRIP (লোগো স্পষ্ট এবং সুন্দর করা হয়েছে)
  * ================================================================== */
 
 function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
@@ -370,37 +370,40 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           gap: 24px 32px;
         }
 
+        /* লোগো কার্ডের সাইজ বাড়ানো হয়েছে যাতে লোগো বড় দেখা যায় */
         .car-brand-item {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 100px;
-          height: 60px;
-          padding: 12px;
+          width: 120px;
+          height: 80px;
+          padding: 16px;
           border-radius: 8px;
-          background: transparent;
+          background: #fff;
+          border: 1px solid #f0f0f0;
           text-decoration: none;
           transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .car-brand-item:hover {
-          background: #f8f9fa;
+          background: #fff;
+          border-color: #e0e0e0;
           transform: translateY(-4px);
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
         }
 
         .car-brand-item img {
           width: 100%;
           height: 100%;
-          max-height: 24px;
+          max-height: 45px; /* লোগো অনেক বড় এবং স্পষ্ট হবে */
           object-fit: contain;
-          filter: grayscale(100%) opacity(0.6);
+          filter: grayscale(100%) opacity(0.85); /* opacity বাড়ানো হয়েছে যাতে স্পষ্ট দেখা যায় */
           transition: all 0.3s ease;
         }
 
         .car-brand-item:hover img {
-          filter: grayscale(0%) opacity(1);
-          transform: scale(1.1);
+          filter: grayscale(0%) opacity(1); /* হোভার করলে রঙিন হবে */
+          transform: scale(1.05);
         }
 
         @media (max-width: 900px) {
@@ -408,12 +411,12 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
             gap: 16px 20px;
           }
           .car-brand-item {
-            width: 80px;
-            height: 50px;
-            padding: 8px;
+            width: 100px;
+            height: 65px;
+            padding: 10px;
           }
           .car-brand-item img {
-            max-height: 20px;
+            max-height: 35px;
           }
         }
 
@@ -430,12 +433,12 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
             gap: 12px 16px;
           }
           .car-brand-item {
-            width: 70px;
-            height: 45px;
-            padding: 6px;
+            width: 80px;
+            height: 55px;
+            padding: 8px;
           }
           .car-brand-item img {
-            max-height: 18px;
+            max-height: 28px;
           }
         }
       `}</style>
@@ -460,7 +463,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 }
 
 /* ==================================================================
- *  PREMIUM CATEGORY SHOWCASE (মোবাইলে ইমেজ বামে, টেক্সট ডানে)
+ *  PREMIUM CATEGORY SHOWCASE (কম্পিউটার ও মোবাইল একই ডিজাইন)
  * ================================================================== */
 
 function CategoryShowcase({ categories }: { categories: Category[] }) {
@@ -475,7 +478,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           position: relative;
           width: 100%;
           background-color: #f9f9f9;
-          padding: 150px 0;
+          padding: 100px 0;
           overflow: hidden;
           border-top: 1px solid #eee;
           border-bottom: 1px solid #eee;
@@ -498,135 +501,28 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           padding: 0 40px;
           display: flex;
           flex-direction: column;
-          gap: 180px;
+          gap: 120px;
           z-index: 1;
         }
 
-        /* ডেস্কটপ ভিউ */
+        /* ডেস্কটপ এবং মোবাইল উভয় জায়গায় লেখা ডানে, ছবি বামে থাকবে */
         .showcase-row {
           display: flex;
+          flex-direction: row; /* সবসময় পাশাপাশি */
           align-items: center;
           justify-content: space-between;
           gap: 80px;
-        }
-
-        .showcase-text {
-          flex: 0 0 45%;
-          max-width: 500px;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
-        .showcase-text .eyebrow {
-          font-family: 'Courier New', Courier, monospace;
-          font-size: 11px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          color: #999;
-          margin-bottom: 28px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .showcase-text .eyebrow::before {
-          content: '';
-          display: block;
-          width: 24px;
-          height: 1px;
-          background: #ccc;
-        }
-
-        .showcase-text h2 {
-          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-          font-size: clamp(44px, 5vw, 64px);
-          font-weight: 300;
-          color: #0a0a0a;
-          line-height: 1.05;
-          margin: 0 0 32px 0;
-          letter-spacing: -0.04em;
-        }
-
-        .showcase-text p {
-          font-size: 16px;
-          color: #666;
-          line-height: 1.7;
-          margin: 0 0 48px 0;
-          font-weight: 400;
-        }
-
-        .custom-pagination {
-          display: flex;
-          align-items: center;
-          gap: 24px;
-          margin-bottom: 56px;
           width: 100%;
-          max-width: 320px;
-        }
-
-        .custom-pagination .nav-arrow {
-          font-size: 16px;
-          color: #999;
-          cursor: pointer;
-          transition: color 0.3s;
-          font-family: monospace;
-        }
-
-        .custom-pagination .nav-arrow:hover {
-          color: #000;
-        }
-
-        .custom-pagination .line {
-          flex: 1;
-          height: 1px;
-          background-color: #dcdcdc;
-        }
-
-        .custom-pagination .page-num {
-          font-family: 'Courier New', Courier, monospace;
-          font-size: 13px;
-          font-weight: 700;
-          color: #0a0a0a;
-          letter-spacing: 0.1em;
-        }
-
-        .catalogue-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 16px;
-          font-size: 12px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-          color: #0a0a0a;
-          text-decoration: none;
-          border-bottom: 1px solid #0a0a0a;
-          padding-bottom: 8px;
-          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .catalogue-btn svg {
-          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .catalogue-btn:hover {
-          color: var(--red);
-          border-color: var(--red);
-        }
-
-        .catalogue-btn:hover svg {
-          transform: translateX(8px);
         }
 
         .showcase-visual {
-          flex: 1;
+          flex: 1; 
           display: flex;
           justify-content: center;
           align-items: center;
           position: relative;
-          min-height: 500px;
+          min-height: 400px;
+          order: -1; /* ছবি সবসময় বামে (DOM এর আগে) থাকবে */
         }
 
         .showcase-visual::before {
@@ -644,9 +540,9 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
 
         .showcase-visual img {
           width: 100%;
-          max-width: 750px;
+          max-width: 650px;
           height: auto;
-          max-height: 550px;
+          max-height: 450px;
           object-fit: contain;
           position: relative;
           z-index: 2;
@@ -655,65 +551,63 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
         }
 
         .showcase-row:hover .showcase-visual img {
-          transform: translateY(-12px) scale(1.03);
-          filter: drop-shadow(0px 40px 60px rgba(0, 0, 0, 0.18)) drop-shadow(0px 15px 20px rgba(0, 0, 0, 0.08));
+          transform: translateY(-10px) scale(1.02);
         }
 
-        @media (max-width: 1024px) {
-          .ultimate-showcase::before { background-size: 50% 100%; }
-          .showcase-container { gap: 120px; }
-          .showcase-row { gap: 40px; }
-          .showcase-text { flex: 0 0 50%; }
+        /* লেখার অংশ (শুধুমাত্র টাইটেল এবং ডেসক্রিপশন) */
+        .showcase-text {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          text-align: left;
         }
 
-        /* -------------------------------------------------------------
-         * মোবাইল ভিউ (max-width: 768px) 
-         * ইমেজ বামে, টেক্সট ডানে এবং উপরে-নিচে কোনো এক্সট্রা স্পেস নেই
-         * ------------------------------------------------------------- */
+        .showcase-text h2 {
+          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+          font-size: clamp(38px, 4.5vw, 56px);
+          font-weight: 400;
+          color: #0a0a0a;
+          line-height: 1.1;
+          margin: 0 0 24px 0;
+          letter-spacing: -0.03em;
+        }
+
+        .showcase-text p {
+          font-size: 16px;
+          color: #666;
+          line-height: 1.7;
+          margin: 0;
+          font-weight: 400;
+          max-width: 500px;
+        }
+
+        /* মোবাইল রেসপন্সিভ (ডিজাইন একই থাকবে, শুধু সাইজ ছোট হবে) */
         @media (max-width: 768px) {
-          .ultimate-showcase { padding: 40px 0; }
+          .ultimate-showcase { padding: 50px 0; }
           .ultimate-showcase::before { background-size: 100% 100%; } 
           
           .showcase-container { 
-            gap: 40px; /* সেকশনগুলোর মাঝে গ্যাপ কমানো হয়েছে */
+            gap: 50px; 
             padding: 0 16px; 
           }
           
           .showcase-row {
-            flex-direction: row; /* পাশাপাশি থাকবে */
-            flex-wrap: nowrap; /* ভেঙে উপরে-নিচে হবে না */
-            align-items: center; /* মাঝ বরাবর অ্যালাইন হবে */
             gap: 16px; 
-            width: 100%;
           }
           
           .showcase-visual {
-            flex: 0 0 35%; /* ইমেজ বাম পাশে ৩৫% জায়গা নেবে */
-            order: -1; /* ইমেজ সবসময় বামে থাকবে */
-            min-height: auto; /* উপরে-নিচে এক্সট্রা স্পেস রিমুভ করা হলো */
-            padding: 0;
+            flex: 0 0 35%; /* মোবাইলে ছবি ৩৫% জায়গা নেবে */
+            min-height: auto;
           }
 
           .showcase-visual img {
-            max-height: 140px; /* মোবাইলে ইমেজ ছোট করা হয়েছে */
-            width: 100%;
-            filter: drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.1));
+            max-height: 140px; 
           }
 
           .showcase-text {
-            flex: 1; /* টেক্সট ডান পাশে ৬৫% জায়গা নেবে */
-            width: auto;
-            align-items: flex-start;
-            text-align: left;
-            padding: 0;
+            flex: 1;
           }
-
-          .showcase-text .eyebrow { 
-            justify-content: flex-start; 
-            font-size: 9px;
-            margin-bottom: 6px;
-          }
-          .showcase-text .eyebrow::before { display: none; }
 
           .showcase-text h2 {
             font-size: 20px;
@@ -724,55 +618,19 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           .showcase-text p {
             font-size: 12px;
             line-height: 1.4;
-            margin-bottom: 12px;
             display: -webkit-box;
-            -webkit-line-clamp: 3; /* ৩ লাইনের পর ... হয়ে যাবে */
+            -webkit-line-clamp: 3; /* মোবাইলে ৩ লাইনের পর ... হয়ে যাবে */
             -webkit-box-orient: vertical;
             overflow: hidden;
-          }
-          
-          .custom-pagination {
-            display: none; /* মোবাইলে স্লাইডার কন্ট্রোল হাইড */
-          }
-
-          .catalogue-btn {
-            font-size: 10px;
-            padding-bottom: 2px;
-            gap: 6px;
           }
         }
       `}</style>
 
       <div className="showcase-container">
-        {displayCategories.map((category, index) => (
+        {displayCategories.map((category) => (
           <div className="showcase-row" key={category.id}>
             
-            {/* টেক্সট কন্টেন্ট (মোবাইলে order: -1 এর কারণে ডানে থাকবে) */}
-            <div className="showcase-text">
-              <span className="eyebrow">Explore Collections</span>
-              <h2>{category.category_name}</h2>
-              <p>
-                {category.description ||
-                  `Full development, repair and tuning. Discover our premium selection of ${category.category_name.toLowerCase()}, engineered for ultimate precision and performance.`}
-              </p>
-              
-              <div className="custom-pagination">
-                <span className="nav-arrow">&lt;</span>
-                <span className="line"></span>
-                <span className="page-num">0{index + 1} / 03</span>
-                <span className="line"></span>
-                <span className="nav-arrow">&gt;</span>
-              </div>
-
-              <Link 
-                href={category.slug ? `/category/${category.slug}` : '/category'} 
-                className="catalogue-btn"
-              >
-                See Catalogue <ArrowIcon />
-              </Link>
-            </div>
-            
-            {/* ইমেজ কন্টেন্ট (মোবাইলে order: -1 এর কারণে বামে থাকবে) */}
+            {/* ইমেজ কন্টেন্ট (order: -1 এর কারণে বামে থাকবে) */}
             <div className="showcase-visual">
               {category.image_url ? (
                 <img src={category.image_url} alt={category.category_name} loading="lazy" />
@@ -785,11 +643,19 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
                   justifyContent: 'center',
                   color: '#ccc',
                   fontSize: '14px',
-                  fontFamily: 'monospace'
                 }}>
                   [ NO IMG ]
                 </div>
               )}
+            </div>
+
+            {/* টেক্সট কন্টেন্ট (ডানে থাকবে) */}
+            <div className="showcase-text">
+              <h2>{category.category_name}</h2>
+              <p>
+                {category.description ||
+                  `Discover our premium selection of ${category.category_name.toLowerCase()}, engineered for ultimate precision and performance.`}
+              </p>
             </div>
             
           </div>
