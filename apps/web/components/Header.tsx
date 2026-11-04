@@ -9,6 +9,7 @@ import { useLanguage } from './LanguageProvider';
 const navItems = [
   { label: 'Home', href: '/' },
   { label: 'Categories', href: '/category' },
+  { label: 'All Brands', href: '/all-brands' },
   { label: 'Vehicle Finder', href: '/vehicles' },
   { label: 'Track Booking', href: '/booking/track' },
   { label: 'Contact', href: '/contact' },

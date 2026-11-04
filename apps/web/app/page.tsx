@@ -450,7 +450,10 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
         }
       `}</style>
       <div className="car-brand-strip-inner">
-        <h2 id="car-brand-strip-title">Browse by car brand</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 22 }}>
+          <h2 id="car-brand-strip-title" style={{ margin: 0 }}>Browse by car brand</h2>
+          <Link className="section-link" href="/all-brands">View all brands <ArrowIcon /></Link>
+        </div>
         <div className="car-brand-grid">
           {brands.map((brand) => (
             <Link

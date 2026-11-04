@@ -3,6 +3,7 @@
     { "path": "/", "title": "Home" },
     { "path": "/catalog/:slug", "title": "Product Details" },
     { "path": "/category", "title": "Categories" },
+    { "path": "/all-brands", "title": "All Car Brands" },
     { "path": "/vehicles", "title": "Vehicle Finder" },
     { "path": "/vehicles/:slug", "title": "Vehicle Details" },
     { "path": "/car-brands/:slug", "title": "Car Brand Vehicles" },
