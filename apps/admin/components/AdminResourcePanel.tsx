@@ -10,7 +10,7 @@ type Resource = Record<string, unknown> & { id: string };
 type Field = {
   key: string;
   label: string;
-  type?: 'text' | 'number' | 'textarea' | 'select' | 'checkbox';
+  type?: 'text' | 'number' | 'textarea' | 'select' | 'checkbox' | 'brand';
   options?: string[];
   required?: boolean;
 };
@@ -26,6 +26,7 @@ const config: Record<
     fields: [
       { key: 'part_name', label: 'Part name', required: true },
       { key: 'sku', label: 'SKU', required: true },
+      { key: 'car_brand_id', label: 'Vehicle brand logo', type: 'brand' },
       { key: 'brand_name', label: 'Brand' },
       { key: 'oem_number', label: 'OEM number' },
       { key: 'price', label: 'Price', type: 'number', required: true },
@@ -48,15 +49,17 @@ const config: Record<
     empty: 'No vehicles found in the fitment library.',
     search: 'Search manufacturer, model, or chassis…',
     fields: [
-      { key: 'manufacturer_name', label: 'Manufacturer', required: true },
+      { key: 'car_brand_id', label: 'Car brand logo ID', type: 'brand', required: true },
       { key: 'model_name', label: 'Model', required: true },
       { key: 'generation', label: 'Generation' },
       { key: 'chassis_code', label: 'Chassis code' },
-      { key: 'car_brand_id', label: 'Car brand logo ID' },
+      { key: 'year_start', label: 'Year from', type: 'number' },
+      { key: 'year_end', label: 'Year to', type: 'number' },
       { key: 'vehicle_type', label: 'Vehicle type' },
       { key: 'slug', label: 'URL slug' },
       { key: 'status', label: 'Status', type: 'select', options: ['active', 'inactive', 'draft'] },
       { key: 'cover_image_url', label: 'Cover image URL' },
+      { key: 'sort_order', label: 'Homepage order', type: 'number' },
       { key: 'is_featured', label: 'Featured vehicle', type: 'checkbox' },
     ],
   },
@@ -230,10 +233,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
     }
   }
   async function remove(row: Resource, title: string) {
-    const confirmation =
-      kind === 'banners'
-        ? `Permanently delete ${title}? It will be removed from the database and live storefront. This cannot be undone.`
-        : `Delete ${title}? This will hide it from the storefront and keep its history safe.`;
+    const confirmation = `Permanently delete ${title}? It will be removed from the database and live storefront. This cannot be undone.`;
     if (!window.confirm(confirmation)) return;
     setError('');
     try {
@@ -452,10 +452,19 @@ function ResourceForm({
   onSaved: () => void;
 }) {
   const [values, setValues] = useState<Record<string, unknown>>(initialValues(fields, row));
+  const [carBrands, setCarBrands] = useState<Array<{ id: string; manufacturer_name: string }>>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const set = (key: string, value: unknown) =>
     setValues((current) => ({ ...current, [key]: value }));
+  useEffect(() => {
+    if (!fields.some((field) => field.type === 'brand')) return;
+    adminFetch<Array<{ id: string; manufacturer_name: string }>>('/api/v1/admin/car-brands')
+      .then(setCarBrands)
+      .catch((cause: unknown) =>
+        setError(cause instanceof Error ? cause.message : 'Car brands could not be loaded.'),
+      );
+  }, [fields]);
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setSaving(true);
@@ -537,6 +546,19 @@ function ResourceForm({
                       {field.options?.map((option) => (
                         <option key={option} value={option}>
                           {option.replace(/_/g, ' ')}
+                        </option>
+                      ))}
+                    </select>
+                  ) : field.type === 'brand' ? (
+                    <select
+                      required={field.required}
+                      value={String(values[field.key] ?? '')}
+                      onChange={(event) => set(field.key, event.target.value)}
+                    >
+                      <option value="">Choose a car brand…</option>
+                      {carBrands.map((brand) => (
+                        <option key={brand.id} value={brand.id}>
+                          {brand.manufacturer_name} · {brand.id.slice(0, 8)}
                         </option>
                       ))}
                     </select>

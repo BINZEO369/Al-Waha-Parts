@@ -7,7 +7,7 @@ export default function Vehicles() {
       <SectionHeader
         eyebrow="Fitment library / section 03"
         title="Vehicle library"
-        description="Manage manufacturers, model records, generations, chassis codes, and active fitment records."
+        description="Manage models under a car-brand ID. Brand and model records are stored together in the car_brands registry."
         action="Add vehicle"
       />
       <section className="workspace-hero">
@@ -17,8 +17,8 @@ export default function Vehicles() {
           </span>
           <h2>Every part starts with the right vehicle model.</h2>
           <p>
-            Live vehicle records are loaded from Supabase and remain searchable on phone, tablet,
-            and desktop.
+            Model records and their images are loaded from car_brands. Choose a brand ID, then mark
+            Featured vehicle to show that model on the homepage.
           </p>
         </div>
         <div className="hero-mark">VH</div>
@@ -29,14 +29,14 @@ export default function Vehicles() {
           number="03A"
           label="Vehicle records"
           title="Manufacturers and models."
-          description="Keep names, logo IDs, chassis codes, and media complete for every supported vehicle model."
+          description="Keep each model linked to its root car-brand ID, with its own image and model details."
           action="Manage records"
         />
         <WorkspaceCard
           number="03B"
           label="Fitment links"
           title="Make matching dependable."
-          description="Connect active vehicles to catalog parts so customer searches return useful results."
+          description="Fitment records point to model IDs in car_brands, so brand, models, parts, and images stay connected."
           action="Open relationships"
         />
       </div>
