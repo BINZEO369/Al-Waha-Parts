@@ -120,11 +120,19 @@ const normalizeModel = (row: CarBrandRecord, brand: CarBrandRecord, index: numbe
     firstValue(row, ['manufacturer_name', 'brand_name', 'car_brand', 'make']) ??
       brand.manufacturer_name,
   ),
+  manufacturer_logo: publicImageUrl(
+    firstValue(row, ['manufacturer_logo', 'brand_logo', 'logo_url', 'logo']) ??
+      firstValue(brand, ['manufacturer_logo', 'logo_url', 'brand_logo']),
+  ),
   model_name: String(firstValue(row, ['model_name', 'model', 'car_model', 'name']) ?? ''),
   generation: firstValue(row, ['generation', 'variant', 'trim']) ?? null,
   chassis_code: firstValue(row, ['chassis_code', 'chassis']) ?? null,
   year_start: firstValue(row, ['year_start', 'from_year', 'start_year']) ?? null,
   year_end: firstValue(row, ['year_end', 'to_year', 'end_year']) ?? null,
+  engine_code: firstValue(row, ['engine_code']) ?? null,
+  engine_capacity: firstValue(row, ['engine_capacity']) ?? null,
+  fuel_type: firstValue(row, ['fuel_type']) ?? null,
+  transmission: firstValue(row, ['transmission']) ?? null,
   vehicle_type: firstValue(row, ['vehicle_type', 'type', 'body_type']) ?? null,
   cover_image_url: publicImageUrl(firstValue(row, ['cover_image_url', 'image_url', 'cover_image'])),
   vehicle_images: Array.isArray(row.vehicle_images)
@@ -216,7 +224,7 @@ app.get('/api/v1/car-brands', async (_request, reply) => {
     .eq('status', 'active')
     .order('sort_order', { ascending: true })
     .order('manufacturer_name', { ascending: true })
-    .limit(10);
+    .limit(200);
   if (error) return jsonError(reply, 500, error.message);
   return {
     data: (data ?? []).map((brand) => ({ ...brand, logo_url: publicImageUrl(brand.logo_url) })),
@@ -526,6 +534,7 @@ app.get(
         category_id?: string;
         vehicle_id?: string;
         car_brand_id?: string;
+        year?: string;
         status?: string;
         featured_only?: string;
         limit?: string;
@@ -570,6 +579,8 @@ app.get(
       );
     if (q.category_id) query = query.eq('category_id', q.category_id);
     if (q.vehicle_id) query = query.eq('part_vehicle_fitments.vehicle_id', q.vehicle_id);
+    if (q.vehicle_id && q.year && /^\d{4}$/.test(q.year))
+      query = query.contains('part_vehicle_fitments.compatible_years', [Number(q.year)]);
     if (vehicleIds) query = query.in('part_vehicle_fitments.vehicle_id', vehicleIds);
     if (q.featured_only === 'true') query = query.eq('is_featured', true);
     query = query.eq('status', q.status ?? 'active');

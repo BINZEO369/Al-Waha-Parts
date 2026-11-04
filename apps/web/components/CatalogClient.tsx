@@ -18,6 +18,8 @@ export function CatalogClient() {
   const [categoryId, setCategoryId] = useState('');
   const [vehicleId, setVehicleId] = useState('');
   const [carBrandId, setCarBrandId] = useState('');
+  const [vehicleYear, setVehicleYear] = useState('');
+  const [vehicleName, setVehicleName] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -28,6 +30,10 @@ export function CatalogClient() {
     setCategoryId(params.get('category') ?? '');
     setCarBrandId(params.get('car_brand_id') ?? '');
     setVehicleId(params.get('vehicle_id') ?? '');
+    setVehicleYear(params.get('year') ?? '');
+    const make = params.get('make') ?? '';
+    const model = params.get('model') ?? '';
+    setVehicleName([make, model].filter(Boolean).join(' '));
   }, []);
 
   useEffect(() => {
@@ -38,10 +44,11 @@ export function CatalogClient() {
     }
     setLoading(true);
     setError('');
+    const yearParam = vehicleYear ? `&year=${encodeURIComponent(vehicleYear)}` : '';
     Promise.all([
       apiFetch<PartCardData[]>(
         apiUrl,
-        `/api/v1/parts?limit=100&search=${encodeURIComponent(search)}${categoryId ? `&category_id=${categoryId}` : ''}${carBrandId ? `&car_brand_id=${carBrandId}` : ''}${vehicleId ? `&vehicle_id=${vehicleId}` : ''}`,
+        `/api/v1/parts?limit=100&search=${encodeURIComponent(search)}${categoryId ? `&category_id=${encodeURIComponent(categoryId)}` : ''}${carBrandId ? `&car_brand_id=${encodeURIComponent(carBrandId)}` : ''}${vehicleId ? `&vehicle_id=${encodeURIComponent(vehicleId)}${yearParam}` : ''}`,
       ),
       apiFetch<Category[]>(apiUrl, '/api/v1/categories'),
     ])
@@ -54,7 +61,13 @@ export function CatalogClient() {
         setError(cause instanceof Error ? cause.message : 'Unable to load the live catalog.');
       })
       .finally(() => setLoading(false));
-  }, [apiUrl, search, categoryId, carBrandId, vehicleId]);
+  }, [apiUrl, search, categoryId, carBrandId, vehicleId, vehicleYear]);
+
+  const clearVehicleFilter = () => {
+    setVehicleId('');
+    setVehicleYear('');
+    setVehicleName('');
+  };
 
   return (
     <>
@@ -67,11 +80,21 @@ export function CatalogClient() {
           <span>⌕</span>
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Search part, brand or SKU"
           />
         </div>
       </div>
+      {vehicleId && (
+        <div className="vehicle-filter-summary">
+          <div>
+            <small>Vehicle fitment active</small>
+            <strong>{vehicleName || 'Selected vehicle'}{vehicleYear ? ` · ${vehicleYear}` : ''}</strong>
+            <span>Only parts compatible with this saved vehicle fitment are requested.</span>
+          </div>
+          <button type="button" onClick={clearVehicleFilter}>Clear vehicle</button>
+        </div>
+      )}
       <div className="category-list" aria-label="Part categories">
         <button
           className={!categoryId ? 'category-chip active' : 'category-chip'}
@@ -85,9 +108,7 @@ export function CatalogClient() {
             key={category.id}
             onClick={() => setCategoryId(category.id)}
           >
-            {category.image_url && (
-              <img className="category-chip-image" src={category.image_url} alt="" />
-            )}
+            {category.image_url && <img className="category-chip-image" src={category.image_url} alt="" />}
             {category.category_name}
           </button>
         ))}
@@ -100,9 +121,11 @@ export function CatalogClient() {
           parts.map((part) => <PartCard key={part.id} part={part} />)
         ) : (
           <div className="empty-state">
-            <strong>No parts are published yet.</strong>
+            <strong>No compatible parts found.</strong>
             <span>
-              When an active part is added in Supabase, it will appear here automatically.
+              {vehicleId
+                ? 'Try another model year or vehicle generation, or ask the parts desk to verify fitment.'
+                : 'When an active part is added in Supabase, it will appear here automatically.'}
             </span>
           </div>
         )}

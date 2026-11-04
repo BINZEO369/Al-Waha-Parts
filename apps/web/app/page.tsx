@@ -58,6 +58,10 @@ type Vehicle = {
   chassis_code?: string | null;
   year_start?: number | null;
   year_end?: number | null;
+  engine_code?: string | null;
+  engine_capacity?: number | string | null;
+  fuel_type?: string | null;
+  transmission?: string | null;
   vehicle_type?: string | null;
   cover_image_url?: string | null;
   is_featured?: boolean;
@@ -916,9 +920,16 @@ export default function Home() {
                 key={vehicle.id}
               >
                 <div className="vehicle-home-card-top">
-                  <small>Model</small>
-                  <strong>{vehicle.manufacturer_name} {vehicle.model_name}</strong>
-                  <span>{vehicle.generation || vehicle.chassis_code || vehicle.vehicle_type || 'Database fitment'}</span>
+                  <div className="vehicle-home-brand">
+                    {vehicle.manufacturer_logo && (
+                      <span className="vehicle-home-logo-frame">
+                        <img src={vehicle.manufacturer_logo} alt={`${vehicle.manufacturer_name} logo`} loading="lazy" />
+                      </span>
+                    )}
+                    <small>{vehicle.manufacturer_name}</small>
+                  </div>
+                  <strong>{vehicle.model_name}</strong>
+                  <span>{[vehicle.generation, vehicle.chassis_code].filter(Boolean).join(' · ') || vehicle.vehicle_type || 'Database fitment'}</span>
                 </div>
                 <div className="vehicle-home-card-image">
                   {vehicle.cover_image_url ? (
@@ -928,9 +939,9 @@ export default function Home() {
                   )}
                 </div>
                 <div className="vehicle-home-card-specs">
-                  <span><small>Fitment</small><b>Database model</b></span>
+                  <span><small>Years</small><b>{vehicle.year_start ? `${vehicle.year_start}–${vehicle.year_end ?? 'Present'}` : 'Not listed'}</b></span>
                   <span><small>Vehicle type</small><b>{vehicle.vehicle_type || 'Vehicle'}</b></span>
-                  <span><small>Explore</small><b>View parts <i aria-hidden="true">↗</i></b></span>
+                  <span><small>Engine</small><b>{vehicle.engine_code || (vehicle.engine_capacity ? `${vehicle.engine_capacity} L` : 'View parts ↗')}</b></span>
                 </div>
               </Link>
             ))}
