@@ -581,7 +581,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         .product-sku-badge { padding: 17px 32px; border: 3px solid #292929; border-radius: 18px; color: #292929; font-size: 28px; white-space: nowrap; }
         .product-genuine { display: inline-flex; align-items: center; gap: 10px; padding: 7px 18px; border: 1px solid #ddd; border-radius: 14px; background: #fff; font-size: 22px; }
         .product-genuine b { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 50%; background: #2166d1; color: #fff; }
-        .product-vehicle-bar { display: none; }
+        .product-vehicle-bar { display: flex; align-items: center; gap: 14px; min-height: 86px; padding: 14px 24px; margin-bottom: 22px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; background: #fff; font-size: 20px; }
         .product-vehicle-bar strong, .product-vehicle-bar small { display: block; }
         .product-vehicle-bar small { margin-top: 4px; color: #777; font-size: 14px; }
         .product-grid { display: block; }
@@ -621,7 +621,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           .product-sku-badge { padding: 10px 14px; border-width: 2px; border-radius: 12px; font-size: 17px; }
           .product-genuine { padding: 5px 12px; font-size: 16px; }
           .product-genuine b { width: 22px; height: 22px; }
-          .product-vehicle-bar { display: flex; align-items: center; gap: 14px; min-height: 86px; padding: 14px 32px; margin-top: 22px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; background: #fff; font-size: 20px; }
+          .product-vehicle-bar { padding-left: 32px; padding-right: 32px; margin-bottom: 0; }
           .product-vehicle-mark { display: grid; width: 64px; height: 48px; place-items: center; border-radius: 12px; background: #f2f2f2; font-size: 16px; }
           .product-vehicle-edit { margin-left: auto; font-size: 28px; }
           .product-vehicle-bar small { font-size: 13px; }
@@ -645,24 +645,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         }
       `}</style>
 
-      <nav className="product-breadcrumb" aria-label="Breadcrumb">
-        <Link href="/">Home</Link><span>/</span>
-        <Link href="/category">Part sections</Link><span>/</span>
-        <Link href={product.parts_categories?.slug ? `/category/${product.parts_categories.slug}` : '/category'}>{product.parts_categories?.category_name ?? 'Parts'}</Link>
-      </nav>
-      <header className="product-reference-heading">
-        <div>
-          <h1>{product.part_name}</h1>
-          <span className="product-genuine"><b>✓</b> Genuine</span>
-        </div>
-        <span className="product-sku-badge">#{product.oem_number ?? product.sku}</span>
-      </header>
       {vehicles[0] && (
-        <Link className="product-vehicle-bar" href="/vehicles">
+        <div className="product-vehicle-bar">
           <span className="product-vehicle-mark">{vehicles[0].manufacturer_name.slice(0, 2).toUpperCase()}</span>
           <span><strong>{vehicles[0].manufacturer_name} {vehicles[0].model_name}</strong><small>{vehicles[0].year_start ?? '—'}–{vehicles[0].year_end ?? 'present'}{vehicles[0].generation ? ` · ${vehicles[0].generation}` : ''}</small></span>
-          <span className="product-vehicle-edit" aria-hidden="true">⌕</span>
-        </Link>
+        </div>
       )}
       <div className="product-grid">
         <section className="product-reference-media">
@@ -697,11 +684,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           <div className="product-price">
             <strong>{formatSar(currentPrice)}</strong>
             {product.sale_price && <del>{formatSar(product.price)}</del>}
-            <span>Incl. VAT</span>
           </div>
-          <div className="product-installment"><p>Split it into 4 interest-free payments</p><strong>{formatSar(Math.ceil(currentPrice / 4))} <small>/ month</small></strong><span>tabby&nbsp;&nbsp; tamara&nbsp;&nbsp; MIS</span></div>
-          <div className="product-delivery"><span>▣</span><strong>2–4 days</strong><span className="product-stock">● {outOfStock ? 'Out of stock' : 'In stock'}</span></div>
-          {vehicles[0] && <div className="product-fitment-ok">✓ &nbsp; Fits your {vehicles[0].manufacturer_name} {vehicles[0].model_name} {vehicles[0].year_start ?? ''}</div>}
           <div className="product-status">
             <span>{product.tested_status === 'tested' ? 'Tested' : 'Fitment checked'}</span>
             <span>
