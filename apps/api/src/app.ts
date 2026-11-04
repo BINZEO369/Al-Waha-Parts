@@ -402,7 +402,17 @@ app.get(
         .order('model_name')
         .limit(1000);
       if (vehicleQuery.error) return jsonError(reply, 500, vehicleQuery.error.message);
-      let data = (vehicleQuery.data ?? []).map((row, index) => normalizeCarBrand(row as CarBrandRecord, index));
+      let data = (vehicleQuery.data ?? []).map((row, index) => {
+        const record = row as CarBrandRecord;
+        return normalizeModel(
+          record,
+          {
+            id: firstValue(record, ['car_brand_id']) ?? '',
+            manufacturer_name: firstValue(record, ['manufacturer_name']) ?? '',
+          },
+          index,
+        );
+      });
       if (q.search) {
         const search = q.search.toLowerCase();
         data = data.filter((item) =>
@@ -480,7 +490,19 @@ app.get('/api/v1/homepage-selected-vehicles', async (_request, reply) => {
       .order('model_name')
       .limit(200);
     if (error) return jsonError(reply, 500, error.message);
-    return { data: (data ?? []).map((row, index) => normalizeCarBrand(row as CarBrandRecord, index)) };
+    return {
+      data: (data ?? []).map((row, index) => {
+        const record = row as CarBrandRecord;
+        return normalizeModel(
+          record,
+          {
+            id: firstValue(record, ['car_brand_id']) ?? '',
+            manufacturer_name: firstValue(record, ['manufacturer_name']) ?? '',
+          },
+          index,
+        );
+      }),
+    };
   } catch (error) {
     return jsonError(
       reply,
