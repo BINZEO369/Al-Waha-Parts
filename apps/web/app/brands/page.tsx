@@ -35,7 +35,9 @@ export default function AllBrandsPage() {
   return (
     <main className="page-shell all-brands-page">
       <style jsx>{`
-        .all-brands-page { max-width: 1240px; }
+        .all-brands-page {
+          max-width: 1240px;
+        }
         .all-brands-heading {
           display: flex;
           align-items: end;
@@ -48,8 +50,8 @@ export default function AllBrandsPage() {
           color: #202124;
           font-family: 'Montserrat';
           font-size: clamp(34px, 5vw, 58px);
-          line-height: .98;
-          letter-spacing: -.06em;
+          line-height: 0.98;
+          letter-spacing: -0.06em;
         }
         .all-brands-heading p {
           max-width: 570px;
@@ -81,12 +83,15 @@ export default function AllBrandsPage() {
           background: #fff;
           color: #202124;
           text-decoration: none;
-          transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+          transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease,
+            border-color 0.2s ease;
         }
         .all-brand-card:hover {
           transform: translateY(-4px);
           border-color: var(--red);
-          box-shadow: 0 14px 28px rgba(229, 35, 47, .12);
+          box-shadow: 0 14px 28px rgba(229, 35, 47, 0.12);
         }
         .all-brand-logo {
           display: grid;
@@ -123,7 +128,7 @@ export default function AllBrandsPage() {
         .all-brand-copy strong {
           font-family: 'Montserrat';
           font-size: 15px;
-          letter-spacing: .02em;
+          letter-spacing: 0.02em;
           text-transform: uppercase;
         }
         .all-brand-copy span {
@@ -132,13 +137,30 @@ export default function AllBrandsPage() {
           line-height: 1;
         }
         @media (max-width: 760px) {
-          .all-brands-heading { align-items: start; flex-direction: column; }
-          .all-brands-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-          .all-brand-card { min-height: 164px; padding: 14px 11px 12px; }
-          .all-brand-logo { height: 90px; }
-          .all-brand-logo img { height: 60px; }
-          .all-brand-copy { padding-top: 11px; }
-          .all-brand-copy strong { font-size: 11px; }
+          .all-brands-heading {
+            align-items: start;
+            flex-direction: column;
+          }
+          .all-brands-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+          }
+          .all-brand-card {
+            min-height: 164px;
+            padding: 14px 11px 12px;
+          }
+          .all-brand-logo {
+            height: 90px;
+          }
+          .all-brand-logo img {
+            height: 60px;
+          }
+          .all-brand-copy {
+            padding-top: 11px;
+          }
+          .all-brand-copy strong {
+            font-size: 11px;
+          }
         }
       `}</style>
 
@@ -167,12 +189,16 @@ export default function AllBrandsPage() {
           {brands.map((brand) => (
             <Link
               className="all-brand-card"
-              href={brand.slug ? `/car-brands/${brand.slug}` : '/vehicles'}
+              href={brand.slug ? `/brands/${brand.slug}` : '/brands'}
               key={brand.id}
             >
               <div className="all-brand-logo">
                 {brand.logo_url ? (
-                  <img src={brand.logo_url} alt={`${brand.manufacturer_name} logo`} loading="lazy" />
+                  <img
+                    src={brand.logo_url}
+                    alt={`${brand.manufacturer_name} logo`}
+                    loading="lazy"
+                  />
                 ) : (
                   <span className="all-brand-initials" aria-hidden="true">
                     {brand.manufacturer_name.slice(0, 2).toUpperCase()}

@@ -1,15 +1,16 @@
 {
   "routes": [
     { "path": "/", "title": "Home" },
-    { "path": "/catalog/:slug", "title": "Product Details" },
-    { "path": "/category", "title": "Categories" },
-    { "path": "/all-brands", "title": "All Car Brands" },
-    { "path": "/vehicles", "title": "Vehicle Finder" },
-    { "path": "/vehicles/:slug", "title": "Vehicle Details" },
-    { "path": "/car-brands/:slug", "title": "Car Brand Vehicles" },
-    { "path": "/map", "title": "Our Location" },
     { "path": "/booking", "title": "Booking Request" },
     { "path": "/booking/track", "title": "Track Booking" },
-    { "path": "/contact", "title": "Contact" }
+    { "path": "/brands", "title": "Car Brands" },
+    { "path": "/brands/:slug", "title": "Brand Models" },
+    { "path": "/brands/:slug/:modelSlug", "title": "Brand Model Details" },
+    { "path": "/catalog/:slug", "title": "Product Details" },
+    { "path": "/category", "title": "Categories" },
+    { "path": "/category/:slug", "title": "Category Details" },
+    { "path": "/contact", "title": "Contact" },
+    { "path": "/login", "title": "Login" },
+    { "path": "/map", "title": "Our Location" }
   ]
 }

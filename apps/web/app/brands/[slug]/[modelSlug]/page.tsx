@@ -2,12 +2,20 @@
 
 import Link from 'next/link';
 import { use, useEffect, useState } from 'react';
-import { apiFetch } from '../../../../../packages/shared/src/api';
-import { PartCard, type PartCardData } from '../../../components/PartCard';
+import { apiFetch } from '../../../../../../packages/shared/src/api';
+import { PartCard, type PartCardData } from '../../../../components/PartCard';
 
+type Brand = {
+  id: string;
+  manufacturer_name: string;
+  slug: string;
+  logo_url: string;
+  sort_order: number;
+};
 type Vehicle = {
   id: string;
   slug: string;
+  car_brand_id?: string | null;
   manufacturer_name: string;
   manufacturer_logo?: string | null;
   model_name: string;
@@ -18,31 +26,69 @@ type Vehicle = {
   vehicle_type?: string | null;
   cover_image_url?: string | null;
   vehicle_images?: string[] | null;
-  gallery_images?: string[] | null;
 };
-
+type BrandDetail = { brand: Brand; vehicles: Vehicle[] };
 type VehicleDetail = { vehicle: Vehicle; parts: PartCardData[] };
 
-export default function VehicleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
-  const [detail, setDetail] = useState<VehicleDetail | null>(null);
+export default function BrandModelPage({
+  params,
+}: {
+  params: Promise<{ slug: string; modelSlug: string }>;
+}) {
+  const { slug, modelSlug } = use(params);
+  const [detail, setDetail] = useState<{
+    brand: Brand;
+    vehicle: Vehicle;
+    parts: PartCardData[];
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
-    if (!apiUrl) {
-      setError('Vehicle API is not configured.');
-      setLoading(false);
-      return;
+    let active = true;
+    async function load() {
+      if (!apiUrl) {
+        setError('Vehicle API is not configured.');
+        setLoading(false);
+        return;
+      }
+      try {
+        const brandDetail = await apiFetch<BrandDetail>(
+          apiUrl,
+          `/api/v1/car-brands/slug/${encodeURIComponent(slug)}`,
+        );
+        const model = brandDetail.vehicles.find((vehicle) => vehicle.slug === modelSlug);
+        if (!model) throw new Error('This model is not listed under the selected car brand.');
+        const vehicleDetail = await apiFetch<VehicleDetail>(
+          apiUrl,
+          `/api/v1/vehicles/slug/${encodeURIComponent(modelSlug)}`,
+        );
+        if (
+          vehicleDetail.vehicle.id !== model.id ||
+          (vehicleDetail.vehicle.car_brand_id &&
+            vehicleDetail.vehicle.car_brand_id !== brandDetail.brand.id)
+        ) {
+          throw new Error('The selected model does not belong to this car brand.');
+        }
+        if (active)
+          setDetail({
+            brand: brandDetail.brand,
+            vehicle: vehicleDetail.vehicle,
+            parts: vehicleDetail.parts,
+          });
+      } catch (cause) {
+        if (active)
+          setError(cause instanceof Error ? cause.message : 'Unable to load vehicle details.');
+      } finally {
+        if (active) setLoading(false);
+      }
     }
-    apiFetch<VehicleDetail>(apiUrl, `/api/v1/vehicles/slug/${encodeURIComponent(slug)}`)
-      .then(setDetail)
-      .catch((cause: unknown) =>
-        setError(cause instanceof Error ? cause.message : 'Unable to load vehicle details.'),
-      )
-      .finally(() => setLoading(false));
-  }, [apiUrl, slug]);
+    void load();
+    return () => {
+      active = false;
+    };
+  }, [apiUrl, slug, modelSlug]);
 
   if (loading)
     return (
@@ -54,19 +100,17 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ slug: 
     return (
       <main className="page-shell">
         <div className="data-alert">{error || 'Vehicle not found.'}</div>
-        <Link className="button" href="/vehicles">
-          Back to vehicle finder
+        <Link className="button" href={`/brands/${encodeURIComponent(slug)}`}>
+          Back to {slug}
         </Link>
       </main>
     );
 
-  const { vehicle, parts } = detail;
+  const { brand, vehicle, parts } = detail;
   const title = `${vehicle.manufacturer_name} ${vehicle.model_name}`;
-  const gallery = [
-    vehicle.cover_image_url,
-    ...(vehicle.vehicle_images ?? []),
-    ...(vehicle.gallery_images ?? []),
-  ].filter(Boolean) as string[];
+  const gallery = [vehicle.cover_image_url, ...(vehicle.vehicle_images ?? [])].filter(
+    Boolean,
+  ) as string[];
 
   return (
     <main className="page-shell vehicle-detail-page">
@@ -84,8 +128,8 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ slug: 
           outline-offset: 3px;
         }
       `}</style>
-      <Link className="back-link" href="/vehicles">
-        ← Vehicle finder
+      <Link className="back-link" href={`/brands/${encodeURIComponent(brand.slug)}`}>
+        ← {brand.manufacturer_name} models
       </Link>
       <section className="vehicle-detail-hero">
         <div className="vehicle-detail-media">
@@ -96,7 +140,7 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ slug: 
           )}
         </div>
         <div className="vehicle-detail-copy">
-          <span className="section-kicker">Vehicle fitment profile</span>
+          <span className="section-kicker">{brand.manufacturer_name} model profile</span>
           <h1>{title}</h1>
           <p className="vehicle-detail-subtitle">
             {vehicle.generation || vehicle.chassis_code || 'Verified fitment record'}
@@ -111,14 +155,16 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ slug: 
               <strong>{parts.length} compatible</strong>
             </div>
           </div>
+          <Link className="button" href={`/category?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
+            Browse all compatible parts
+          </Link>
         </div>
       </section>
-
       <section className="vehicle-info-strip">
         <div>
           <span className="section-kicker">Database details</span>
           <strong>
-            {vehicle.manufacturer_name} {vehicle.model_name}
+            {brand.manufacturer_name} {vehicle.model_name}
           </strong>
         </div>
         {vehicle.chassis_code && (
@@ -138,7 +184,6 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ slug: 
           <strong className="fitment-ok">Active and verified</strong>
         </div>
       </section>
-
       <section className="vehicle-products-section">
         <div className="section-heading">
           <div>
