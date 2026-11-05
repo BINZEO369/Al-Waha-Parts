@@ -111,9 +111,6 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ slug: 
               <strong>{parts.length} compatible</strong>
             </div>
           </div>
-          <Link className="button" href={`/catalog?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
-            Browse all compatible parts
-          </Link>
         </div>
       </section>
 
