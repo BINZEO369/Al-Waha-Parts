@@ -114,7 +114,7 @@ function ArrowIcon() {
 }
 
 /* ==================================================================
- *  HERO CAROUSEL (অপরিবর্তিত)
+ *  HERO CAROUSEL
  * ================================================================== */
 
 function HeroCarousel() {
@@ -347,7 +347,7 @@ function HeroCarousel() {
 }
 
 /* ==================================================================
- *  CAR BRAND STRIP (অপরিবর্তিত)
+ *  CAR BRAND STRIP
  * ================================================================== */
 
 function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
@@ -501,7 +501,10 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 }
 
 /* ==================================================================
- *  ULTIMATE PREMIUM CATEGORY SHOWCASE (Mobile: Image Left, Text Right)
+ *  PREMIUM CATEGORY SHOWCASE
+ *  Layout (Desktop & Mobile):
+ *  LEFT  → Eyebrow + Title + Description + CTA
+ *  RIGHT → Image with white fade at top & bottom (blends into page)
  * ================================================================== */
 
 function CategoryShowcase({ categories }: { categories: Category[] }) {
@@ -510,66 +513,52 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
   const displayCategories = categories.slice(0, 3);
 
   return (
-    <section className="ultimate-showcase">
+    <section className="ultimate-showcase" aria-label="Explore our collections">
       <style jsx>{`
-        /* --- মূল সেকশন ও আর্কিটেকচারাল গ্রিড --- */
         .ultimate-showcase {
           position: relative;
           width: 100%;
-          background-color: #f9f9f9;
-          padding: 150px 0;
+          background: #ffffff;
+          padding: 110px 0;
           overflow: hidden;
-          border-top: 1px solid #eee;
-          border-bottom: 1px solid #eee;
-        }
-
-        /* সূক্ষ্ম ব্যাকগ্রাউন্ড গ্রিড লাইন (ছবির মতো টেকনিক্যাল লুক) */
-        .ultimate-showcase::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background-image: 
-            linear-gradient(to right, rgba(0,0,0,0.02) 1px, transparent 1px);
-          background-size: 25% 100%; /* ৪টি কলাম */
-          pointer-events: none;
+          border-top: 1px solid #f2f2f2;
+          border-bottom: 1px solid #f2f2f2;
         }
 
         .showcase-container {
-          position: relative;
-          max-width: 1440px;
+          max-width: 1280px;
           margin: 0 auto;
-          padding: 0 40px;
+          padding: 0 48px;
           display: flex;
           flex-direction: column;
-          gap: 180px;
-          z-index: 1;
+          gap: 130px;
         }
 
-        /* --- রো লেআউট: লেখা বামে, ছবি ডানে --- */
+        /* ── Row: Text (left) · Image (right) ── */
         .showcase-row {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 80px;
+          gap: 72px;
         }
 
-        /* --- বাম পাশ: টেক্সট ও কন্ট্রোল --- */
+        /* ── LEFT · Text column ── */
         .showcase-text {
-          flex: 0 0 45%;
-          max-width: 500px;
+          flex: 0 0 48%;
+          max-width: 520px;
           display: flex;
           flex-direction: column;
           align-items: flex-start;
         }
 
         .showcase-text .eyebrow {
-          font-family: 'Montserrat';
+          font-family: 'Montserrat', sans-serif;
           font-size: 11px;
           font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.15em;
-          color: #999;
-          margin-bottom: 28px;
+          letter-spacing: 0.16em;
+          color: #9a9a9a;
+          margin-bottom: 22px;
           display: flex;
           align-items: center;
           gap: 12px;
@@ -578,83 +567,81 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
         .showcase-text .eyebrow::before {
           content: '';
           display: block;
-          width: 24px;
+          width: 26px;
           height: 1px;
-          background: #ccc;
+          background: #c9c9c9;
         }
 
         .showcase-text h2 {
-          font-family: 'Montserrat';
-          font-size: clamp(44px, 5vw, 64px);
+          font-family: 'Montserrat', sans-serif;
+          font-size: clamp(38px, 4.4vw, 58px);
           font-weight: 300;
           color: #0a0a0a;
-          line-height: 1.05;
-          margin: 0 0 32px 0;
-          letter-spacing: -0.04em;
+          line-height: 1.06;
+          margin: 0 0 26px 0;
+          letter-spacing: -0.045em;
         }
 
         .showcase-text p {
-          font-size: 16px;
-          color: #666;
-          line-height: 1.7;
-          margin: 0 0 48px 0;
+          font-size: 15px;
+          color: #6f6f6f;
+          line-height: 1.75;
+          margin: 0 0 34px 0;
           font-weight: 400;
+          max-width: 460px;
         }
 
-        /* --- কাস্টম স্লাইডার --- */
-        .custom-pagination {
+        /* ── Index indicator ── */
+        .showcase-index {
           display: flex;
           align-items: center;
-          gap: 24px;
-          margin-bottom: 56px;
+          gap: 16px;
+          margin-bottom: 34px;
           width: 100%;
-          max-width: 320px;
+          max-width: 260px;
         }
 
-        .custom-pagination .nav-arrow {
-          font-size: 16px;
-          color: #999;
-          cursor: pointer;
-          transition: color 0.3s;
-          font-family: 'Montserrat';
-        }
-
-        .custom-pagination .nav-arrow:hover {
-          color: #000;
-        }
-
-        .custom-pagination .line {
-          flex: 1;
-          height: 1px;
-          background-color: #dcdcdc;
-        }
-
-        .custom-pagination .page-num {
-          font-family: 'Montserrat';
-          font-size: 13px;
+        .showcase-index .current {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 14px;
           font-weight: 700;
           color: #0a0a0a;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.08em;
         }
 
-        /* --- প্রিমিয়াম টেক্সট বাটন --- */
+        .showcase-index .divider {
+          flex: 1;
+          height: 1px;
+          background: #e2e2e2;
+        }
+
+        .showcase-index .total {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 12px;
+          font-weight: 500;
+          color: #b5b5b5;
+          letter-spacing: 0.08em;
+        }
+
+        /* ── CTA ── */
         .catalogue-btn {
           display: inline-flex;
           align-items: center;
-          gap: 16px;
-          font-size: 12px;
+          gap: 14px;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 11px;
           font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.14em;
           color: #0a0a0a;
           text-decoration: none;
           border-bottom: 1px solid #0a0a0a;
           padding-bottom: 8px;
-          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .catalogue-btn svg {
-          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        .catalogue-btn :global(svg) {
+          transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .catalogue-btn:hover {
@@ -662,120 +649,218 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           border-color: var(--red);
         }
 
-        .catalogue-btn:hover svg {
+        .catalogue-btn:hover :global(svg) {
           transform: translateX(8px);
         }
 
-        /* --- ডান পাশ: 3D ফ্লোটিং ইমেজ --- */
+        /* ── RIGHT · Image with white fade at top & bottom ── */
         .showcase-visual {
           flex: 1;
           display: flex;
-          justify-content: center;
           align-items: center;
+          justify-content: center;
           position: relative;
-          min-height: 500px;
-        }
-
-        /* ইমেজের পেছনে স্টুডিও লাইটিং গ্লো */
-        .showcase-visual::before {
-          content: '';
-          position: absolute;
-          width: 80%;
-          height: 80%;
-          background: radial-gradient(circle, rgba(220,220,220,0.4) 0%, rgba(249,249,249,0) 70%);
-          border-radius: 50%;
-          z-index: 0;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
+          min-height: 420px;
+          -webkit-mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.15) 6%,
+            rgba(0, 0, 0, 0.85) 16%,
+            #000 24%,
+            #000 76%,
+            rgba(0, 0, 0, 0.85) 84%,
+            rgba(0, 0, 0, 0.15) 94%,
+            transparent 100%
+          );
+          mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.15) 6%,
+            rgba(0, 0, 0, 0.85) 16%,
+            #000 24%,
+            #000 76%,
+            rgba(0, 0, 0, 0.85) 84%,
+            rgba(0, 0, 0, 0.15) 94%,
+            transparent 100%
+          );
         }
 
         .showcase-visual img {
+          display: block;
           width: 100%;
-          max-width: 750px;
+          max-width: 620px;
+          max-height: 420px;
           height: auto;
-          max-height: 550px;
           object-fit: contain;
-          position: relative;
-          z-index: 2;
-          filter: drop-shadow(0px 30px 50px rgba(0, 0, 0, 0.12)) drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.05));
-          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .showcase-row:hover .showcase-visual img {
-          transform: translateY(-12px) scale(1.03);
-          filter: drop-shadow(0px 40px 60px rgba(0, 0, 0, 0.18)) drop-shadow(0px 15px 20px rgba(0, 0, 0, 0.08));
+          transform: translateY(-6px) scale(1.02);
         }
 
-        /* --- ট্যাবলেট রেসপন্সিভ --- */
+        .showcase-visual .empty {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 220px;
+          color: #d0d0d0;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 12px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        /* ── Tablet ── */
         @media (max-width: 1024px) {
-          .ultimate-showcase::before { background-size: 50% 100%; }
-          .showcase-container { gap: 120px; }
-          .showcase-row { gap: 40px; }
-          .showcase-text { flex: 0 0 50%; }
-        }
+          .showcase-container {
+            gap: 100px;
+            padding: 0 32px;
+          }
 
-        /* --- মোবাইল রেসপন্সিভ (ইমেজ বামে, টেক্সট ডানে) --- */
-        @media (max-width: 768px) {
-          .ultimate-showcase { padding: 60px 0; }
-          .ultimate-showcase::before { background-size: 100% 100%; } 
-          .showcase-container { gap: 60px; padding: 0 16px; }
-          
           .showcase-row {
-            flex-direction: row; /* মোবাইলেও রো লেআউট থাকবে */
-            align-items: center;
-            gap: 16px; 
-          }
-          
-          .showcase-visual {
-            flex: 0 0 40%; /* ইমেজ ৪০% জায়গা নেবে */
-            order: -1; /* DOM এ টেক্সট আগে থাকলেও ইমেজ বামে আসবে */
-            min-height: 200px;
-          }
-
-          .showcase-visual img {
-            max-height: 180px;
-            filter: drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.1));
+            gap: 44px;
           }
 
           .showcase-text {
-            flex: 1; /* টেক্সট বাকি ৬০% জায়গা নেবে */
-            width: auto;
-            align-items: flex-start; /* টেক্সট বাম দিক থেকে শুরু হবে */
-            text-align: left;
+            flex: 0 0 50%;
           }
 
-          .showcase-text .eyebrow { 
-            justify-content: flex-start; 
-            font-size: 9px;
-            margin-bottom: 8px;
+          .showcase-visual {
+            min-height: 340px;
           }
-          .showcase-text .eyebrow::before { display: none; }
+
+          .showcase-visual img {
+            max-height: 340px;
+          }
+        }
+
+        /* ── Mobile · keep same left/right layout ── */
+        @media (max-width: 768px) {
+          .ultimate-showcase {
+            padding: 54px 0;
+          }
+
+          .showcase-container {
+            gap: 54px;
+            padding: 0 16px;
+          }
+
+          .showcase-row {
+            flex-direction: row;
+            align-items: center;
+            gap: 14px;
+          }
+
+          .showcase-text {
+            flex: 1 1 58%;
+            max-width: none;
+            order: -1; /* text stays on LEFT */
+            min-width: 0;
+          }
+
+          .showcase-text .eyebrow {
+            font-size: 8px;
+            letter-spacing: 0.12em;
+            margin-bottom: 8px;
+            gap: 8px;
+          }
+
+          .showcase-text .eyebrow::before {
+            width: 14px;
+          }
 
           .showcase-text h2 {
-            font-size: 22px;
-            margin-bottom: 12px;
-            letter-spacing: -0.02em;
+            font-size: clamp(20px, 5.2vw, 26px);
+            line-height: 1.08;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
           }
 
           .showcase-text p {
-            font-size: 12px;
-            line-height: 1.5;
-            margin-bottom: 16px;
+            font-size: 11px;
+            line-height: 1.55;
+            margin-bottom: 14px;
             display: -webkit-box;
-            -webkit-line-clamp: 3; /* মোবাইলে টেক্সট ৩ লাইনে সীমিত */
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
           }
-          
-          .custom-pagination {
-            display: none; /* মোবাইলে জায়গা বাঁচাতে স্লাইডার কন্ট্রোল হাইড */
+
+          .showcase-index {
+            display: none;
           }
 
           .catalogue-btn {
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            padding-bottom: 4px;
+            gap: 6px;
+          }
+
+          .catalogue-btn :global(svg) {
+            width: 12px;
+            height: 12px;
+          }
+
+          .showcase-visual {
+            flex: 1 1 42%;
+            min-height: 170px;
+            -webkit-mask-image: linear-gradient(
+              to bottom,
+              transparent 0%,
+              rgba(0, 0, 0, 0.2) 8%,
+              rgba(0, 0, 0, 0.9) 18%,
+              #000 26%,
+              #000 74%,
+              rgba(0, 0, 0, 0.9) 82%,
+              rgba(0, 0, 0, 0.2) 92%,
+              transparent 100%
+            );
+            mask-image: linear-gradient(
+              to bottom,
+              transparent 0%,
+              rgba(0, 0, 0, 0.2) 8%,
+              rgba(0, 0, 0, 0.9) 18%,
+              #000 26%,
+              #000 74%,
+              rgba(0, 0, 0, 0.9) 82%,
+              rgba(0, 0, 0, 0.2) 92%,
+              transparent 100%
+            );
+          }
+
+          .showcase-visual img {
+            max-height: 170px;
+          }
+
+          .showcase-visual .empty {
+            height: 140px;
+            font-size: 9px;
+          }
+        }
+
+        @media (max-width: 380px) {
+          .showcase-row {
+            gap: 10px;
+          }
+
+          .showcase-text h2 {
+            font-size: 18px;
+          }
+
+          .showcase-text p {
             font-size: 10px;
-            padding-bottom: 2px;
-            gap: 8px;
+            -webkit-line-clamp: 2;
+          }
+
+          .showcase-visual {
+            min-height: 140px;
+          }
+
+          .showcase-visual img {
+            max-height: 140px;
           }
         }
       `}</style>
@@ -783,49 +868,41 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
       <div className="showcase-container">
         {displayCategories.map((category, index) => (
           <div className="showcase-row" key={category.id}>
-            {/* বাম পাশ: টেক্সট */}
+            {/* ── LEFT · Title + Description + CTA ── */}
             <div className="showcase-text">
               <span className="eyebrow">Explore Collections</span>
+
               <h2>{category.category_name}</h2>
+
               <p>
                 {category.description ||
                   `Full development, repair and tuning. Discover our premium selection of ${category.category_name.toLowerCase()}, engineered for ultimate precision and performance.`}
               </p>
-              
-              {/* প্রিমিয়াম স্লাইডার কন্ট্রোল */}
-              <div className="custom-pagination">
-                <span className="nav-arrow">&lt;</span>
-                <span className="line"></span>
-                <span className="page-num">0{index + 1} / 03</span>
-                <span className="line"></span>
-                <span className="nav-arrow">&gt;</span>
+
+              <div className="showcase-index" aria-hidden="true">
+                <span className="current">0{index + 1}</span>
+                <span className="divider" />
+                <span className="total">0{displayCategories.length}</span>
               </div>
 
-              <Link 
-                href={category.slug ? `/category/${category.slug}` : '/category'} 
+              <Link
+                href={category.slug ? `/category/${category.slug}` : '/category'}
                 className="catalogue-btn"
               >
                 See Catalogue <ArrowIcon />
               </Link>
             </div>
-            
-            {/* ডান পাশ: হিউজ ফ্লোটিং ইমেজ */}
+
+            {/* ── RIGHT · Image (white fade top & bottom) ── */}
             <div className="showcase-visual">
               {category.image_url ? (
-                <img src={category.image_url} alt={category.category_name} loading="lazy" />
+                <img
+                  src={category.image_url}
+                  alt={category.category_name}
+                  loading="lazy"
+                />
               ) : (
-                <div style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#ccc',
-                  fontSize: '14px',
-                  fontFamily: 'Montserrat'
-                }}>
-                  [ IMAGE NOT FOUND ]
-                </div>
+                <div className="empty">Image coming soon</div>
               )}
             </div>
           </div>
@@ -835,9 +912,232 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
   );
 }
 
+/* ==================================================================
+ *  HOMEPAGE CAR SPOTLIGHT (below brand logos)
+ *  Left  → Title + Description + CTA
+ *  Right → Image (white fade top & bottom)
+ * ================================================================== */
+
 function HomepageCarSpotlight() {
   return (
     <section className="home-spotlight" aria-labelledby="home-spotlight-title">
+      <style jsx>{`
+        .home-spotlight {
+          width: min(100% - 36px, 1164px);
+          min-height: 340px;
+          margin: 34px auto 24px;
+          display: grid;
+          grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
+          align-items: center;
+          gap: clamp(20px, 4vw, 48px);
+          padding: clamp(22px, 4vw, 46px);
+          overflow: hidden;
+          border: 1px solid #f1f1f1;
+          border-radius: 24px;
+          background: #ffffff;
+          box-shadow: 0 18px 50px rgba(28, 28, 28, 0.045);
+        }
+
+        .home-spotlight-copy {
+          position: relative;
+          z-index: 1;
+          max-width: 500px;
+        }
+
+        .home-spotlight-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 13px;
+          color: var(--red);
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+        }
+
+        .home-spotlight-eyebrow::before {
+          width: 24px;
+          height: 2px;
+          background: var(--red);
+          content: '';
+        }
+
+        .home-spotlight-copy h2 {
+          max-width: 470px;
+          margin: 0 0 14px;
+          color: var(--ink);
+          font-family: 'Montserrat', sans-serif;
+          font-size: clamp(30px, 4vw, 50px);
+          font-weight: 800;
+          line-height: 1.02;
+          letter-spacing: -0.065em;
+        }
+
+        .home-spotlight-copy p {
+          max-width: 440px;
+          margin: 0 0 22px;
+          color: #727272;
+          font-size: 13px;
+          line-height: 1.75;
+        }
+
+        .home-spotlight-cta {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          min-height: 42px;
+          padding: 0 16px;
+          background: var(--red);
+          color: #fff;
+          font-size: 11px;
+          font-weight: 700;
+          transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .home-spotlight-cta:hover {
+          transform: translateY(-2px);
+          background: var(--red-dark);
+          box-shadow: 0 8px 18px rgba(229, 35, 47, 0.2);
+        }
+
+        .home-spotlight-art {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 0;
+          min-height: 240px;
+        }
+
+        .home-spotlight-art img {
+          position: relative;
+          display: block;
+          width: min(100%, 420px);
+          aspect-ratio: 1;
+          object-fit: contain;
+          -webkit-mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.25) 8%,
+            rgba(0, 0, 0, 0.9) 20%,
+            #000 30%,
+            #000 70%,
+            rgba(0, 0, 0, 0.9) 80%,
+            rgba(0, 0, 0, 0.25) 92%,
+            transparent 100%
+          );
+          mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.25) 8%,
+            rgba(0, 0, 0, 0.9) 20%,
+            #000 30%,
+            #000 70%,
+            rgba(0, 0, 0, 0.9) 80%,
+            rgba(0, 0, 0, 0.25) 92%,
+            transparent 100%
+          );
+        }
+
+        @media (max-width: 640px) {
+          .home-spotlight {
+            width: calc(100% - 24px);
+            min-height: 0;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+            gap: 8px;
+            padding: 20px 14px;
+            margin: 24px auto 18px;
+            border-radius: 18px;
+          }
+
+          .home-spotlight-eyebrow {
+            gap: 6px;
+            margin-bottom: 9px;
+            font-size: 8px;
+            letter-spacing: 0.1em;
+          }
+
+          .home-spotlight-eyebrow::before {
+            width: 15px;
+          }
+
+          .home-spotlight-copy h2 {
+            margin-bottom: 9px;
+            font-size: clamp(20px, 5.3vw, 30px);
+            line-height: 1.06;
+          }
+
+          .home-spotlight-copy p {
+            margin-bottom: 12px;
+            font-size: 10px;
+            line-height: 1.55;
+          }
+
+          .home-spotlight-cta {
+            gap: 6px;
+            min-height: 34px;
+            padding: 0 10px;
+            font-size: 9px;
+            white-space: nowrap;
+          }
+
+          .home-spotlight-cta :global(svg) {
+            width: 13px;
+            height: 13px;
+          }
+
+          .home-spotlight-art {
+            min-height: 160px;
+          }
+
+          .home-spotlight-art img {
+            width: 100%;
+            -webkit-mask-image: linear-gradient(
+              to bottom,
+              transparent 0%,
+              rgba(0, 0, 0, 0.3) 10%,
+              #000 24%,
+              #000 76%,
+              rgba(0, 0, 0, 0.3) 90%,
+              transparent 100%
+            );
+            mask-image: linear-gradient(
+              to bottom,
+              transparent 0%,
+              rgba(0, 0, 0, 0.3) 10%,
+              #000 24%,
+              #000 76%,
+              rgba(0, 0, 0, 0.3) 90%,
+              transparent 100%
+            );
+          }
+        }
+
+        @media (max-width: 360px) {
+          .home-spotlight {
+            width: calc(100% - 20px);
+            gap: 5px;
+            padding: 16px 10px;
+          }
+
+          .home-spotlight-copy h2 {
+            font-size: 19px;
+          }
+
+          .home-spotlight-copy p {
+            font-size: 9px;
+          }
+
+          .home-spotlight-cta {
+            gap: 4px;
+            padding: 0 7px;
+            font-size: 8px;
+          }
+        }
+      `}</style>
+
       <div className="home-spotlight-copy">
         <span className="home-spotlight-eyebrow">Built for the way you drive</span>
         <h2 id="home-spotlight-title">Better parts. Better journeys.</h2>
@@ -849,6 +1149,7 @@ function HomepageCarSpotlight() {
           Explore car brands <ArrowIcon />
         </Link>
       </div>
+
       <div className="home-spotlight-art">
         <img
           src="/performance-car-showcase.png"
@@ -942,120 +1243,7 @@ export default function Home() {
           outline: 2px solid var(--red);
           outline-offset: 3px;
         }
-        .home-spotlight {
-          width: min(100% - 36px, 1164px);
-          min-height: 360px;
-          margin: 34px auto 24px;
-          display: grid;
-          grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
-          align-items: center;
-          gap: clamp(20px, 4vw, 48px);
-          padding: clamp(22px, 4vw, 46px);
-          overflow: hidden;
-          border: 1px solid #f1f1f1;
-          border-radius: 24px;
-          background: linear-gradient(115deg, #fff 0%, #fff 48%, #fafafa 100%);
-          box-shadow: 0 18px 50px rgba(28, 28, 28, 0.045);
-        }
-        .home-spotlight-copy {
-          position: relative;
-          z-index: 1;
-          max-width: 500px;
-        }
-        .home-spotlight-eyebrow {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 13px;
-          color: var(--red);
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-        }
-        .home-spotlight-eyebrow::before {
-          width: 24px;
-          height: 2px;
-          background: var(--red);
-          content: '';
-        }
-        .home-spotlight-copy h2 {
-          max-width: 470px;
-          margin: 0 0 14px;
-          color: var(--ink);
-          font-family: 'Montserrat';
-          font-size: clamp(30px, 4vw, 50px);
-          font-weight: 800;
-          line-height: 1.02;
-          letter-spacing: -0.065em;
-        }
-        .home-spotlight-copy p {
-          max-width: 440px;
-          margin: 0 0 22px;
-          color: #727272;
-          font-size: 13px;
-          line-height: 1.75;
-        }
-        .home-spotlight-cta {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          min-height: 42px;
-          padding: 0 16px;
-          background: var(--red);
-          color: #fff;
-          font-size: 11px;
-          font-weight: 700;
-          transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-        }
-        .home-spotlight-cta:hover {
-          transform: translateY(-2px);
-          background: var(--red-dark);
-          box-shadow: 0 8px 18px rgba(229, 35, 47, 0.2);
-        }
-        .home-spotlight-art {
-          position: relative;
-          isolation: isolate;
-          display: grid;
-          min-width: 0;
-          place-items: center;
-        }
-        .home-spotlight-art::before {
-          position: absolute;
-          z-index: -1;
-          inset: 2%;
-          border-radius: 50%;
-          background: radial-gradient(
-            ellipse at center,
-            rgba(255, 255, 255, 1) 0%,
-            rgba(255, 255, 255, 0.96) 38%,
-            rgba(255, 255, 255, 0) 77%
-          );
-          content: '';
-          filter: blur(20px);
-        }
-        .home-spotlight-art img {
-          position: relative;
-          display: block;
-          width: min(100%, 420px);
-          aspect-ratio: 1;
-          object-fit: contain;
-          mix-blend-mode: multiply;
-          -webkit-mask-image: radial-gradient(
-            ellipse at center,
-            #000 53%,
-            rgba(0, 0, 0, 0.9) 67%,
-            transparent 87%
-          );
-          mask-image: radial-gradient(
-            ellipse at center,
-            #000 53%,
-            rgba(0, 0, 0, 0.9) 67%,
-            transparent 87%
-          );
-          filter: drop-shadow(0 0 20px #fff) drop-shadow(0 0 40px rgba(255, 255, 255, 0.88));
-        }
+
         .popular-cars-heading {
           width: 100%;
           align-items: center;
@@ -1063,67 +1251,28 @@ export default function Home() {
           justify-content: center !important;
           margin-bottom: 22px;
         }
+
         .popular-cars-title-box {
           display: inline-block;
           margin: 0;
           padding: 12px 22px;
           border: 1px solid var(--red);
           color: var(--red);
-          font-family: 'Montserrat';
+          font-family: 'Montserrat', sans-serif;
           font-size: 21px;
           letter-spacing: -.03em;
           text-align: center;
         }
-        .popular-cars-title-box::after { display: none; }
+
+        .popular-cars-title-box::after {
+          display: none;
+        }
+
         @media (max-width: 520px) {
-          .popular-cars-title-box { padding: 10px 16px; font-size: 18px; }
-        }
-        @media (max-width: 640px) {
-          .home-spotlight {
-            width: calc(100% - 24px);
-            min-height: 0;
-            grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-            gap: 8px;
-            padding: 20px 14px;
-            margin: 24px auto 18px;
-            border-radius: 18px;
+          .popular-cars-title-box {
+            padding: 10px 16px;
+            font-size: 18px;
           }
-          .home-spotlight-eyebrow {
-            gap: 6px;
-            margin-bottom: 9px;
-            font-size: 8px;
-            letter-spacing: 0.1em;
-          }
-          .home-spotlight-eyebrow::before { width: 15px; }
-          .home-spotlight-copy h2 {
-            margin-bottom: 9px;
-            font-size: clamp(20px, 5.3vw, 30px);
-            line-height: 1.06;
-          }
-          .home-spotlight-copy p {
-            margin-bottom: 12px;
-            font-size: 10px;
-            line-height: 1.55;
-          }
-          .home-spotlight-cta {
-            gap: 6px;
-            min-height: 34px;
-            padding: 0 10px;
-            font-size: 9px;
-            white-space: nowrap;
-          }
-          .home-spotlight-cta :global(svg) { width: 13px; height: 13px; }
-          .home-spotlight-art img { width: 100%; }
-        }
-        @media (max-width: 360px) {
-          .home-spotlight {
-            width: calc(100% - 20px);
-            gap: 5px;
-            padding: 16px 10px;
-          }
-          .home-spotlight-copy h2 { font-size: 19px; }
-          .home-spotlight-copy p { font-size: 9px; }
-          .home-spotlight-cta { gap: 4px; padding: 0 7px; font-size: 8px; }
         }
       `}</style>
 
@@ -1142,9 +1291,10 @@ export default function Home() {
         </div>
       )}
 
+      {/* 3. HOMEPAGE CAR SPOTLIGHT (banner below brand logos) */}
       <HomepageCarSpotlight />
 
-      {/* 3. POPULAR VEHICLES */}
+      {/* 4. POPULAR VEHICLES */}
       {!loading && homeSelectedVehicles.length > 0 && (
         <section className="store-section vehicle-home-section" style={{ paddingTop: '60px', paddingBottom: '20px' }}>
           <div className="section-heading popular-cars-heading">
@@ -1194,31 +1344,12 @@ export default function Home() {
         </section>
       )}
 
-      {/* 4. ULTIMATE PREMIUM CATEGORY SHOWCASE */}
+      {/* 5. PREMIUM CATEGORY SHOWCASE (text left, image right, white fade) */}
       {!loading && popularCategories.length > 0 && (
-        <section className="store-section category-start-section" aria-label="Start from a category">
-          <div className="category-start-heading">
-            <h2>Start from a category</h2>
-            <Link className="category-start-view-all" href="/category">View all <span aria-hidden="true">›</span></Link>
-          </div>
-          <div className="category-start-grid">
-            {popularCategories.map((category) => (
-              <Link
-                className="category-start-card"
-                href={category.slug ? `/category/${category.slug}` : '/category'}
-                key={category.id}
-              >
-                <div className="category-start-image">
-                  {category.image_url ? <img src={category.image_url} alt="" /> : <span aria-hidden="true">⌁</span>}
-                </div>
-                <strong>{category.category_name.trim()}</strong>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <CategoryShowcase categories={popularCategories} />
       )}
 
-      {/* 5. NEW ARRIVALS / PARTS */}
+      {/* 6. NEW ARRIVALS / PARTS */}
       {!loading && homeSelectedParts.length > 0 && (
         <section className="store-section arrivals-section">
           <div className="section-heading arrivals-heading">
@@ -1273,7 +1404,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* 6. EMPTY STATE */}
+      {/* 7. EMPTY STATE */}
       {!loading &&
         !popularCategories.length &&
         !homeSelectedParts.length &&
@@ -1288,7 +1419,7 @@ export default function Home() {
           </section>
         )}
 
-      {/* 7. SERVICE STRIP */}
+      {/* 8. SERVICE STRIP */}
       <section className="store-section service-strip">
         <div>
           <strong>Database-first catalog</strong>
