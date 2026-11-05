@@ -501,7 +501,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 }
 
 /* ==================================================================
- *  PREMIUM CATEGORY SHOWCASE
+ *  PREMIUM CATEGORY SHOWCASE — UNCHANGED
  * ================================================================== */
 
 function CategoryShowcase({ categories }: { categories: Category[] }) {
@@ -901,8 +901,8 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
 }
 
 /* ==================================================================
- *  HOMEPAGE CAR SPOTLIGHT — text LEFT · image RIGHT
- *  (CTA removed — title + description only)
+ *  HOMEPAGE CAR SPOTLIGHT — text LEFT · image RIGHT (edge-to-edge)
+ *  Image touches the RIGHT screen edge (padding-right: 0)
  * ================================================================== */
 
 function HomepageCarSpotlight() {
@@ -1132,10 +1132,12 @@ function HomepageCarSpotlight() {
 }
 
 /* ==================================================================
- *  REVERSE CAR SPOTLIGHT — image LEFT · text RIGHT
- *  · Image now contained within viewport (no cut-off on left)
- *  · Gentle left-edge fade + preserved right-edge fade toward text
- *  · CTA removed — title + description only
+ *  REVERSE CAR SPOTLIGHT — image LEFT · text RIGHT (edge-to-edge)
+ *  · Mirrors HomepageCarSpotlight exactly
+ *  · Image touches the LEFT screen edge (padding-left: 0)
+ *  · No gap on the left — image starts from x=0
+ *  · object-fit: contain keeps the full image visible (no cut-off)
+ *  · Title + description only (no CTA)
  * ================================================================== */
 
 function ReverseCarSpotlight() {
@@ -1151,7 +1153,7 @@ function ReverseCarSpotlight() {
           gap: clamp(20px, 3vw, 48px);
           padding-top: 70px;
           padding-bottom: 70px;
-          padding-left: max(24px, calc((100vw - 1280px) / 2 - 40px));
+          padding-left: 0; /* ← image starts at the very left screen edge */
           padding-right: max(24px, calc((100vw - 1280px) / 2 + 24px));
           background: #ffffff;
           overflow: hidden;
@@ -1200,13 +1202,13 @@ function ReverseCarSpotlight() {
           line-height: 1.8;
         }
 
-        /* Image container — contained within viewport with gentle
-           fade on left & right so no hard cut-off appears. */
+        /* Image container — flush to the left screen edge.
+           Only the inner (right) side fades toward the text. */
         .reverse-spotlight-art {
           position: relative;
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-start;
           min-height: 480px;
           width: 100%;
           -webkit-mask-image:
@@ -1218,11 +1220,10 @@ function ReverseCarSpotlight() {
               transparent 100%
             ),
             linear-gradient(
-              to right,
+              to left,
               transparent 0%,
-              #000 10%,
-              #000 82%,
-              transparent 100%
+              #000 18%,
+              #000 100%
             );
           -webkit-mask-composite: source-in;
           mask-image:
@@ -1234,11 +1235,10 @@ function ReverseCarSpotlight() {
               transparent 100%
             ),
             linear-gradient(
-              to right,
+              to left,
               transparent 0%,
-              #000 10%,
-              #000 82%,
-              transparent 100%
+              #000 18%,
+              #000 100%
             );
           mask-composite: intersect;
         }
@@ -1246,11 +1246,11 @@ function ReverseCarSpotlight() {
         .reverse-spotlight-art img {
           display: block;
           width: 100%;
-          max-width: 780px;
+          max-width: 860px;
           max-height: 560px;
           height: auto;
           object-fit: contain;
-          object-position: center center;
+          object-position: left center;
           transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -1264,7 +1264,7 @@ function ReverseCarSpotlight() {
             gap: 20px;
             padding-top: 54px;
             padding-bottom: 54px;
-            padding-left: 16px;
+            padding-left: 0;
             padding-right: 24px;
           }
 
@@ -1274,7 +1274,6 @@ function ReverseCarSpotlight() {
 
           .reverse-spotlight-art img {
             max-height: 400px;
-            max-width: 100%;
           }
         }
 
@@ -1284,7 +1283,7 @@ function ReverseCarSpotlight() {
             gap: 12px;
             padding-top: 38px;
             padding-bottom: 38px;
-            padding-left: 12px;
+            padding-left: 0;
             padding-right: 16px;
           }
 
@@ -1328,7 +1327,7 @@ function ReverseCarSpotlight() {
         @media (max-width: 400px) {
           .reverse-spotlight {
             gap: 8px;
-            padding-left: 8px;
+            padding-left: 0;
             padding-right: 12px;
           }
 
@@ -1901,10 +1900,10 @@ export default function Home() {
         subtitle="From daily drivers to weekend builds — discover OEM-grade components and performance upgrades crafted for the road ahead."
       />
 
-      {/* 4. HOMEPAGE CAR SPOTLIGHT (text left · image right) */}
+      {/* 4. HOMEPAGE CAR SPOTLIGHT (text left · image right → touches RIGHT screen edge) */}
       <HomepageCarSpotlight />
 
-      {/* 5. REVERSE CAR SPOTLIGHT (image left · text right) — img4 */}
+      {/* 5. REVERSE CAR SPOTLIGHT (image left · text right → touches LEFT screen edge) — img4 */}
       <ReverseCarSpotlight />
 
       {/* 6. FULL-WIDTH IMAGE SHOWCASE №2 — img3.png */}
@@ -1971,7 +1970,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* 8. PREMIUM CATEGORY SHOWCASE */}
+      {/* 8. PREMIUM CATEGORY SHOWCASE — unchanged */}
       {!loading && popularCategories.length > 0 && (
         <CategoryShowcase categories={popularCategories} />
       )}
