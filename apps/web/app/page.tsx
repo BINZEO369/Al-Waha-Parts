@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { brandModelHref, brandSlugFromName } from '../lib/vehicle-routes';
@@ -1186,14 +1186,34 @@ function HomepageCarSpotlight() {
 }
 
 /* ==================================================================
- *  FULL-WIDTH IMAGE SHOWCASE — NEW SECTION
+ *  FULL-WIDTH IMAGE SHOWCASE (Reusable · 2 instances)
  *  · Image spans the FULL viewport width (100vw)
  *  · White fade on top, bottom, left, right — blends into page
  *  · Overlay title + subtitle with scroll-triggered reveal animation
  *  · Subtle parallax on mouse move
  * ================================================================== */
 
-function FullWidthImageShowcase() {
+type FullWidthImageShowcaseProps = {
+  imageSrc: string;
+  imageAlt: string;
+  eyebrow: string;
+  title: ReactNode;
+  subtitle: string;
+  ctaLabel: string;
+  ctaHref: string;
+  sectionId: string;
+};
+
+function FullWidthImageShowcase({
+  imageSrc,
+  imageAlt,
+  eyebrow,
+  title,
+  subtitle,
+  ctaLabel,
+  ctaHref,
+  sectionId,
+}: FullWidthImageShowcaseProps) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const [visible, setVisible] = useState(false);
@@ -1257,7 +1277,7 @@ function FullWidthImageShowcase() {
     <section
       ref={sectionRef}
       className={`fullwidth-showcase${visible ? ' is-visible' : ''}`}
-      aria-labelledby="fullwidth-showcase-title"
+      aria-labelledby={sectionId}
     >
       <style jsx>{`
         .fullwidth-showcase {
@@ -1412,7 +1432,7 @@ function FullWidthImageShowcase() {
           animation: showcase-fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
         }
 
-        .fullwidth-showcase-title em {
+        .fullwidth-showcase-title :global(em) {
           font-style: normal;
           color: var(--red);
         }
@@ -1606,24 +1626,21 @@ function FullWidthImageShowcase() {
       <div className="fullwidth-showcase-media">
         <img
           ref={imageRef}
-          src="/images/img1.png"
-          alt="Performance automotive showcase"
+          src={imageSrc}
+          alt={imageAlt}
           loading="lazy"
           decoding="async"
         />
       </div>
 
       <div className="fullwidth-showcase-overlay">
-        <span className="fullwidth-showcase-eyebrow">Precision Engineered</span>
-        <h2 id="fullwidth-showcase-title" className="fullwidth-showcase-title">
-          Every part. <em>Every drive.</em> Perfected.
+        <span className="fullwidth-showcase-eyebrow">{eyebrow}</span>
+        <h2 id={sectionId} className="fullwidth-showcase-title">
+          {title}
         </h2>
-        <p className="fullwidth-showcase-subtitle">
-          From daily drivers to weekend builds — discover OEM-grade components and performance
-          upgrades crafted for the road ahead.
-        </p>
-        <Link className="fullwidth-showcase-cta" href="/category">
-          Start Exploring <ArrowIcon />
+        <p className="fullwidth-showcase-subtitle">{subtitle}</p>
+        <Link className="fullwidth-showcase-cta" href={ctaHref}>
+          {ctaLabel} <ArrowIcon />
         </Link>
       </div>
     </section>
@@ -1762,8 +1779,37 @@ export default function Home() {
       {/* 3. HOMEPAGE CAR SPOTLIGHT (full-bleed banner below brand logos) */}
       <HomepageCarSpotlight />
 
-      {/* 3b. FULL-WIDTH IMAGE SHOWCASE (new — img1.png, full-bleed, animated overlay) */}
-      <FullWidthImageShowcase />
+      {/* 3b. FULL-WIDTH IMAGE SHOWCASE №1 — img1.png */}
+      <FullWidthImageShowcase
+        sectionId="fullwidth-showcase-one"
+        imageSrc="/images/img1.png"
+        imageAlt="Performance automotive showcase"
+        eyebrow="Precision Engineered"
+        title={
+          <>
+            Every part. <em>Every drive.</em> Perfected.
+          </>
+        }
+        subtitle="From daily drivers to weekend builds — discover OEM-grade components and performance upgrades crafted for the road ahead."
+        ctaLabel="Start Exploring"
+        ctaHref="/category"
+      />
+
+      {/* 3c. FULL-WIDTH IMAGE SHOWCASE №2 — img3.png */}
+      <FullWidthImageShowcase
+        sectionId="fullwidth-showcase-two"
+        imageSrc="/images/img3.png"
+        imageAlt="Performance braking and drivetrain parts showcase"
+        eyebrow="Stopping Power Redefined"
+        title={
+          <>
+            Built to <em>stop.</em> Engineered to last.
+          </>
+        }
+        subtitle="Premium brake systems, discs, pads and drivetrain upgrades — delivered with the precision, fitment and durability your vehicle deserves."
+        ctaLabel="Explore Parts"
+        ctaHref="/category"
+      />
 
       {/* 4. POPULAR VEHICLES */}
       {!loading && homeSelectedVehicles.length > 0 && (
