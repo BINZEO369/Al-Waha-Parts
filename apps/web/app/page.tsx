@@ -502,9 +502,6 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
 
 /* ==================================================================
  *  PREMIUM CATEGORY SHOWCASE
- *  Layout (Desktop & Mobile):
- *  LEFT  → Eyebrow + Title + Description + CTA
- *  RIGHT → Image with white fade at top & bottom (blends into page)
  * ================================================================== */
 
 function CategoryShowcase({ categories }: { categories: Category[] }) {
@@ -534,7 +531,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           gap: 130px;
         }
 
-        /* ── Row: Text (left) · Image (right) ── */
         .showcase-row {
           display: flex;
           align-items: center;
@@ -542,7 +538,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           gap: 72px;
         }
 
-        /* ── LEFT · Text column ── */
         .showcase-text {
           flex: 0 0 48%;
           max-width: 520px;
@@ -591,7 +586,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           max-width: 460px;
         }
 
-        /* ── Index indicator ── */
         .showcase-index {
           display: flex;
           align-items: center;
@@ -623,7 +617,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           letter-spacing: 0.08em;
         }
 
-        /* ── CTA ── */
         .catalogue-btn {
           display: inline-flex;
           align-items: center;
@@ -653,7 +646,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           transform: translateX(8px);
         }
 
-        /* ── RIGHT · Image with white fade at top & bottom ── */
         .showcase-visual {
           flex: 1;
           display: flex;
@@ -712,7 +704,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           text-transform: uppercase;
         }
 
-        /* ── Tablet ── */
         @media (max-width: 1024px) {
           .showcase-container {
             gap: 100px;
@@ -736,7 +727,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           }
         }
 
-        /* ── Mobile · keep same left/right layout ── */
         @media (max-width: 768px) {
           .ultimate-showcase {
             padding: 54px 0;
@@ -756,7 +746,7 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           .showcase-text {
             flex: 1 1 58%;
             max-width: none;
-            order: -1; /* text stays on LEFT */
+            order: -1;
             min-width: 0;
           }
 
@@ -868,7 +858,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
       <div className="showcase-container">
         {displayCategories.map((category, index) => (
           <div className="showcase-row" key={category.id}>
-            {/* ── LEFT · Title + Description + CTA ── */}
             <div className="showcase-text">
               <span className="eyebrow">Explore Collections</span>
 
@@ -893,7 +882,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
               </Link>
             </div>
 
-            {/* ── RIGHT · Image (white fade top & bottom) ── */}
             <div className="showcase-visual">
               {category.image_url ? (
                 <img
@@ -913,9 +901,11 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
 }
 
 /* ==================================================================
- *  HOMEPAGE CAR SPOTLIGHT (below brand logos)
- *  Left  → Title + Description + CTA
- *  Right → Image (white fade top & bottom)
+ *  HOMEPAGE CAR SPOTLIGHT — FULL-BLEED · EDGE-TO-EDGE
+ *  · Image touches the right screen edge (zero gap)
+ *  · Image is larger
+ *  · White fade on LEFT + TOP + BOTTOM (blends into page perfectly)
+ *  · Refined typographic hierarchy on the left
  * ================================================================== */
 
 function HomepageCarSpotlight() {
@@ -923,217 +913,258 @@ function HomepageCarSpotlight() {
     <section className="home-spotlight" aria-labelledby="home-spotlight-title">
       <style jsx>{`
         .home-spotlight {
-          width: min(100% - 36px, 1164px);
-          min-height: 340px;
-          margin: 34px auto 24px;
+          position: relative;
+          width: 100%;
           display: grid;
-          grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
+          grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.25fr);
           align-items: center;
-          gap: clamp(20px, 4vw, 48px);
-          padding: clamp(22px, 4vw, 46px);
-          overflow: hidden;
-          border: 1px solid #f1f1f1;
-          border-radius: 24px;
+          gap: clamp(20px, 3vw, 48px);
+          padding-top: 70px;
+          padding-bottom: 70px;
+          padding-left: max(24px, calc((100vw - 1280px) / 2 + 24px));
+          padding-right: 0;
           background: #ffffff;
-          box-shadow: 0 18px 50px rgba(28, 28, 28, 0.045);
+          overflow: hidden;
         }
 
+        /* ── LEFT · Text block ── */
         .home-spotlight-copy {
           position: relative;
           z-index: 1;
-          max-width: 500px;
+          max-width: 520px;
         }
 
         .home-spotlight-eyebrow {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          margin-bottom: 13px;
+          gap: 12px;
+          margin-bottom: 22px;
           color: var(--red);
-          font-size: 10px;
+          font-size: 11px;
           font-weight: 700;
-          letter-spacing: 0.15em;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
         }
 
         .home-spotlight-eyebrow::before {
-          width: 24px;
-          height: 2px;
+          width: 32px;
+          height: 1.5px;
           background: var(--red);
           content: '';
         }
 
         .home-spotlight-copy h2 {
-          max-width: 470px;
-          margin: 0 0 14px;
+          margin: 0 0 22px;
           color: var(--ink);
           font-family: 'Montserrat', sans-serif;
-          font-size: clamp(30px, 4vw, 50px);
+          font-size: clamp(34px, 4.5vw, 60px);
           font-weight: 800;
           line-height: 1.02;
-          letter-spacing: -0.065em;
+          letter-spacing: -0.06em;
         }
 
         .home-spotlight-copy p {
           max-width: 440px;
-          margin: 0 0 22px;
-          color: #727272;
-          font-size: 13px;
-          line-height: 1.75;
+          margin: 0 0 30px;
+          color: #6a6a6a;
+          font-size: 14px;
+          line-height: 1.8;
         }
 
         .home-spotlight-cta {
           display: inline-flex;
           align-items: center;
-          justify-content: center;
-          gap: 10px;
-          min-height: 42px;
-          padding: 0 16px;
-          background: var(--red);
-          color: #fff;
+          gap: 12px;
+          min-height: 46px;
+          padding: 0 24px;
+          background: #0a0a0a;
+          color: #ffffff;
           font-size: 11px;
           font-weight: 700;
-          transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          text-decoration: none;
+          transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+            transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+            box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .home-spotlight-cta:hover {
+          background: var(--red);
           transform: translateY(-2px);
-          background: var(--red-dark);
-          box-shadow: 0 8px 18px rgba(229, 35, 47, 0.2);
+          box-shadow: 0 12px 24px rgba(229, 35, 47, 0.22);
         }
 
+        .home-spotlight-cta :global(svg) {
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .home-spotlight-cta:hover :global(svg) {
+          transform: translateX(6px);
+        }
+
+        /* ── RIGHT · Full-bleed image with fade on LEFT + TOP + BOTTOM ── */
         .home-spotlight-art {
           position: relative;
           display: flex;
           align-items: center;
-          justify-content: center;
-          min-width: 0;
-          min-height: 240px;
+          justify-content: flex-end;
+          min-height: 480px;
+          width: 100%;
+          -webkit-mask-image:
+            linear-gradient(
+              to bottom,
+              transparent 0%,
+              #000 12%,
+              #000 88%,
+              transparent 100%
+            ),
+            linear-gradient(
+              to right,
+              transparent 0%,
+              #000 18%,
+              #000 100%
+            );
+          -webkit-mask-composite: source-in;
+          mask-image:
+            linear-gradient(
+              to bottom,
+              transparent 0%,
+              #000 12%,
+              #000 88%,
+              transparent 100%
+            ),
+            linear-gradient(
+              to right,
+              transparent 0%,
+              #000 18%,
+              #000 100%
+            );
+          mask-composite: intersect;
         }
 
         .home-spotlight-art img {
-          position: relative;
           display: block;
-          width: min(100%, 420px);
-          aspect-ratio: 1;
+          width: 100%;
+          max-width: 860px;
+          max-height: 560px;
+          height: auto;
           object-fit: contain;
-          -webkit-mask-image: linear-gradient(
-            to bottom,
-            transparent 0%,
-            rgba(0, 0, 0, 0.25) 8%,
-            rgba(0, 0, 0, 0.9) 20%,
-            #000 30%,
-            #000 70%,
-            rgba(0, 0, 0, 0.9) 80%,
-            rgba(0, 0, 0, 0.25) 92%,
-            transparent 100%
-          );
-          mask-image: linear-gradient(
-            to bottom,
-            transparent 0%,
-            rgba(0, 0, 0, 0.25) 8%,
-            rgba(0, 0, 0, 0.9) 20%,
-            #000 30%,
-            #000 70%,
-            rgba(0, 0, 0, 0.9) 80%,
-            rgba(0, 0, 0, 0.25) 92%,
-            transparent 100%
-          );
+          object-position: right center;
+          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @media (max-width: 640px) {
+        .home-spotlight:hover .home-spotlight-art img {
+          transform: translateY(-6px) scale(1.015);
+        }
+
+        /* ── Tablet ── */
+        @media (max-width: 900px) {
           .home-spotlight {
-            width: calc(100% - 24px);
-            min-height: 0;
-            grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-            gap: 8px;
-            padding: 20px 14px;
-            margin: 24px auto 18px;
-            border-radius: 18px;
-          }
-
-          .home-spotlight-eyebrow {
-            gap: 6px;
-            margin-bottom: 9px;
-            font-size: 8px;
-            letter-spacing: 0.1em;
-          }
-
-          .home-spotlight-eyebrow::before {
-            width: 15px;
-          }
-
-          .home-spotlight-copy h2 {
-            margin-bottom: 9px;
-            font-size: clamp(20px, 5.3vw, 30px);
-            line-height: 1.06;
-          }
-
-          .home-spotlight-copy p {
-            margin-bottom: 12px;
-            font-size: 10px;
-            line-height: 1.55;
-          }
-
-          .home-spotlight-cta {
-            gap: 6px;
-            min-height: 34px;
-            padding: 0 10px;
-            font-size: 9px;
-            white-space: nowrap;
-          }
-
-          .home-spotlight-cta :global(svg) {
-            width: 13px;
-            height: 13px;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+            gap: 20px;
+            padding-top: 54px;
+            padding-bottom: 54px;
+            padding-left: 24px;
           }
 
           .home-spotlight-art {
-            min-height: 160px;
+            min-height: 340px;
           }
 
           .home-spotlight-art img {
-            width: 100%;
-            -webkit-mask-image: linear-gradient(
-              to bottom,
-              transparent 0%,
-              rgba(0, 0, 0, 0.3) 10%,
-              #000 24%,
-              #000 76%,
-              rgba(0, 0, 0, 0.3) 90%,
-              transparent 100%
-            );
-            mask-image: linear-gradient(
-              to bottom,
-              transparent 0%,
-              rgba(0, 0, 0, 0.3) 10%,
-              #000 24%,
-              #000 76%,
-              rgba(0, 0, 0, 0.3) 90%,
-              transparent 100%
-            );
+            max-height: 400px;
           }
         }
 
-        @media (max-width: 360px) {
+        /* ── Mobile ── */
+        @media (max-width: 640px) {
           .home-spotlight {
-            width: calc(100% - 20px);
-            gap: 5px;
-            padding: 16px 10px;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 12px;
+            padding-top: 38px;
+            padding-bottom: 38px;
+            padding-left: 16px;
+          }
+
+          .home-spotlight-eyebrow {
+            font-size: 8px;
+            letter-spacing: 0.14em;
+            margin-bottom: 10px;
+            gap: 6px;
+          }
+
+          .home-spotlight-eyebrow::before {
+            width: 16px;
+            height: 1px;
           }
 
           .home-spotlight-copy h2 {
-            font-size: 19px;
+            font-size: clamp(22px, 5.4vw, 32px);
+            line-height: 1.06;
+            margin-bottom: 12px;
+            letter-spacing: -0.045em;
           }
 
           .home-spotlight-copy p {
-            font-size: 9px;
+            font-size: 11px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
           }
 
           .home-spotlight-cta {
-            gap: 4px;
-            padding: 0 7px;
+            gap: 6px;
+            min-height: 36px;
+            padding: 0 12px;
+            font-size: 9px;
+            letter-spacing: 0.08em;
+          }
+
+          .home-spotlight-cta :global(svg) {
+            width: 12px;
+            height: 12px;
+          }
+
+          .home-spotlight-art {
+            min-height: 220px;
+          }
+
+          .home-spotlight-art img {
+            max-height: 240px;
+          }
+        }
+
+        @media (max-width: 400px) {
+          .home-spotlight {
+            gap: 8px;
+            padding-left: 12px;
+          }
+
+          .home-spotlight-copy h2 {
+            font-size: 20px;
+          }
+
+          .home-spotlight-copy p {
+            font-size: 10px;
+            -webkit-line-clamp: 2;
+          }
+
+          .home-spotlight-cta {
+            min-height: 32px;
+            padding: 0 9px;
             font-size: 8px;
+          }
+
+          .home-spotlight-art {
+            min-height: 170px;
+          }
+
+          .home-spotlight-art img {
+            max-height: 180px;
           }
         }
       `}</style>
@@ -1291,7 +1322,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* 3. HOMEPAGE CAR SPOTLIGHT (banner below brand logos) */}
+      {/* 3. HOMEPAGE CAR SPOTLIGHT (full-bleed banner below brand logos) */}
       <HomepageCarSpotlight />
 
       {/* 4. POPULAR VEHICLES */}
@@ -1344,7 +1375,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* 5. PREMIUM CATEGORY SHOWCASE (text left, image right, white fade) */}
+      {/* 5. PREMIUM CATEGORY SHOWCASE */}
       {!loading && popularCategories.length > 0 && (
         <CategoryShowcase categories={popularCategories} />
       )}
