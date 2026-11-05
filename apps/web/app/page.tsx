@@ -384,7 +384,7 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 6px;
+          gap: 0;
           border: 1px solid #ebebeb;
           border-radius: 6px;
           background: #fff;
@@ -399,23 +399,18 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
           transform: translateY(-2px);
         }
 
-        .car-brand-item img {
-          display: block;
-          width: auto;
-          max-width: 100%;
-          height: 18px;
-          object-fit: contain;
+        .car-brand-logo-stage {
+          width: 100%;
+          height: 38px;
+          display: grid;
+          place-items: center;
         }
 
-        .car-brand-item span {
-          width: 100%;
-          color: #555;
-          font-size: 10px;
-          font-weight: 600;
-          letter-spacing: 0.02em;
-          line-height: 1.2;
-          text-align: center;
-          text-transform: uppercase;
+        .car-brand-item img {
+          display: block;
+          width: min(72px, 100%);
+          height: 28px;
+          object-fit: contain;
         }
 
         @media (max-width: 900px) {
@@ -443,18 +438,18 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
             max-width: none;
             min-height: 64px;
             padding: 7px 3px;
-            gap: 5px;
+            gap: 0;
+          }
+
+          .car-brand-logo-stage {
+            height: 30px;
           }
 
           .car-brand-item img {
-            height: 14px;
+            width: min(58px, 100%);
+            height: 22px;
           }
 
-          .car-brand-item span {
-            width: 100%;
-            font-size: 8px;
-            text-align: center;
-          }
         }
       `}</style>
       <div className="car-brand-strip-inner">
@@ -470,7 +465,9 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
               key={brand.id}
               aria-label={`View ${brand.manufacturer_name} vehicles`}
             >
-              <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
+              <span className="car-brand-logo-stage">
+                <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
+              </span>
             </Link>
           ))}
         </div>
