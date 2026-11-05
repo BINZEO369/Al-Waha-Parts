@@ -172,7 +172,6 @@
 .vehicle-home-brand { display: flex; align-items: center; gap: 10px; min-width: 0; margin-bottom: 3px; }
 .vehicle-home-logo-frame { width: 64px; height: 44px; flex: 0 0 64px; display: grid; place-items: center; padding: 5px 8px; border: 1px solid #e8e8e8; border-radius: 6px; background: #fff; }
 .vehicle-home-logo-frame img { display: block; width: 100%; height: 100%; object-fit: contain; }
-.vehicle-home-brand small { color: #555; font-size: 10px; font-weight: 600; letter-spacing: .02em; }
 
 .vehicle-brand-selector { display: grid; gap: 13px; margin: 4px 0 20px; padding: 16px; border: 1px solid #ececec; border-radius: 8px; background: #fff; }
 .vehicle-brand-selector-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }

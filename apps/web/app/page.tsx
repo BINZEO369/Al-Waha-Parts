@@ -974,7 +974,6 @@ export default function Home() {
                         <img src={vehicle.manufacturer_logo} alt={`${vehicle.manufacturer_name} logo`} loading="lazy" />
                       </span>
                     )}
-                    <small>{vehicle.manufacturer_name}</small>
                   </div>
                   <strong>{vehicle.model_name}</strong>
                   <span>{[vehicle.generation, vehicle.chassis_code].filter(Boolean).join(' · ') || vehicle.vehicle_type || 'Database fitment'}</span>
