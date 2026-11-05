@@ -825,11 +825,11 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
 .vehicle-home-card-top { position: relative; }
 .vehicle-home-brand { min-height: 16px; display: flex; align-items: center; padding-right: 30px; }
 .vehicle-home-brand small { display: block; }
-.vehicle-home-logo-frame { position: absolute; top: 7px; right: 10px; width: 22px; height: 22px; display: grid; place-items: center; overflow: hidden; border: 0; border-radius: 0; background: transparent; }
-.vehicle-home-logo-frame img { width: 16px !important; height: 16px !important; padding: 0 !important; object-fit: contain; }
+.vehicle-home-logo-frame { position: absolute; top: 5px; right: 9px; width: 30px; height: 30px; display: grid; place-items: center; overflow: hidden; border: 0; border-radius: 0; background: transparent; }
+.vehicle-home-logo-frame img { width: 24px !important; height: 24px !important; padding: 0 !important; object-fit: contain; }
 @media (max-width: 700px) {
-  .vehicle-home-logo-frame { top: 5px; right: 7px; width: 19px; height: 19px; }
-  .vehicle-home-logo-frame img { width: 14px !important; height: 14px !important; }
+  .vehicle-home-logo-frame { top: 3px; right: 6px; width: 25px; height: 25px; }
+  .vehicle-home-logo-frame img { width: 20px !important; height: 20px !important; }
   .vehicle-home-brand { padding-right: 24px; }
 }
 
