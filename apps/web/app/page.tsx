@@ -835,6 +835,32 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
   );
 }
 
+function HomepageCarSpotlight() {
+  return (
+    <section className="home-spotlight" aria-labelledby="home-spotlight-title">
+      <div className="home-spotlight-copy">
+        <span className="home-spotlight-eyebrow">Built for the way you drive</span>
+        <h2 id="home-spotlight-title">Better parts. Better journeys.</h2>
+        <p>
+          Find trusted car parts for the vehicles you love. Explore leading brands and get the right
+          fit for every journey ahead.
+        </p>
+        <Link className="home-spotlight-cta" href="/brands">
+          Explore car brands <ArrowIcon />
+        </Link>
+      </div>
+      <div className="home-spotlight-art">
+        <img
+          src="/performance-car-showcase.png"
+          alt="A close-up of a white performance car with a red taillight"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    </section>
+  );
+}
+
 /* ==================================================================
  *  HOME PAGE
  * ================================================================== */
@@ -916,6 +942,120 @@ export default function Home() {
           outline: 2px solid var(--red);
           outline-offset: 3px;
         }
+        .home-spotlight {
+          width: min(100% - 36px, 1164px);
+          min-height: 360px;
+          margin: 34px auto 24px;
+          display: grid;
+          grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
+          align-items: center;
+          gap: clamp(20px, 4vw, 48px);
+          padding: clamp(22px, 4vw, 46px);
+          overflow: hidden;
+          border: 1px solid #f1f1f1;
+          border-radius: 24px;
+          background: linear-gradient(115deg, #fff 0%, #fff 48%, #fafafa 100%);
+          box-shadow: 0 18px 50px rgba(28, 28, 28, 0.045);
+        }
+        .home-spotlight-copy {
+          position: relative;
+          z-index: 1;
+          max-width: 500px;
+        }
+        .home-spotlight-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 13px;
+          color: var(--red);
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+        }
+        .home-spotlight-eyebrow::before {
+          width: 24px;
+          height: 2px;
+          background: var(--red);
+          content: '';
+        }
+        .home-spotlight-copy h2 {
+          max-width: 470px;
+          margin: 0 0 14px;
+          color: var(--ink);
+          font-family: 'Montserrat';
+          font-size: clamp(30px, 4vw, 50px);
+          font-weight: 800;
+          line-height: 1.02;
+          letter-spacing: -0.065em;
+        }
+        .home-spotlight-copy p {
+          max-width: 440px;
+          margin: 0 0 22px;
+          color: #727272;
+          font-size: 13px;
+          line-height: 1.75;
+        }
+        .home-spotlight-cta {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          min-height: 42px;
+          padding: 0 16px;
+          background: var(--red);
+          color: #fff;
+          font-size: 11px;
+          font-weight: 700;
+          transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+        .home-spotlight-cta:hover {
+          transform: translateY(-2px);
+          background: var(--red-dark);
+          box-shadow: 0 8px 18px rgba(229, 35, 47, 0.2);
+        }
+        .home-spotlight-art {
+          position: relative;
+          isolation: isolate;
+          display: grid;
+          min-width: 0;
+          place-items: center;
+        }
+        .home-spotlight-art::before {
+          position: absolute;
+          z-index: -1;
+          inset: 2%;
+          border-radius: 50%;
+          background: radial-gradient(
+            ellipse at center,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(255, 255, 255, 0.96) 38%,
+            rgba(255, 255, 255, 0) 77%
+          );
+          content: '';
+          filter: blur(20px);
+        }
+        .home-spotlight-art img {
+          position: relative;
+          display: block;
+          width: min(100%, 420px);
+          aspect-ratio: 1;
+          object-fit: contain;
+          mix-blend-mode: multiply;
+          -webkit-mask-image: radial-gradient(
+            ellipse at center,
+            #000 53%,
+            rgba(0, 0, 0, 0.9) 67%,
+            transparent 87%
+          );
+          mask-image: radial-gradient(
+            ellipse at center,
+            #000 53%,
+            rgba(0, 0, 0, 0.9) 67%,
+            transparent 87%
+          );
+          filter: drop-shadow(0 0 20px #fff) drop-shadow(0 0 40px rgba(255, 255, 255, 0.88));
+        }
         .popular-cars-heading {
           width: 100%;
           align-items: center;
@@ -938,6 +1078,53 @@ export default function Home() {
         @media (max-width: 520px) {
           .popular-cars-title-box { padding: 10px 16px; font-size: 18px; }
         }
+        @media (max-width: 640px) {
+          .home-spotlight {
+            width: calc(100% - 24px);
+            min-height: 0;
+            grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+            gap: 8px;
+            padding: 20px 14px;
+            margin: 24px auto 18px;
+            border-radius: 18px;
+          }
+          .home-spotlight-eyebrow {
+            gap: 6px;
+            margin-bottom: 9px;
+            font-size: 8px;
+            letter-spacing: 0.1em;
+          }
+          .home-spotlight-eyebrow::before { width: 15px; }
+          .home-spotlight-copy h2 {
+            margin-bottom: 9px;
+            font-size: clamp(20px, 5.3vw, 30px);
+            line-height: 1.06;
+          }
+          .home-spotlight-copy p {
+            margin-bottom: 12px;
+            font-size: 10px;
+            line-height: 1.55;
+          }
+          .home-spotlight-cta {
+            gap: 6px;
+            min-height: 34px;
+            padding: 0 10px;
+            font-size: 9px;
+            white-space: nowrap;
+          }
+          .home-spotlight-cta :global(svg) { width: 13px; height: 13px; }
+          .home-spotlight-art img { width: 100%; }
+        }
+        @media (max-width: 360px) {
+          .home-spotlight {
+            width: calc(100% - 20px);
+            gap: 5px;
+            padding: 16px 10px;
+          }
+          .home-spotlight-copy h2 { font-size: 19px; }
+          .home-spotlight-copy p { font-size: 9px; }
+          .home-spotlight-cta { gap: 4px; padding: 0 7px; font-size: 8px; }
+        }
       `}</style>
 
       {/* 1. HERO BANNER */}
@@ -954,6 +1141,8 @@ export default function Home() {
           Loading categories, parts and vehicles from the database…
         </div>
       )}
+
+      <HomepageCarSpotlight />
 
       {/* 3. POPULAR VEHICLES */}
       {!loading && homeSelectedVehicles.length > 0 && (
