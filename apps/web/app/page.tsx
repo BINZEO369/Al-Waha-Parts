@@ -831,7 +831,7 @@ export default function Home() {
       return;
     }
     void apiFetch<CarBrand[]>(apiUrl, '/api/v1/car-brands')
-      .then((items) => setCarBrands(Array.isArray(items) ? items.slice(0, 10) : []))
+      .then((items) => setCarBrands(Array.isArray(items) ? items : []))
       .catch(() => setCarBrands([]));
 
     Promise.all([
