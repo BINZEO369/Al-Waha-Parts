@@ -902,7 +902,8 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
 
 /* ==================================================================
  *  HOMEPAGE CAR SPOTLIGHT — text LEFT · image RIGHT (edge-to-edge)
- *  Image touches the RIGHT screen edge (padding-right: 0)
+ *  Image touches the RIGHT screen edge.
+ *  Only top/bottom fade is kept — no horizontal fade (original image).
  * ================================================================== */
 
 function HomepageCarSpotlight() {
@@ -967,6 +968,8 @@ function HomepageCarSpotlight() {
           line-height: 1.8;
         }
 
+        /* Image container — only vertical (top/bottom) fade.
+           No horizontal fade → original image horizontally. */
         .home-spotlight-art {
           position: relative;
           display: flex;
@@ -974,36 +977,20 @@ function HomepageCarSpotlight() {
           justify-content: flex-end;
           min-height: 480px;
           width: 100%;
-          -webkit-mask-image:
-            linear-gradient(
-              to bottom,
-              transparent 0%,
-              #000 12%,
-              #000 88%,
-              transparent 100%
-            ),
-            linear-gradient(
-              to right,
-              transparent 0%,
-              #000 18%,
-              #000 100%
-            );
-          -webkit-mask-composite: source-in;
-          mask-image:
-            linear-gradient(
-              to bottom,
-              transparent 0%,
-              #000 12%,
-              #000 88%,
-              transparent 100%
-            ),
-            linear-gradient(
-              to right,
-              transparent 0%,
-              #000 18%,
-              #000 100%
-            );
-          mask-composite: intersect;
+          -webkit-mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            #000 12%,
+            #000 88%,
+            transparent 100%
+          );
+          mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            #000 12%,
+            #000 88%,
+            transparent 100%
+          );
         }
 
         .home-spotlight-art img {
@@ -1133,11 +1120,8 @@ function HomepageCarSpotlight() {
 
 /* ==================================================================
  *  REVERSE CAR SPOTLIGHT — image LEFT · text RIGHT (edge-to-edge)
- *  · Mirrors HomepageCarSpotlight exactly
- *  · Image touches the LEFT screen edge (padding-left: 0)
- *  · No gap on the left — image starts from x=0
- *  · object-fit: contain keeps the full image visible (no cut-off)
- *  · Title + description only (no CTA)
+ *  · Image touches the LEFT screen edge.
+ *  · Only top/bottom fade — no horizontal fade (original image).
  * ================================================================== */
 
 function ReverseCarSpotlight() {
@@ -1202,8 +1186,8 @@ function ReverseCarSpotlight() {
           line-height: 1.8;
         }
 
-        /* Image container — flush to the left screen edge.
-           Only the inner (right) side fades toward the text. */
+        /* Image container — only vertical (top/bottom) fade.
+           No horizontal fade → original image horizontally. */
         .reverse-spotlight-art {
           position: relative;
           display: flex;
@@ -1211,36 +1195,20 @@ function ReverseCarSpotlight() {
           justify-content: flex-start;
           min-height: 480px;
           width: 100%;
-          -webkit-mask-image:
-            linear-gradient(
-              to bottom,
-              transparent 0%,
-              #000 12%,
-              #000 88%,
-              transparent 100%
-            ),
-            linear-gradient(
-              to left,
-              transparent 0%,
-              #000 18%,
-              #000 100%
-            );
-          -webkit-mask-composite: source-in;
-          mask-image:
-            linear-gradient(
-              to bottom,
-              transparent 0%,
-              #000 12%,
-              #000 88%,
-              transparent 100%
-            ),
-            linear-gradient(
-              to left,
-              transparent 0%,
-              #000 18%,
-              #000 100%
-            );
-          mask-composite: intersect;
+          -webkit-mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            #000 12%,
+            #000 88%,
+            transparent 100%
+          );
+          mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            #000 12%,
+            #000 88%,
+            transparent 100%
+          );
         }
 
         .reverse-spotlight-art img {
@@ -1372,7 +1340,9 @@ function ReverseCarSpotlight() {
 }
 
 /* ==================================================================
- *  FULL-WIDTH IMAGE SHOWCASE (Reusable · CTA removed)
+ *  FULL-WIDTH IMAGE SHOWCASE — original image, no glows
+ *  · Red & dark blurred glows removed (::before / ::after gone)
+ *  · Vertical white fade kept for page blend
  * ================================================================== */
 
 type FullWidthImageShowcaseProps = {
@@ -1635,33 +1605,6 @@ function FullWidthImageShowcase({
             opacity: 1;
             transform: translateY(0);
           }
-        }
-
-        .fullwidth-showcase::before,
-        .fullwidth-showcase::after {
-          content: '';
-          position: absolute;
-          z-index: 1;
-          border-radius: 50%;
-          pointer-events: none;
-          filter: blur(80px);
-          opacity: 0.4;
-        }
-
-        .fullwidth-showcase::before {
-          width: 320px;
-          height: 320px;
-          top: -80px;
-          left: 8%;
-          background: radial-gradient(circle, rgba(229, 35, 47, 0.5), transparent 70%);
-        }
-
-        .fullwidth-showcase::after {
-          width: 260px;
-          height: 260px;
-          bottom: -60px;
-          right: 10%;
-          background: radial-gradient(circle, rgba(10, 10, 10, 0.35), transparent 70%);
         }
 
         @media (max-width: 900px) {
