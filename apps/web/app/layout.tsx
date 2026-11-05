@@ -823,21 +823,35 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
 }
 `;
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://al-waha-parts.vercel.app';
+
 export const metadata: Metadata = {
-  title: 'Al Waha Parts — New Car Parts in UAE',
-  description:
-    'Shop quality automotive parts, wheels, brakes and suspension with fitment support across the UAE.',
-  icons: {
-    icon: '/favicon.png',
-    shortcut: '/favicon.png',
-    apple: '/favicon.png',
-  },
+  metadataBase: new URL(siteUrl),
+  title: { default: 'Al Waha Parts | Car Parts in Al Jubail, Saudi Arabia', template: '%s | Al Waha Parts' },
+  description: 'Buy quality car parts in Al Jubail, Saudi Arabia. Find brakes, suspension, filters, wheels and replacement parts with vehicle fitment support.',
+  keywords: ['car parts Al Jubail', 'auto parts Saudi Arabia', 'car spare parts Jubail', 'automotive parts Saudi Arabia', 'brakes and suspension Jubail', 'vehicle fitment Saudi Arabia'],
+  applicationName: 'Al Waha Parts', authors: [{ name: 'Al Waha Parts' }], creator: 'Al Waha Parts', publisher: 'Al Waha Parts',
+  alternates: { canonical: '/' },
+  openGraph: { type: 'website', locale: 'en_SA', url: siteUrl, siteName: 'Al Waha Parts', title: 'Al Waha Parts | Car Parts in Al Jubail, Saudi Arabia', description: 'Shop car parts and replacement parts in Al Jubail, Saudi Arabia with live catalog and vehicle fitment support.', images: [{ url: '/logo.png', width: 112, height: 54, alt: 'Al Waha Parts' }] },
+  twitter: { card: 'summary', title: 'Al Waha Parts | Car Parts in Al Jubail, Saudi Arabia', description: 'Quality automotive parts and vehicle fitment support in Al Jubail, Saudi Arabia.', images: ['/logo.png'] },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
+  other: { 'geo.region': 'SA-04', 'geo.placename': 'Al Jubail, Eastern Province, Saudi Arabia', ICBM: '27.0046, 49.6460' },
 };
+
+const localBusinessSchema = {
+  '@context': 'https://schema.org', '@type': 'AutoPartsStore', '@id': `${siteUrl}/#business`, name: 'Al Waha Parts', url: siteUrl, logo: `${siteUrl}/logo.png`, image: `${siteUrl}/logo.png`,
+  description: 'Automotive parts seller and vehicle fitment support in Al Jubail, Saudi Arabia.',
+  address: { '@type': 'PostalAddress', addressLocality: 'Al Jubail', addressRegion: 'Eastern Province', addressCountry: 'SA' },
+  areaServed: [{ '@type': 'City', name: 'Al Jubail' }, { '@type': 'Country', name: 'Saudi Arabia' }], priceRange: '$$', knowsLanguage: ['en', 'ar'], sameAs: [siteUrl],
+};
+const websiteSchema = { '@context': 'https://schema.org', '@type': 'WebSite', '@id': `${siteUrl}/#website`, name: 'Al Waha Parts', url: siteUrl, description: 'Car parts and vehicle fitment support in Al Jubail, Saudi Arabia.', publisher: { '@id': `${siteUrl}/#business` }, inLanguage: ['en-SA', 'ar-SA'] };
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
         <style>{globalStyles}</style>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([localBusinessSchema, websiteSchema]) }} />
       <LanguageProvider>
         <CartProvider>
           <Header />

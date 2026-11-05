@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /login
+Disallow: /booking
+Disallow: /api/
+
+Sitemap: https://al-waha-parts.vercel.app/sitemap.xml

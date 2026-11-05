@@ -105,7 +105,7 @@ export function BookingForm() {
         </select></label>
       </div>
       <div className="form-grid">
-        <label>City<input name="customer_city" autoComplete="address-level2" placeholder="Enter your city" /></label>
+        <label>City<input name="customer_city" autoComplete="address-level2" placeholder="Al Jubail, Dammam …" /></label>
         <label>Delivery address<input name="shipping_address" autoComplete="street-address" required={deliveryMethod === 'delivery'} placeholder={deliveryMethod === 'delivery' ? 'Required for delivery' : 'Optional for pickup'} /></label>
       </div>
       <label>Note for the parts desk (optional)<textarea name="customer_note" rows={3} placeholder="Anything the team should know before calling?" /></label>

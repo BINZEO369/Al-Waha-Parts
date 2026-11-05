@@ -10,7 +10,7 @@ export default function ContactPage() {
         <h1>Bring us the tricky one.</h1>
         <p>
           Call the parts desk or send a booking request. We work with drivers, workshops and fleet
-          teams across the UAE.
+          teams in Al Jubail and across Saudi Arabia.
         </p>
       </section>
       <div className="contact-grid">
