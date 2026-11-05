@@ -39,3 +39,9 @@
 - Dashboard, inventory, bookings, vehicles, categories, admin access, and settings must each have a clear heading, purpose copy, primary action, responsive cards or panels, and honest live/loading/empty/error states.
 - Tables, cards, filters, buttons, forms, status badges, and spacing must remain legible and usable on both phone and desktop widths.
 - The visual system must consistently use white surfaces, charcoal text, and Al Waha red for active states and actions.
+
+## Homepage car image spotlight appears before Popular Cars
+- Convert the user-provided car image to PNG and save it in the website repository with a clear, descriptive filename.
+- Place the new section immediately before the homepage “Popular Cars” section.
+- Keep a hardcoded title and descriptive copy on the left and the image on the right on desktop and mobile layouts.
+- Add a soft white shadow/glow around the image on the top, bottom, left, and right so it blends with the storefront.

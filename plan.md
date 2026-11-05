@@ -29,6 +29,14 @@
 - **Wordmark:** preserve the existing Al Waha Parts wordmark and layout.
 - **Signature brand color:** the existing red accent.
 
+# Homepage car spotlight addendum
+
+## Implementation and design
+- Convert the user-provided car image to PNG and store it in `apps/web/public/` with a descriptive filename.
+- Add a responsive, hardcoded editorial spotlight immediately before the homepage “Popular Cars” section: copy and title on the left, supplied car image on the right on desktop and mobile.
+- Blend the image into the existing white/off-white storefront using a soft white glow/shadow on all four sides; retain the existing Al Waha red for a small accent and CTA.
+- Implement the section in `apps/web/app/page.tsx` and keep it independent of database loading so its copy is always available.
+
 
 # Admin redesign addendum
 
