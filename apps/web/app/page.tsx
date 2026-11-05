@@ -471,7 +471,6 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
               aria-label={`View ${brand.manufacturer_name} vehicles`}
             >
               <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
-              <span>{brand.manufacturer_name}</span>
             </Link>
           ))}
         </div>
