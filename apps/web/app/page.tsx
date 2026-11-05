@@ -76,6 +76,23 @@ type CarBrand = {
   sort_order: number;
 };
 
+const HOME_VEHICLE_LIMIT = 6;
+const HOME_BRAND_PREFERENCE_KEY = 'alwaha-home-brand-preference';
+
+function randomVehicles(items: Vehicle[], limit = HOME_VEHICLE_LIMIT) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    const current = shuffled[index];
+    const replacement = shuffled[swapIndex];
+    if (current && replacement) {
+      shuffled[index] = replacement;
+      shuffled[swapIndex] = current;
+    }
+  }
+  return shuffled.slice(0, limit);
+}
+
 /* ==================================================================
  *  ICONS
  * ================================================================== */
@@ -469,6 +486,9 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
               href={`/car-brands/${brand.slug}`}
               key={brand.id}
               aria-label={`View ${brand.manufacturer_name} vehicles`}
+              onClick={() => {
+                window.localStorage.setItem(HOME_BRAND_PREFERENCE_KEY, brand.manufacturer_name);
+              }}
             >
               <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
             </Link>
@@ -824,8 +844,23 @@ export default function Home() {
   const [parts, setParts] = useState<Part[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [carBrands, setCarBrands] = useState<CarBrand[]>([]);
+  const [preferredBrand, setPreferredBrand] = useState('');
+  const [homeSelectedVehicles, setHomeSelectedVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const readPreference = () => {
+      try {
+        setPreferredBrand(window.localStorage.getItem(HOME_BRAND_PREFERENCE_KEY) || '');
+      } catch {
+        setPreferredBrand('');
+      }
+    };
+    readPreference();
+    window.addEventListener('pageshow', readPreference);
+    return () => window.removeEventListener('pageshow', readPreference);
+  }, []);
 
   useEffect(() => {
     if (!apiUrl) {
@@ -858,7 +893,17 @@ export default function Home() {
   }, [apiUrl]);
 
   const homeSelectedParts = parts;
-  const homeSelectedVehicles = vehicles;
+
+  useEffect(() => {
+    if (vehicles.length === 0) {
+      setHomeSelectedVehicles([]);
+      return;
+    }
+    const preferredVehicles = preferredBrand
+      ? vehicles.filter((vehicle) => vehicle.manufacturer_name.trim().toLowerCase() === preferredBrand.trim().toLowerCase())
+      : [];
+    setHomeSelectedVehicles(randomVehicles(preferredVehicles.length ? preferredVehicles : vehicles));
+  }, [preferredBrand, vehicles]);
 
   return (
     <main className="home-page">
