@@ -9,8 +9,7 @@ import { useLanguage } from './LanguageProvider';
 const navItems = [
   { label: 'Home', href: '/' },
   { label: 'Categories', href: '/category' },
-  { label: 'All Brands', href: '/all-brands' },
-  { label: 'Vehicle Finder', href: '/vehicles' },
+  { label: 'Car Brands', href: '/brands' },
   { label: 'Track Booking', href: '/booking/track' },
   { label: 'Contact', href: '/contact' },
 ];
@@ -182,7 +181,7 @@ export function Footer() {
         </div>
         <div className="footer-column">
           <h3>Customer service</h3>
-          <Link href="/vehicles">Vehicle finder</Link>
+          <Link href="/brands">Browse car brands</Link>
           <Link href="/booking">Booking desk</Link>
           <Link href="/booking/track">Track booking</Link>
         </div>

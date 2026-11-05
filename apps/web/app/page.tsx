@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { formatSar } from '../../../packages/shared/src/currency';
+import { brandModelHref, brandSlugFromName } from '../lib/vehicle-routes';
 
 /* ==================================================================
  *  TYPES
@@ -477,13 +478,13 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
       <div className="car-brand-strip-inner">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 22 }}>
           <h2 id="car-brand-strip-title" style={{ margin: 0 }}>Browse by car brand</h2>
-          <Link className="section-link" href="/all-brands">View all brands <ArrowIcon /></Link>
+          <Link className="section-link" href="/brands">View all brands <ArrowIcon /></Link>
         </div>
         <div className="car-brand-grid">
           {visibleBrands.map((brand) => (
             <Link
               className="car-brand-item"
-              href={`/car-brands/${brand.slug}`}
+              href={`/brands/${brand.slug}`}
               key={brand.id}
               aria-label={`View ${brand.manufacturer_name} vehicles`}
               onClick={() => {
@@ -964,7 +965,15 @@ export default function Home() {
             {homeSelectedVehicles.map((vehicle) => (
               <Link
                 className="vehicle-home-card"
-                href={vehicle.slug ? `/vehicles/${vehicle.slug}` : '/vehicles'}
+                href={
+                  vehicle.slug
+                    ? brandModelHref(
+                        carBrands.find((brand) => brand.manufacturer_name === vehicle.manufacturer_name)?.slug ||
+                          brandSlugFromName(vehicle.manufacturer_name),
+                        vehicle.slug,
+                      )
+                    : '/brands'
+                }
                 key={vehicle.id}
               >
                 <div className="vehicle-home-card-top">
