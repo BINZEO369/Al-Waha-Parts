@@ -187,10 +187,10 @@
 .vehicle-brand-option > span:last-child { max-width: 100%; overflow: hidden; color: #4a4a4a; font-size: 11px; font-weight: 600; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
 .vehicle-brand-option.active > span:last-child { color: var(--red); }
 .finder-brand-row { display: flex; align-items: center; gap: 10px; }
-.finder-brand-logo { width: 64px; height: 46px; flex: 0 0 64px; display: block; object-fit: contain; padding: 4px 7px; border: 1px solid #e8e8e8; border-radius: 6px; background: #fff; }
+.finder-brand-logo { width: 30px; height: 24px; flex: 0 0 30px; display: block; object-fit: contain; padding: 2px 4px; border: 1px solid #f1d0d3; border-radius: 50%; background: #fff; }
 .finder-vehicle-specs { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
 .vehicle-filter-summary { display: flex; align-items: center; gap: 14px; margin: 0 0 20px; padding: 13px 15px; border: 1px solid #ededed; border-left: 3px solid var(--red); border-radius: 6px; background: #fff; }
-.vehicle-filter-summary > img { width: 64px; height: 46px; flex: 0 0 64px; display: block; object-fit: contain; padding: 4px 7px; border: 1px solid #e8e8e8; border-radius: 6px; background: #fff; }
+.vehicle-filter-summary > img { width: 30px; height: 24px; flex: 0 0 30px; display: block; object-fit: contain; padding: 2px 4px; border: 1px solid #f1d0d3; border-radius: 50%; background: #fff; }
 .vehicle-filter-summary > div { min-width: 0; flex: 1; display: grid; gap: 3px; }
 .vehicle-filter-summary small { color: var(--red); font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .vehicle-filter-summary strong { color: #252525; font-size: 14px; }
@@ -223,7 +223,7 @@
 .finder-selected-details { min-width: 0; display: grid; align-content: start; gap: 10px; }
 .finder-selected-details h2 { margin: 0; color: #242424; font-size: 21px; line-height: 1.25; }
 .finder-brand-label { color: #777; font-size: 11px; }
-.finder-brand-fallback { display: grid; width: 64px; height: 46px; place-items: center; border: 1px solid #e8e8e8; border-radius: 6px; background: #fff; color: var(--red); font-weight: 700; }
+.finder-brand-fallback { display: grid; width: 30px; height: 24px; place-items: center; border: 1px solid #f1d0d3; border-radius: 50%; background: #fff; color: var(--red); font-size: 11px; font-weight: 700; }
 .finder-vehicle-specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 9px; }
 .finder-vehicle-specs > div { min-width: 0; display: grid; gap: 4px; padding: 9px 10px; border: 1px solid #efefef; border-radius: 5px; background: #fff; }
 .finder-vehicle-specs small { color: #777; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
