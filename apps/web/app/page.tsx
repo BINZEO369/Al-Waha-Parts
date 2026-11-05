@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { brandModelHref, brandSlugFromName } from '../lib/vehicle-routes';
@@ -902,10 +902,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
 
 /* ==================================================================
  *  HOMEPAGE CAR SPOTLIGHT — FULL-BLEED · EDGE-TO-EDGE
- *  · Image touches the right screen edge (zero gap)
- *  · Image is larger
- *  · White fade on LEFT + TOP + BOTTOM (blends into page perfectly)
- *  · Refined typographic hierarchy on the left
  * ================================================================== */
 
 function HomepageCarSpotlight() {
@@ -927,7 +923,6 @@ function HomepageCarSpotlight() {
           overflow: hidden;
         }
 
-        /* ── LEFT · Text block ── */
         .home-spotlight-copy {
           position: relative;
           z-index: 1;
@@ -1003,7 +998,6 @@ function HomepageCarSpotlight() {
           transform: translateX(6px);
         }
 
-        /* ── RIGHT · Full-bleed image with fade on LEFT + TOP + BOTTOM ── */
         .home-spotlight-art {
           position: relative;
           display: flex;
@@ -1058,7 +1052,6 @@ function HomepageCarSpotlight() {
           transform: translateY(-6px) scale(1.015);
         }
 
-        /* ── Tablet ── */
         @media (max-width: 900px) {
           .home-spotlight {
             grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
@@ -1077,7 +1070,6 @@ function HomepageCarSpotlight() {
           }
         }
 
-        /* ── Mobile ── */
         @media (max-width: 640px) {
           .home-spotlight {
             grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -1188,6 +1180,451 @@ function HomepageCarSpotlight() {
           loading="lazy"
           decoding="async"
         />
+      </div>
+    </section>
+  );
+}
+
+/* ==================================================================
+ *  FULL-WIDTH IMAGE SHOWCASE — NEW SECTION
+ *  · Image spans the FULL viewport width (100vw)
+ *  · White fade on top, bottom, left, right — blends into page
+ *  · Overlay title + subtitle with scroll-triggered reveal animation
+ *  · Subtle parallax on mouse move
+ * ================================================================== */
+
+function FullWidthImageShowcase() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  /* ── Scroll reveal ── */
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  /* ── Subtle parallax on mouse move (desktop only) ── */
+  useEffect(() => {
+    const section = sectionRef.current;
+    const image = imageRef.current;
+    if (!section || !image) return;
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+
+    let frame = 0;
+    const onMove = (event: MouseEvent) => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        const rect = section.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = (event.clientX - cx) / rect.width;
+        const dy = (event.clientY - cy) / rect.height;
+        image.style.transform = `translate3d(${dx * 14}px, ${dy * 10}px, 0) scale(1.02)`;
+        frame = 0;
+      });
+    };
+    const onLeave = () => {
+      image.style.transform = 'translate3d(0, 0, 0) scale(1.02)';
+    };
+
+    section.addEventListener('mousemove', onMove);
+    section.addEventListener('mouseleave', onLeave);
+    return () => {
+      section.removeEventListener('mousemove', onMove);
+      section.removeEventListener('mouseleave', onLeave);
+    };
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      className={`fullwidth-showcase${visible ? ' is-visible' : ''}`}
+      aria-labelledby="fullwidth-showcase-title"
+    >
+      <style jsx>{`
+        .fullwidth-showcase {
+          position: relative;
+          width: 100vw;
+          margin-left: calc(50% - 50vw);
+          margin-right: calc(50% - 50vw);
+          padding: 0;
+          background: #ffffff;
+          overflow: hidden;
+          isolation: isolate;
+        }
+
+        /* ── Image wrapper (full-bleed) ── */
+        .fullwidth-showcase-media {
+          position: relative;
+          width: 100%;
+          height: clamp(360px, 62vh, 720px);
+          overflow: hidden;
+          -webkit-mask-image:
+            linear-gradient(
+              to bottom,
+              transparent 0%,
+              rgba(0, 0, 0, 0.35) 6%,
+              #000 16%,
+              #000 84%,
+              rgba(0, 0, 0, 0.35) 94%,
+              transparent 100%
+            ),
+            linear-gradient(
+              to right,
+              transparent 0%,
+              #000 5%,
+              #000 95%,
+              transparent 100%
+            );
+          -webkit-mask-composite: source-in;
+          mask-image:
+            linear-gradient(
+              to bottom,
+              transparent 0%,
+              rgba(0, 0, 0, 0.35) 6%,
+              #000 16%,
+              #000 84%,
+              rgba(0, 0, 0, 0.35) 94%,
+              transparent 100%
+            ),
+            linear-gradient(
+              to right,
+              transparent 0%,
+              #000 5%,
+              #000 95%,
+              transparent 100%
+            );
+          mask-composite: intersect;
+        }
+
+        .fullwidth-showcase-media img {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          transform: scale(1.02);
+          transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+          will-change: transform;
+          opacity: 0;
+        }
+
+        .fullwidth-showcase.is-visible .fullwidth-showcase-media img {
+          opacity: 1;
+          animation: showcase-image-in 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes showcase-image-in {
+          0% {
+            opacity: 0;
+            transform: scale(1.08) translateY(24px);
+            filter: blur(8px);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1.02) translateY(0);
+            filter: blur(0);
+          }
+        }
+
+        /* ── Overlay text ── */
+        .fullwidth-showcase-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: 2;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 0 24px;
+          pointer-events: none;
+        }
+
+        .fullwidth-showcase-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 22px;
+          padding: 8px 18px;
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          background: rgba(10, 10, 10, 0.35);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          color: #ffffff;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          border-radius: 999px;
+          opacity: 0;
+          transform: translateY(16px);
+        }
+
+        .fullwidth-showcase.is-visible .fullwidth-showcase-eyebrow {
+          animation: showcase-fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+        }
+
+        .fullwidth-showcase-eyebrow::before {
+          content: '';
+          width: 8px;
+          height: 8px;
+          background: var(--red);
+          border-radius: 50%;
+          box-shadow: 0 0 0 4px rgba(229, 35, 47, 0.25);
+        }
+
+        .fullwidth-showcase-title {
+          max-width: 900px;
+          margin: 0 0 22px;
+          color: #ffffff;
+          font-family: 'Montserrat', sans-serif;
+          font-size: clamp(34px, 5.4vw, 78px);
+          font-weight: 800;
+          line-height: 1.02;
+          letter-spacing: -0.055em;
+          text-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+          opacity: 0;
+          transform: translateY(24px);
+        }
+
+        .fullwidth-showcase.is-visible .fullwidth-showcase-title {
+          animation: showcase-fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+        }
+
+        .fullwidth-showcase-title em {
+          font-style: normal;
+          color: var(--red);
+        }
+
+        .fullwidth-showcase-subtitle {
+          max-width: 620px;
+          margin: 0 0 34px;
+          color: rgba(255, 255, 255, 0.85);
+          font-size: 15px;
+          line-height: 1.7;
+          text-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+          opacity: 0;
+          transform: translateY(20px);
+        }
+
+        .fullwidth-showcase.is-visible .fullwidth-showcase-subtitle {
+          animation: showcase-fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+        }
+
+        .fullwidth-showcase-cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          min-height: 50px;
+          padding: 0 30px;
+          background: #ffffff;
+          color: #0a0a0a;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          text-decoration: none;
+          border-radius: 999px;
+          pointer-events: auto;
+          opacity: 0;
+          transform: translateY(20px);
+          transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+            color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+            transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+            box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fullwidth-showcase.is-visible .fullwidth-showcase-cta {
+          animation: showcase-fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+        }
+
+        .fullwidth-showcase-cta:hover {
+          background: var(--red);
+          color: #ffffff;
+          transform: translateY(-3px);
+          box-shadow: 0 16px 32px rgba(229, 35, 47, 0.35);
+        }
+
+        .fullwidth-showcase-cta :global(svg) {
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fullwidth-showcase-cta:hover :global(svg) {
+          transform: translateX(6px);
+        }
+
+        @keyframes showcase-fade-up {
+          0% {
+            opacity: 0;
+            transform: translateY(28px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        /* ── Ambient red glow accents ── */
+        .fullwidth-showcase::before,
+        .fullwidth-showcase::after {
+          content: '';
+          position: absolute;
+          z-index: 1;
+          border-radius: 50%;
+          pointer-events: none;
+          filter: blur(80px);
+          opacity: 0.4;
+        }
+
+        .fullwidth-showcase::before {
+          width: 320px;
+          height: 320px;
+          top: -80px;
+          left: 8%;
+          background: radial-gradient(circle, rgba(229, 35, 47, 0.5), transparent 70%);
+        }
+
+        .fullwidth-showcase::after {
+          width: 260px;
+          height: 260px;
+          bottom: -60px;
+          right: 10%;
+          background: radial-gradient(circle, rgba(10, 10, 10, 0.35), transparent 70%);
+        }
+
+        /* ── Tablet ── */
+        @media (max-width: 900px) {
+          .fullwidth-showcase-media {
+            height: clamp(320px, 55vh, 560px);
+          }
+
+          .fullwidth-showcase-title {
+            font-size: clamp(28px, 6vw, 52px);
+          }
+
+          .fullwidth-showcase-subtitle {
+            font-size: 13px;
+          }
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 640px) {
+          .fullwidth-showcase-media {
+            height: 360px;
+          }
+
+          .fullwidth-showcase-eyebrow {
+            font-size: 8px;
+            letter-spacing: 0.16em;
+            padding: 6px 12px;
+            margin-bottom: 14px;
+            gap: 8px;
+          }
+
+          .fullwidth-showcase-eyebrow::before {
+            width: 6px;
+            height: 6px;
+          }
+
+          .fullwidth-showcase-title {
+            font-size: clamp(24px, 7vw, 34px);
+            line-height: 1.08;
+            margin-bottom: 14px;
+            letter-spacing: -0.04em;
+          }
+
+          .fullwidth-showcase-subtitle {
+            font-size: 11px;
+            line-height: 1.6;
+            margin-bottom: 22px;
+            max-width: 90%;
+          }
+
+          .fullwidth-showcase-cta {
+            min-height: 40px;
+            padding: 0 20px;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            gap: 8px;
+          }
+
+          .fullwidth-showcase-cta :global(svg) {
+            width: 13px;
+            height: 13px;
+          }
+        }
+
+        @media (max-width: 380px) {
+          .fullwidth-showcase-media {
+            height: 320px;
+          }
+
+          .fullwidth-showcase-title {
+            font-size: 22px;
+          }
+
+          .fullwidth-showcase-subtitle {
+            font-size: 10px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .fullwidth-showcase-media img,
+          .fullwidth-showcase-eyebrow,
+          .fullwidth-showcase-title,
+          .fullwidth-showcase-subtitle,
+          .fullwidth-showcase-cta {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+          }
+        }
+      `}</style>
+
+      <div className="fullwidth-showcase-media">
+        <img
+          ref={imageRef}
+          src="/images/img1.png"
+          alt="Performance automotive showcase"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+
+      <div className="fullwidth-showcase-overlay">
+        <span className="fullwidth-showcase-eyebrow">Precision Engineered</span>
+        <h2 id="fullwidth-showcase-title" className="fullwidth-showcase-title">
+          Every part. <em>Every drive.</em> Perfected.
+        </h2>
+        <p className="fullwidth-showcase-subtitle">
+          From daily drivers to weekend builds — discover OEM-grade components and performance
+          upgrades crafted for the road ahead.
+        </p>
+        <Link className="fullwidth-showcase-cta" href="/category">
+          Start Exploring <ArrowIcon />
+        </Link>
       </div>
     </section>
   );
@@ -1324,6 +1761,9 @@ export default function Home() {
 
       {/* 3. HOMEPAGE CAR SPOTLIGHT (full-bleed banner below brand logos) */}
       <HomepageCarSpotlight />
+
+      {/* 3b. FULL-WIDTH IMAGE SHOWCASE (new — img1.png, full-bleed, animated overlay) */}
+      <FullWidthImageShowcase />
 
       {/* 4. POPULAR VEHICLES */}
       {!loading && homeSelectedVehicles.length > 0 && (
