@@ -901,7 +901,8 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
 }
 
 /* ==================================================================
- *  HOMEPAGE CAR SPOTLIGHT — text LEFT · image RIGHT (edge-to-edge)
+ *  HOMEPAGE CAR SPOTLIGHT — text LEFT · image RIGHT
+ *  (CTA removed — title + description only)
  * ================================================================== */
 
 function HomepageCarSpotlight() {
@@ -960,42 +961,10 @@ function HomepageCarSpotlight() {
 
         .home-spotlight-copy p {
           max-width: 440px;
-          margin: 0 0 30px;
+          margin: 0;
           color: #6a6a6a;
           font-size: 14px;
           line-height: 1.8;
-        }
-
-        .home-spotlight-cta {
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          min-height: 46px;
-          padding: 0 24px;
-          background: #0a0a0a;
-          color: #ffffff;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          text-decoration: none;
-          transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-            transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-            box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .home-spotlight-cta:hover {
-          background: var(--red);
-          transform: translateY(-2px);
-          box-shadow: 0 12px 24px rgba(229, 35, 47, 0.22);
-        }
-
-        .home-spotlight-cta :global(svg) {
-          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .home-spotlight-cta:hover :global(svg) {
-          transform: translateX(6px);
         }
 
         .home-spotlight-art {
@@ -1101,24 +1070,10 @@ function HomepageCarSpotlight() {
           .home-spotlight-copy p {
             font-size: 11px;
             line-height: 1.6;
-            margin-bottom: 16px;
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
-          }
-
-          .home-spotlight-cta {
-            gap: 6px;
-            min-height: 36px;
-            padding: 0 12px;
-            font-size: 9px;
-            letter-spacing: 0.08em;
-          }
-
-          .home-spotlight-cta :global(svg) {
-            width: 12px;
-            height: 12px;
           }
 
           .home-spotlight-art {
@@ -1145,12 +1100,6 @@ function HomepageCarSpotlight() {
             -webkit-line-clamp: 2;
           }
 
-          .home-spotlight-cta {
-            min-height: 32px;
-            padding: 0 9px;
-            font-size: 8px;
-          }
-
           .home-spotlight-art {
             min-height: 170px;
           }
@@ -1168,9 +1117,6 @@ function HomepageCarSpotlight() {
           Find trusted car parts for the vehicles you love. Explore leading brands and get the right
           fit for every journey ahead.
         </p>
-        <Link className="home-spotlight-cta" href="/brands">
-          Explore car brands <ArrowIcon />
-        </Link>
       </div>
 
       <div className="home-spotlight-art">
@@ -1186,9 +1132,10 @@ function HomepageCarSpotlight() {
 }
 
 /* ==================================================================
- *  REVERSE CAR SPOTLIGHT — image LEFT · text RIGHT (edge-to-edge)
- *  · Mirrored version of HomepageCarSpotlight
- *  · Image touches the LEFT screen edge (zero gap)
+ *  REVERSE CAR SPOTLIGHT — image LEFT · text RIGHT
+ *  · Image now contained within viewport (no cut-off on left)
+ *  · Gentle left-edge fade + preserved right-edge fade toward text
+ *  · CTA removed — title + description only
  * ================================================================== */
 
 function ReverseCarSpotlight() {
@@ -1204,7 +1151,7 @@ function ReverseCarSpotlight() {
           gap: clamp(20px, 3vw, 48px);
           padding-top: 70px;
           padding-bottom: 70px;
-          padding-left: 0;
+          padding-left: max(24px, calc((100vw - 1280px) / 2 - 40px));
           padding-right: max(24px, calc((100vw - 1280px) / 2 + 24px));
           background: #ffffff;
           overflow: hidden;
@@ -1247,49 +1194,19 @@ function ReverseCarSpotlight() {
 
         .reverse-spotlight-copy p {
           max-width: 440px;
-          margin: 0 0 30px;
+          margin: 0;
           color: #6a6a6a;
           font-size: 14px;
           line-height: 1.8;
         }
 
-        .reverse-spotlight-cta {
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          min-height: 46px;
-          padding: 0 24px;
-          background: #0a0a0a;
-          color: #ffffff;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          text-decoration: none;
-          transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-            transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-            box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .reverse-spotlight-cta:hover {
-          background: var(--red);
-          transform: translateY(-2px);
-          box-shadow: 0 12px 24px rgba(229, 35, 47, 0.22);
-        }
-
-        .reverse-spotlight-cta :global(svg) {
-          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .reverse-spotlight-cta:hover :global(svg) {
-          transform: translateX(6px);
-        }
-
+        /* Image container — contained within viewport with gentle
+           fade on left & right so no hard cut-off appears. */
         .reverse-spotlight-art {
           position: relative;
           display: flex;
           align-items: center;
-          justify-content: flex-start;
+          justify-content: center;
           min-height: 480px;
           width: 100%;
           -webkit-mask-image:
@@ -1301,10 +1218,11 @@ function ReverseCarSpotlight() {
               transparent 100%
             ),
             linear-gradient(
-              to left,
+              to right,
               transparent 0%,
-              #000 18%,
-              #000 100%
+              #000 10%,
+              #000 82%,
+              transparent 100%
             );
           -webkit-mask-composite: source-in;
           mask-image:
@@ -1316,10 +1234,11 @@ function ReverseCarSpotlight() {
               transparent 100%
             ),
             linear-gradient(
-              to left,
+              to right,
               transparent 0%,
-              #000 18%,
-              #000 100%
+              #000 10%,
+              #000 82%,
+              transparent 100%
             );
           mask-composite: intersect;
         }
@@ -1327,11 +1246,11 @@ function ReverseCarSpotlight() {
         .reverse-spotlight-art img {
           display: block;
           width: 100%;
-          max-width: 860px;
+          max-width: 780px;
           max-height: 560px;
           height: auto;
           object-fit: contain;
-          object-position: left center;
+          object-position: center center;
           transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -1345,6 +1264,7 @@ function ReverseCarSpotlight() {
             gap: 20px;
             padding-top: 54px;
             padding-bottom: 54px;
+            padding-left: 16px;
             padding-right: 24px;
           }
 
@@ -1354,6 +1274,7 @@ function ReverseCarSpotlight() {
 
           .reverse-spotlight-art img {
             max-height: 400px;
+            max-width: 100%;
           }
         }
 
@@ -1363,6 +1284,7 @@ function ReverseCarSpotlight() {
             gap: 12px;
             padding-top: 38px;
             padding-bottom: 38px;
+            padding-left: 12px;
             padding-right: 16px;
           }
 
@@ -1388,24 +1310,10 @@ function ReverseCarSpotlight() {
           .reverse-spotlight-copy p {
             font-size: 11px;
             line-height: 1.6;
-            margin-bottom: 16px;
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
-          }
-
-          .reverse-spotlight-cta {
-            gap: 6px;
-            min-height: 36px;
-            padding: 0 12px;
-            font-size: 9px;
-            letter-spacing: 0.08em;
-          }
-
-          .reverse-spotlight-cta :global(svg) {
-            width: 12px;
-            height: 12px;
           }
 
           .reverse-spotlight-art {
@@ -1420,6 +1328,7 @@ function ReverseCarSpotlight() {
         @media (max-width: 400px) {
           .reverse-spotlight {
             gap: 8px;
+            padding-left: 8px;
             padding-right: 12px;
           }
 
@@ -1430,12 +1339,6 @@ function ReverseCarSpotlight() {
           .reverse-spotlight-copy p {
             font-size: 10px;
             -webkit-line-clamp: 2;
-          }
-
-          .reverse-spotlight-cta {
-            min-height: 32px;
-            padding: 0 9px;
-            font-size: 8px;
           }
 
           .reverse-spotlight-art {
@@ -1464,16 +1367,13 @@ function ReverseCarSpotlight() {
           From routine maintenance to full performance builds — every component in our catalog is
           inspected, tested and backed by fitment guarantees you can trust.
         </p>
-        <Link className="reverse-spotlight-cta" href="/category">
-          Explore the catalog <ArrowIcon />
-        </Link>
       </div>
     </section>
   );
 }
 
 /* ==================================================================
- *  FULL-WIDTH IMAGE SHOWCASE (Reusable)
+ *  FULL-WIDTH IMAGE SHOWCASE (Reusable · CTA removed)
  * ================================================================== */
 
 type FullWidthImageShowcaseProps = {
@@ -1482,8 +1382,6 @@ type FullWidthImageShowcaseProps = {
   eyebrow: string;
   title: ReactNode;
   subtitle: string;
-  ctaLabel: string;
-  ctaHref: string;
   sectionId: string;
 };
 
@@ -1493,8 +1391,6 @@ function FullWidthImageShowcase({
   eyebrow,
   title,
   subtitle,
-  ctaLabel,
-  ctaHref,
   sectionId,
 }: FullWidthImageShowcaseProps) {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -1718,7 +1614,7 @@ function FullWidthImageShowcase({
 
         .fullwidth-showcase-subtitle {
           max-width: 620px;
-          margin: 0 0 34px;
+          margin: 0;
           color: rgba(255, 255, 255, 0.85);
           font-size: 15px;
           line-height: 1.7;
@@ -1729,49 +1625,6 @@ function FullWidthImageShowcase({
 
         .fullwidth-showcase.is-visible .fullwidth-showcase-subtitle {
           animation: showcase-fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
-        }
-
-        .fullwidth-showcase-cta {
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          min-height: 50px;
-          padding: 0 30px;
-          background: #ffffff;
-          color: #0a0a0a;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          text-decoration: none;
-          border-radius: 999px;
-          pointer-events: auto;
-          opacity: 0;
-          transform: translateY(20px);
-          transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-            color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-            transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-            box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .fullwidth-showcase.is-visible .fullwidth-showcase-cta {
-          animation: showcase-fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
-        }
-
-        .fullwidth-showcase-cta:hover {
-          background: var(--red);
-          color: #ffffff;
-          transform: translateY(-3px);
-          box-shadow: 0 16px 32px rgba(229, 35, 47, 0.35);
-        }
-
-        .fullwidth-showcase-cta :global(svg) {
-          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .fullwidth-showcase-cta:hover :global(svg) {
-          transform: translateX(6px);
         }
 
         @keyframes showcase-fade-up {
@@ -1854,21 +1707,7 @@ function FullWidthImageShowcase({
           .fullwidth-showcase-subtitle {
             font-size: 11px;
             line-height: 1.6;
-            margin-bottom: 22px;
             max-width: 90%;
-          }
-
-          .fullwidth-showcase-cta {
-            min-height: 40px;
-            padding: 0 20px;
-            font-size: 10px;
-            letter-spacing: 0.1em;
-            gap: 8px;
-          }
-
-          .fullwidth-showcase-cta :global(svg) {
-            width: 13px;
-            height: 13px;
           }
         }
 
@@ -1890,8 +1729,7 @@ function FullWidthImageShowcase({
           .fullwidth-showcase-media img,
           .fullwidth-showcase-eyebrow,
           .fullwidth-showcase-title,
-          .fullwidth-showcase-subtitle,
-          .fullwidth-showcase-cta {
+          .fullwidth-showcase-subtitle {
             animation: none !important;
             opacity: 1 !important;
             transform: none !important;
@@ -1915,9 +1753,6 @@ function FullWidthImageShowcase({
           {title}
         </h2>
         <p className="fullwidth-showcase-subtitle">{subtitle}</p>
-        <Link className="fullwidth-showcase-cta" href={ctaHref}>
-          {ctaLabel} <ArrowIcon />
-        </Link>
       </div>
     </section>
   );
@@ -2052,15 +1887,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ──────────────────────────────────────────────────────────
-       *  BANNER SEQUENCE (reordered)
-       *  1. FullWidth img1  (was #2 → now first)
-       *  2. HomepageCarSpotlight (was #1 → moved between two fulls)
-       *  3. ReverseCarSpotlight · img4 (was #4 → moved between two fulls)
-       *  4. FullWidth img3  (was #3 → now last)
-       * ────────────────────────────────────────────────────────── */}
-
-      {/* BANNER 1 — FULL-WIDTH img1 */}
+      {/* 3. FULL-WIDTH IMAGE SHOWCASE №1 — img1.png */}
       <FullWidthImageShowcase
         sectionId="fullwidth-showcase-one"
         imageSrc="/images/img1.png"
@@ -2072,17 +1899,15 @@ export default function Home() {
           </>
         }
         subtitle="From daily drivers to weekend builds — discover OEM-grade components and performance upgrades crafted for the road ahead."
-        ctaLabel="Start Exploring"
-        ctaHref="/category"
       />
 
-      {/* BANNER 2 — HOMEPAGE CAR SPOTLIGHT (text left · image right) */}
+      {/* 4. HOMEPAGE CAR SPOTLIGHT (text left · image right) */}
       <HomepageCarSpotlight />
 
-      {/* BANNER 3 — REVERSE CAR SPOTLIGHT (image left · text right) — img4 */}
+      {/* 5. REVERSE CAR SPOTLIGHT (image left · text right) — img4 */}
       <ReverseCarSpotlight />
 
-      {/* BANNER 4 — FULL-WIDTH img3 */}
+      {/* 6. FULL-WIDTH IMAGE SHOWCASE №2 — img3.png */}
       <FullWidthImageShowcase
         sectionId="fullwidth-showcase-two"
         imageSrc="/images/img3.png"
@@ -2094,11 +1919,9 @@ export default function Home() {
           </>
         }
         subtitle="Premium brake systems, discs, pads and drivetrain upgrades — delivered with the precision, fitment and durability your vehicle deserves."
-        ctaLabel="Explore Parts"
-        ctaHref="/category"
       />
 
-      {/* 4. POPULAR VEHICLES */}
+      {/* 7. POPULAR VEHICLES */}
       {!loading && homeSelectedVehicles.length > 0 && (
         <section className="store-section vehicle-home-section" style={{ paddingTop: '60px', paddingBottom: '20px' }}>
           <div className="section-heading popular-cars-heading">
@@ -2148,12 +1971,12 @@ export default function Home() {
         </section>
       )}
 
-      {/* 5. PREMIUM CATEGORY SHOWCASE */}
+      {/* 8. PREMIUM CATEGORY SHOWCASE */}
       {!loading && popularCategories.length > 0 && (
         <CategoryShowcase categories={popularCategories} />
       )}
 
-      {/* 6. NEW ARRIVALS / PARTS */}
+      {/* 9. NEW ARRIVALS / PARTS */}
       {!loading && homeSelectedParts.length > 0 && (
         <section className="store-section arrivals-section">
           <div className="section-heading arrivals-heading">
@@ -2208,7 +2031,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* 7. EMPTY STATE */}
+      {/* 10. EMPTY STATE */}
       {!loading &&
         !popularCategories.length &&
         !homeSelectedParts.length &&
@@ -2223,7 +2046,7 @@ export default function Home() {
           </section>
         )}
 
-      {/* 8. SERVICE STRIP */}
+      {/* 11. SERVICE STRIP */}
       <section className="store-section service-strip">
         <div>
           <strong>Database-first catalog</strong>
