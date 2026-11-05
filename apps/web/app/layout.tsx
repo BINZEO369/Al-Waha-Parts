@@ -821,6 +821,18 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
 @media (max-width: 700px) {
   .category-start-card strong { max-width: 105px; font-size: 9px; line-height: 1.15; }
 }
+/* Compact manufacturer mark: keep the logo in the model corner, never above the vehicle card. */
+.vehicle-home-card-top { position: relative; }
+.vehicle-home-brand { min-height: 16px; display: flex; align-items: center; padding-right: 30px; }
+.vehicle-home-brand small { display: block; }
+.vehicle-home-logo-frame { position: absolute; top: 7px; right: 10px; width: 22px; height: 22px; display: grid; place-items: center; overflow: hidden; border: 1px solid #f1d0d3; border-radius: 50%; background: #fff; }
+.vehicle-home-logo-frame img { width: 16px !important; height: 16px !important; padding: 0 !important; object-fit: contain; }
+@media (max-width: 700px) {
+  .vehicle-home-logo-frame { top: 5px; right: 7px; width: 19px; height: 19px; }
+  .vehicle-home-logo-frame img { width: 14px !important; height: 14px !important; }
+  .vehicle-home-brand { padding-right: 24px; }
+}
+
 `;
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://al-waha-parts.vercel.app';
