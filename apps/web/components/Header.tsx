@@ -223,6 +223,10 @@ export function Footer() {
             <span>Customer Complaints &amp; Suggestions Policy</span>
             <span lang="bn">গ্রাহক অভিযোগ ও পরামর্শ নীতিমালা</span>
           </Link>
+          <Link href="/policies/shipping-delivery">
+            <span>Shipping &amp; Delivery Policy</span>
+            <span lang="bn">শিপিং ও ডেলিভারি নীতিমালা</span>
+          </Link>
         </div>
       </nav>
       <section className="footer-disclaimer" aria-labelledby="trademark-disclaimer-title">
