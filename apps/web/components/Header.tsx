@@ -165,8 +165,8 @@ export function Footer() {
     <footer className="store-footer">
       <div className="footer-main">
         <div className="footer-about">
-          <Link className="brand" href="/" aria-label="Al Waha Parts home">
-            <Image src="/logo.png" alt="Al Waha Parts" width={112} height={54} className="logo" />
+          <Link className="brand footer-brand-card" href="/" aria-label="Al Waha Parts home">
+            <Image src="/logo.png" alt="Al Waha Parts" width={100} height={100} className="logo footer-brand-logo" />
           </Link>
           <p>
             Quality automotive parts, fitment support and a parts desk you can rely on across the
@@ -192,9 +192,35 @@ export function Footer() {
             <br />
             Al Jubail 35428, Saudi Arabia
           </p>
-          <a href="mailto:hello@alwahaparts.com">hello@alwahaparts.com</a>
+          <a href="mailto:hello.alwaha@proton.me">hello.alwaha@proton.me</a>
         </div>
       </div>
+      <nav className="footer-policies" aria-label="Policies">
+        <h2>Policies <span lang="bn">/ নীতিমালা</span></h2>
+        <div className="footer-policy-grid">
+          <Link href="/policies/trademark-disclaimer">
+            <span>Trademark Disclaimer</span><span lang="bn">ট্রেডমার্ক সংক্রান্ত ঘোষণা</span>
+          </Link>
+          <Link href="/policies/copyright-disclaimer">
+            <span>Copyright Disclaimer</span><span lang="bn">কপিরাইট সংক্রান্ত ঘোষণা</span>
+          </Link>
+          <Link href="/policies/product-disclaimer">
+            <span>Product Disclaimer</span><span lang="bn">পণ্য সংক্রান্ত ঘোষণা</span>
+          </Link>
+          <Link href="/policies/privacy-policy">
+            <span>Privacy Policy</span><span lang="bn">গোপনীয়তা নীতিমালা</span>
+          </Link>
+          <Link href="/policies/terms-and-conditions">
+            <span>Terms &amp; Conditions</span><span lang="bn">শর্তাবলি</span>
+          </Link>
+          <Link href="/policies/return-refund-policy">
+            <span>Return &amp; Refund Policy</span><span lang="bn">পণ্য ফেরত ও অর্থ ফেরত নীতিমালা</span>
+          </Link>
+          <Link href="/policies/warranty-policy">
+            <span>Warranty Policy</span>
+          </Link>
+        </div>
+      </nav>
       <section className="footer-disclaimer" aria-labelledby="trademark-disclaimer-title">
         <h2 id="trademark-disclaimer-title">Trademark Disclaimer</h2>
         <p>
