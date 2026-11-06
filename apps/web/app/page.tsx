@@ -1440,42 +1440,24 @@ function FullWidthImageShowcase({
           width: 100%;
           height: clamp(360px, 62vh, 720px);
           overflow: hidden;
-          -webkit-mask-image:
-            linear-gradient(
-              to bottom,
-              transparent 0%,
-              rgba(0, 0, 0, 0.35) 6%,
-              #000 16%,
-              #000 84%,
-              rgba(0, 0, 0, 0.35) 94%,
-              transparent 100%
-            ),
-            linear-gradient(
-              to right,
-              transparent 0%,
-              #000 5%,
-              #000 95%,
-              transparent 100%
-            );
-          -webkit-mask-composite: source-in;
-          mask-image:
-            linear-gradient(
-              to bottom,
-              transparent 0%,
-              rgba(0, 0, 0, 0.35) 6%,
-              #000 16%,
-              #000 84%,
-              rgba(0, 0, 0, 0.35) 94%,
-              transparent 100%
-            ),
-            linear-gradient(
-              to right,
-              transparent 0%,
-              #000 5%,
-              #000 95%,
-              transparent 100%
-            );
-          mask-composite: intersect;
+          -webkit-mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.35) 6%,
+            #000 16%,
+            #000 84%,
+            rgba(0, 0, 0, 0.35) 94%,
+            transparent 100%
+          );
+          mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.35) 6%,
+            #000 16%,
+            #000 84%,
+            rgba(0, 0, 0, 0.35) 94%,
+            transparent 100%
+          );
         }
 
         .fullwidth-showcase-media img {
