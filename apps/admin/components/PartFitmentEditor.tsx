@@ -80,7 +80,7 @@ export function PartFitmentEditor() {
     finally { setSaving(false); }
   }
 
-  if (loading) return <section className="workspace-card"><strong>Loading fitment editor…</strong></section>;
+  if (loading) return <section className="workspace-card admin-inline-loader" role="status"><span className="loading-spinner" /><div><strong>Loading fitment editor</strong><small>Preparing parts and vehicle models</small></div></section>;
   return (
     <section className="fitment-editor content-section" aria-labelledby="part-fitment-editor-title">
       <div className="section-title"><div><span className="eyebrow"><b>02B</b>One-model fitment</span><h2 id="part-fitment-editor-title">Assign compatible vehicle years</h2><p>Each part can use one model only, with one or more compatible years.</p></div></div>

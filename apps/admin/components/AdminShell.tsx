@@ -14,6 +14,7 @@ const links: Array<[string, string, string, string]> = [
   ['/admins', 'Admin access', '06', 'Team permissions'],
   ['/settings', 'Settings', '07', 'System health'],
   ['/banners', 'Hero banners', '08', 'Storefront hero'],
+  ['/car-brands', 'Car brands', '09', 'Logo directory'],
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -42,7 +43,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [pathname, router]);
 
   if (pathname === '/login') return <>{children}</>;
-  if (checking) return <div className="admin-loading"><div className="loading-mark">AW</div><strong>Verifying secure access…</strong></div>;
+  if (checking) return <div className="admin-loading" role="status" aria-live="polite"><div className="admin-loading-card"><div className="loading-mark"><span>AW</span><i /></div><div className="admin-loading-copy"><strong>Preparing your workspace</strong><span>Verifying secure access</span></div><div className="loading-progress"><b /></div></div></div>;
   if (authError) return <div className="admin-loading"><strong>{authError}</strong><Link className="primary-button" href="/login">Return to login</Link></div>;
 
   async function signOut() { await supabase?.auth.signOut(); router.replace('/login'); }

@@ -978,6 +978,44 @@ app.delete(
   },
 );
 
+const editableCarBrandFields = [
+  'manufacturer_name',
+  'slug',
+  'logo_url',
+  'is_active',
+  'sort_order',
+] as const;
+app.get('/api/v1/admin/car-brands', { preHandler: requireAdmin as any }, async (_request, reply) => {
+  const { data, error } = await getSupabaseAdmin()
+    .from('car_brands')
+    .select('*')
+    .order('sort_order')
+    .order('manufacturer_name')
+    .limit(500);
+  if (error) return jsonError(reply, 500, error.message);
+  return { data: data ?? [] };
+});
+app.post('/api/v1/admin/car-brands', { preHandler: requireAdmin as any }, async (request, reply) => {
+  const body = pickFields((request.body ?? {}) as Record<string, unknown>, editableCarBrandFields);
+  if (!body.manufacturer_name || !body.slug || !body.logo_url)
+    return jsonError(reply, 400, 'manufacturer_name, slug and logo_url are required');
+  const { data, error } = await getSupabaseAdmin().from('car_brands').insert(body).select().single();
+  if (error) return jsonError(reply, 400, error.message);
+  return reply.code(201).send({ data });
+});
+app.patch('/api/v1/admin/car-brands/:id', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string }; Body: Record<string, unknown> }>, reply) => {
+  const body = pickFields(request.body ?? {}, editableCarBrandFields);
+  if (!Object.keys(body).length) return jsonError(reply, 400, 'No editable car brand fields provided');
+  const { data, error } = await getSupabaseAdmin().from('car_brands').update(body).eq('id', request.params.id).select().single();
+  if (error) return jsonError(reply, 400, error.message);
+  return { data };
+});
+app.delete('/api/v1/admin/car-brands/:id', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+  const { data, error } = await getSupabaseAdmin().from('car_brands').delete().eq('id', request.params.id).select('id').single();
+  if (error) return jsonError(reply, 400, `Car brand could not be permanently deleted: ${error.message}`);
+  return { data };
+});
+
 app.get(
   '/api/v1/admin/bookings',
   { preHandler: requireAdmin as any },
@@ -1105,11 +1143,11 @@ app.delete(
   async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
     const { data, error } = await getSupabaseAdmin()
       .from('parts')
-      .update({ status: 'inactive' })
+      .delete()
       .eq('id', request.params.id)
-      .select('id,status')
+      .select('id')
       .single();
-    if (error) return jsonError(reply, 404, 'Part could not be deleted.');
+    if (error) return jsonError(reply, 400, `Part could not be permanently deleted: ${error.message}`);
     return { data };
   },
 );
@@ -1254,12 +1292,12 @@ app.delete(
   { preHandler: requireAdmin as any },
   async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
     const { data, error } = await getSupabaseAdmin()
-      .from('car_brands')
-      .update({ status: 'inactive', is_active: false })
+      .from('vehicles')
+      .delete()
       .eq('id', request.params.id)
-      .select('id,status')
+      .select('id')
       .single();
-    if (error) return jsonError(reply, 404, 'Vehicle could not be deleted.');
+    if (error) return jsonError(reply, 400, `Vehicle could not be permanently deleted: ${error.message}`);
     return { data };
   },
 );
@@ -1332,11 +1370,11 @@ app.delete(
   async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
     const { data, error } = await getSupabaseAdmin()
       .from('parts_categories')
-      .update({ status: 'inactive' })
+      .delete()
       .eq('id', request.params.id)
-      .select('id,status')
+      .select('id')
       .single();
-    if (error) return jsonError(reply, 404, 'Category could not be deleted.');
+    if (error) return jsonError(reply, 400, `Category could not be permanently deleted: ${error.message}`);
     return { data };
   },
 );

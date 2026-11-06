@@ -31,7 +31,7 @@ export function PartsTable() {
     return () => { mounted = false; };
   }, []);
 
-  if (loading) return <div className="admin-loading"><strong>Loading live parts…</strong></div>;
+  if (loading) return <div className="admin-inline-loader" role="status"><span className="loading-spinner" /><div><strong>Loading live parts</strong><small>Syncing inventory from Supabase</small></div></div>;
   if (error) return <div className="admin-alert" role="alert">{error}</div>;
   if (!rows.length) return <div className="admin-empty">No parts found in the live catalog.</div>;
 

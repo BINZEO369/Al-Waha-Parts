@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { adminFetch } from '../lib/auth';
 
-type ResourceKind = 'parts' | 'vehicles' | 'categories' | 'admins' | 'banners';
+type ResourceKind = 'parts' | 'vehicles' | 'categories' | 'admins' | 'banners' | 'carBrands';
 type Resource = Record<string, unknown> & { id: string };
 
 type Field = {
@@ -99,6 +99,19 @@ const config: Record<
       { key: 'sort_order', label: 'Display order', type: 'number' },
     ],
   },
+  carBrands: {
+    endpoint: '/api/v1/admin/car-brands',
+    title: 'Car brand logo records',
+    empty: 'No car brand records found.',
+    search: 'Search manufacturer, slug, or logo URL…',
+    fields: [
+      { key: 'manufacturer_name', label: 'Manufacturer', required: true },
+      { key: 'slug', label: 'URL slug', required: true },
+      { key: 'logo_url', label: 'Logo image URL', required: true },
+      { key: 'sort_order', label: 'Display order', type: 'number' },
+      { key: 'is_active', label: 'Active logo', type: 'checkbox' },
+    ],
+  },
   admins: {
     endpoint: '/api/v1/admin/admins',
     title: 'Team access records',
@@ -144,6 +157,13 @@ function summary(kind: ResourceKind, row: Resource) {
       meta: `${text(row.slug)} · ${text(row.eyebrow, 'No eyebrow')}`,
       detail: `${text(row.cta_label)} → ${text(row.cta_href)} · order ${text(row.sort_order, '0')}`,
       status: row.status,
+    };
+  if (kind === 'carBrands')
+    return {
+      title: text(row.manufacturer_name),
+      meta: `${text(row.slug)} · ${text(row.logo_url)}`,
+      detail: `${row.is_active ? 'Active' : 'Hidden'} · order ${text(row.sort_order, '0')}`,
+      status: row.is_active ? 'active' : 'inactive',
     };
   return {
     title: text(row.name),
@@ -230,10 +250,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
     }
   }
   async function remove(row: Resource, title: string) {
-    const confirmation =
-      kind === 'banners'
-        ? `Permanently delete ${title}? It will be removed from the database and live storefront. This cannot be undone.`
-        : `Delete ${title}? This will hide it from the storefront and keep its history safe.`;
+    const confirmation = `Permanently delete ${title}? It will be removed from the database and live storefront. Related fitment links may also be removed. This cannot be undone.`;
     if (!window.confirm(confirmation)) return;
     setError('');
     try {
@@ -258,7 +275,9 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
                     ? '04'
                     : kind === 'admins'
                       ? '06'
-                      : '08'}
+                      : kind === 'banners'
+                        ? '08'
+                        : '09'}
             </b>
             {meta.title}
           </span>
@@ -333,8 +352,9 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
         </div>
       </div>
       {loading && (
-        <div className="empty-table-state loading-state">
-          <span className="loading-spinner" /> Loading live {kind} from Supabase…
+        <div className="resource-loading-state" role="status" aria-live="polite">
+          <div className="resource-loading-heading"><span className="loading-spinner" /><div><strong>Loading {meta.title.toLowerCase()}</strong><small>Fetching the latest records from Supabase</small></div></div>
+          <div className="loading-skeleton-list" aria-hidden="true"><i /><i /><i /></div>
         </div>
       )}
       {!loading && error && (
@@ -372,7 +392,9 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
                       ? `Price · ${text(row.currency, 'SAR')}`
                       : kind === 'admins'
                         ? 'Access review'
-                        : 'Live database record'}
+                        : kind === 'carBrands'
+                          ? 'Database logo relation'
+                          : 'Live database record'}
                   </small>
                 </div>
                 <span className={statusClass(item.status)}>
