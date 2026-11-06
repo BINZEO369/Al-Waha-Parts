@@ -187,6 +187,12 @@ export function Footer() {
           <Link href="/booking/track">Track booking</Link>
         </div>
         <div className="footer-column">
+          <h3>Shop</h3>
+          <Link href="/category">All categories</Link>
+          <Link href="/vehicles">Vehicle finder</Link>
+          <Link href="/catalog">New arrivals</Link>
+        </div>
+        <div className="footer-column">
           <h3>Contact us</h3>
           <p>
             Al Waha Car Scrap

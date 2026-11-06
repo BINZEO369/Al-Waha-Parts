@@ -273,7 +273,7 @@ h1, h2, h3, p { margin-top: 0; }
 
 /* ---------- FOOTER ---------- */
 .store-footer { background: linear-gradient(135deg, #b9101c 0%, var(--red) 55%, #c91420 100%); color: #fff; }
-.footer-main { max-width: var(--max); padding: 48px 18px 34px; margin: 0 auto; display: grid; grid-template-columns: 1.35fr 1fr 1fr 1.1fr; gap: 18px; }
+.footer-main { max-width: var(--max); padding: 48px 18px 34px; margin: 0 auto; display: grid; grid-template-columns: 1.25fr repeat(4, minmax(0, 1fr)); gap: 16px; }
 .footer-about, .footer-column { padding: 20px; border: 1px solid rgba(255,255,255,.16); border-radius: 14px; background: rgba(255,255,255,.07); }
 .footer-about .footer-brand-card { width: 112px; height: 112px; justify-content: center; padding: 6px; border: 1px solid rgba(255,255,255,.85); border-radius: 16px; background: #fff; box-shadow: 0 4px 12px rgba(67,0,7,.1); }
 .footer-about .footer-brand-logo { width: 100px; height: 100px; object-fit: contain; filter: none; opacity: 1; }
