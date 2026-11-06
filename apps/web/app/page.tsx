@@ -1691,36 +1691,6 @@ export default function Home() {
           outline-offset: 3px;
         }
 
-        .popular-cars-heading {
-          width: 100%;
-          align-items: center;
-          flex-direction: row;
-          justify-content: center !important;
-          margin-bottom: 22px;
-        }
-
-        .popular-cars-title-box {
-          display: inline-block;
-          margin: 0;
-          padding: 12px 22px;
-          border: 1px solid var(--red);
-          color: var(--red);
-          font-family: 'Montserrat', sans-serif;
-          font-size: 21px;
-          letter-spacing: -.03em;
-          text-align: center;
-        }
-
-        .popular-cars-title-box::after {
-          display: none;
-        }
-
-        @media (max-width: 520px) {
-          .popular-cars-title-box {
-            padding: 10px 16px;
-            font-size: 18px;
-          }
-        }
       `}</style>
 
       {/* 1. HERO BANNER */}
@@ -1768,7 +1738,11 @@ export default function Home() {
       {!loading && homeSelectedVehicles.length > 0 && (
         <section className="store-section vehicle-home-section" style={{ paddingTop: '60px', paddingBottom: '20px' }}>
           <div className="section-heading popular-cars-heading">
-            <h2 className="popular-cars-title-box">Popular Cars</h2>
+            <div>
+              <span className="popular-cars-eyebrow">DATABASE FITMENT</span>
+              <h2 className="popular-cars-title-box">Popular Cars</h2>
+              <p>Explore the models our customers choose most for their next parts upgrade.</p>
+            </div>
           </div>
           <div className="vehicle-home-grid">
             {homeSelectedVehicles.map((vehicle) => (
