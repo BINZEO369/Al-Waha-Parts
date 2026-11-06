@@ -1817,9 +1817,6 @@ export default function Home() {
       {/* 1. HERO BANNER */}
       <HeroCarousel />
 
-      {/* 2. CAR BRAND LOGOS */}
-      <CarBrandStrip brands={carBrands} />
-
       {error && (
         <div className="store-section data-alert home-data-alert">{error}</div>
       )}
@@ -1863,7 +1860,10 @@ export default function Home() {
         subtitle="Premium brake systems, discs, pads and drivetrain upgrades — delivered with the precision, fitment and durability your vehicle deserves."
       />
 
-      {/* 7. POPULAR VEHICLES */}
+      {/* CAR BRAND LOGOS */}
+      <CarBrandStrip brands={carBrands} />
+
+      {/* POPULAR VEHICLES */}
       {!loading && homeSelectedVehicles.length > 0 && (
         <section className="store-section vehicle-home-section" style={{ paddingTop: '60px', paddingBottom: '20px' }}>
           <div className="section-heading popular-cars-heading">
