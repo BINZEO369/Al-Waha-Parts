@@ -21,7 +21,7 @@ export default function ContactPage() {
         </div>
         <div>
           <span className="eyebrow">Email</span>
-          <h2>desk@alwahaparts.com</h2>
+          <h2>alwaha@proton.me</h2>
           <p>We usually reply within one business day.</p>
         </div>
       </div>
