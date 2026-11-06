@@ -51,14 +51,18 @@ h1, h2, h3, p { margin-top: 0; }
 .site-chrome {
   position: sticky;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 100;
   background: var(--white);
   box-shadow: 0 2px 14px rgba(0, 0, 0, .06);
 }
 .store-header {
-  max-width: var(--max);
+  width: 100%;
+  max-width: none;
   min-height: 82px;
-  padding: 0 18px;
+  padding: 0 max(18px, calc((100vw - var(--max)) / 2 + 18px));
   margin: 0 auto;
   display: flex;
   align-items: center;
