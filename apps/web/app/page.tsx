@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { brandModelHref, brandSlugFromName } from '../lib/vehicle-routes';
+import { PageLoader } from '../components/PageLoader';
 
 /* ==================================================================
  *  TYPES
@@ -145,30 +146,7 @@ function HeroCarousel() {
   }, [banners.length]);
 
   if (loading) {
-    return (
-      <section className="hero-carousel-root" aria-label="Featured banners loading" aria-busy="true">
-        <style jsx global>{`
-          .hero-carousel-root {
-            position: relative;
-            width: 100%;
-            height: 600px;
-            background: #111;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .shimmer {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #1a1a1a 25%, #262626 38%, #1a1a1a 63%);
-            background-size: 400% 100%;
-            animation: shimmer 1.25s ease infinite;
-          }
-          @keyframes shimmer { to { background-position: -100% 0; } }
-        `}</style>
-        <div className="shimmer" aria-hidden="true" />
-      </section>
-    );
+    return <PageLoader label="Loading featured banners" />;
   }
 
   if (!banners.length) return null;
@@ -1752,9 +1730,7 @@ export default function Home() {
         <div className="store-section data-alert home-data-alert">{error}</div>
       )}
       {loading && (
-        <div className="store-section home-loading">
-          Loading categories, parts and vehicles from the database…
-        </div>
+        <PageLoader label="Loading the live catalog" />
       )}
 
       {/* 3. FULL-WIDTH IMAGE SHOWCASE №1 — img1.png */}

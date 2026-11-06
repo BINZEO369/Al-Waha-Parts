@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { use, useEffect, useState } from 'react';
 import { apiFetch } from '../../../../../../packages/shared/src/api';
 import { PartCard, type PartCardData } from '../../../../components/PartCard';
+import { PageLoader } from '../../../../components/PageLoader';
 
 type Brand = {
   id: string;
@@ -93,7 +94,7 @@ export default function BrandModelPage({
   if (loading)
     return (
       <main className="page-shell">
-        <div className="empty-state">Loading vehicle details and compatible products…</div>
+        <PageLoader label="Loading vehicle details" />
       </main>
     );
   if (error || !detail)

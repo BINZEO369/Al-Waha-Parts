@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../../packages/shared/src/api';
+import { PageLoader } from '../../components/PageLoader';
 
 type Brand = {
   id: string;
@@ -179,7 +180,7 @@ export default function AllBrandsPage() {
         {!loading && !error && <span className="all-brands-count">{brands.length} brands</span>}
       </header>
 
-      {loading && <div className="empty-state">Loading all brands from the database…</div>}
+      {loading && <PageLoader label="Loading all brands" />}
       {error && <div className="data-alert">{error}</div>}
       {!loading && !error && brands.length === 0 && (
         <div className="empty-state">No active brands are available yet.</div>

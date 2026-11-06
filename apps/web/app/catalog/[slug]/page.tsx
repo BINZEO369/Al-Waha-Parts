@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch } from '../../../../../packages/shared/src/api';
 import { formatSar } from '../../../../../packages/shared/src/currency';
 import { useCart } from '../../../components/CartProvider';
+import { PageLoader } from '../../../components/PageLoader';
 
 type VehicleFitment = {
   id: string;
@@ -393,7 +394,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             }
           }
         `}</style>
-        <div className="empty-state">Loading product details…</div>
+        <PageLoader label="Loading product details" />
       </main>
     );
   }

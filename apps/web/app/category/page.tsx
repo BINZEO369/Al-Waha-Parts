@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../../packages/shared/src/api';
+import { PageLoader } from '../../components/PageLoader';
 
 type Category = {
   id: string;
@@ -36,7 +37,7 @@ export default function CategoryPage() {
           <h1 id="category-directory-title">Start from a category</h1>
           <span className="category-count">{categories.length} categories</span>
         </div>
-        {loading && <div className="empty-state">Loading categories…</div>}
+        {loading && <PageLoader label="Loading categories" />}
         {error && <div className="data-alert">{error}</div>}
         {!loading && !error && categories.length === 0 && <div className="empty-state">No categories are available yet.</div>}
         {!loading && !error && categories.length > 0 && (

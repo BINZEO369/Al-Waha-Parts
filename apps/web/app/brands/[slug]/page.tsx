@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { use, useEffect, useState } from 'react';
 import { apiFetch } from '../../../../../packages/shared/src/api';
 import { brandModelHref } from '../../../lib/vehicle-routes';
+import { PageLoader } from '../../../components/PageLoader';
 
 type Brand = {
   id: string;
@@ -63,7 +64,7 @@ export default function BrandPage({ params }: { params: Promise<{ slug: string }
   if (!detail)
     return (
       <main className="page-shell">
-        <div className="empty-state">Loading brand vehicles…</div>
+        <PageLoader label="Loading brand vehicles" />
       </main>
     );
 

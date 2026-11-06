@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { PartCard, type PartCardData } from './PartCard';
+import { PageLoader } from './PageLoader';
 
 type Category = {
   id: string;
@@ -116,7 +117,7 @@ export function CatalogClient() {
       {error && <div className="data-alert">{error}</div>}
       <div className="catalog-grid">
         {loading ? (
-          <div className="empty-state">Loading the latest catalog from the database…</div>
+          <PageLoader label="Loading the latest catalog" />
         ) : parts.length ? (
           parts.map((part) => <PartCard key={part.id} part={part} />)
         ) : (

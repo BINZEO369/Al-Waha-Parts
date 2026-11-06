@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { use, useEffect, useState } from 'react';
 import { apiFetch } from '../../../../../packages/shared/src/api';
 import { PartCard, type PartCardData } from '../../../components/PartCard';
+import { PageLoader } from '../../../components/PageLoader';
 
 type Category = {
   id: string;
@@ -35,7 +36,7 @@ export default function CategoryDetailPage({ params }: { params: Promise<{ slug:
       .finally(() => setLoading(false));
   }, [apiUrl, slug]);
 
-  if (loading) return <main className="page-shell"><div className="empty-state">Loading category details and products…</div></main>;
+  if (loading) return <PageLoader label="Loading category details" />;
   if (error || !detail) return <main className="page-shell"><div className="data-alert">{error || 'Category not found.'}</div><Link className="button" href="/category">Back to categories</Link></main>;
 
   const { category, parts } = detail;

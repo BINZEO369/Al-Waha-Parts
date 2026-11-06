@@ -335,6 +335,15 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .empty-state { grid-column: 1 / -1; padding: 55px 20px; border: 1px dashed var(--line); color: #888; text-align: center; }
 .empty-state strong, .empty-state span { display: block; }
 .empty-state span { margin-top: 8px; font-size: 12px; }
+.page-loader { min-height: 42vh; padding: 80px 20px; display: grid; place-items: center; align-content: center; gap: 10px; background: #fff; color: var(--red); text-align: center; }
+.page-loader-mark { width: 72px; height: 56px; display: flex; align-items: flex-end; justify-content: center; gap: 6px; }
+.page-loader-mark span { width: 11px; height: 28px; background: var(--red); animation: alwaha-loader-bars 1s ease-in-out infinite; }
+.page-loader-mark span:nth-child(2) { height: 44px; animation-delay: .14s; }
+.page-loader-mark span:nth-child(3) { height: 34px; animation-delay: .28s; }
+.page-loader strong { color: var(--ink); font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.page-loader small { color: #999; font-size: 10px; }
+@keyframes alwaha-loader-bars { 0%, 100% { transform: scaleY(.65); opacity: .55; } 50% { transform: scaleY(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .page-loader-mark span { animation: none; } }
 
 /* ---------- FORMS / CONTACT ---------- */
 .booking-form, .finder-card { max-width: 860px; padding: 34px; display: grid; gap: 24px; border: 1px solid var(--line); background: #fff; box-shadow: 0 16px 40px rgba(28,28,28,.06); }
