@@ -16,7 +16,7 @@ export default function ContactPage() {
       <div className="contact-grid">
         <div>
           <span className="eyebrow">Parts desk</span>
-          <h2>+971 4 000 0000</h2>
+          <h2>0533866922</h2>
           <p>Mon–Sat · 08:00–18:00</p>
         </div>
         <div>
