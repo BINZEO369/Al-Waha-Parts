@@ -11,6 +11,7 @@ const navItems = [
   { label: 'Categories', href: '/category' },
   { label: 'Car Brands', href: '/brands' },
   { label: 'Track Booking', href: '/booking/track' },
+  { label: 'Policies', href: '/policies' },
   { label: 'Contact', href: '/contact' },
 ];
 
