@@ -10,6 +10,7 @@
     { "path": "/category", "title": "Categories" },
     { "path": "/category/:slug", "title": "Category Details" },
     { "path": "/contact", "title": "Contact" },
+    { "path": "/policies/copyright-disclaimer", "title": "Copyright Disclaimer" },
     { "path": "/policies/trademark-disclaimer", "title": "Trademark Disclaimer" },
     { "path": "/login", "title": "Login" },
     { "path": "/map", "title": "Our Location" }
