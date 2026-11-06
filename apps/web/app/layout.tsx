@@ -833,6 +833,146 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
   .vehicle-home-brand { padding-right: 24px; }
 }
 
+/* ---------- LIQUID GLASS HEADER: one mobile-first layout at every width ---------- */
+.site-chrome {
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.store-header {
+  width: calc(100% - 32px);
+  min-height: 96px;
+  margin: 12px auto 0;
+  padding: 0 24px;
+  justify-content: space-between;
+  gap: 20px;
+  border: 1px solid rgba(255, 255, 255, .72);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .62);
+  box-shadow: 0 10px 36px rgba(31, 41, 55, .11), inset 0 1px 0 rgba(255,255,255,.8);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  backdrop-filter: blur(24px) saturate(170%);
+}
+.header-actions { margin-left: auto; gap: 20px; }
+.menu-toggle {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: 15px;
+  background: rgba(255,255,255,.55);
+  color: var(--ink);
+  box-shadow: 0 4px 14px rgba(31,41,55,.08), inset 0 1px 0 rgba(255,255,255,.9);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  transition: background .2s ease, transform .2s ease;
+}
+.menu-toggle:hover { background: rgba(255,255,255,.86); transform: translateY(-1px); }
+.main-nav {
+  display: block;
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  bottom: 14px;
+  z-index: 220;
+  width: min(360px, calc(100vw - 28px));
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: 24px;
+  background: rgba(248, 250, 252, .76);
+  color: var(--ink);
+  box-shadow: 0 24px 70px rgba(15,23,42,.22), inset 0 1px 0 rgba(255,255,255,.9);
+  -webkit-backdrop-filter: blur(30px) saturate(175%);
+  backdrop-filter: blur(30px) saturate(175%);
+  transform: translateX(calc(100% + 32px));
+  transition: transform .28s cubic-bezier(.2,.75,.25,1);
+}
+.main-nav.is-open { transform: translateX(0); }
+.nav-drawer-header {
+  min-height: 76px;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(31,41,55,.1);
+  color: var(--ink);
+  font-family: 'Montserrat';
+  font-size: 18px;
+}
+.nav-drawer-header button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(31,41,55,.12);
+  border-radius: 12px;
+  background: rgba(255,255,255,.6);
+  color: var(--ink);
+}
+.nav-drawer-header svg { width: 20px; height: 20px; }
+.main-nav-inner {
+  max-width: none;
+  min-height: 0;
+  padding: 18px 18px 26px;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: start;
+  gap: 5px;
+}
+.main-nav a {
+  min-height: 48px;
+  padding: 0 15px;
+  border-radius: 12px;
+  color: #252b35;
+  font-size: 12px;
+  transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+.main-nav a:hover { background: rgba(229,28,35,.09); color: var(--red); transform: translateX(2px); }
+.main-nav a.active { background: var(--red); color: #fff; }
+.main-nav a.active:hover { background: var(--red); color: #fff; }
+.language-toggle {
+  min-height: 42px;
+  margin: 14px 0 0;
+  border-color: rgba(31,41,55,.14);
+  border-radius: 12px;
+  background: rgba(255,255,255,.65);
+}
+.menu-drawer-backdrop {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  border: 0;
+  background: rgba(15,23,42,.2);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+@media (max-width: 700px) {
+  .store-header {
+    width: calc(100% - 20px);
+    min-height: 70px;
+    margin-top: 8px;
+    padding: 0 14px;
+    border-radius: 19px;
+    gap: 14px;
+  }
+  .logo { width: 90px; height: 46px; }
+  .header-actions { gap: 14px; }
+  .menu-toggle { width: 42px; height: 42px; border-radius: 13px; }
+  .main-nav {
+    top: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: min(340px, calc(100vw - 20px));
+    min-height: 0;
+  }
+  .main-nav-inner { grid-template-columns: 1fr; }
+}
+
 `;
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://al-waha-parts.vercel.app';
