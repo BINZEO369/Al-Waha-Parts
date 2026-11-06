@@ -255,6 +255,15 @@ export function Footer() {
         <span>© 2026 Al Waha Parts. All rights reserved.</span>
         <span>Right part. Right fit.</span>
       </div>
+      <div className="footer-build-banner">
+        <Image
+          src="/build-with-binzeo.jpg"
+          alt="Build with Binzeo"
+          width={2172}
+          height={724}
+          priority={false}
+        />
+      </div>
     </footer>
   );
 }

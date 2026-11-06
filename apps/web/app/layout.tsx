@@ -294,6 +294,8 @@ h1, h2, h3, p { margin-top: 0; }
 .footer-disclaimer h2 { margin: 0 0 9px; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .footer-disclaimer p { max-width: 1050px; margin: 0 0 7px; font-size: 10px; line-height: 1.7; }
 .footer-bottom { max-width: var(--max); padding: 16px 18px; margin: 0 auto; display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,.16); color: rgba(255,255,255,.7); font-size: 10px; }
+.footer-build-banner { width: 100%; line-height: 0; background: #fff; }
+.footer-build-banner img { display: block; width: 100%; height: auto; max-width: none; }
 
 /* ---------- SHARED INNER PAGES ---------- */
 .page-shell { max-width: var(--max); padding: 68px 18px 100px; margin: 0 auto; }
