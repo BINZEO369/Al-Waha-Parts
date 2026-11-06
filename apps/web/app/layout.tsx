@@ -863,14 +863,14 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
   backdrop-filter: none;
 }
 .store-header {
-  width: calc(100% - 32px);
+  width: 100%;
   min-height: 96px;
-  margin: 12px auto 0;
+  margin: 0;
   padding: 0 24px;
   justify-content: space-between;
   gap: 20px;
   border: 1px solid rgba(255, 255, 255, .72);
-  border-radius: 24px;
+  border-radius: 0;
   background: rgba(255, 255, 255, .62);
   box-shadow: 0 10px 36px rgba(31, 41, 55, .11), inset 0 1px 0 rgba(255,255,255,.8);
   -webkit-backdrop-filter: blur(24px) saturate(170%);
@@ -975,11 +975,11 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
 }
 @media (max-width: 700px) {
   .store-header {
-    width: calc(100% - 20px);
+    width: 100%;
     min-height: 70px;
-    margin-top: 8px;
+    margin-top: 0;
     padding: 0 14px;
-    border-radius: 19px;
+    border-radius: 0;
     gap: 14px;
   }
   .logo { width: 90px; height: 46px; }
