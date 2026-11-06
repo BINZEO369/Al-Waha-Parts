@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { formatSar } from '../../../packages/shared/src/currency';
-import { brandModelHref, brandSlugFromName } from '../lib/vehicle-routes';
 import { PageLoader } from '../components/PageLoader';
 
 /* ==================================================================
@@ -50,26 +49,6 @@ type Part = {
   sort_order?: number;
 };
 
-type Vehicle = {
-  id: string;
-  slug?: string | null;
-  manufacturer_name: string;
-  manufacturer_logo?: string | null;
-  model_name: string;
-  generation?: string | null;
-  chassis_code?: string | null;
-  year_start?: number | null;
-  year_end?: number | null;
-  engine_code?: string | null;
-  engine_capacity?: number | string | null;
-  fuel_type?: string | null;
-  transmission?: string | null;
-  vehicle_type?: string | null;
-  cover_image_url?: string | null;
-  is_featured?: boolean;
-  sort_order?: number;
-};
-
 type CarBrand = {
   id: string;
   manufacturer_name: string;
@@ -78,22 +57,6 @@ type CarBrand = {
   sort_order: number;
 };
 
-const HOME_VEHICLE_LIMIT = 6;
-const HOME_BRAND_PREFERENCE_KEY = 'alwaha-home-brand-preference';
-
-function randomVehicles(items: Vehicle[], limit = HOME_VEHICLE_LIMIT) {
-  const shuffled = [...items];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    const current = shuffled[index];
-    const replacement = shuffled[swapIndex];
-    if (current && replacement) {
-      shuffled[index] = replacement;
-      shuffled[swapIndex] = current;
-    }
-  }
-  return shuffled.slice(0, limit);
-}
 
 /* ==================================================================
  *  ICONS
@@ -463,9 +426,6 @@ function CarBrandStrip({ brands }: { brands: CarBrand[] }) {
               href={`/brands/${brand.slug}`}
               key={brand.id}
               aria-label={`View ${brand.manufacturer_name} vehicles`}
-              onClick={() => {
-                window.localStorage.setItem(HOME_BRAND_PREFERENCE_KEY, brand.manufacturer_name);
-              }}
             >
               <img src={brand.logo_url} alt="" aria-hidden="true" loading="lazy" />
             </Link>
@@ -1615,25 +1575,9 @@ export default function Home() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const [popularCategories, setPopularCategories] = useState<Category[]>([]);
   const [parts, setParts] = useState<Part[]>([]);
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [carBrands, setCarBrands] = useState<CarBrand[]>([]);
-  const [preferredBrand, setPreferredBrand] = useState('');
-  const [homeSelectedVehicles, setHomeSelectedVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    const readPreference = () => {
-      try {
-        setPreferredBrand(window.localStorage.getItem(HOME_BRAND_PREFERENCE_KEY) || '');
-      } catch {
-        setPreferredBrand('');
-      }
-    };
-    readPreference();
-    window.addEventListener('pageshow', readPreference);
-    return () => window.removeEventListener('pageshow', readPreference);
-  }, []);
 
   useEffect(() => {
     if (!apiUrl) {
@@ -1648,12 +1592,10 @@ export default function Home() {
     Promise.all([
       apiFetch<Category[]>(apiUrl, '/api/v1/popular-categories?limit=200'),
       apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=200&featured_only=true'),
-      apiFetch<Vehicle[]>(apiUrl, '/api/v1/homepage-selected-vehicles?limit=200'),
     ])
-      .then(([nextPopularCategories, nextParts, nextVehicles]) => {
+      .then(([nextPopularCategories, nextParts]) => {
         setPopularCategories(nextPopularCategories);
         setParts(nextParts);
-        setVehicles(nextVehicles);
       })
       .catch((cause) => {
         setError(
@@ -1666,17 +1608,6 @@ export default function Home() {
   }, [apiUrl]);
 
   const homeSelectedParts = parts;
-
-  useEffect(() => {
-    if (vehicles.length === 0) {
-      setHomeSelectedVehicles([]);
-      return;
-    }
-    const preferredVehicles = preferredBrand
-      ? vehicles.filter((vehicle) => vehicle.manufacturer_name.trim().toLowerCase() === preferredBrand.trim().toLowerCase())
-      : [];
-    setHomeSelectedVehicles(randomVehicles(preferredVehicles.length ? preferredVehicles : vehicles));
-  }, [preferredBrand, vehicles]);
 
   if (loading) return <PageLoader label="Loading Al Waha Parts" />;
 
@@ -1733,60 +1664,6 @@ export default function Home() {
 
       {/* CAR BRAND LOGOS */}
       <CarBrandStrip brands={carBrands} />
-
-      {/* POPULAR VEHICLES */}
-      {!loading && homeSelectedVehicles.length > 0 && (
-        <section className="store-section vehicle-home-section" style={{ paddingTop: '60px', paddingBottom: '20px' }}>
-          <div className="section-heading popular-cars-heading">
-            <div>
-              <span className="popular-cars-eyebrow">DATABASE FITMENT</span>
-              <h2 className="popular-cars-title-box">Popular Cars</h2>
-              <p>Explore the models our customers choose most for their next parts upgrade.</p>
-            </div>
-          </div>
-          <div className="vehicle-home-grid">
-            {homeSelectedVehicles.map((vehicle) => (
-              <Link
-                className="vehicle-home-card"
-                href={
-                  vehicle.slug
-                    ? brandModelHref(
-                        carBrands.find((brand) => brand.manufacturer_name === vehicle.manufacturer_name)?.slug ||
-                          brandSlugFromName(vehicle.manufacturer_name),
-                        vehicle.slug,
-                      )
-                    : '/brands'
-                }
-                key={vehicle.id}
-              >
-                <div className="vehicle-home-card-top">
-                  <div className="vehicle-home-brand">
-                    {vehicle.manufacturer_logo && (
-                      <span className="vehicle-home-logo-frame">
-                        <img src={vehicle.manufacturer_logo} alt={`${vehicle.manufacturer_name} logo`} loading="lazy" />
-                      </span>
-                    )}
-                  </div>
-                  <strong>{vehicle.model_name}</strong>
-                  <span>{[vehicle.generation, vehicle.chassis_code].filter(Boolean).join(' · ') || vehicle.vehicle_type || 'Database fitment'}</span>
-                </div>
-                <div className="vehicle-home-card-image">
-                  {vehicle.cover_image_url ? (
-                    <img src={vehicle.cover_image_url} alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`} />
-                  ) : (
-                    <span className="database-image-empty">No vehicle image</span>
-                  )}
-                </div>
-                <div className="vehicle-home-card-specs">
-                  <span><small>Years</small><b>{vehicle.year_start ? `${vehicle.year_start}–${vehicle.year_end ?? 'Present'}` : 'Not listed'}</b></span>
-                  <span><small>Vehicle type</small><b>{vehicle.vehicle_type || 'Vehicle'}</b></span>
-                  <span><small>Engine</small><b>{vehicle.engine_code || (vehicle.engine_capacity ? `${vehicle.engine_capacity} L` : 'View parts ↗')}</b></span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* 8. PREMIUM CATEGORY SHOWCASE — unchanged */}
       {!loading && popularCategories.length > 0 && (
@@ -1852,13 +1729,12 @@ export default function Home() {
       {!loading &&
         !popularCategories.length &&
         !homeSelectedParts.length &&
-        !homeSelectedVehicles.length &&
         !error && (
           <section className="store-section home-empty-state">
             <h2>No published database records yet.</h2>
             <p>
-              Categories, parts and vehicles will appear here after they are
-              added to the live database.
+              Categories and parts will appear here after they are added to the
+              live database.
             </p>
           </section>
         )}
