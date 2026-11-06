@@ -13,6 +13,7 @@
     { "path": "/policies/customer-complaints-suggestions", "title": "Customer Complaints & Suggestions Policy" },
     { "path": "/policies/copyright-disclaimer", "title": "Copyright Disclaimer" },
     { "path": "/policies/product-disclaimer", "title": "Product Disclaimer" },
+    { "path": "/policies/return-refund-policy", "title": "Return & Refund Policy" },
     { "path": "/policies/shipping-delivery", "title": "Shipping & Delivery Policy" },
     { "path": "/policies/trademark-disclaimer", "title": "Trademark Disclaimer" },
     { "path": "/policies/warranty-policy", "title": "Warranty Policy" },
