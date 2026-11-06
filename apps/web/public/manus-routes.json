@@ -15,6 +15,7 @@
     { "path": "/policies/product-disclaimer", "title": "Product Disclaimer" },
     { "path": "/policies/shipping-delivery", "title": "Shipping & Delivery Policy" },
     { "path": "/policies/trademark-disclaimer", "title": "Trademark Disclaimer" },
+    { "path": "/policies/warranty-policy", "title": "Warranty Policy" },
     { "path": "/login", "title": "Login" },
     { "path": "/map", "title": "Our Location" }
   ]
