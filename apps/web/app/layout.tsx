@@ -1029,7 +1029,7 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
 .home-page .vehicle-home-section {
   padding-top: 54px !important;
   padding-bottom: 42px !important;
-  background: #f4f5f6;
+  background: #fff;
 }
 .home-page .popular-cars-heading {
   width: 100%;
@@ -1040,7 +1040,7 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
 }
 .home-page .popular-cars-heading > div { display: grid; justify-items: center; gap: 8px; }
 .home-page .popular-cars-eyebrow {
-  color: #7a858a;
+  color: #555;
   font-family: 'Montserrat';
   font-size: 9px;
   font-weight: 700;
@@ -1062,23 +1062,23 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
 .home-page .popular-cars-heading p { max-width: 430px; margin: 2px 0 0; color: #788287; font-size: 11px; line-height: 1.55; }
 .home-page .vehicle-home-grid { gap: 16px; }
 .home-page .vehicle-home-card {
-  border: 1px solid #dfe3e5;
-  border-top: 3px solid #343d42;
+  border: 1px solid #d8d8d8;
+  border-top: 3px solid #222;
   border-radius: 4px;
   background: #fff;
   box-shadow: 0 2px 0 rgba(28, 38, 42, .03);
 }
-.home-page .vehicle-home-card:hover { transform: translateY(-4px); border-color: #aeb8bd; box-shadow: 0 14px 28px rgba(28, 38, 42, .12); }
+.home-page .vehicle-home-card:hover { transform: translateY(-4px); border-color: #888; box-shadow: 0 14px 28px rgba(0, 0, 0, .1); }
 .home-page .vehicle-home-card-top { min-height: 66px; padding: 10px 16px 4px; gap: 3px; }
 .home-page .vehicle-home-card-top strong { color: #1e2529; font-size: 18px; letter-spacing: .01em; }
-.home-page .vehicle-home-card-top span { color: #7c878c; }
-.home-page .vehicle-home-logo-frame { border: 1px solid #e2e6e8; border-radius: 50%; background: #fafbfb; }
-.home-page .vehicle-home-card-image { height: 158px; background: linear-gradient(145deg, #f9fafb, #eef1f2); }
+.home-page .vehicle-home-card-top span { color: #777; }
+.home-page .vehicle-home-logo-frame { border: 1px solid #ddd; border-radius: 50%; background: #fafafa; }
+.home-page .vehicle-home-card-image { height: 158px; background: #fafafa; }
 .home-page .vehicle-home-card-image img { padding: 8px; mix-blend-mode: multiply; transition: transform .25s ease; }
 .home-page .vehicle-home-card:hover .vehicle-home-card-image img { transform: scale(1.035); }
-.home-page .vehicle-home-card-specs { min-height: 48px; padding: 9px 15px 11px; border-top: 1px solid #e6e9ea; }
-.home-page .vehicle-home-card-specs small { color: #899398; }
-.home-page .vehicle-home-card-specs b { color: #3f4a4f; }
+.home-page .vehicle-home-card-specs { min-height: 48px; padding: 9px 15px 11px; border-top: 1px solid #e5e5e5; }
+.home-page .vehicle-home-card-specs small { color: #777; }
+.home-page .vehicle-home-card-specs b { color: #333; }
 @media (max-width: 700px) {
   .home-page .vehicle-home-section { padding: 38px 14px 32px !important; }
   .home-page .popular-cars-heading { margin-bottom: 20px; }
