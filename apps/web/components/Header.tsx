@@ -195,6 +195,20 @@ export function Footer() {
           <a href="mailto:hello@alwahaparts.com">hello@alwahaparts.com</a>
         </div>
       </div>
+      <section className="footer-disclaimer" aria-labelledby="trademark-disclaimer-title">
+        <h2 id="trademark-disclaimer-title">Trademark Disclaimer</h2>
+        <p>
+          All vehicle manufacturer names, trademarks, logos and brand identifiers are the property
+          of their respective owners. They are used solely for product identification, vehicle
+          identification and compatibility purposes. AL-WAHA is an independent automotive parts
+          business and is not affiliated with, endorsed by, or officially associated with any
+          vehicle manufacturer unless expressly stated.
+        </p>
+        <p>
+          The use of third-party trademarks does not imply any partnership, sponsorship or
+          authorisation.
+        </p>
+      </section>
       <div className="footer-bottom">
         <span>© 2026 Al Waha Parts. All rights reserved.</span>
         <span>Right part. Right fit.</span>

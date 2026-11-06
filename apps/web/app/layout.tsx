@@ -278,6 +278,9 @@ h1, h2, h3, p { margin-top: 0; }
 .footer-column h3 { margin: 4px 0 8px; font-size: 13px; font-weight: 600; }
 .footer-column a, .footer-column p { margin: 0; color: #aaa; font-size: 11px; line-height: 1.6; }
 .footer-column a:hover { color: #fff; }
+.footer-disclaimer { max-width: var(--max); padding: 0 18px 24px; margin: 0 auto; color: rgba(255,255,255,.72); }
+.footer-disclaimer h2 { margin: 0 0 9px; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.footer-disclaimer p { max-width: 1050px; margin: 0 0 7px; font-size: 10px; line-height: 1.7; }
 .footer-bottom { max-width: var(--max); padding: 16px 18px; margin: 0 auto; display: flex; justify-content: space-between; border-top: 1px solid #444; color: #888; font-size: 10px; }
 
 /* ---------- SHARED INNER PAGES ---------- */
