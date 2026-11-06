@@ -145,9 +145,7 @@ function HeroCarousel() {
     return () => window.clearInterval(timer);
   }, [banners.length]);
 
-  if (loading) {
-    return <PageLoader label="Loading featured banners" />;
-  }
+  if (loading) return null;
 
   if (!banners.length) return null;
 
@@ -1680,6 +1678,8 @@ export default function Home() {
     setHomeSelectedVehicles(randomVehicles(preferredVehicles.length ? preferredVehicles : vehicles));
   }, [preferredBrand, vehicles]);
 
+  if (loading) return <PageLoader label="Loading Al Waha Parts" />;
+
   return (
     <main className="home-page">
       <style jsx>{`
@@ -1729,10 +1729,6 @@ export default function Home() {
       {error && (
         <div className="store-section data-alert home-data-alert">{error}</div>
       )}
-      {loading && (
-        <PageLoader label="Loading the live catalog" />
-      )}
-
       {/* 3. FULL-WIDTH IMAGE SHOWCASE №1 — img1.png */}
       <FullWidthImageShowcase
         sectionId="fullwidth-showcase-one"
