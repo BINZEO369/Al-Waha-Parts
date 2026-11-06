@@ -1765,6 +1765,11 @@ export default function Home() {
                   ) : (
                     <span className="database-image-empty">No vehicle image</span>
                   )}
+                  {vehicle.manufacturer_logo && (
+                    <span className="vehicle-home-image-watermark" aria-hidden="true">
+                      <img src={vehicle.manufacturer_logo} alt="" loading="lazy" decoding="async" />
+                    </span>
+                  )}
                 </div>
                 <div className="vehicle-home-card-top">
                   <strong>{vehicle.model_name}</strong>

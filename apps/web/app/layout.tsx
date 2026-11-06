@@ -1051,9 +1051,11 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
   box-shadow: none;
 }
 .home-page .vehicle-home-card:hover { transform: none; }
-.home-page .vehicle-home-card-image { height: 190px; background: transparent; }
+.home-page .vehicle-home-card-image { height: 190px; position: relative; background: transparent; }
 .home-page .vehicle-home-card-image img { width: 100%; height: 100%; padding: 0; object-fit: contain; mix-blend-mode: multiply; transition: opacity .2s ease; }
 .home-page .vehicle-home-card:hover .vehicle-home-card-image img { opacity: .78; transform: none; }
+.home-page .vehicle-home-image-watermark { position: absolute; top: 12px; right: 12px; z-index: 2; width: 52px; height: 52px; display: grid; place-items: center; opacity: .22; pointer-events: none; }
+.home-page .vehicle-home-image-watermark img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(1) contrast(.8) drop-shadow(0 2px 4px rgba(0, 0, 0, .32)); mix-blend-mode: multiply; }
 .home-page .vehicle-home-card-top { min-height: 0; padding: 10px 0 0; display: block; text-align: center; }
 .home-page .vehicle-home-card-top strong { display: block; color: #202020; font-size: 13px; font-weight: 600; letter-spacing: .01em; }
 @media (max-width: 700px) {
@@ -1063,6 +1065,7 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
   .home-page .popular-cars-heading p { max-width: 320px; font-size: 10px; }
   .home-page .vehicle-home-grid { gap: 10px; }
   .home-page .vehicle-home-card-image { height: 145px; }
+  .home-page .vehicle-home-image-watermark { top: 9px; right: 9px; width: 42px; height: 42px; }
   .home-page .vehicle-home-card-top { padding-top: 8px; }
   .home-page .vehicle-home-card-top strong { font-size: 12px; }
 }
@@ -1071,6 +1074,7 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
   .home-page .popular-cars-title-box { font-size: 23px; }
   .home-page .vehicle-home-grid { gap: 8px; }
   .home-page .vehicle-home-card-image { height: 112px; }
+  .home-page .vehicle-home-image-watermark { top: 7px; right: 7px; width: 34px; height: 34px; }
   .home-page .vehicle-home-card-top { padding-top: 6px; }
   .home-page .vehicle-home-card-top strong { font-size: 11px; }
 }
