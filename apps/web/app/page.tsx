@@ -1739,9 +1739,7 @@ export default function Home() {
         <section className="store-section vehicle-home-section" style={{ paddingTop: '60px', paddingBottom: '20px' }}>
           <div className="section-heading popular-cars-heading">
             <div>
-              <span className="popular-cars-eyebrow">DATABASE FITMENT</span>
-              <h2 className="popular-cars-title-box">Popular Cars</h2>
-              <p>Explore the models our customers choose most for their next parts upgrade.</p>
+              <h2 className="popular-cars-title-box">CAR MODEL</h2>
             </div>
           </div>
           <div className="vehicle-home-grid">
