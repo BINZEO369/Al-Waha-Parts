@@ -1348,7 +1348,6 @@ function ReverseCarSpotlight() {
 type FullWidthImageShowcaseProps = {
   imageSrc: string;
   imageAlt: string;
-  eyebrow: string;
   title: ReactNode;
   subtitle: string;
   sectionId: string;
@@ -1357,7 +1356,6 @@ type FullWidthImageShowcaseProps = {
 function FullWidthImageShowcase({
   imageSrc,
   imageAlt,
-  eyebrow,
   title,
   subtitle,
   sectionId,
@@ -1524,40 +1522,6 @@ function FullWidthImageShowcase({
           pointer-events: none;
         }
 
-        .fullwidth-showcase-eyebrow {
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 22px;
-          padding: 8px 18px;
-          border: 1px solid rgba(255, 255, 255, 0.4);
-          background: rgba(10, 10, 10, 0.35);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          color: #ffffff;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          border-radius: 999px;
-          opacity: 0;
-          transform: translateY(16px);
-        }
-
-        .fullwidth-showcase.is-visible .fullwidth-showcase-eyebrow {
-          animation: showcase-fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
-        }
-
-        .fullwidth-showcase-eyebrow::before {
-          content: '';
-          width: 8px;
-          height: 8px;
-          background: var(--red);
-          border-radius: 50%;
-          box-shadow: 0 0 0 4px rgba(229, 35, 47, 0.25);
-        }
-
         .fullwidth-showcase-title {
           max-width: 900px;
           margin: 0 0 22px;
@@ -1626,19 +1590,6 @@ function FullWidthImageShowcase({
             height: 360px;
           }
 
-          .fullwidth-showcase-eyebrow {
-            font-size: 8px;
-            letter-spacing: 0.16em;
-            padding: 6px 12px;
-            margin-bottom: 14px;
-            gap: 8px;
-          }
-
-          .fullwidth-showcase-eyebrow::before {
-            width: 6px;
-            height: 6px;
-          }
-
           .fullwidth-showcase-title {
             font-size: clamp(24px, 7vw, 34px);
             line-height: 1.08;
@@ -1669,7 +1620,6 @@ function FullWidthImageShowcase({
 
         @media (prefers-reduced-motion: reduce) {
           .fullwidth-showcase-media img,
-          .fullwidth-showcase-eyebrow,
           .fullwidth-showcase-title,
           .fullwidth-showcase-subtitle {
             animation: none !important;
@@ -1690,7 +1640,6 @@ function FullWidthImageShowcase({
       </div>
 
       <div className="fullwidth-showcase-overlay">
-        <span className="fullwidth-showcase-eyebrow">{eyebrow}</span>
         <h2 id={sectionId} className="fullwidth-showcase-title">
           {title}
         </h2>
@@ -1831,7 +1780,6 @@ export default function Home() {
         sectionId="fullwidth-showcase-one"
         imageSrc="/images/img1.png"
         imageAlt="Performance automotive showcase"
-        eyebrow="Precision Engineered"
         title={
           <>
             Every part. <em>Every drive.</em> Perfected.
@@ -1851,7 +1799,6 @@ export default function Home() {
         sectionId="fullwidth-showcase-two"
         imageSrc="/images/img3.png"
         imageAlt="Performance braking and drivetrain parts showcase"
-        eyebrow="Stopping Power Redefined"
         title={
           <>
             Built to <em>stop.</em> Engineered to last.
