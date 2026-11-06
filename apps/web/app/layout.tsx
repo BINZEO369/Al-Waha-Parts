@@ -1046,6 +1046,7 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
   line-height: 1;
   text-align: center;
 }
+.home-page .popular-cars-title-box::after { display: none; }
 .home-page .popular-cars-heading p { max-width: 430px; margin: 2px 0 0; color: #788287; font-size: 11px; line-height: 1.55; }
 .home-page .vehicle-home-grid { gap: 16px; }
 .home-page .vehicle-home-card {
