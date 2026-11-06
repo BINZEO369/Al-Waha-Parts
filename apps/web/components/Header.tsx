@@ -98,7 +98,6 @@ export function Header() {
             title="Our location"
           >
             <LocationIcon />
-            <span>Location</span>
           </Link>
           <Link
             href="/booking"
