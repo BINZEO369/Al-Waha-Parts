@@ -1767,21 +1767,7 @@ export default function Home() {
                   )}
                 </div>
                 <div className="vehicle-home-card-top">
-                  <div className="vehicle-home-brand">
-                    <span className="vehicle-home-manufacturer">{vehicle.manufacturer_name}</span>
-                    {vehicle.manufacturer_logo && (
-                      <span className="vehicle-home-logo-frame">
-                        <img src={vehicle.manufacturer_logo} alt={`${vehicle.manufacturer_name} logo`} loading="lazy" />
-                      </span>
-                    )}
-                  </div>
                   <strong>{vehicle.model_name}</strong>
-                  <span>{[vehicle.generation, vehicle.chassis_code].filter(Boolean).join(' · ') || vehicle.vehicle_type || 'Database fitment'}</span>
-                </div>
-                <div className="vehicle-home-card-specs">
-                  <span><small>Years</small><b>{vehicle.year_start ? `${vehicle.year_start}–${vehicle.year_end ?? 'Present'}` : 'Not listed'}</b></span>
-                  <span><small>Vehicle type</small><b>{vehicle.vehicle_type || 'Vehicle'}</b></span>
-                  <span><small>Engine</small><b>{vehicle.engine_code || (vehicle.engine_capacity ? `${vehicle.engine_capacity} L` : 'View parts ↗')}</b></span>
                 </div>
               </Link>
             ))}
