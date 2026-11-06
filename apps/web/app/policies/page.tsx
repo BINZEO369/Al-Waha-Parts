@@ -10,55 +10,46 @@ export const metadata: Metadata = {
 const policies = [
   {
     title: 'Trademark Disclaimer',
-    bangla: 'ট্রেডমার্ক সংক্রান্ত ঘোষণা',
     description: 'Third-party vehicle marks, identification and compatibility.',
     href: '/policies/trademark-disclaimer',
   },
   {
     title: 'Copyright Disclaimer',
-    bangla: 'কপিরাইট সংক্রান্ত ঘোষণা',
     description: 'Copyright ownership, permitted use and complaints.',
     href: '/policies/copyright-disclaimer',
   },
   {
     title: 'Product Disclaimer',
-    bangla: 'পণ্য সংক্রান্ত ঘোষণা',
     description: 'Product details, fitment, pricing and use information.',
     href: '/policies/product-disclaimer',
   },
   {
     title: 'Privacy Policy',
-    bangla: 'গোপনীয়তা নীতিমালা',
     description: 'How personal information is collected and protected.',
     href: '/policies/privacy-policy',
   },
   {
     title: 'Terms & Conditions',
-    bangla: 'শর্তাবলি',
     description: 'Terms for using the AL-WAHA website and services.',
     href: '/policies/terms-and-conditions',
   },
   {
     title: 'Return & Refund Policy',
-    bangla: 'পণ্য ফেরত ও অর্থ ফেরত নীতিমালা',
     description: 'Return eligibility, cancellations and refunds.',
     href: '/policies/return-refund-policy',
   },
   {
     title: 'Warranty Policy',
-    bangla: 'ওয়ারেন্টি নীতিমালা',
     description: 'Warranty coverage, exclusions and claims.',
     href: '/policies/warranty-policy',
   },
   {
     title: 'Customer Complaints & Suggestions Policy',
-    bangla: 'গ্রাহক অভিযোগ ও পরামর্শ নীতিমালা',
     description: 'How to submit feedback and request complaint reviews.',
     href: '/policies/customer-complaints-suggestions',
   },
   {
     title: 'Shipping & Delivery Policy',
-    bangla: 'শিপিং ও ডেলিভারি নীতিমালা',
     description: 'Delivery areas, charges, tracking and delivery support.',
     href: '/policies/shipping-delivery',
   },
@@ -81,7 +72,6 @@ export default function PoliciesPage() {
         .policies-index-page .policy-number { color: var(--red); font-size: 10px; font-weight: 800; letter-spacing: .12em; }
         .policies-index-page .policy-card-action { padding: 6px 9px; border: 1px solid rgba(229,28,35,.18); border-radius: 999px; background: rgba(229,28,35,.06); color: var(--red); font-size: 9px; font-weight: 700; }
         .policies-index-page .policy-card-title { font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 700; line-height: 1.45; }
-        .policies-index-page .policy-card-bangla { margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.5; }
         .policies-index-page .policy-card-description { margin-top: auto; padding-top: 15px; color: var(--muted); font-size: 11px; line-height: 1.65; }
         @media (max-width: 900px) { .policies-index-page .policies-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 600px) {
@@ -109,7 +99,6 @@ export default function PoliciesPage() {
               <span className="policy-card-action">View policy&nbsp; →</span>
             </span>
             <span className="policy-card-title">{policy.title}</span>
-            <span className="policy-card-bangla" lang="bn">{policy.bangla}</span>
             <span className="policy-card-description">{policy.description}</span>
           </Link>
         ))}
