@@ -219,6 +219,10 @@ export function Footer() {
           <Link href="/policies/warranty-policy">
             <span>Warranty Policy</span>
           </Link>
+          <Link href="/policies/customer-complaints-suggestions">
+            <span>Customer Complaints &amp; Suggestions Policy</span>
+            <span lang="bn">গ্রাহক অভিযোগ ও পরামর্শ নীতিমালা</span>
+          </Link>
         </div>
       </nav>
       <section className="footer-disclaimer" aria-labelledby="trademark-disclaimer-title">
