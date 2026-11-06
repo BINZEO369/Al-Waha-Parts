@@ -197,40 +197,37 @@ export function Footer() {
         </div>
       </div>
       <nav className="footer-policies" aria-label="Policies">
-        <h2>Policies <span lang="bn">/ নীতিমালা</span></h2>
+        <h2>Policies</h2>
         <div className="footer-policy-grid">
           <Link href="/policies/trademark-disclaimer">
-            <span>Trademark Disclaimer</span><span lang="bn">ট্রেডমার্ক সংক্রান্ত ঘোষণা</span>
+            <span>Trademark Disclaimer</span>
           </Link>
           <Link href="/policies/copyright-disclaimer">
-            <span>Copyright Disclaimer</span><span lang="bn">কপিরাইট সংক্রান্ত ঘোষণা</span>
+            <span>Copyright Disclaimer</span>
           </Link>
           <Link href="/policies/product-disclaimer">
-            <span>Product Disclaimer</span><span lang="bn">পণ্য সংক্রান্ত ঘোষণা</span>
+            <span>Product Disclaimer</span>
           </Link>
           <Link href="/policies/privacy-policy">
-            <span>Privacy Policy</span><span lang="bn">গোপনীয়তা নীতিমালা</span>
+            <span>Privacy Policy</span>
           </Link>
           <Link href="/policies/terms-and-conditions">
-            <span>Terms &amp; Conditions</span><span lang="bn">শর্তাবলি</span>
+            <span>Terms &amp; Conditions</span>
           </Link>
           <Link href="/policies/return-refund-policy">
-            <span>Return &amp; Refund Policy</span><span lang="bn">পণ্য ফেরত ও অর্থ ফেরত নীতিমালা</span>
+            <span>Return &amp; Refund Policy</span>
           </Link>
           <Link href="/policies/warranty-policy">
             <span>Warranty Policy</span>
           </Link>
           <Link href="/policies/customer-complaints-suggestions">
             <span>Customer Complaints &amp; Suggestions Policy</span>
-            <span lang="bn">গ্রাহক অভিযোগ ও পরামর্শ নীতিমালা</span>
           </Link>
           <Link href="/policies/shipping-delivery">
             <span>Shipping &amp; Delivery Policy</span>
-            <span lang="bn">শিপিং ও ডেলিভারি নীতিমালা</span>
           </Link>
           <Link href="/policies">
             <span>Browse All Policies</span>
-            <span lang="bn">সব নীতিমালা দেখুন</span>
           </Link>
         </div>
       </nav>
