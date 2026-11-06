@@ -1052,8 +1052,9 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
   box-shadow: 0 2px 0 rgba(28, 38, 42, .03);
 }
 .home-page .vehicle-home-card:hover { transform: translateY(-4px); border-color: #888; box-shadow: 0 14px 28px rgba(0, 0, 0, .1); }
-.home-page .vehicle-home-card-top { min-height: 66px; padding: 10px 16px 4px; gap: 3px; }
-.home-page .vehicle-home-card-top strong { color: #1e2529; font-size: 18px; letter-spacing: .01em; }
+.home-page .vehicle-home-card-top { min-height: 69px; padding: 9px 16px 5px; gap: 3px; }
+.home-page .vehicle-home-card-top strong { color: #1e2529; font-size: 15px; letter-spacing: .01em; }
+.home-page .vehicle-home-manufacturer { color: #666; font-family: 'Montserrat'; font-size: 8px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .home-page .vehicle-home-card-top span { color: #777; }
 .home-page .vehicle-home-logo-frame { border: 1px solid #ddd; border-radius: 50%; background: #fafafa; }
 .home-page .vehicle-home-card-image { height: 158px; background: #fafafa; }
@@ -1068,8 +1069,8 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
   .home-page .popular-cars-title-box { font-size: 27px; }
   .home-page .popular-cars-heading p { max-width: 320px; font-size: 10px; }
   .home-page .vehicle-home-grid { gap: 10px; }
-  .home-page .vehicle-home-card-top { min-height: 58px; padding: 8px 10px 3px; }
-  .home-page .vehicle-home-card-top strong { font-size: 14px; }
+  .home-page .vehicle-home-card-top { min-height: 60px; padding: 8px 10px 3px; }
+  .home-page .vehicle-home-card-top strong { font-size: 13px; }
   .home-page .vehicle-home-card-image { height: 124px; }
   .home-page .vehicle-home-card-specs { padding: 7px 9px 9px; }
 }
@@ -1077,8 +1078,9 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
   .home-page .popular-cars-eyebrow { font-size: 8px; }
   .home-page .popular-cars-title-box { font-size: 23px; }
   .home-page .vehicle-home-grid { gap: 8px; }
-  .home-page .vehicle-home-card-top { min-height: 51px; padding: 7px 8px 2px; }
-  .home-page .vehicle-home-card-top strong { font-size: 12px; }
+  .home-page .vehicle-home-card-top { min-height: 54px; padding: 7px 8px 2px; }
+  .home-page .vehicle-home-card-top strong { font-size: 11px; }
+  .home-page .vehicle-home-manufacturer { font-size: 7px; }
   .home-page .vehicle-home-card-image { height: 106px; }
   .home-page .vehicle-home-card-specs { min-height: 38px; padding: 6px 7px 7px; }
 }

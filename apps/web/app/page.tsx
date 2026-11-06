@@ -1759,8 +1759,16 @@ export default function Home() {
                 }
                 key={vehicle.id}
               >
+                <div className="vehicle-home-card-image">
+                  {vehicle.cover_image_url ? (
+                    <img src={vehicle.cover_image_url} alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`} loading="lazy" decoding="async" />
+                  ) : (
+                    <span className="database-image-empty">No vehicle image</span>
+                  )}
+                </div>
                 <div className="vehicle-home-card-top">
                   <div className="vehicle-home-brand">
+                    <span className="vehicle-home-manufacturer">{vehicle.manufacturer_name}</span>
                     {vehicle.manufacturer_logo && (
                       <span className="vehicle-home-logo-frame">
                         <img src={vehicle.manufacturer_logo} alt={`${vehicle.manufacturer_name} logo`} loading="lazy" />
@@ -1769,13 +1777,6 @@ export default function Home() {
                   </div>
                   <strong>{vehicle.model_name}</strong>
                   <span>{[vehicle.generation, vehicle.chassis_code].filter(Boolean).join(' · ') || vehicle.vehicle_type || 'Database fitment'}</span>
-                </div>
-                <div className="vehicle-home-card-image">
-                  {vehicle.cover_image_url ? (
-                    <img src={vehicle.cover_image_url} alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`} />
-                  ) : (
-                    <span className="database-image-empty">No vehicle image</span>
-                  )}
                 </div>
                 <div className="vehicle-home-card-specs">
                   <span><small>Years</small><b>{vehicle.year_start ? `${vehicle.year_start}–${vehicle.year_end ?? 'Present'}` : 'Not listed'}</b></span>
