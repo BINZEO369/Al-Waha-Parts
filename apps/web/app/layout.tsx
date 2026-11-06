@@ -335,30 +335,13 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .empty-state { grid-column: 1 / -1; padding: 55px 20px; border: 1px dashed var(--line); color: #888; text-align: center; }
 .empty-state strong, .empty-state span { display: block; }
 .empty-state span { margin-top: 8px; font-size: 12px; }
-.page-loader { min-height: 58vh; padding: 68px 20px; display: grid; place-items: center; background: radial-gradient(circle at 50% 35%, #fff 0, #fff 36%, #f7f7f8 100%); color: var(--red); text-align: center; }
-.page-loader-card { width: min(430px, 100%); padding: 30px 30px 26px; border: 1px solid rgba(229,35,47,.12); border-radius: 22px; background: rgba(255,255,255,.88); box-shadow: 0 24px 70px rgba(25,27,31,.1), 0 3px 12px rgba(25,27,31,.04); backdrop-filter: blur(14px); }
-.page-loader-brand { display: flex; align-items: center; justify-content: center; gap: 10px; padding-bottom: 23px; border-bottom: 1px solid #f0ecec; text-align: left; }
-.page-loader-brand-mark { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 10px; color: #fff; background: linear-gradient(145deg, var(--red), #b91521); font-size: 11px; font-weight: 800; box-shadow: 0 7px 17px rgba(229,35,47,.2); }
-.page-loader-brand strong, .page-loader-brand b { display: block; line-height: 1; font-size: 11px; letter-spacing: .1em; }
-.page-loader-brand b { margin-top: 4px; color: var(--red); }
-.page-loader-mark { width: 76px; height: 58px; margin: 29px auto 18px; display: flex; align-items: flex-end; justify-content: center; gap: 6px; }
-.page-loader-mark span { width: 10px; height: 27px; border-radius: 5px 5px 2px 2px; background: linear-gradient(180deg, #ff6670, var(--red)); transform-origin: bottom; animation: alwaha-loader-bars 1s ease-in-out infinite; }
-.page-loader-mark span:nth-child(2) { height: 45px; animation-delay: .14s; }
-.page-loader-mark span:nth-child(3) { height: 34px; animation-delay: .28s; }
-.page-loader-copy strong, .page-loader-copy small { display: block; }
-.page-loader-copy strong { color: var(--ink); font-size: 12px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
-.page-loader-copy small { margin-top: 7px; color: #999; font-size: 10px; }
-.page-loader-track { height: 4px; margin-top: 23px; overflow: hidden; border-radius: 999px; background: #f3dadd; }
-.page-loader-track i { display: block; width: 36%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--red-dark), var(--red), #ff7b82); animation: alwaha-loader-progress 1.7s ease-in-out infinite; }
-.page-loader-dots { display: flex; justify-content: center; gap: 5px; margin-top: 15px; }
-.page-loader-dots i { width: 4px; height: 4px; border-radius: 50%; background: #d9a1a5; animation: alwaha-loader-dot 1.2s ease-in-out infinite; }
-.page-loader-dots i:nth-child(2) { animation-delay: .16s; }
-.page-loader-dots i:nth-child(3) { animation-delay: .32s; }
-@keyframes alwaha-loader-bars { 0%, 100% { transform: scaleY(.65); opacity: .55; } 50% { transform: scaleY(1); opacity: 1; } }
-@keyframes alwaha-loader-progress { 0% { transform: translateX(-150%); } 55%, 100% { transform: translateX(360%); } }
-@keyframes alwaha-loader-dot { 0%, 100% { transform: translateY(0); opacity: .35; } 50% { transform: translateY(-4px); opacity: 1; } }
-@media (max-width: 520px) { .page-loader { min-height: 52vh; padding: 42px 15px; } .page-loader-card { padding: 25px 20px 22px; border-radius: 18px; } }
-@media (prefers-reduced-motion: reduce) { .page-loader-mark span, .page-loader-track i, .page-loader-dots i { animation: none; } }
+.page-loader { min-height: 58vh; padding: 48px 20px; display: grid; place-items: center; background: #fff; color: #252525; text-align: center; }
+.page-loader-content { display: grid; justify-items: center; gap: 14px; }
+.page-loader-spinner { width: 24px; height: 24px; display: block; border: 2px solid #e2e2e2; border-top-color: #252525; border-radius: 50%; animation: alwaha-loader-spin .72s linear infinite; }
+.page-loader-label { color: #555; font-size: 10px; font-weight: 600; letter-spacing: .04em; }
+@keyframes alwaha-loader-spin { to { transform: rotate(360deg); } }
+@media (max-width: 520px) { .page-loader { min-height: 52vh; padding: 36px 15px; } .page-loader-spinner { width: 22px; height: 22px; } }
+@media (prefers-reduced-motion: reduce) { .page-loader-spinner { animation: none; } }
 
 /* ---------- FORMS / CONTACT ---------- */
 .booking-form, .finder-card { max-width: 860px; padding: 34px; display: grid; gap: 24px; border: 1px solid var(--line); background: #fff; box-shadow: 0 16px 40px rgba(28,28,28,.06); }
