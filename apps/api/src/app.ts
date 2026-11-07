@@ -361,6 +361,30 @@ app.get('/api/v1/popular-categories', async (_request, reply) => {
     'battery-charging',
     'filters-maintenance',
   ];
+  const supabase = getSupabaseAdmin();
+  const { data: selected, error: selectedError } = await supabase
+    .from('popular_categories')
+    .select(
+      'display_order,category:parts_categories!popular_categories_category_id_fkey(id,category_name,slug,description,image_url,status,sort_order)',
+    )
+    .eq('is_active', true)
+    .order('display_order', { ascending: true })
+    .limit(20);
+  if (selectedError) return jsonError(reply, 500, selectedError.message);
+  const selectedCategories = (selected ?? [])
+    .flatMap((row) => {
+      const relation = row.category as unknown;
+      return (Array.isArray(relation) ? relation : [relation]).filter(
+        (category): category is CarBrandRecord =>
+          Boolean(
+            category &&
+              typeof category === 'object' &&
+              (category as CarBrandRecord).status === 'active',
+          ),
+      );
+    });
+  if (selectedCategories.length) return { data: selectedCategories };
+
   const { data, error } = await getSupabaseAdmin()
     .from('parts_categories')
     .select('id,category_name,slug,description,image_url,status,sort_order')
@@ -489,7 +513,36 @@ app.get(
 
 app.get('/api/v1/homepage-selected-vehicles', async (_request, reply) => {
   try {
-    const { data, error } = await getSupabaseAdmin()
+    const supabase = getSupabaseAdmin();
+    const { data: selected, error: selectedError } = await supabase
+      .from('homepage_selected_vehicles')
+      .select(
+        'display_order,vehicle:car_models!homepage_selected_vehicles_vehicle_id_car_models_fkey(*,manufacturers:manufacturer_id(id,manufacturer_name,slug,logo_url))',
+      )
+      .eq('is_active', true)
+      .order('display_order', { ascending: true })
+      .limit(200);
+    if (selectedError) return jsonError(reply, 500, selectedError.message);
+    const selectedModels = (selected ?? [])
+      .flatMap((row) => {
+        const relation = row.vehicle as unknown;
+        return Array.isArray(relation) ? relation.slice(0, 1) : relation ? [relation] : [];
+      })
+      .filter(
+        (record): record is CarBrandRecord =>
+          Boolean(record && typeof record === 'object'),
+      )
+      .map(
+        (record, index) =>
+          normalizeModel(
+            record,
+            (record.manufacturers as CarBrandRecord | null) ?? {},
+            index,
+          ),
+      );
+    if (selectedModels.length) return { data: selectedModels };
+
+    const { data, error } = await supabase
       .from('car_models')
       .select('*,manufacturers:manufacturer_id(id,manufacturer_name,slug,logo_url)')
       .eq('status', 'active')
