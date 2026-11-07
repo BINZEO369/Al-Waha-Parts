@@ -125,19 +125,18 @@ export default function BrandModelPage({
 
   const { brand, vehicle, parts } = detail;
   
-  // Title generation
-  const yearPrefix = vehicle.year_start ? `${vehicle.year_start} ` : '';
-  const title = `${yearPrefix}${vehicle.manufacturer_name} ${vehicle.model_name}`.trim();
+  // Title generation (Year removed as requested)
+  const title = `${vehicle.manufacturer_name} ${vehicle.model_name}`.trim();
   const manufacturerLogo = vehicle.manufacturer_logo || brand.logo_url;
   const gallery = [vehicle.cover_image_url, ...(vehicle.vehicle_images ?? [])].filter(
     Boolean,
   ) as string[];
 
   return (
-    <main className="page-shell vehicle-detail-page">
+    <main className="vehicle-detail-page">
       <style jsx>{`
         .vehicle-detail-page {
-          max-width: 1200px;
+          max-width: 1300px;
           margin: 0 auto;
           padding: 24px;
           font-family: system-ui, -apple-system, sans-serif;
@@ -148,6 +147,7 @@ export default function BrandModelPage({
           margin-bottom: 24px;
           color: #666;
           font-size: 14px;
+          font-weight: 500;
           text-decoration: none;
           transition: color 0.2s;
         }
@@ -155,51 +155,76 @@ export default function BrandModelPage({
           color: #000;
         }
         
-        /* Hero Card (Matching Image 2 style) */
-        .vehicle-hero-card {
-          display: flex;
-          flex-direction: column;
-          background: #fff;
-          border: 1px solid #eaeaea;
-          border-radius: 12px;
+        /* Full Width Liquid Hero Section */
+        .vehicle-hero-section {
+          position: relative;
+          width: 100%;
+          min-height: 550px;
+          border-radius: 24px;
           overflow: hidden;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-          margin-bottom: 40px;
+          display: flex;
+          align-items: flex-end;
+          margin-bottom: 50px;
+          background: #1a1a1a; /* Fallback */
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
-        @media (min-width: 768px) {
-          .vehicle-hero-card {
-            flex-direction: row;
-          }
+
+        .hero-bg-image {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          z-index: 1;
         }
-        
-        .vehicle-image-container {
-          flex: 1;
-          background: #f8f9fa;
+
+        /* Gradient overlay for better text readability over the image */
+        .hero-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);
+          z-index: 2;
+        }
+
+        .hero-placeholder {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 40px;
-          min-height: 300px;
-        }
-        .vehicle-image-container img {
-          max-width: 100%;
-          max-height: 350px;
-          object-fit: contain;
-        }
-        .vehicle-placeholder {
           font-size: 24px;
-          font-weight: bold;
-          color: #ccc;
+          color: #555;
+          background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+          z-index: 1;
         }
 
-        .vehicle-info-container {
-          flex: 1;
-          padding: 40px;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
+        /* Liquid Glassmorphism Card */
+        .liquid-details-card {
+          position: relative;
+          z-index: 3;
+          margin: 30px;
+          padding: 32px;
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(255, 255, 255, 0.7);
+          border-radius: 24px;
+          max-width: 550px;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+          transition: transform 0.3s ease;
         }
         
+        .liquid-details-card:hover {
+          transform: translateY(-2px);
+        }
+
         .brand-header {
           display: flex;
           align-items: center;
@@ -207,70 +232,79 @@ export default function BrandModelPage({
           margin-bottom: 16px;
         }
         .brand-header img {
-          width: 48px;
-          height: 48px;
+          width: 44px;
+          height: 44px;
           object-fit: contain;
-          border-radius: 8px;
-          border: 1px solid #eaeaea;
-          padding: 4px;
+          border-radius: 12px;
+          border: 1px solid rgba(0,0,0,0.05);
+          padding: 6px;
+          background: #fff;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         .brand-header strong {
           font-size: 16px;
-          color: #555;
+          color: #444;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
+          font-weight: 700;
         }
 
         .vehicle-title {
-          font-size: 32px;
-          font-weight: 700;
+          font-size: 36px;
+          font-weight: 800;
           margin: 0 0 24px 0;
           color: #111;
-          line-height: 1.2;
+          line-height: 1.1;
+          letter-spacing: -0.5px;
         }
 
-        /* Specs Grid (Matching Image 2 style) */
         .specs-grid {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 16px;
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          gap: 20px;
           margin-bottom: 32px;
-          padding-top: 24px;
-          border-top: 1px solid #eaeaea;
+          padding-top: 20px;
+          border-top: 1px solid rgba(0,0,0,0.08);
         }
         .spec-item {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 6px;
         }
         .spec-label {
           font-size: 12px;
-          color: #888;
+          color: #666;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.8px;
+          font-weight: 600;
         }
         .spec-value {
           font-size: 15px;
-          font-weight: 600;
-          color: #222;
+          font-weight: 700;
+          color: #111;
         }
 
-        .action-btn {
+        /* Liquid Gradient Button */
+        .liquid-btn {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          background: #2563eb;
+          background: linear-gradient(135deg, #2563eb, #1e40af);
           color: #fff;
-          padding: 14px 24px;
-          border-radius: 8px;
+          padding: 16px 32px;
+          border-radius: 14px;
           font-weight: 600;
-          font-size: 15px;
+          font-size: 16px;
           text-decoration: none;
-          transition: background 0.2s;
-          width: max-content;
+          transition: all 0.3s ease;
+          box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+          width: 100%;
+          border: none;
         }
-        .action-btn:hover {
-          background: #1d4ed8;
+        .liquid-btn:hover {
+          background: linear-gradient(135deg, #1d4ed8, #1e3a8a);
+          box-shadow: 0 12px 25px rgba(37, 99, 235, 0.6);
+          transform: translateY(-2px);
         }
 
         /* Parts Section */
@@ -278,10 +312,11 @@ export default function BrandModelPage({
           margin-top: 40px;
         }
         .parts-section h2 {
-          font-size: 24px;
+          font-size: 26px;
           font-weight: 700;
           margin-bottom: 24px;
           color: #111;
+          letter-spacing: -0.5px;
         }
         .catalog-grid {
           display: grid;
@@ -289,12 +324,28 @@ export default function BrandModelPage({
           gap: 24px;
         }
         .empty-state {
-          padding: 40px;
+          padding: 50px;
           text-align: center;
-          background: #f8f9fa;
-          border-radius: 12px;
+          background: rgba(248, 249, 250, 0.8);
+          backdrop-filter: blur(10px);
+          border-radius: 20px;
           border: 1px dashed #ccc;
           color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          .vehicle-hero-section {
+            min-height: 500px;
+          }
+          .liquid-details-card {
+            margin: 16px;
+            padding: 24px;
+            max-width: 100%;
+          }
+          .vehicle-title {
+            font-size: 28px;
+          }
         }
       `}</style>
 
@@ -302,17 +353,19 @@ export default function BrandModelPage({
         ← Back to {brand.manufacturer_name}
       </Link>
 
-      {/* Hero Section (Matching the clean card design) */}
-      <section className="vehicle-hero-card">
-        <div className="vehicle-image-container">
-          {gallery.length ? (
-            <img src={gallery[0]} alt={title} />
-          ) : (
-            <div className="vehicle-placeholder">No Image</div>
-          )}
-        </div>
+      {/* Liquid Full-Width Hero Section */}
+      <section className="vehicle-hero-section">
+        {gallery.length ? (
+          <>
+            <img className="hero-bg-image" src={gallery[0]} alt={title} />
+            <div className="hero-overlay"></div>
+          </>
+        ) : (
+          <div className="hero-placeholder">No Image Available</div>
+        )}
         
-        <div className="vehicle-info-container">
+        {/* Floating Details Card ON TOP of the image */}
+        <div className="liquid-details-card">
           <div className="brand-header">
             {manufacturerLogo && <img src={manufacturerLogo} alt={`${brand.manufacturer_name} logo`} />}
             <strong>{brand.manufacturer_name}</strong>
@@ -320,7 +373,7 @@ export default function BrandModelPage({
           
           <h1 className="vehicle-title">{title}</h1>
           
-          {/* Only showing data that exists in the database */}
+          {/* Only showing data that exists in the database (Year removed) */}
           <div className="specs-grid">
             {vehicle.vehicle_type && (
               <div className="spec-item">
@@ -340,17 +393,9 @@ export default function BrandModelPage({
                 <span className="spec-value">{vehicle.chassis_code}</span>
               </div>
             )}
-            {vehicle.year_start && (
-              <div className="spec-item">
-                <span className="spec-label">Year</span>
-                <span className="spec-value">
-                  {vehicle.year_start} {vehicle.year_end ? `- ${vehicle.year_end}` : ' - Present'}
-                </span>
-              </div>
-            )}
           </div>
 
-          <Link className="action-btn" href={`/category?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
+          <Link className="liquid-btn" href={`/category?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
             Browse Compatible Parts
           </Link>
         </div>
@@ -368,7 +413,7 @@ export default function BrandModelPage({
         ) : (
           <div className="empty-state">
             <strong>No compatible products are published yet.</strong>
-            <p style={{ marginTop: '8px' }}>Our parts desk can still help source the right item for this vehicle.</p>
+            <p style={{ marginTop: '8px', fontSize: '14px' }}>Our parts desk can still help source the right item for this vehicle.</p>
           </div>
         )}
       </section>
