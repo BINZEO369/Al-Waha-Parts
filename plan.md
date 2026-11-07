@@ -37,6 +37,13 @@
 - Blend the image into the existing white/off-white storefront using a soft white glow/shadow on all four sides; retain the existing Al Waha red for a small accent and CTA.
 - Implement the section in `apps/web/app/page.tsx` and keep it independent of database loading so its copy is always available.
 
+## Cookie consent and local preference management
+- Add a global storefront consent manager mounted in the root layout, with a first-party consent cookie that stores the user's essential, preferences, analytics and marketing choices for 180 days.
+- Offer Accept all, Necessary only, Customise/Save preferences, and a persistent entry point for reopening settings; non-essential choices default off.
+- Keep cookie preference checks in a small reusable helper and broadcast changes for any future optional integrations. Do not load analytics or advertising scripts that the site does not currently have.
+- Gate the existing car-brand guide's one-year dismissal cookie behind optional Preferences consent; use a same-device fallback if cookies are blocked, and reflect both storage behaviors accurately in the privacy policy.
+- Match the existing Al Waha red/white interface, work on mobile, remain keyboard-accessible, and provide English/Arabic copy consistent with the site's language toggle.
+
 
 # Admin redesign addendum
 

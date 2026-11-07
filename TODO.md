@@ -45,3 +45,12 @@
 - Place the new section immediately before the homepage “Popular Cars” section.
 - Keep a hardcoded title and descriptive copy on the left and the image on the right on desktop and mobile layouts.
 - Add a soft white shadow/glow around the image on the top, bottom, left, and right so it blends with the storefront.
+
+## Storefront cookie consent and local preferences
+- On the storefront, show cookie choices when no saved consent exists and let the visitor accept all, allow necessary only, or open custom settings.
+- Necessary cookies must always remain enabled; preferences, analytics, and marketing choices must be optional and off by default.
+- Save consent in a first-party cookie for 180 days using `Path=/`, `SameSite=Lax`, and `Secure` on HTTPS; fall back to same-device browser storage if cookies are blocked.
+- Allow visitors to reopen the cookie preferences after dismissing the initial notice, and announce consent changes for optional integrations.
+- Do not claim optional analytics/advertising tools are active or load them unless those integrations exist and consent allows them.
+- The existing car-brand guide dismissal preference must only be persisted when Preferences cookies are allowed; document its one-year duration and same-device fallback in the privacy policy.
+- Keep the controls responsive, accessible, and available in the site's English/Arabic language modes.

@@ -49,7 +49,9 @@ const sections = [
   {
     title: 'Cookies and Tracking',
     paragraphs: [
-      'Our website may use cookies and similar technologies to improve functionality, analyse website traffic, and enhance user experience. Users may manage cookies through their browser settings.',
+      'The storefront keeps the cart and language preference in local browser storage. Cookie choices are saved in the first-party alwaha_cookie_consent cookie for up to 180 days. If cookies are blocked, the consent choice is stored in local browser storage for the same period. You can change your choice at any time using Cookie settings at the bottom of the site or your browser settings.',
+      'Necessary consent storage is always on. Preferences, analytics, and marketing categories are optional and off by default. The site currently has no analytics or advertising integrations active; accepting those categories does not load tools that have not been configured.',
+      'When preference cookies are allowed, dismissing the car-brand guide can save the first-party all_brands_guide_seen cookie for up to one year. If cookies are blocked, this guide preference uses local browser storage. The guide dismissal is not saved when preference cookies are not allowed.',
     ],
   },
   {
@@ -126,7 +128,7 @@ export default function PrivacyPolicyPage() {
         </p>
         <div className="policy-dates">
           <span>Effective Date: To be confirmed</span>
-          <span>Last Updated: 6 November 2026</span>
+          <span>Last Updated: 7 November 2026</span>
         </div>
       </header>
 
