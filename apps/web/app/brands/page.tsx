@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../../packages/shared/src/api';
 import { hasCookieConsent } from '../../lib/cookie-consent';
-import { PageLoader } from '../../components/PageLoader';
+import { BrandPageLoading } from '../../components/BrandPageLoading';
 
 type Brand = {
   id: string;
@@ -69,23 +69,45 @@ export default function AllBrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
   const [showGuide, setShowGuide] = useState(false);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError('');
+    setBrands([]);
+
     if (!apiUrl) {
       setError('Brand API is not configured.');
       setLoading(false);
-      return;
+      return () => {
+        active = false;
+      };
     }
 
     apiFetch<Brand[]>(apiUrl, '/api/v1/car-brands')
-      .then((items) => setBrands(Array.isArray(items) ? items : []))
-      .catch((cause: unknown) =>
-        setError(cause instanceof Error ? cause.message : 'Unable to load brands.'),
-      )
-      .finally(() => setLoading(false));
-  }, [apiUrl]);
+      .then((items) => {
+        if (!active) return;
+        if (!Array.isArray(items)) {
+          throw new Error('The brands API returned an unexpected response.');
+        }
+        setBrands(items);
+      })
+      .catch((cause: unknown) => {
+        if (active) {
+          setError(cause instanceof Error ? cause.message : 'Unable to load brands.');
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [apiUrl, retryCount]);
 
   /* Show the guide until it is dismissed with optional Preferences consent. */
   useEffect(() => {
@@ -407,10 +429,26 @@ export default function AllBrandsPage() {
         )}
       </header>
 
-      {loading && <PageLoader label="Loading brands..." />}
+      {loading && <BrandPageLoading variant="brands" label="Loading brands..." />}
 
       {error && (
-        <p style={{ color: '#888', padding: '20px', textAlign: 'center' }}>{error}</p>
+        <div
+          role="alert"
+          style={{ display: 'grid', justifyItems: 'center', gap: '12px', padding: '20px' }}
+        >
+          <p style={{ color: '#888', margin: 0, textAlign: 'center' }}>{error}</p>
+          <button
+            type="button"
+            className="button"
+            onClick={() => {
+              setError('');
+              setLoading(true);
+              setRetryCount((current) => current + 1);
+            }}
+          >
+            Try again
+          </button>
+        </div>
       )}
 
       {!loading && !error && brands.length === 0 && (

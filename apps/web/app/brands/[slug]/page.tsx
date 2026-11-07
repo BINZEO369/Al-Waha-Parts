@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { use, useEffect, useState } from 'react';
 import { apiFetch } from '../../../../../packages/shared/src/api';
 import { brandModelHref } from '../../../lib/vehicle-routes';
-import { PageLoader } from '../../../components/PageLoader';
+import { BrandPageLoading } from '../../../components/BrandPageLoading';
 
 type Brand = {
   id: string;
@@ -31,40 +31,73 @@ export default function BrandPage({ params }: { params: Promise<{ slug: string }
   const { slug } = use(params);
   const [detail, setDetail] = useState<BrandDetail | null>(null);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setError('');
+    setDetail(null);
+
     if (!apiUrl) {
       setError('Vehicle API is not configured.');
-      return;
+      setLoading(false);
+      return () => {
+        active = false;
+      };
     }
+
     apiFetch<BrandDetail>(apiUrl, `/api/v1/car-brands/slug/${encodeURIComponent(slug)}`)
       .then((data) => {
-        if (active) setDetail(data);
+        if (!active) return;
+        if (!data?.brand || !Array.isArray(data.vehicles)) {
+          throw new Error('The brand API returned an unexpected response.');
+        }
+        setDetail(data);
       })
       .catch((cause: unknown) => {
-        if (active)
+        if (active) {
           setError(cause instanceof Error ? cause.message : 'Unable to load brand vehicles.');
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
       });
+
     return () => {
       active = false;
     };
-  }, [apiUrl, slug]);
+  }, [apiUrl, slug, retryCount]);
 
-  if (error)
+  if (loading)
     return (
       <main className="page-shell">
-        <div className="data-alert">{error}</div>
-        <Link className="button" href="/">
-          Back to home
-        </Link>
+        <BrandPageLoading variant="models" label="Loading brand vehicles..." />
       </main>
     );
-  if (!detail)
+
+  if (error || !detail)
     return (
       <main className="page-shell">
-        <PageLoader label="Loading brand vehicles" />
+        <div className="data-alert" role="alert">
+          {error || 'Brand details are not available.'}
+        </div>
+        <button
+          type="button"
+          className="button"
+          onClick={() => {
+            setError('');
+            setLoading(true);
+            setRetryCount((current) => current + 1);
+          }}
+        >
+          Try again
+        </button>
+        <Link className="button" href="/brands">
+          Back to brands
+        </Link>
       </main>
     );
 

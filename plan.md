@@ -44,6 +44,10 @@
 - Gate the existing car-brand guide's one-year dismissal cookie behind optional Preferences consent; use a same-device fallback if cookies are blocked, and reflect both storage behaviors accurately in the privacy policy.
 - Match the existing Al Waha red/white interface, work on mobile, remain keyboard-accessible, and provide English/Arabic copy consistent with the site's language toggle.
 
+## Brand browsing loading and recovery
+- Replace blank brand-list and brand-model spinners with responsive skeleton cards while the existing API request is pending.
+- If a brand request fails or returns an invalid response, show an accessible error and a retry action; cancel stale requests after a retry or navigation.
+- Preserve the live API contract, brand/model links, and existing cookie-consent behavior.
 
 # Admin redesign addendum
 

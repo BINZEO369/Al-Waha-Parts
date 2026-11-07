@@ -54,3 +54,8 @@
 - Do not claim optional analytics/advertising tools are active or load them unless those integrations exist and consent allows them.
 - The existing car-brand guide dismissal preference must only be persisted when Preferences cookies are allowed; document its one-year duration and same-device fallback in the privacy policy.
 - Keep the controls responsive, accessible, and available in the site's English/Arabic language modes.
+
+## Brands listing and detail pages remain understandable while loading or recovering
+- On `/brands` and `/brands/{brand}`, show responsive placeholder cards while live brand/model data is being fetched instead of a blank white panel with only a spinner.
+- If a request fails or returns malformed data, show a clear error and a “Try again” control; retries must replace stale results and stale requests must not overwrite newer state.
+- Once the API responds, show the live brand cards or that brand's vehicle models with no lingering loading or error state.
