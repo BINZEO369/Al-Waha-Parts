@@ -49,6 +49,10 @@ export default function BrandModelPage({
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // State to manage the details card visibility
+  const [isCardOpen, setIsCardOpen] = useState(true);
+
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -111,6 +115,17 @@ export default function BrandModelPage({
     };
   }, [apiUrl, slug, modelSlug]);
 
+  // Auto-hide the card after 5 seconds
+  useEffect(() => {
+    if (detail) {
+      const timer = setTimeout(() => {
+        setIsCardOpen(false);
+      }, 5000); // 5000 milliseconds = 5 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [detail]);
+
   if (loading)
     return (
       <main className="page-shell">
@@ -129,26 +144,31 @@ export default function BrandModelPage({
 
   const { brand, vehicle, parts } = detail;
   
-  // Title generation
   const title = `${vehicle.manufacturer_name} ${vehicle.model_name}`.trim();
   const manufacturerLogo = vehicle.manufacturer_logo || brand.logo_url;
   const gallery = [vehicle.cover_image_url, ...(vehicle.vehicle_images ?? [])].filter(
     Boolean,
   ) as string[];
   
-  // Database values only (labels removed)
   const specs = [
-    vehicle.vehicle_type,
-    vehicle.generation,
-    vehicle.chassis_code,
-    vehicle.year_start && vehicle.year_end
-      ? `${vehicle.year_start}–${vehicle.year_end}`
-      : vehicle.year_start || vehicle.year_end,
-    vehicle.engine_code,
-    vehicle.engine_capacity,
-    vehicle.fuel_type,
-    vehicle.transmission,
-  ].filter((val) => val !== null && val !== undefined && String(val).trim() !== '');
+    { label: 'Vehicle type', value: vehicle.vehicle_type },
+    { label: 'Generation', value: vehicle.generation },
+    { label: 'Chassis', value: vehicle.chassis_code },
+    {
+      label: 'Year range',
+      value:
+        vehicle.year_start && vehicle.year_end
+          ? `${vehicle.year_start}–${vehicle.year_end}`
+          : vehicle.year_start || vehicle.year_end,
+    },
+    { label: 'Engine code', value: vehicle.engine_code },
+    { label: 'Engine capacity', value: vehicle.engine_capacity },
+    { label: 'Fuel type', value: vehicle.fuel_type },
+    { label: 'Transmission', value: vehicle.transmission },
+  ].filter(
+    (spec): spec is { label: string; value: string | number } =>
+      spec.value !== null && spec.value !== undefined && String(spec.value).trim() !== '',
+  );
 
   return (
     <main className="vehicle-detail-wrapper">
@@ -160,7 +180,7 @@ export default function BrandModelPage({
           background: #fafafa;
         }
 
-        /* DYNAMIC FULL BLEED HERO SECTION (No black gaps) */
+        /* DYNAMIC FULL BLEED HERO SECTION */
         .full-bleed-hero {
           position: relative;
           width: 100vw;
@@ -175,11 +195,10 @@ export default function BrandModelPage({
           overflow: hidden;
         }
 
-        /* Image dictates the height automatically */
         .hero-bg-image {
           width: 100%;
           height: auto;
-          display: block;
+          display: block; 
           object-fit: contain;
           z-index: 1;
         }
@@ -187,38 +206,38 @@ export default function BrandModelPage({
         .hero-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 30%);
+          background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%);
           z-index: 2;
           pointer-events: none;
         }
 
         .hero-placeholder {
-          height: 300px;
+          height: 400px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 20px;
+          font-size: 24px;
           color: #666;
           background: #111;
         }
 
-        /* Floating Back Button (Micro) */
+        /* Floating Back Button */
         .glass-back-btn {
           position: absolute;
-          top: 12px;
-          left: 12px;
-          z-index: 10;
+          top: 16px;
+          left: 16px;
+          z-index: 20;
           display: inline-flex;
           align-items: center;
-          gap: 3px;
-          padding: 4px 8px;
+          gap: 4px;
+          padding: 6px 12px;
           background: rgba(255, 255, 255, 0.2);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           border: 1px solid rgba(255, 255, 255, 0.3);
           border-radius: 50px;
           color: #fff;
-          font-size: 9px;
+          font-size: 12px;
           font-weight: 600;
           text-decoration: none;
           transition: all 0.3s ease;
@@ -227,85 +246,132 @@ export default function BrandModelPage({
           background: rgba(255, 255, 255, 0.4);
         }
 
-        /* ULTRA-TINY DETAILS CARD */
+        /* "i" INFO TOGGLE BUTTON (Top Right) */
+        .info-toggle-btn {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          z-index: 20;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          background: rgba(255, 255, 255, 0.25);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.5);
+          border-radius: 50%;
+          color: #fff;
+          cursor: pointer;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          transition: all 0.3s ease;
+        }
+        .info-toggle-btn:hover {
+          background: rgba(255, 255, 255, 0.4);
+          transform: scale(1.05);
+        }
+
+        /* VEHICLE DETAILS CARD */
         .liquid-details-card {
           position: absolute;
-          bottom: 10px;
-          left: 10px;
-          z-index: 5;
-          padding: 8px;
+          bottom: 24px;
+          left: 24px;
+          z-index: 10;
+          padding: 20px;
           background: rgba(255, 255, 255, 0.88);
-          backdrop-filter: blur(16px) saturate(180%);
-          -webkit-backdrop-filter: blur(16px) saturate(180%);
-          border: 1px solid rgba(255, 255, 255, 0.9);
-          border-radius: 8px;
-          width: 180px; /* Extremely small width */
-          max-height: 240px;
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(255, 255, 255, 0.95);
+          border-radius: 16px;
+          width: min(380px, calc(100vw - 48px));
+          max-height: 60vh;
           overflow-y: auto;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-          transition: transform 0.3s ease;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+          
+          /* Animation settings */
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          opacity: 1;
+          transform: translateY(0) scale(1);
+          pointer-events: auto;
         }
-        
-        .liquid-details-card:hover {
-          transform: translateY(-1px);
+
+        /* Hidden state for the card */
+        .liquid-details-card.hidden {
+          opacity: 0;
+          transform: translateY(20px) scale(0.95);
+          pointer-events: none;
         }
 
         .brand-header {
           display: flex;
           align-items: center;
-          margin-bottom: 4px;
+          gap: 10px;
+          margin-bottom: 12px;
         }
         .brand-header img {
-          width: 14px;
-          height: 14px;
+          width: 28px;
+          height: 28px;
           object-fit: contain;
+          border-radius: 4px;
+          padding: 2px;
+          background: #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .brand-header strong {
+          font-size: 13px;
+          color: #222;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 800;
         }
 
         .vehicle-title {
-          font-size: 12px;
+          font-size: 22px;
           font-weight: 800;
-          margin: 0 0 6px 0;
+          margin: 0 0 16px 0;
           color: #000;
           line-height: 1.2;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
         }
 
-        /* Compact Data Tags */
-        .specs-container {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 3px;
-          margin-bottom: 8px;
-          padding-top: 6px;
+        .specs-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          margin-bottom: 20px;
+          padding-top: 14px;
           border-top: 1px solid rgba(0,0,0,0.08);
         }
+        .spec-item {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .spec-label {
+          font-size: 10px;
+          color: #666;
+          text-transform: uppercase;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+        }
         .spec-value {
-          font-size: 8px;
-          font-weight: 600;
+          font-size: 13px;
+          font-weight: 700;
           color: #111;
-          background: rgba(0,0,0,0.06);
-          padding: 2px 4px;
-          border-radius: 4px;
-          line-height: 1;
-          white-space: nowrap;
-          max-width: 100%;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          line-height: 1.3;
+          overflow-wrap: anywhere;
         }
 
-        /* Micro Liquid Button */
         .liquid-btn {
           display: inline-flex;
           align-items: center;
           justify-content: center;
           background: #111;
           color: #fff;
-          padding: 5px;
-          border-radius: 4px;
+          padding: 12px;
+          border-radius: 8px;
           font-weight: 600;
-          font-size: 9px;
+          font-size: 14px;
           text-decoration: none;
           transition: all 0.3s ease;
           width: 100%;
@@ -357,19 +423,25 @@ export default function BrandModelPage({
         /* Responsive */
         @media (max-width: 768px) {
           .glass-back-btn {
-            top: 8px;
-            left: 8px;
-            font-size: 8px;
-            padding: 4px 6px;
+            top: 12px;
+            left: 12px;
+            padding: 5px 10px;
+            font-size: 11px;
+          }
+          .info-toggle-btn {
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
           }
           .liquid-details-card {
-            width: 150px; /* Even smaller on mobile */
-            bottom: 8px;
-            left: 8px;
-            padding: 6px;
+            bottom: 16px;
+            left: 16px;
+            width: calc(100vw - 32px);
+            padding: 16px;
+            max-height: 55vh;
           }
-          .vehicle-title { font-size: 11px; }
-          .spec-value { font-size: 7px; }
+          .vehicle-title { font-size: 20px; }
           .parts-section-wrapper {
             padding: 40px 16px;
           }
@@ -388,33 +460,49 @@ export default function BrandModelPage({
           <div className="hero-placeholder">No Image Available</div>
         )}
 
-        {/* Tiny Glass Back Button */}
+        {/* Back Button */}
         <Link className="glass-back-btn" href={`/brands/${encodeURIComponent(brand.slug)}`}>
-          <svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
           Back
         </Link>
 
-        {/* ULTRA-TINY Liquid Glass Details Card (Bottom-Left) */}
-        <div className="liquid-details-card">
+        {/* Info Toggle Button (Top Right) */}
+        <button 
+          className="info-toggle-btn" 
+          onClick={() => setIsCardOpen(!isCardOpen)}
+          aria-label="Toggle Vehicle Details"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        </button>
+
+        {/* Vehicle details card */}
+        <div className={`liquid-details-card ${isCardOpen ? '' : 'hidden'}`}>
           <div className="brand-header">
             {manufacturerLogo && <img src={manufacturerLogo} alt={`${brand.manufacturer_name} logo`} />}
+            <strong>{brand.manufacturer_name}</strong>
           </div>
           
-          <h1 className="vehicle-title" title={title}>{title}</h1>
+          <h1 className="vehicle-title">{title}</h1>
           
-          {/* ONLY Database Values (No labels, no extra text) */}
           {specs.length > 0 && (
-            <div className="specs-container">
-              {specs.map((value, idx) => (
-                <span className="spec-value" key={idx}>{value}</span>
+            <div className="specs-grid">
+              {specs.map(({ label, value }) => (
+                <div className="spec-item" key={label}>
+                  <span className="spec-label">{label}</span>
+                  <span className="spec-value">{value}</span>
+                </div>
               ))}
             </div>
           )}
 
           <Link className="liquid-btn" href={`/category?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
-            Parts
+            Browse Parts
           </Link>
         </div>
       </section>
