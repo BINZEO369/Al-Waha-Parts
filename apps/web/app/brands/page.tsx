@@ -62,13 +62,15 @@ export default function AllBrandsPage() {
     return () => clearTimeout(t);
   }, []);
 
-  /* Auto-dismiss after 7 seconds */
+  /*
+   * Auto-hide visually after 7 seconds — but DO NOT set the cookie.
+   * If the user never clicks dismiss, the guide will show again on the
+   * next visit. The cookie is only written when the user explicitly
+   * dismisses the toast.
+   */
   useEffect(() => {
     if (!showGuide) return;
-    const t = setTimeout(() => {
-      setShowGuide(false);
-      setCookie(GUIDE_COOKIE, '1', GUIDE_COOKIE_MAX_AGE);
-    }, 7000);
+    const t = setTimeout(() => setShowGuide(false), 7000);
     return () => clearTimeout(t);
   }, [showGuide]);
 
