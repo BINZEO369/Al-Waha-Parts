@@ -150,41 +150,38 @@ export default function BrandModelPage({
           right: 50%;
           margin-left: -50vw;
           margin-right: -50vw;
-          height: 65vh; /* Adjusted height to prevent extreme zoom */
-          min-height: 450px;
-          display: flex;
-          align-items: flex-end; /* Aligns card to bottom */
+          height: 60vh; /* Balanced height */
+          min-height: 400px;
           background: #0a0a0a;
           overflow: hidden;
         }
 
-        /* Blurred Background to fill gaps (no zoom) */
+        /* Blurred Background (Fills gaps, no extreme zoom) */
         .hero-bg-blur {
           position: absolute;
-          inset: -20px; /* Slightly larger to hide blur edges */
+          inset: -20px;
           width: calc(100% + 40px);
           height: calc(100% + 40px);
           object-fit: cover;
-          filter: blur(30px) brightness(0.4);
+          filter: blur(25px) brightness(0.3); /* Darkened for better contrast */
           z-index: 0;
           pointer-events: none;
         }
 
-        /* Main Image with contain (shows full car without excessive zoom) */
+        /* Main Image */
         .hero-bg-image {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: contain; /* This prevents the image from zooming/cropping */
+          object-fit: contain;
           z-index: 1;
         }
 
         .hero-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%),
-                      linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 40%);
+          background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%);
           z-index: 2;
         }
 
@@ -200,118 +197,104 @@ export default function BrandModelPage({
           z-index: 1;
         }
 
-        /* Floating Back Button (Glass Style) */
+        /* Floating Back Button */
         .glass-back-btn {
           position: absolute;
-          top: 24px;
-          left: 30px;
+          top: 20px;
+          left: 20px;
           z-index: 10;
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          padding: 10px 16px;
+          gap: 6px;
+          padding: 8px 14px;
           background: rgba(255, 255, 255, 0.15);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           border: 1px solid rgba(255, 255, 255, 0.3);
           border-radius: 50px;
           color: #fff;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 600;
           text-decoration: none;
           transition: all 0.3s ease;
         }
         .glass-back-btn:hover {
           background: rgba(255, 255, 255, 0.25);
-          transform: translateY(-2px);
         }
 
-        /* Container to align the liquid card */
-        .hero-content-container {
-          position: relative;
-          z-index: 3;
-          width: 100%;
-          max-width: 1300px;
-          margin: 0 auto;
-          padding: 0 40px 30px 40px; /* Pushed to bottom */
-          display: flex;
-          justify-content: flex-start; /* Aligns Left */
-          align-items: flex-end; /* Aligns Bottom */
-        }
-
-        /* LIQUID GLASS CARD (Smaller size) */
+        /* LIQUID GLASS CARD (Positioned Bottom-Left) */
         .liquid-details-card {
-          padding: 24px 28px;
-          background: rgba(255, 255, 255, 0.8);
-          backdrop-filter: blur(24px) saturate(180%);
-          -webkit-backdrop-filter: blur(24px) saturate(180%);
+          position: absolute;
+          bottom: 24px;
+          left: 24px;
+          z-index: 5;
+          padding: 16px;
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
           border: 1px solid rgba(255, 255, 255, 0.9);
-          border-radius: 20px;
-          max-width: 420px; /* Made smaller */
-          width: 100%;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.8);
+          border-radius: 16px;
+          width: 280px; /* Extremely small card */
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
           transition: transform 0.3s ease;
         }
         
         .liquid-details-card:hover {
-          transform: translateY(-3px);
+          transform: translateY(-2px);
         }
 
         .brand-header {
           display: flex;
           align-items: center;
-          gap: 12px;
-          margin-bottom: 12px;
+          gap: 8px;
+          margin-bottom: 8px;
         }
         .brand-header img {
-          width: 40px;
-          height: 40px;
+          width: 24px;
+          height: 24px;
           object-fit: contain;
-          border-radius: 10px;
-          border: 1px solid rgba(0,0,0,0.05);
-          padding: 6px;
+          border-radius: 6px;
+          padding: 2px;
           background: #fff;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .brand-header strong {
-          font-size: 14px;
+          font-size: 10px;
           color: #222;
           text-transform: uppercase;
-          letter-spacing: 1px;
+          letter-spacing: 0.5px;
           font-weight: 800;
         }
 
         .vehicle-title {
-          font-size: 26px; /* Reduced from 42px */
+          font-size: 18px; /* Very small title */
           font-weight: 800;
-          margin: 0 0 16px 0;
+          margin: 0 0 12px 0;
           color: #000;
           line-height: 1.2;
-          letter-spacing: -0.5px;
         }
 
         .specs-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-          gap: 12px;
-          margin-bottom: 20px;
-          padding-top: 16px;
+          grid-template-columns: 1fr 1fr; /* 2 columns for compact layout */
+          gap: 8px;
+          margin-bottom: 12px;
+          padding-top: 10px;
           border-top: 1px solid rgba(0,0,0,0.1);
         }
         .spec-item {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 2px;
         }
         .spec-label {
-          font-size: 10px;
-          color: #555;
+          font-size: 8px;
+          color: #666;
           text-transform: uppercase;
-          letter-spacing: 0.8px;
           font-weight: 700;
         }
         .spec-value {
-          font-size: 13px;
+          font-size: 11px;
           font-weight: 700;
           color: #111;
         }
@@ -321,22 +304,19 @@ export default function BrandModelPage({
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #111, #333);
+          background: #111;
           color: #fff;
-          padding: 12px 20px;
-          border-radius: 10px;
+          padding: 10px;
+          border-radius: 8px;
           font-weight: 600;
-          font-size: 14px;
+          font-size: 11px;
           text-decoration: none;
           transition: all 0.3s ease;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
           width: 100%;
-          border: 1px solid rgba(255,255,255,0.1);
+          border: none;
         }
         .liquid-btn:hover {
-          background: linear-gradient(135deg, #000, #222);
-          box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
-          transform: translateY(-1px);
+          background: #333;
         }
 
         /* PARTS SECTION */
@@ -379,39 +359,23 @@ export default function BrandModelPage({
         }
 
         /* Responsive */
-        @media (max-width: 1024px) {
-          .full-bleed-hero { height: 60vh; }
-        }
-
         @media (max-width: 768px) {
           .full-bleed-hero {
-            height: 55vh;
-            min-height: 400px;
+            height: 50vh;
+            min-height: 350px;
           }
           .glass-back-btn {
-            top: 16px;
-            left: 16px;
-            padding: 8px 12px;
-            font-size: 12px;
-          }
-          .hero-content-container {
-            padding: 0 16px 16px 16px; /* Bottom left on mobile too */
+            top: 12px;
+            left: 12px;
+            padding: 6px 10px;
+            font-size: 11px;
           }
           .liquid-details-card {
-            padding: 16px 20px;
-            border-radius: 16px;
-            max-width: 100%;
-          }
-          .vehicle-title { font-size: 22px; margin-bottom: 12px; }
-          .specs-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 16px;
-            padding-top: 12px;
-          }
-          .liquid-btn {
-            padding: 10px 16px;
-            font-size: 13px;
+            bottom: 16px;
+            left: 16px;
+            width: calc(100% - 32px); /* Takes full width minus margins on mobile */
+            max-width: 300px;
+            padding: 14px;
           }
           .parts-section-wrapper {
             padding: 40px 16px;
@@ -424,9 +388,7 @@ export default function BrandModelPage({
       <section className="full-bleed-hero">
         {gallery.length ? (
           <>
-            {/* Blurred background to avoid empty spaces without zooming the main image */}
             <img className="hero-bg-blur" src={gallery[0]} alt="" aria-hidden="true" />
-            {/* Main Image - object-fit contain prevents extreme zooming */}
             <img className="hero-bg-image" src={gallery[0]} alt={title} />
             <div className="hero-overlay"></div>
           </>
@@ -434,50 +396,48 @@ export default function BrandModelPage({
           <div className="hero-placeholder">No Image Available</div>
         )}
 
-        {/* Glass Back Button floating on top-left */}
+        {/* Glass Back Button */}
         <Link className="glass-back-btn" href={`/brands/${encodeURIComponent(brand.slug)}`}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
           Back
         </Link>
 
-        {/* Floating Liquid Glass Details Card (Bottom Left) */}
-        <div className="hero-content-container">
-          <div className="liquid-details-card">
-            <div className="brand-header">
-              {manufacturerLogo && <img src={manufacturerLogo} alt={`${brand.manufacturer_name} logo`} />}
-              <strong>{brand.manufacturer_name}</strong>
-            </div>
-            
-            <h1 className="vehicle-title">{title}</h1>
-            
-            {/* Specs Grid */}
-            <div className="specs-grid">
-              {vehicle.vehicle_type && (
-                <div className="spec-item">
-                  <span className="spec-label">Body Type</span>
-                  <span className="spec-value">{vehicle.vehicle_type}</span>
-                </div>
-              )}
-              {vehicle.generation && (
-                <div className="spec-item">
-                  <span className="spec-label">Generation</span>
-                  <span className="spec-value">{vehicle.generation}</span>
-                </div>
-              )}
-              {vehicle.chassis_code && (
-                <div className="spec-item">
-                  <span className="spec-label">Chassis Code</span>
-                  <span className="spec-value">{vehicle.chassis_code}</span>
-                </div>
-              )}
-            </div>
-
-            <Link className="liquid-btn" href={`/category?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
-              Browse Compatible Parts
-            </Link>
+        {/* Ultra-Small Liquid Glass Details Card (Bottom-Left) */}
+        <div className="liquid-details-card">
+          <div className="brand-header">
+            {manufacturerLogo && <img src={manufacturerLogo} alt={`${brand.manufacturer_name} logo`} />}
+            <strong>{brand.manufacturer_name}</strong>
           </div>
+          
+          <h1 className="vehicle-title">{title}</h1>
+          
+          {/* Specs Grid */}
+          <div className="specs-grid">
+            {vehicle.vehicle_type && (
+              <div className="spec-item">
+                <span className="spec-label">Type</span>
+                <span className="spec-value">{vehicle.vehicle_type}</span>
+              </div>
+            )}
+            {vehicle.generation && (
+              <div className="spec-item">
+                <span className="spec-label">Gen</span>
+                <span className="spec-value">{vehicle.generation}</span>
+              </div>
+            )}
+            {vehicle.chassis_code && (
+              <div className="spec-item">
+                <span className="spec-label">Chassis</span>
+                <span className="spec-value">{vehicle.chassis_code}</span>
+              </div>
+            )}
+          </div>
+
+          <Link className="liquid-btn" href={`/category?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
+            Browse Parts
+          </Link>
         </div>
       </section>
 
