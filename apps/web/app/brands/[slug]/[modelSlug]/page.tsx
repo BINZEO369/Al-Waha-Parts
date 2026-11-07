@@ -120,7 +120,7 @@ export default function BrandModelPage({
     if (detail) {
       const timer = setTimeout(() => {
         setIsCardOpen(false);
-      }, 5000); // 5000 milliseconds = 5 seconds
+      }, 5000);
 
       return () => clearTimeout(timer);
     }
@@ -206,7 +206,7 @@ export default function BrandModelPage({
         .hero-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%);
+          background: linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 40%);
           z-index: 2;
           pointer-events: none;
         }
@@ -221,105 +221,99 @@ export default function BrandModelPage({
           background: #111;
         }
 
-        /* Floating Back Button */
-        .glass-back-btn {
-          position: absolute;
-          top: 16px;
-          left: 16px;
-          z-index: 20;
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          padding: 6px 12px;
-          background: rgba(255, 255, 255, 0.2);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          border-radius: 50px;
-          color: #fff;
-          font-size: 12px;
-          font-weight: 600;
-          text-decoration: none;
-          transition: all 0.3s ease;
-        }
-        .glass-back-btn:hover {
-          background: rgba(255, 255, 255, 0.4);
-        }
-
-        /* "i" INFO TOGGLE BUTTON (Top Right) */
+        /* PREMIUM "i" INFO TOGGLE BUTTON (Top Right) */
         .info-toggle-btn {
           position: absolute;
-          top: 16px;
-          right: 16px;
+          top: 20px;
+          right: 20px;
           z-index: 20;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 40px;
-          height: 40px;
-          background: rgba(255, 255, 255, 0.25);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          width: 46px;
+          height: 46px;
+          background: rgba(255, 255, 255, 0.2);
+          backdrop-filter: blur(16px) saturate(180%);
+          -webkit-backdrop-filter: blur(16px) saturate(180%);
           border: 1px solid rgba(255, 255, 255, 0.5);
           border-radius: 50%;
           color: #fff;
           cursor: pointer;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          transition: all 0.3s ease;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 0 10px rgba(255,255,255,0.2);
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .info-toggle-btn:hover {
-          background: rgba(255, 255, 255, 0.4);
-          transform: scale(1.05);
+          background: rgba(255, 255, 255, 0.35);
+          transform: scale(1.08);
+          box-shadow: 0 10px 40px rgba(0,0,0,0.3), inset 0 0 15px rgba(255,255,255,0.3);
+        }
+        .info-toggle-btn svg {
+          width: 22px;
+          height: 22px;
+          transition: transform 0.4s ease;
+        }
+        .info-toggle-btn:hover svg {
+          transform: rotate(15deg) scale(1.1);
         }
 
-        /* VEHICLE DETAILS CARD */
+        /* FULL-WIDTH GLASS BOTTOM SHEET CARD */
         .liquid-details-card {
           position: absolute;
-          bottom: 24px;
-          left: 24px;
+          bottom: 0;
+          left: 0;
+          right: 0;
           z-index: 10;
-          padding: 20px;
-          background: rgba(255, 255, 255, 0.88);
-          backdrop-filter: blur(20px) saturate(180%);
-          -webkit-backdrop-filter: blur(20px) saturate(180%);
-          border: 1px solid rgba(255, 255, 255, 0.95);
-          border-radius: 16px;
-          width: min(380px, calc(100vw - 48px));
-          max-height: 60vh;
-          overflow-y: auto;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+          padding: 30px 40px;
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(24px) saturate(180%);
+          -webkit-backdrop-filter: blur(24px) saturate(180%);
+          border-top: 1px solid rgba(255, 255, 255, 0.9);
+          border-radius: 24px 24px 0 0;
+          box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
           
-          /* Animation settings */
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          opacity: 1;
-          transform: translateY(0) scale(1);
-          pointer-events: auto;
+          /* Slide up/down animation */
+          transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+          transform: translateY(0);
         }
 
         /* Hidden state for the card */
         .liquid-details-card.hidden {
-          opacity: 0;
-          transform: translateY(20px) scale(0.95);
-          pointer-events: none;
+          transform: translateY(105%); /* Slides completely out of view */
+        }
+
+        .card-content-wrapper {
+          max-width: 1200px;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+
+        .card-header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          flex-wrap: wrap;
+          gap: 16px;
         }
 
         .brand-header {
           display: flex;
           align-items: center;
-          gap: 10px;
-          margin-bottom: 12px;
+          gap: 12px;
+          margin-bottom: 8px;
         }
         .brand-header img {
-          width: 28px;
-          height: 28px;
+          width: 32px;
+          height: 32px;
           object-fit: contain;
-          border-radius: 4px;
+          border-radius: 6px;
           padding: 2px;
           background: #fff;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .brand-header strong {
-          font-size: 13px;
+          font-size: 14px;
           color: #222;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -327,39 +321,37 @@ export default function BrandModelPage({
         }
 
         .vehicle-title {
-          font-size: 22px;
+          font-size: 28px;
           font-weight: 800;
-          margin: 0 0 16px 0;
+          margin: 0;
           color: #000;
           line-height: 1.2;
         }
 
         .specs-grid {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
-          margin-bottom: 20px;
-          padding-top: 14px;
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          gap: 16px;
+          padding-top: 20px;
           border-top: 1px solid rgba(0,0,0,0.08);
         }
         .spec-item {
           display: flex;
           flex-direction: column;
-          gap: 2px;
+          gap: 4px;
         }
         .spec-label {
-          font-size: 10px;
+          font-size: 11px;
           color: #666;
           text-transform: uppercase;
           font-weight: 700;
           letter-spacing: 0.5px;
         }
         .spec-value {
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 700;
           color: #111;
           line-height: 1.3;
-          overflow-wrap: anywhere;
         }
 
         .liquid-btn {
@@ -368,17 +360,18 @@ export default function BrandModelPage({
           justify-content: center;
           background: #111;
           color: #fff;
-          padding: 12px;
-          border-radius: 8px;
+          padding: 14px 24px;
+          border-radius: 10px;
           font-weight: 600;
-          font-size: 14px;
+          font-size: 15px;
           text-decoration: none;
           transition: all 0.3s ease;
-          width: 100%;
           border: none;
+          white-space: nowrap;
         }
         .liquid-btn:hover {
           background: #333;
+          transform: translateY(-1px);
         }
 
         /* PARTS SECTION */
@@ -422,26 +415,30 @@ export default function BrandModelPage({
 
         /* Responsive */
         @media (max-width: 768px) {
-          .glass-back-btn {
-            top: 12px;
-            left: 12px;
-            padding: 5px 10px;
-            font-size: 11px;
-          }
           .info-toggle-btn {
-            top: 12px;
-            right: 12px;
-            width: 36px;
-            height: 36px;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
           }
           .liquid-details-card {
-            bottom: 16px;
-            left: 16px;
-            width: calc(100vw - 32px);
-            padding: 16px;
-            max-height: 55vh;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
           }
-          .vehicle-title { font-size: 20px; }
+          .card-header-row {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .vehicle-title { font-size: 22px; }
+          .specs-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding-top: 16px;
+          }
+          .liquid-btn {
+            width: 100%;
+            margin-top: 10px;
+          }
           .parts-section-wrapper {
             padding: 40px 16px;
           }
@@ -460,50 +457,49 @@ export default function BrandModelPage({
           <div className="hero-placeholder">No Image Available</div>
         )}
 
-        {/* Back Button */}
-        <Link className="glass-back-btn" href={`/brands/${encodeURIComponent(brand.slug)}`}>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-          Back
-        </Link>
-
-        {/* Info Toggle Button (Top Right) */}
+        {/* Premium "i" Toggle Button */}
         <button 
           className="info-toggle-btn" 
           onClick={() => setIsCardOpen(!isCardOpen)}
           aria-label="Toggle Vehicle Details"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="16" x2="12" y2="12"></line>
             <line x1="12" y1="8" x2="12.01" y2="8"></line>
           </svg>
         </button>
 
-        {/* Vehicle details card */}
+        {/* Full-Width Glass Bottom Sheet Card */}
         <div className={`liquid-details-card ${isCardOpen ? '' : 'hidden'}`}>
-          <div className="brand-header">
-            {manufacturerLogo && <img src={manufacturerLogo} alt={`${brand.manufacturer_name} logo`} />}
-            <strong>{brand.manufacturer_name}</strong>
-          </div>
-          
-          <h1 className="vehicle-title">{title}</h1>
-          
-          {specs.length > 0 && (
-            <div className="specs-grid">
-              {specs.map(({ label, value }) => (
-                <div className="spec-item" key={label}>
-                  <span className="spec-label">{label}</span>
-                  <span className="spec-value">{value}</span>
+          <div className="card-content-wrapper">
+            
+            <div className="card-header-row">
+              <div>
+                <div className="brand-header">
+                  {manufacturerLogo && <img src={manufacturerLogo} alt={`${brand.manufacturer_name} logo`} />}
+                  <strong>{brand.manufacturer_name}</strong>
                 </div>
-              ))}
+                <h1 className="vehicle-title">{title}</h1>
+              </div>
+              
+              <Link className="liquid-btn" href={`/category?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
+                Browse Compatible Parts
+              </Link>
             </div>
-          )}
+            
+            {specs.length > 0 && (
+              <div className="specs-grid">
+                {specs.map(({ label, value }) => (
+                  <div className="spec-item" key={label}>
+                    <span className="spec-label">{label}</span>
+                    <span className="spec-value">{value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
 
-          <Link className="liquid-btn" href={`/category?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
-            Browse Parts
-          </Link>
+          </div>
         </div>
       </section>
 
