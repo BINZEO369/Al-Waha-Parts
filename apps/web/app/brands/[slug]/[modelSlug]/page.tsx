@@ -150,20 +150,20 @@ export default function BrandModelPage({
           right: 50%;
           margin-left: -50vw;
           margin-right: -50vw;
-          height: 60vh; /* Balanced height */
+          height: 60vh; 
           min-height: 400px;
           background: #0a0a0a;
           overflow: hidden;
         }
 
-        /* Blurred Background (Fills gaps, no extreme zoom) */
+        /* Blurred Background */
         .hero-bg-blur {
           position: absolute;
           inset: -20px;
           width: calc(100% + 40px);
           height: calc(100% + 40px);
           object-fit: cover;
-          filter: blur(25px) brightness(0.3); /* Darkened for better contrast */
+          filter: blur(25px) brightness(0.3);
           z-index: 0;
           pointer-events: none;
         }
@@ -181,7 +181,7 @@ export default function BrandModelPage({
         .hero-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%);
+          background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 30%);
           z-index: 2;
         }
 
@@ -197,23 +197,23 @@ export default function BrandModelPage({
           z-index: 1;
         }
 
-        /* Floating Back Button */
+        /* Floating Back Button (Tiny) */
         .glass-back-btn {
           position: absolute;
-          top: 16px;
-          left: 16px;
+          top: 12px;
+          left: 12px;
           z-index: 10;
           display: inline-flex;
           align-items: center;
-          gap: 4px;
-          padding: 6px 12px;
+          gap: 3px;
+          padding: 5px 10px;
           background: rgba(255, 255, 255, 0.15);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           border: 1px solid rgba(255, 255, 255, 0.3);
           border-radius: 50px;
           color: #fff;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 600;
           text-decoration: none;
           transition: all 0.3s ease;
@@ -222,94 +222,94 @@ export default function BrandModelPage({
           background: rgba(255, 255, 255, 0.25);
         }
 
-        /* LIQUID GLASS CARD (Ultra-Compact Size) */
+        /* LIQUID GLASS CARD (Ultra-Micro Size) */
         .liquid-details-card {
           position: absolute;
-          bottom: 16px;
-          left: 16px;
+          bottom: 12px;
+          left: 12px;
           z-index: 5;
-          padding: 12px;
+          padding: 8px;
           background: rgba(255, 255, 255, 0.85);
-          backdrop-filter: blur(20px) saturate(180%);
-          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          backdrop-filter: blur(16px) saturate(180%);
+          -webkit-backdrop-filter: blur(16px) saturate(180%);
           border: 1px solid rgba(255, 255, 255, 0.9);
-          border-radius: 12px;
-          width: 220px; /* Extremely small card */
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+          width: 160px; /* Extremely tiny card */
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
           transition: transform 0.3s ease;
         }
         
         .liquid-details-card:hover {
-          transform: translateY(-2px);
+          transform: translateY(-1px);
         }
 
         .brand-header {
           display: flex;
           align-items: center;
-          gap: 6px;
-          margin-bottom: 6px;
+          gap: 4px;
+          margin-bottom: 4px;
         }
         .brand-header img {
-          width: 18px;
-          height: 18px;
+          width: 12px;
+          height: 12px;
           object-fit: contain;
-          border-radius: 4px;
-          padding: 2px;
+          border-radius: 2px;
+          padding: 1px;
           background: #fff;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         .brand-header strong {
-          font-size: 9px;
+          font-size: 7px;
           color: #222;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.3px;
           font-weight: 800;
         }
 
         .vehicle-title {
-          font-size: 14px; /* Very small title */
+          font-size: 11px; /* Micro title */
           font-weight: 800;
-          margin: 0 0 8px 0;
+          margin: 0 0 4px 0;
           color: #000;
-          line-height: 1.2;
+          line-height: 1.1;
         }
 
         .specs-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr; /* 2 columns for compact layout */
-          gap: 6px;
-          margin-bottom: 10px;
-          padding-top: 8px;
+          grid-template-columns: 1fr 1fr;
+          gap: 4px;
+          margin-bottom: 6px;
+          padding-top: 4px;
           border-top: 1px solid rgba(0,0,0,0.1);
         }
         .spec-item {
           display: flex;
           flex-direction: column;
-          gap: 1px;
+          gap: 0px;
         }
         .spec-label {
-          font-size: 7px;
+          font-size: 6px;
           color: #666;
           text-transform: uppercase;
           font-weight: 700;
         }
         .spec-value {
-          font-size: 9px;
+          font-size: 8px;
           font-weight: 700;
           color: #111;
         }
 
-        /* Liquid Button */
+        /* Micro Liquid Button */
         .liquid-btn {
           display: inline-flex;
           align-items: center;
           justify-content: center;
           background: #111;
           color: #fff;
-          padding: 8px;
-          border-radius: 6px;
+          padding: 4px;
+          border-radius: 4px;
           font-weight: 600;
-          font-size: 10px;
+          font-size: 8px;
           text-decoration: none;
           transition: all 0.3s ease;
           width: 100%;
@@ -365,18 +365,18 @@ export default function BrandModelPage({
             min-height: 350px;
           }
           .glass-back-btn {
-            top: 12px;
-            left: 12px;
-            padding: 5px 10px;
-            font-size: 10px;
+            top: 8px;
+            left: 8px;
+            padding: 4px 8px;
+            font-size: 9px;
           }
           .liquid-details-card {
-            bottom: 12px;
-            left: 12px;
-            width: 180px; /* Even smaller on mobile */
-            padding: 10px;
+            bottom: 8px;
+            left: 8px;
+            width: 140px; /* Tiny on mobile */
+            padding: 6px;
           }
-          .vehicle-title { font-size: 13px; }
+          .vehicle-title { font-size: 10px; }
           .parts-section-wrapper {
             padding: 40px 16px;
           }
@@ -396,15 +396,15 @@ export default function BrandModelPage({
           <div className="hero-placeholder">No Image Available</div>
         )}
 
-        {/* Glass Back Button */}
+        {/* Tiny Glass Back Button */}
         <Link className="glass-back-btn" href={`/brands/${encodeURIComponent(brand.slug)}`}>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
           Back
         </Link>
 
-        {/* Ultra-Small Liquid Glass Details Card (Bottom-Left) */}
+        {/* Ultra-Micro Liquid Glass Details Card (Bottom-Left) */}
         <div className="liquid-details-card">
           <div className="brand-header">
             {manufacturerLogo && <img src={manufacturerLogo} alt={`${brand.manufacturer_name} logo`} />}
@@ -436,7 +436,7 @@ export default function BrandModelPage({
           </div>
 
           <Link className="liquid-btn" href={`/category?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
-            Browse Parts
+            Parts
           </Link>
         </div>
       </section>
