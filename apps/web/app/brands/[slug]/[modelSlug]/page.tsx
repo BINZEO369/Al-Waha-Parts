@@ -10,13 +10,14 @@ type Brand = {
   id: string;
   manufacturer_name: string;
   slug: string;
-  logo_url: string;
+  logo_url: string | null;
   sort_order: number;
 };
 type Vehicle = {
   id: string;
   slug: string;
   car_brand_id?: string | null;
+  manufacturer_id?: string | null;
   manufacturer_name: string;
   manufacturer_logo?: string | null;
   model_name: string;
@@ -65,17 +66,32 @@ export default function BrandModelPage({
           apiUrl,
           `/api/v1/vehicles/slug/${encodeURIComponent(modelSlug)}`,
         );
+        const detailManufacturerId =
+          vehicleDetail.vehicle.car_brand_id || vehicleDetail.vehicle.manufacturer_id;
         if (
           vehicleDetail.vehicle.id !== model.id ||
-          (vehicleDetail.vehicle.car_brand_id &&
-            vehicleDetail.vehicle.car_brand_id !== brandDetail.brand.id)
+          (detailManufacturerId && detailManufacturerId !== brandDetail.brand.id)
         ) {
           throw new Error('The selected model does not belong to this car brand.');
         }
+        const completeVehicle: Vehicle = {
+          ...model,
+          ...vehicleDetail.vehicle,
+          manufacturer_name:
+            vehicleDetail.vehicle.manufacturer_name ||
+            model.manufacturer_name ||
+            brandDetail.brand.manufacturer_name,
+          manufacturer_logo:
+            vehicleDetail.vehicle.manufacturer_logo ||
+            model.manufacturer_logo ||
+            brandDetail.brand.logo_url,
+          car_brand_id:
+            detailManufacturerId || model.car_brand_id || brandDetail.brand.id,
+        };
         if (active)
           setDetail({
             brand: brandDetail.brand,
-            vehicle: vehicleDetail.vehicle,
+            vehicle: completeVehicle,
             parts: vehicleDetail.parts,
           });
       } catch (cause) {
@@ -109,6 +125,7 @@ export default function BrandModelPage({
 
   const { brand, vehicle, parts } = detail;
   const title = `${vehicle.manufacturer_name} ${vehicle.model_name}`;
+  const manufacturerLogo = vehicle.manufacturer_logo || brand.logo_url;
   const gallery = [vehicle.cover_image_url, ...(vehicle.vehicle_images ?? [])].filter(
     Boolean,
   ) as string[];
@@ -128,6 +145,25 @@ export default function BrandModelPage({
           outline: 2px solid var(--red);
           outline-offset: 3px;
         }
+        .vehicle-detail-manufacturer {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 14px;
+        }
+        .vehicle-detail-manufacturer img {
+          width: 54px;
+          height: 46px;
+          padding: 4px;
+          border: 1px solid #e8e8e8;
+          border-radius: 10px;
+          background: #fff;
+          object-fit: contain;
+        }
+        .vehicle-detail-manufacturer strong {
+          color: #222;
+          font-size: 15px;
+        }
       `}</style>
       <Link className="back-link" href={`/brands/${encodeURIComponent(brand.slug)}`}>
         ← {brand.manufacturer_name} models
@@ -141,7 +177,11 @@ export default function BrandModelPage({
           )}
         </div>
         <div className="vehicle-detail-copy">
-          <span className="section-kicker">{brand.manufacturer_name} model profile</span>
+          <div className="vehicle-detail-manufacturer">
+            {manufacturerLogo && <img src={manufacturerLogo} alt={`${brand.manufacturer_name} logo`} />}
+            <strong>{brand.manufacturer_name}</strong>
+          </div>
+          <span className="section-kicker">Model profile</span>
           <h1>{title}</h1>
           <p className="vehicle-detail-subtitle">
             {vehicle.generation || vehicle.chassis_code || 'Verified fitment record'}

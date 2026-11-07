@@ -484,13 +484,19 @@ app.get(
       .maybeSingle();
     if (vehicleError) return jsonError(reply, 500, vehicleError.message);
     if (!vehicle) return jsonError(reply, 404, 'Vehicle not found');
+    const manufacturer = (vehicle as CarBrandRecord).manufacturers as CarBrandRecord | null;
+    const normalizedVehicle = normalizeModel(
+      vehicle as CarBrandRecord,
+      manufacturer ?? {},
+      0,
+    );
 
     const { data: parts, error: partsError } = await supabase
       .from('parts')
       .select(
         '*,parts_categories(id,category_name,slug),car_brands:manufacturers(id,manufacturer_name,slug,logo_url),part_vehicle_fitments:part_model_fitments!inner(vehicle_id:model_id)',
       )
-      .eq('part_vehicle_fitments.model_id', vehicle.id)
+      .eq('part_vehicle_fitments.model_id', normalizedVehicle.id)
       .eq('status', 'active')
       .order('position')
       .order('part_name')
@@ -499,11 +505,7 @@ app.get(
     return {
       data: {
         vehicle: {
-          ...vehicle,
-          cover_image_url: publicImageUrl(vehicle.cover_image_url),
-          vehicle_images: Array.isArray(vehicle.vehicle_images)
-            ? vehicle.vehicle_images.map((image: unknown) => publicImageUrl(image)).filter(Boolean)
-            : vehicle.vehicle_images,
+          ...normalizedVehicle,
         },
         parts: parts ?? [],
       },
