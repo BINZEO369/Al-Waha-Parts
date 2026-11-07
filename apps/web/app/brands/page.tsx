@@ -55,15 +55,15 @@ export default function AllBrandsPage() {
           color: #111;
           font-family: 'Montserrat', sans-serif;
           font-size: clamp(24px, 4vw, 32px);
-          font-weight: 800;
-          letter-spacing: -0.03em;
+          font-weight: 700;
+          letter-spacing: -0.02em;
         }
         .brand-count {
           color: #666;
           font-size: 14px;
-          font-weight: 600;
+          font-weight: 500;
           background: #fff;
-          padding: 6px 16px;
+          padding: 6px 14px;
           border-radius: 50px;
           border: 1px solid #eaeaea;
         }
@@ -71,7 +71,7 @@ export default function AllBrandsPage() {
         /* গ্রিড লেআউট */
         .all-brands-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
           gap: 24px;
         }
 
@@ -79,20 +79,22 @@ export default function AllBrandsPage() {
         .all-brand-card {
           display: flex;
           flex-direction: column;
+          align-items: center; /* সব কিছু মাঝখানে আনার জন্য */
+          text-align: center;
           background: #ffffff;
           border-radius: 20px;
           border: 1px solid #eaeaea;
-          padding: 28px 24px;
+          padding: 32px 24px 24px;
           text-decoration: none;
-          transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+          transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
           position: relative;
           overflow: hidden;
         }
 
-        /* হোভার ইফেক্ট (Liquid feel) */
+        /* লিকুইড হোভার ইফেক্ট */
         .all-brand-card:hover {
-          transform: translateY(-6px);
+          transform: translateY(-8px);
           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
           border-color: #d0d0d0;
         }
@@ -101,7 +103,7 @@ export default function AllBrandsPage() {
         .all-brand-logo {
           display: flex;
           width: 100%;
-          height: 110px;
+          height: 100px;
           align-items: center;
           justify-content: center;
           margin-bottom: 24px;
@@ -111,98 +113,76 @@ export default function AllBrandsPage() {
           max-width: 85%;
           max-height: 75px;
           object-fit: contain;
-          transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+          transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* স্প্রিং অ্যানিমেশন */
         }
 
         /* হোভার করলে লোগো হালকা বড় হবে */
         .all-brand-card:hover .all-brand-logo img {
-          transform: scale(1.08);
+          transform: scale(1.1);
         }
 
         .all-brand-initials {
           display: grid;
-          width: 70px;
-          height: 70px;
+          width: 64px;
+          height: 64px;
           place-items: center;
           background: #f1f3f5;
           border-radius: 50%;
           color: #333;
           font-family: 'Montserrat', sans-serif;
-          font-size: 22px;
-          font-weight: 800;
+          font-size: 20px;
+          font-weight: 700;
         }
 
-        /* টেক্সট এবং প্রিমিয়াম বাটন কন্টেইনার */
-        .brand-info {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-top: auto;
-          padding-top: 20px;
-        }
-
-        .brand-text-wrapper {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          flex: 1;
-          padding-right: 15px;
-        }
-
+        /* ব্র্যান্ডের নাম */
         .brand-name {
           font-family: 'Montserrat', sans-serif;
-          font-size: 17px;
-          font-weight: 800;
+          font-size: 14px;
+          font-weight: 700;
           color: #111;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 20px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          letter-spacing: -0.02em;
+          width: 100%;
         }
 
-        /* সাব-টেক্সট যা ইউজারকে ক্লিক করতে উৎসাহিত করবে */
-        .brand-subtext {
-          font-family: 'Inter', sans-serif;
-          font-size: 12px;
-          font-weight: 500;
-          color: #888;
-          transition: color 0.3s ease;
-        }
-
-        .all-brand-card:hover .brand-subtext {
-          color: #111;
-        }
-
-        /* নতুন প্রিমিয়াম মিনিমাল বাটন (সার্কুলার অ্যারো) */
+        /* নতুন আল্ট্রা-প্রিমিয়াম বাটন */
         .view-btn {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 42px;
-          height: 42px;
-          border-radius: 50%;
-          background-color: #f4f5f7;
-          border: none;
-          transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-          flex-shrink: 0;
+          gap: 8px;
+          width: 100%;
+          padding: 12px 20px;
+          font-size: 13px;
+          font-weight: 600;
+          color: #333;
+          background-color: #f8f9fa;
+          border: 1px solid #eaeaea;
+          border-radius: 50px;
+          transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+          margin-top: auto;
         }
 
         .view-btn svg {
-          width: 18px;
-          height: 18px;
-          stroke: #111;
-          stroke-width: 2.5;
-          transition: all 0.3s ease;
+          width: 16px;
+          height: 16px;
+          transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         /* কার্ডে হোভার করলে বাটন কালো হয়ে যাবে */
         .all-brand-card:hover .view-btn {
           background-color: #111;
+          color: #ffffff;
+          border-color: #111;
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
         }
 
         .all-brand-card:hover .view-btn svg {
-          stroke: #fff;
-          transform: translateX(2px);
+          transform: translateX(4px);
         }
 
         /* মোবাইল রেসপন্সিভ */
@@ -212,26 +192,23 @@ export default function AllBrandsPage() {
             gap: 12px;
           }
           .all-brand-card {
-            padding: 16px;
+            padding: 20px 12px 12px;
             border-radius: 16px;
           }
           .all-brand-logo {
-            height: 80px;
+            height: 70px;
             margin-bottom: 16px;
           }
           .brand-name {
-            font-size: 14px;
-          }
-          .brand-subtext {
-            display: none; /* মোবাইলে সাব-টেক্সট লুকিয়ে থাকবে */
+            font-size: 12px;
+            margin-bottom: 12px;
           }
           .view-btn {
-            width: 34px;
-            height: 34px;
+            padding: 10px 12px;
+            font-size: 11px;
           }
-          .view-btn svg {
-            width: 16px;
-            height: 16px;
+          .view-btn span {
+            display: none; /* মোবাইলে লেখা লুকিয়ে শুধু অ্যারো দেখাবে */
           }
           .header-section {
             flex-direction: column;
@@ -278,18 +255,13 @@ export default function AllBrandsPage() {
                 )}
               </div>
               
-              <div className="brand-info">
-                <div className="brand-text-wrapper">
-                  <span className="brand-name">{brand.manufacturer_name}</span>
-                  <span className="brand-subtext">Explore Models</span>
-                </div>
-                
-                {/* প্রিমিয়াম সার্কুলার অ্যারো বাটন */}
-                <div className="view-btn">
-                  <svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </div>
+              <span className="brand-name">{brand.manufacturer_name}</span>
+              
+              <div className="view-btn">
+                <span>Explore Models</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
               </div>
             </Link>
           ))}
