@@ -928,20 +928,92 @@ app.get(
 
 app.get('/api/v1/admin/dashboard', { preHandler: requireAdmin as any }, async (_request, reply) => {
   const supabase = getSupabaseAdmin();
-  const [parts, vehicles, bookings, admins] = await Promise.all([
+  const [parts, manufacturers, vehicles, bookings, pendingBookings, categories, banners, admins] = await Promise.all([
     supabase.from('parts').select('id', { count: 'exact', head: true }),
+    supabase.from('manufacturers').select('id', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('car_models').select('id', { count: 'exact', head: true }).eq('status', 'active'),
     supabase.from('bookings').select('id', { count: 'exact', head: true }),
+    supabase.from('bookings').select('id', { count: 'exact', head: true }).in('booking_status', ['pending', 'new', 'confirmed']),
+    supabase.from('parts_categories').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    supabase.from('hero_banners').select('id', { count: 'exact', head: true }).eq('status', 'active'),
     supabase.from('admins').select('id', { count: 'exact', head: true }).eq('status', 'active'),
   ]);
   return reply.send({
     data: {
       parts: parts.count ?? 0,
+      manufacturers: manufacturers.count ?? 0,
       vehicles: vehicles.count ?? 0,
       bookings: bookings.count ?? 0,
+      pending_bookings: pendingBookings.count ?? 0,
+      categories: categories.count ?? 0,
+      banners: banners.count ?? 0,
       active_admins: admins.count ?? 0,
     },
   });
+});
+
+const editableManufacturerFields = [
+  'manufacturer_name',
+  'slug',
+  'logo_url',
+  'company_description',
+  'country',
+  'founded_year',
+  'status',
+  'is_active',
+  'sort_order',
+] as const;
+
+app.get('/api/v1/admin/car-brands', { preHandler: requireAdmin as any }, async (_request, reply) => {
+  const supabase = getSupabaseAdmin();
+  const [{ data: manufacturers, error: manufacturerError }, { data: models, error: modelError }] = await Promise.all([
+    supabase.from('manufacturers').select('*').order('sort_order').order('manufacturer_name').limit(500),
+    supabase.from('car_models').select('id,manufacturer_id,status').limit(5000),
+  ]);
+  if (manufacturerError || modelError) return jsonError(reply, 500, manufacturerError?.message ?? modelError?.message ?? 'Manufacturers could not be loaded.');
+  const counts = new Map<string, { total: number; active: number }>();
+  for (const model of models ?? []) {
+    const current = counts.get(model.manufacturer_id) ?? { total: 0, active: 0 };
+    current.total += 1;
+    if (model.status === 'active') current.active += 1;
+    counts.set(model.manufacturer_id, current);
+  }
+  return {
+    data: (manufacturers ?? []).map((manufacturer) => ({
+      ...manufacturer,
+      status: manufacturer.is_active ? manufacturer.status : 'inactive',
+      model_count: counts.get(manufacturer.id)?.total ?? 0,
+      active_model_count: counts.get(manufacturer.id)?.active ?? 0,
+    })),
+  };
+});
+
+app.post('/api/v1/admin/car-brands', { preHandler: requireAdmin as any }, async (request, reply) => {
+  const input = pickFields((request.body ?? {}) as Record<string, unknown>, editableManufacturerFields);
+  const manufacturerName = typeof input.manufacturer_name === 'string' ? input.manufacturer_name.trim() : '';
+  if (!manufacturerName) return jsonError(reply, 400, 'manufacturer_name is required');
+  input.manufacturer_name = manufacturerName;
+  if (typeof input.slug !== 'string' || !input.slug.trim()) input.slug = brandSlug(manufacturerName);
+  input.status = input.status ?? 'active';
+  input.is_active = input.is_active ?? true;
+  const { data, error } = await getSupabaseAdmin().from('manufacturers').insert(input).select().single();
+  if (error) return jsonError(reply, 400, error.message);
+  return reply.code(201).send({ data: { ...data, model_count: 0, active_model_count: 0 } });
+});
+
+app.patch('/api/v1/admin/car-brands/:id', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string }; Body: Record<string, unknown> }>, reply) => {
+  const input = pickFields(request.body ?? {}, editableManufacturerFields);
+  if (typeof input.manufacturer_name === 'string') input.manufacturer_name = input.manufacturer_name.trim();
+  if (!Object.keys(input).length) return jsonError(reply, 400, 'No editable manufacturer fields provided');
+  const { data, error } = await getSupabaseAdmin().from('manufacturers').update(input).eq('id', request.params.id).select().single();
+  if (error) return jsonError(reply, 400, error.message);
+  return { data };
+});
+
+app.delete('/api/v1/admin/car-brands/:id', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+  const { data, error } = await getSupabaseAdmin().from('manufacturers').update({ status: 'inactive', is_active: false }).eq('id', request.params.id).select('id,status,is_active').single();
+  if (error) return jsonError(reply, 404, 'Manufacturer could not be deactivated.');
+  return { data };
 });
 
 const editableBannerFields = [
@@ -1262,7 +1334,7 @@ app.get('/api/v1/admin/vehicles', { preHandler: requireAdmin as any }, async (_r
     .select('*,manufacturers:manufacturer_id(id,manufacturer_name,slug,logo_url)')
     .order('sort_order')
     .order('model_name')
-    .limit(500);
+    .limit(5000);
   if (error) return jsonError(reply, 500, error.message);
   return {
     data: (data ?? []).map((row) => ({

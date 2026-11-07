@@ -60,3 +60,37 @@
 - Fixed desktop rail with compact mobile header and horizontally scrollable section navigation.
 - Every section gets a clear title, purpose, primary action, and explicit loading/empty/error state.
 - Manrope handles interface text; DM Mono handles labels, codes, statuses, and metadata.
+
+# Normalized database admin upgrade
+
+## Goal
+
+Turn the admin app into a premium operations workspace backed by the connected Supabase production database. The normalized vehicle source of truth is `manufacturers` → `car_models`, with `part_model_fitments`, `parts_categories`, `hero_banners`, `homepage_selected_vehicles`, `parts`, `bookings`, and `admins` supporting the storefront and operations workflow.
+
+## Implementation
+
+- Add normalized manufacturer CRUD at `/api/v1/admin/car-brands`, including model counts and logo metadata.
+- Keep vehicle model CRUD on `car_models`, expose joined manufacturer identity, and show live model media in admin rows.
+- Expand dashboard live metrics to include manufacturers, models, categories, banners, and pending bookings.
+- Add media previews in the shared admin resource panel for brand logos, vehicle covers, part images, category images, and banners.
+- Update admin copy and navigation so brand/model management is a first-class workflow.
+- Validate admin and API typechecks/builds, then deploy the connected production projects.
+
+## Design
+
+**Style:** International automotive operations suite: quiet white workspace, charcoal typography, red Al Waha action color, compact data-dense panels, live image previews, and clear status signals.
+
+**Core principles:** database-first; media visible at the point of decision; relationships explicit; safe soft-deactivation over destructive deletion; mobile-safe operations.
+
+**Signature elements:** AW red mark, mono live/status labels, image preview tiles for logos and vehicle media.
+
+**Brand essence:** a dependable Saudi parts operations desk—precise, direct, and fitment-first.
+
+## Project structure
+
+- `apps/api/src/app.ts`: authenticated admin endpoints and normalized database queries.
+- `apps/admin/components/AdminResourcePanel.tsx`: shared live CRUD, filters, status actions, and media preview rows.
+- `apps/admin/app/dashboard/page.tsx`: live operational summary.
+- `apps/admin/app/car-brands/page.tsx`: manufacturer/logo management.
+- `apps/admin/app/vehicles/page.tsx`: model and fitment management.
+- `apps/admin/app/globals.css`: premium responsive workspace styling.

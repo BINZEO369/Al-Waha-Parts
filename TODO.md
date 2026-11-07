@@ -59,3 +59,11 @@
 - On `/brands` and `/brands/{brand}`, show responsive placeholder cards while live brand/model data is being fetched instead of a blank white panel with only a spinner.
 - If a request fails or returns malformed data, show a clear error and a “Try again” control; retries must replace stale results and stale requests must not overwrite newer state.
 - Once the API responds, show the live brand cards or that brand's vehicle models with no lingering loading or error state.
+
+## Admin is aligned with the normalized production database
+- The admin must treat `manufacturers` as the source of truth for brand identity and `car_models` as the source of truth for vehicle models; it must not depend on the removed combined `car_brands` table.
+- Admin users must be able to create, edit, activate, deactivate, and review manufacturer records including company name, slug, logo URL, description, country, founded year, and display order.
+- Manufacturer records must show live logo previews and the count of related models; vehicle model records must show their joined manufacturer and live cover image where available.
+- The dashboard must expose live counts for parts, manufacturers, models, bookings, categories, hero banners, and active admins, with pending booking visibility where available.
+- Image and logo fields must be visibly previewed in the resource rows while preserving the existing database/API CRUD behavior.
+- Admin and API typechecks and production builds must pass before the updated admin projects are deployed.

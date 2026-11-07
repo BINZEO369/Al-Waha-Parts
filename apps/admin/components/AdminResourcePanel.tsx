@@ -110,6 +110,10 @@ const config: Record<
       { key: 'manufacturer_name', label: 'Manufacturer', required: true },
       { key: 'slug', label: 'URL slug', required: true },
       { key: 'logo_url', label: 'Logo image URL', required: true },
+      { key: 'company_description', label: 'Company description', type: 'textarea' },
+      { key: 'country', label: 'Country' },
+      { key: 'founded_year', label: 'Founded year', type: 'number' },
+      { key: 'status', label: 'Status', type: 'select', options: ['active', 'inactive', 'draft'] },
       { key: 'sort_order', label: 'Display order', type: 'number' },
       { key: 'is_active', label: 'Active logo', type: 'checkbox' },
     ],
@@ -131,6 +135,16 @@ function statusClass(value: unknown) {
     .toLowerCase()
     .replace(/\s+/g, '-')}`;
 }
+
+function mediaFor(kind: ResourceKind, row: Resource) {
+  if (kind === 'carBrands') return row.logo_url;
+  if (kind === 'vehicles') return row.cover_image_url;
+  if (kind === 'parts') return row.primary_image_url;
+  if (kind === 'categories') return row.image_url;
+  if (kind === 'banners') return row.image_url;
+  return null;
+}
+
 function summary(kind: ResourceKind, row: Resource) {
   if (kind === 'parts')
     return {
@@ -163,8 +177,8 @@ function summary(kind: ResourceKind, row: Resource) {
   if (kind === 'carBrands')
     return {
       title: text(row.manufacturer_name),
-      meta: `${text(row.slug)} · ${text(row.logo_url)}`,
-      detail: `${row.is_active ? 'Active' : 'Hidden'} · order ${text(row.sort_order, '0')}`,
+      meta: `${text(row.slug)} · ${text(row.country, 'Country not set')}`,
+      detail: `${text(row.active_model_count ?? row.model_count, '0')} active models · order ${text(row.sort_order, '0')}`,
       status: row.is_active ? 'active' : 'inactive',
     };
   return {
@@ -242,9 +256,12 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
   async function setAvailability(row: Resource, nextStatus: 'active' | 'inactive') {
     setActionError('');
     try {
+      const body = kind === 'carBrands'
+        ? { status: nextStatus, is_active: nextStatus === 'active' }
+        : { status: nextStatus };
       await adminFetch(`${meta.endpoint}/${row.id}`, {
         method: 'PATCH',
-        body: JSON.stringify({ status: nextStatus }),
+        body: JSON.stringify(body),
       });
       load();
     } catch (cause) {
@@ -382,7 +399,13 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
             const canToggleStatus = kind !== 'admins' || row.can_manage_access === true;
             return (
               <article className="resource-row" key={row.id}>
-                <div className="resource-avatar">{item.title.slice(0, 2).toUpperCase()}</div>
+                <div className={`resource-avatar ${mediaFor(kind, row) ? 'resource-media' : ''}`}>
+                  {typeof mediaFor(kind, row) === 'string' ? (
+                    <img src={String(mediaFor(kind, row))} alt="" loading="lazy" />
+                  ) : (
+                    item.title.slice(0, 2).toUpperCase()
+                  )}
+                </div>
                 <div className="resource-main">
                   <strong>{item.title}</strong>
                   <small>{item.meta}</small>

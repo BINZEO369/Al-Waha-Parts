@@ -38,7 +38,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       } catch (error) { if (mounted) setAuthError(error instanceof Error ? error.message : 'Admin access could not be verified.'); }
     }
     void verify();
-    const listener = client?.auth.onAuthStateChange((event) => { if (event === 'SIGNED_OUT') router.replace('/login'); });
+    const listener = client?.auth.onAuthStateChange((event: string) => { if (event === 'SIGNED_OUT') router.replace('/login'); });
     return () => { mounted = false; listener?.data.subscription.unsubscribe(); };
   }, [pathname, router]);
 

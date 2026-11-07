@@ -7,7 +7,7 @@ export default function Vehicles() {
       <SectionHeader
         eyebrow="Fitment library / section 03"
         title="Vehicle library"
-        description="Manage manufacturers, model records, generations, chassis codes, and active fitment records."
+        description="Manage the normalized manufacturer-to-model library, fitment fields, years, SEO metadata, and live vehicle media."
         action="Add vehicle"
       />
       <section className="workspace-hero">
@@ -17,8 +17,8 @@ export default function Vehicles() {
           </span>
           <h2>Every part starts with the right vehicle model.</h2>
           <p>
-            Live vehicle records are loaded from Supabase and remain searchable on phone, tablet,
-            and desktop.
+            Live model records are loaded from Supabase and remain searchable on phone, tablet,
+            and desktop. Cover images and manufacturer relationships are visible before you edit.
           </p>
         </div>
         <div className="hero-mark">VH</div>
