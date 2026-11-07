@@ -129,31 +129,26 @@ export default function BrandModelPage({
 
   const { brand, vehicle, parts } = detail;
   
-  // Title generation (Year completely removed)
+  // Title generation
   const title = `${vehicle.manufacturer_name} ${vehicle.model_name}`.trim();
   const manufacturerLogo = vehicle.manufacturer_logo || brand.logo_url;
   const gallery = [vehicle.cover_image_url, ...(vehicle.vehicle_images ?? [])].filter(
     Boolean,
   ) as string[];
+  
+  // Database values only (labels removed)
   const specs = [
-    { label: 'Vehicle type', value: vehicle.vehicle_type },
-    { label: 'Generation', value: vehicle.generation },
-    { label: 'Chassis', value: vehicle.chassis_code },
-    {
-      label: 'Year range',
-      value:
-        vehicle.year_start && vehicle.year_end
-          ? `${vehicle.year_start}–${vehicle.year_end}`
-          : vehicle.year_start || vehicle.year_end,
-    },
-    { label: 'Engine code', value: vehicle.engine_code },
-    { label: 'Engine capacity', value: vehicle.engine_capacity },
-    { label: 'Fuel type', value: vehicle.fuel_type },
-    { label: 'Transmission / gearbox', value: vehicle.transmission },
-  ].filter(
-    (spec): spec is { label: string; value: string | number } =>
-      spec.value !== null && spec.value !== undefined && String(spec.value).trim() !== '',
-  );
+    vehicle.vehicle_type,
+    vehicle.generation,
+    vehicle.chassis_code,
+    vehicle.year_start && vehicle.year_end
+      ? `${vehicle.year_start}–${vehicle.year_end}`
+      : vehicle.year_start || vehicle.year_end,
+    vehicle.engine_code,
+    vehicle.engine_capacity,
+    vehicle.fuel_type,
+    vehicle.transmission,
+  ].filter((val) => val !== null && val !== undefined && String(val).trim() !== '');
 
   return (
     <main className="vehicle-detail-wrapper">
@@ -165,7 +160,7 @@ export default function BrandModelPage({
           background: #fafafa;
         }
 
-        /* FULL BLEED HERO SECTION */
+        /* DYNAMIC FULL BLEED HERO SECTION (No black gaps) */
         .full-bleed-hero {
           position: relative;
           width: 100vw;
@@ -173,30 +168,18 @@ export default function BrandModelPage({
           right: 50%;
           margin-left: -50vw;
           margin-right: -50vw;
-          height: 60vh; 
-          min-height: 400px;
-          background: #0a0a0a;
+          background: #f0f0f0;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
           overflow: hidden;
         }
 
-        /* Blurred Background */
-        .hero-bg-blur {
-          position: absolute;
-          inset: -20px;
-          width: calc(100% + 40px);
-          height: calc(100% + 40px);
-          object-fit: cover;
-          filter: blur(25px) brightness(0.3);
-          z-index: 0;
-          pointer-events: none;
-        }
-
-        /* Main Image */
+        /* Image dictates the height automatically */
         .hero-bg-image {
-          position: absolute;
-          inset: 0;
           width: 100%;
-          height: 100%;
+          height: auto;
+          display: block;
           object-fit: contain;
           z-index: 1;
         }
@@ -206,21 +189,20 @@ export default function BrandModelPage({
           inset: 0;
           background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 30%);
           z-index: 2;
+          pointer-events: none;
         }
 
         .hero-placeholder {
-          position: absolute;
-          inset: 0;
+          height: 300px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 24px;
+          font-size: 20px;
           color: #666;
           background: #111;
-          z-index: 1;
         }
 
-        /* Floating Back Button (Tiny) */
+        /* Floating Back Button (Micro) */
         .glass-back-btn {
           position: absolute;
           top: 12px;
@@ -229,38 +211,38 @@ export default function BrandModelPage({
           display: inline-flex;
           align-items: center;
           gap: 3px;
-          padding: 5px 10px;
-          background: rgba(255, 255, 255, 0.15);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          padding: 4px 8px;
+          background: rgba(255, 255, 255, 0.2);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           border: 1px solid rgba(255, 255, 255, 0.3);
           border-radius: 50px;
           color: #fff;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 600;
           text-decoration: none;
           transition: all 0.3s ease;
         }
         .glass-back-btn:hover {
-          background: rgba(255, 255, 255, 0.25);
+          background: rgba(255, 255, 255, 0.4);
         }
 
-        /* Vehicle details card */
+        /* ULTRA-TINY DETAILS CARD */
         .liquid-details-card {
           position: absolute;
-          bottom: 12px;
-          left: 12px;
+          bottom: 10px;
+          left: 10px;
           z-index: 5;
-          padding: 16px;
-          background: rgba(255, 255, 255, 0.85);
+          padding: 8px;
+          background: rgba(255, 255, 255, 0.88);
           backdrop-filter: blur(16px) saturate(180%);
           -webkit-backdrop-filter: blur(16px) saturate(180%);
           border: 1px solid rgba(255, 255, 255, 0.9);
-          border-radius: 14px;
-          width: min(440px, calc(100vw - 24px));
-          max-height: min(52vh, 390px);
+          border-radius: 8px;
+          width: 180px; /* Extremely small width */
+          max-height: 240px;
           overflow-y: auto;
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
           transition: transform 0.3s ease;
         }
         
@@ -271,63 +253,46 @@ export default function BrandModelPage({
         .brand-header {
           display: flex;
           align-items: center;
-          gap: 8px;
-          margin-bottom: 8px;
+          margin-bottom: 4px;
         }
         .brand-header img {
-          width: 22px;
-          height: 22px;
+          width: 14px;
+          height: 14px;
           object-fit: contain;
-          border-radius: 2px;
-          padding: 1px;
-          background: #fff;
-          box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        }
-        .brand-header strong {
-          font-size: 11px;
-          color: #222;
-          text-transform: uppercase;
-          letter-spacing: 0.3px;
-          font-weight: 800;
         }
 
         .vehicle-title {
-          font-size: 20px;
+          font-size: 12px;
           font-weight: 800;
-          margin: 0 0 10px 0;
+          margin: 0 0 6px 0;
           color: #000;
-          line-height: 1.1;
+          line-height: 1.2;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
-        .specs-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px;
-          margin-bottom: 12px;
-          padding-top: 10px;
-          border-top: 1px solid rgba(0,0,0,0.1);
-        }
-        .spec-item {
+        /* Compact Data Tags */
+        .specs-container {
           display: flex;
-          flex-direction: column;
-          gap: 4px;
-          padding: 8px 10px;
-          border: 1px solid rgba(0,0,0,0.08);
-          border-radius: 8px;
-          background: rgba(255,255,255,0.72);
-        }
-        .spec-label {
-          font-size: 9px;
-          color: #666;
-          text-transform: uppercase;
-          font-weight: 700;
+          flex-wrap: wrap;
+          gap: 3px;
+          margin-bottom: 8px;
+          padding-top: 6px;
+          border-top: 1px solid rgba(0,0,0,0.08);
         }
         .spec-value {
-          font-size: 12px;
-          font-weight: 700;
+          font-size: 8px;
+          font-weight: 600;
           color: #111;
-          line-height: 1.35;
-          overflow-wrap: anywhere;
+          background: rgba(0,0,0,0.06);
+          padding: 2px 4px;
+          border-radius: 4px;
+          line-height: 1;
+          white-space: nowrap;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         /* Micro Liquid Button */
@@ -337,10 +302,10 @@ export default function BrandModelPage({
           justify-content: center;
           background: #111;
           color: #fff;
-          padding: 9px 12px;
-          border-radius: 7px;
+          padding: 5px;
+          border-radius: 4px;
           font-weight: 600;
-          font-size: 12px;
+          font-size: 9px;
           text-decoration: none;
           transition: all 0.3s ease;
           width: 100%;
@@ -391,28 +356,20 @@ export default function BrandModelPage({
 
         /* Responsive */
         @media (max-width: 768px) {
-          .full-bleed-hero {
-            height: 50vh;
-            min-height: 350px;
-          }
           .glass-back-btn {
             top: 8px;
             left: 8px;
-            padding: 4px 8px;
-            font-size: 9px;
+            font-size: 8px;
+            padding: 4px 6px;
           }
           .liquid-details-card {
+            width: 150px; /* Even smaller on mobile */
             bottom: 8px;
             left: 8px;
-            width: min(440px, calc(100vw - 16px));
-            max-height: 48vh;
-            padding: 12px;
+            padding: 6px;
           }
-          .vehicle-title { font-size: 18px; }
-          .specs-grid { gap: 6px; }
-          .spec-item { padding: 7px 8px; }
-          .spec-label { font-size: 8px; }
-          .spec-value { font-size: 11px; }
+          .vehicle-title { font-size: 11px; }
+          .spec-value { font-size: 7px; }
           .parts-section-wrapper {
             padding: 40px 16px;
           }
@@ -420,11 +377,10 @@ export default function BrandModelPage({
         }
       `}</style>
 
-      {/* Full-Width Hero Section */}
+      {/* Dynamic Full-Width Hero Section */}
       <section className="full-bleed-hero">
         {gallery.length ? (
           <>
-            <img className="hero-bg-blur" src={gallery[0]} alt="" aria-hidden="true" />
             <img className="hero-bg-image" src={gallery[0]} alt={title} />
             <div className="hero-overlay"></div>
           </>
@@ -432,30 +388,27 @@ export default function BrandModelPage({
           <div className="hero-placeholder">No Image Available</div>
         )}
 
-        {/* Glass Back Button */}
+        {/* Tiny Glass Back Button */}
         <Link className="glass-back-btn" href={`/brands/${encodeURIComponent(brand.slug)}`}>
-          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
           Back
         </Link>
 
-        {/* Vehicle details card with populated database specifications */}
+        {/* ULTRA-TINY Liquid Glass Details Card (Bottom-Left) */}
         <div className="liquid-details-card">
           <div className="brand-header">
             {manufacturerLogo && <img src={manufacturerLogo} alt={`${brand.manufacturer_name} logo`} />}
-            <strong>{brand.manufacturer_name}</strong>
           </div>
           
-          <h1 className="vehicle-title">{title}</h1>
+          <h1 className="vehicle-title" title={title}>{title}</h1>
           
+          {/* ONLY Database Values (No labels, no extra text) */}
           {specs.length > 0 && (
-            <div className="specs-grid">
-              {specs.map(({ label, value }) => (
-                <div className="spec-item" key={label}>
-                  <span className="spec-label">{label}</span>
-                  <span className="spec-value">{value}</span>
-                </div>
+            <div className="specs-container">
+              {specs.map((value, idx) => (
+                <span className="spec-value" key={idx}>{value}</span>
               ))}
             </div>
           )}
