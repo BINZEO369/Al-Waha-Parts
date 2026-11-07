@@ -177,7 +177,7 @@ export default function BrandModelPage({
           background: #fafafa;
         }
 
-        /* DYNAMIC FULL BLEED HERO SECTION */
+        /* DYNAMIC FULL BLEED HERO SECTION - GAP REMOVED */
         .full-bleed-hero {
           position: relative;
           width: 100vw;
@@ -186,12 +186,8 @@ export default function BrandModelPage({
           margin-left: -50vw;
           margin-right: -50vw;
           background: #f0f0f0;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
           overflow: hidden; 
-          /* Added min-height so tiny images don't clip the card */
-          min-height: 350px; 
+          /* min-height এবং flex প্রোপার্টি সরিয়ে দেওয়া হয়েছে যাতে হেডারের নিচে কোনো গ্যাপ না থাকে */
         }
 
         .hero-bg-image {
@@ -257,7 +253,6 @@ export default function BrandModelPage({
           left: 0;
           right: 0;
           z-index: 10;
-          /* Reduced padding to save space */
           padding: 16px 24px; 
           background: rgba(255, 255, 255, 0.88);
           backdrop-filter: blur(24px) saturate(180%);
@@ -278,7 +273,6 @@ export default function BrandModelPage({
           margin: 0 auto;
           display: flex;
           flex-direction: column;
-          /* Reduced gap between rows */
           gap: 12px; 
         }
 
@@ -296,7 +290,6 @@ export default function BrandModelPage({
           gap: 8px;
           margin-bottom: 2px;
         }
-        /* Smaller Logo */
         .brand-header img {
           width: 22px; 
           height: 22px;
@@ -306,7 +299,6 @@ export default function BrandModelPage({
           background: #fff;
           box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
-        /* Smaller Brand Name */
         .brand-header strong {
           font-size: 11px; 
           color: #444;
@@ -315,7 +307,6 @@ export default function BrandModelPage({
           font-weight: 800;
         }
 
-        /* Smaller Vehicle Title */
         .vehicle-title {
           font-size: 20px; 
           font-weight: 800;
@@ -324,12 +315,11 @@ export default function BrandModelPage({
           line-height: 1.15;
         }
 
-        /* Compact Specs Grid */
         .specs-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-          gap: 8px 12px; /* Reduced gap */
-          padding-top: 10px; /* Reduced padding */
+          gap: 8px 12px; 
+          padding-top: 10px; 
           border-top: 1px solid rgba(0,0,0,0.08);
         }
         .spec-item {
@@ -337,7 +327,6 @@ export default function BrandModelPage({
           flex-direction: column;
           gap: 2px;
         }
-        /* Smaller Labels */
         .spec-label {
           font-size: 9px; 
           color: #666;
@@ -345,7 +334,6 @@ export default function BrandModelPage({
           font-weight: 700;
           letter-spacing: 0.5px;
         }
-        /* Smaller Values */
         .spec-value {
           font-size: 12px; 
           font-weight: 700;
@@ -353,17 +341,16 @@ export default function BrandModelPage({
           line-height: 1.2;
         }
 
-        /* Smaller Button */
         .liquid-btn {
           display: inline-flex;
           align-items: center;
           justify-content: center;
           background: #111;
           color: #fff;
-          padding: 10px 18px; /* Reduced padding */
+          padding: 10px 18px; 
           border-radius: 8px;
           font-weight: 600;
-          font-size: 12px; /* Smaller text */
+          font-size: 12px; 
           text-decoration: none;
           transition: all 0.3s ease;
           border: none;
@@ -426,7 +413,7 @@ export default function BrandModelPage({
             height: 14px;
           }
           .liquid-details-card {
-            padding: 12px 16px; /* Even smaller on mobile */
+            padding: 12px 16px; 
             border-radius: 16px 16px 0 0;
           }
           .card-header-row {
