@@ -38,183 +38,195 @@ export default function AllBrandsPage() {
       <style jsx>{`
         .all-brands-page {
           max-width: 1240px;
-          margin: 0 auto;
-          padding: 40px 20px;
+          padding: 60px 20px;
+          background-color: #f8f9fa; /* হালকা মেটে ব্যাকগ্রাউন্ড */
+          min-height: 100vh;
         }
-        .all-brands-heading {
+        
+        /* হেডার স্টাইল */
+        .header-section {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 24px;
           margin-bottom: 40px;
         }
-        .all-brands-heading h1 {
+        .header-section h1 {
           margin: 0;
           color: #111;
           font-family: 'Montserrat', sans-serif;
-          font-size: clamp(28px, 4vw, 42px);
+          font-size: clamp(24px, 4vw, 32px);
           font-weight: 700;
           letter-spacing: -0.02em;
         }
-        .all-brands-count {
-          padding: 8px 16px;
-          background: #f8f9fa;
-          border: 1px solid #eee;
-          border-radius: 30px;
-          color: #555;
-          font-size: 13px;
-          font-weight: 600;
+        .brand-count {
+          color: #666;
+          font-size: 14px;
+          font-weight: 500;
         }
+
+        /* গ্রিড লেআউট */
         .all-brands-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
           gap: 24px;
         }
-        
-        /* Premium Liquid Card Design */
+
+        /* কার্ড ডিজাইন */
         .all-brand-card {
-          position: relative;
           display: flex;
           flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 40px 24px 32px;
           background: #ffffff;
-          border: 1px solid #f0f0f0;
-          border-radius: 20px;
+          border-radius: 16px;
+          border: 1px solid #eaeaea;
+          padding: 24px;
           text-decoration: none;
           transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-          overflow: hidden;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
         }
 
+        /* হোভার ইফেক্ট (Liquid feel) */
         .all-brand-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
-          border-color: transparent;
+          transform: translateY(-8px);
+          box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+          border-color: #d0d0d0;
         }
 
+        /* লোগো কন্টেইনার */
         .all-brand-logo {
           display: flex;
+          width: 100%;
+          height: 110px;
           align-items: center;
           justify-content: center;
-          width: 100%;
-          height: 100px;
           margin-bottom: 20px;
         }
 
         .all-brand-logo img {
-          width: 100%;
-          height: 100%;
+          max-width: 90%;
+          max-height: 80px;
           object-fit: contain;
-          filter: grayscale(100%) opacity(0.7);
-          transition: all 0.3s ease;
+          /* গ্রেস্কেল ফিল্টার সরিয়ে দেওয়া হয়েছে, এখন অরজিনাল কালার দেখাবে */
+          transition: transform 0.3s ease;
         }
 
-        /* Hover state brings logo back to full color */
+        /* হোভার করলে লোগো হালকা বড় হবে */
         .all-brand-card:hover .all-brand-logo img {
-          filter: grayscale(0%) opacity(1);
-          transform: scale(1.05);
+          transform: scale(1.08);
         }
 
         .all-brand-initials {
           display: grid;
-          width: 80px;
-          height: 80px;
+          width: 64px;
+          height: 64px;
           place-items: center;
-          background: #f5f5f5;
+          background: #f1f3f5;
           border-radius: 50%;
           color: #333;
           font-family: 'Montserrat', sans-serif;
-          font-size: 24px;
+          font-size: 20px;
           font-weight: 700;
-          transition: all 0.3s ease;
         }
 
-        .all-brand-card:hover .all-brand-initials {
-          background: #000;
-          color: #fff;
-        }
-
-        .all-brand-copy {
-          text-align: center;
-          width: 100%;
-        }
-
-        .all-brand-copy strong {
-          display: block;
-          margin-bottom: 8px;
-          color: #111;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 16px;
-          font-weight: 600;
-          letter-spacing: 0.03em;
-          text-transform: uppercase;
-        }
-
-        /* Clear indication that clicking opens models */
-        .view-models {
+        /* টেক্সট এবং প্রিমিয়াম বাটন */
+        .brand-info {
           display: flex;
           align-items: center;
-          justify-content: center;
-          gap: 6px;
-          color: #888;
-          font-size: 13px;
-          font-weight: 500;
-          transition: color 0.3s ease;
+          justify-content: space-between;
+          margin-top: auto;
+          border-top: 1px solid #f0f0f0;
+          padding-top: 16px;
+          gap: 10px;
         }
 
-        .view-models span {
+        .brand-name {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 15px;
+          font-weight: 600;
+          color: #222;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          flex: 1;
+        }
+
+        /* নতুন প্রিমিয়াম বাটন ডিজাইন */
+        .view-btn {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 8px 14px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #555;
+          background-color: #f8f9fa;
+          border: 1px solid #e0e0e0;
+          border-radius: 50px; /* পিল শেইপ */
+          transition: all 0.3s ease;
+          white-space: nowrap;
+        }
+
+        .view-btn svg {
+          width: 14px;
+          height: 14px;
           transition: transform 0.3s ease;
         }
 
-        .all-brand-card:hover .view-models {
-          color: #e5232f; /* Your theme red color */
+        /* কার্ডে হোভার করলে বাটন কালো হয়ে যাবে */
+        .all-brand-card:hover .view-btn {
+          background-color: #111;
+          color: #fff;
+          border-color: #111;
         }
 
-        .all-brand-card:hover .view-models span {
-          transform: translateX(4px);
+        .all-brand-card:hover .view-btn svg {
+          transform: translateX(3px);
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-          .all-brands-heading {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 16px;
-            margin-bottom: 24px;
-          }
+        /* মোবাইল রেসপন্সিভ */
+        @media (max-width: 600px) {
           .all-brands-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
           }
           .all-brand-card {
-            padding: 24px 16px;
-            border-radius: 16px;
+            padding: 16px;
+            border-radius: 12px;
           }
           .all-brand-logo {
-            height: 70px;
-            margin-bottom: 16px;
+            height: 80px;
+            margin-bottom: 12px;
           }
-          .all-brand-copy strong {
+          .brand-name {
             font-size: 13px;
           }
-          .view-models {
-            font-size: 11px;
+          .view-btn {
+            padding: 6px 10px;
+          }
+          .view-btn span {
+            display: none; /* মোবাইলে লেখা লুকিয়ে শুধু অ্যারো দেখাবে */
+          }
+          .header-section {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
           }
         }
       `}</style>
 
-      <header className="all-brands-heading">
+      <header className="header-section">
         <h1>Explore Our Premium Brands</h1>
-        {!loading && !error && <span className="all-brands-count">{brands.length} Brands</span>}
+        {!loading && !error && (
+          <span className="brand-count">{brands.length} Brands Available</span>
+        )}
       </header>
 
       {loading && <PageLoader label="Loading brands..." />}
       
-      {error && <div className="data-alert">{error}</div>}
+      {/* এরর চিন্হ সরিয়ে সাধারণ টেক্সট করা হয়েছে */}
+      {error && <p style={{ color: '#888', padding: '20px', textAlign: 'center' }}>{error}</p>}
       
       {!loading && !error && brands.length === 0 && (
-        <div className="empty-state">No active brands are available yet.</div>
+        <div className="empty-state" style={{ textAlign: 'center', color: '#666' }}>No brands are available yet.</div>
       )}
       
       {!loading && !error && brands.length > 0 && (
@@ -224,7 +236,6 @@ export default function AllBrandsPage() {
               className="all-brand-card"
               href={brand.slug ? `/brands/${brand.slug}` : '/brands'}
               key={brand.id}
-              title={`View ${brand.manufacturer_name} models`}
             >
               <div className="all-brand-logo">
                 {brand.logo_url ? (
@@ -239,10 +250,15 @@ export default function AllBrandsPage() {
                   </span>
                 )}
               </div>
-              <div className="all-brand-copy">
-                <strong>{brand.manufacturer_name}</strong>
-                <div className="view-models">
-                  View Models <span>→</span>
+              
+              <div className="brand-info">
+                <span className="brand-name">{brand.manufacturer_name}</span>
+                {/* প্রিমিয়াম ভিউ বাটন */}
+                <div className="view-btn">
+                  <span>Models</span>
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               </div>
             </Link>
