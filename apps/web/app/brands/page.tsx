@@ -12,7 +12,26 @@ type Brand = {
   logo_url?: string | null;
 };
 
-const GUIDE_KEY = 'all-brands-guide-seen';
+const GUIDE_COOKIE = 'all_brands_guide_seen';
+const GUIDE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+
+/* ---- tiny cookie helpers ---- */
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(
+    new RegExp('(?:^|; )' + name.replace(/([.*+?^${}()|[\]\\])/g, '\\$1') + '=([^;]*)'),
+  );
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function setCookie(name: string, value: string, maxAgeSeconds: number): void {
+  if (typeof document === 'undefined') return;
+  document.cookie =
+    `${name}=${encodeURIComponent(value)}; ` +
+    `path=/; max-age=${maxAgeSeconds}; ` +
+    `SameSite=Lax` +
+    (window.location.protocol === 'https:' ? '; Secure' : '');
+}
 
 export default function AllBrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -36,35 +55,26 @@ export default function AllBrandsPage() {
       .finally(() => setLoading(false));
   }, [apiUrl]);
 
-  /* প্রথম ভিজিটে গাইডলাইন দেখানো */
+  /* Show guide on first visit (cookie-based) */
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      if (localStorage.getItem(GUIDE_KEY)) return;
-    } catch {
-      return;
-    }
+    if (getCookie(GUIDE_COOKIE)) return;
     const t = setTimeout(() => setShowGuide(true), 700);
     return () => clearTimeout(t);
   }, []);
 
-  /* গাইডলাইন ৭ সেকেন্ড পরে নিজে থেকে বন্ধ হবে */
+  /* Auto-dismiss after 7 seconds */
   useEffect(() => {
     if (!showGuide) return;
     const t = setTimeout(() => {
       setShowGuide(false);
-      try {
-        localStorage.setItem(GUIDE_KEY, '1');
-      } catch {}
+      setCookie(GUIDE_COOKIE, '1', GUIDE_COOKIE_MAX_AGE);
     }, 7000);
     return () => clearTimeout(t);
   }, [showGuide]);
 
   const dismissGuide = () => {
     setShowGuide(false);
-    try {
-      localStorage.setItem(GUIDE_KEY, '1');
-    } catch {}
+    setCookie(GUIDE_COOKIE, '1', GUIDE_COOKIE_MAX_AGE);
   };
 
   return (
@@ -73,11 +83,11 @@ export default function AllBrandsPage() {
         .all-brands-page {
           max-width: 1240px;
           padding: 60px 20px;
-          background-color: #f8f9fa; /* হালকা মেটে ব্যাকগ্রাউন্ড */
+          background-color: #f8f9fa;
           min-height: 100vh;
         }
-        
-        /* হেডার স্টাইল */
+
+        /* Header */
         .header-section {
           display: flex;
           align-items: center;
@@ -98,14 +108,14 @@ export default function AllBrandsPage() {
           font-weight: 500;
         }
 
-        /* গ্রিড লেআউট */
+        /* Grid */
         .all-brands-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
           gap: 24px;
         }
 
-        /* কার্ড ডিজাইন */
+        /* Card */
         .all-brand-card {
           display: flex;
           flex-direction: column;
@@ -118,14 +128,13 @@ export default function AllBrandsPage() {
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
         }
 
-        /* হোভার ইফেক্ট (Liquid feel) */
         .all-brand-card:hover {
           transform: translateY(-8px);
           box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
           border-color: #d0d0d0;
         }
 
-        /* লোগো কন্টেইনার */
+        /* Logo container */
         .all-brand-logo {
           display: flex;
           width: 100%;
@@ -141,12 +150,11 @@ export default function AllBrandsPage() {
           max-height: 80px;
           object-fit: contain;
           padding: 6px;
-          border: 1px solid #ff0000; /* চিকন লাল বর্ডার (বক্স) */
+          border: 1px solid #ff0000;
           border-radius: 8px;
           transition: transform 0.3s ease;
         }
 
-        /* হোভার করলে লোগো হালকা বড় হবে */
         .all-brand-card:hover .all-brand-logo img {
           transform: scale(1.08);
         }
@@ -164,7 +172,7 @@ export default function AllBrandsPage() {
           font-weight: 700;
         }
 
-        /* ব্র্যান্ডের নাম — মাঝখানে, নিচে */
+        /* Brand name */
         .brand-info {
           display: flex;
           align-items: center;
@@ -186,7 +194,7 @@ export default function AllBrandsPage() {
           max-width: 100%;
         }
 
-        /* ===== প্রিমিয়াম গাইড টোস্ট ===== */
+        /* ===== Premium guide toast ===== */
         .guide-toast {
           position: fixed;
           bottom: 32px;
@@ -202,7 +210,7 @@ export default function AllBrandsPage() {
           border-radius: 16px;
           box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35),
             0 0 0 1px rgba(255, 255, 255, 0.06) inset;
-          max-width: 380px;
+          max-width: 400px;
           animation: guideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
@@ -217,30 +225,61 @@ export default function AllBrandsPage() {
           }
         }
 
+        /* Click icon */
         .guide-icon {
+          position: relative;
           display: grid;
           place-items: center;
-          width: 42px;
-          height: 42px;
-          border-radius: 50%;
-          background: #ff2b2b;
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          background: rgba(255, 43, 43, 0.12);
+          border: 1px solid rgba(255, 43, 43, 0.35);
           flex-shrink: 0;
-          color: #fff;
-          animation: guidePulse 1.8s ease-in-out infinite;
+          color: #ff4d4d;
         }
 
-        @keyframes guidePulse {
-          0%, 100% {
-            box-shadow: 0 0 0 0 rgba(255, 43, 43, 0.5);
+        /* Ripple rings around icon */
+        .guide-icon::before,
+        .guide-icon::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 12px;
+          border: 1px solid rgba(255, 77, 77, 0.55);
+          animation: guideRipple 2s ease-out infinite;
+          pointer-events: none;
+        }
+
+        .guide-icon::after {
+          animation-delay: 1s;
+        }
+
+        @keyframes guideRipple {
+          0% {
+            transform: scale(1);
+            opacity: 0.7;
           }
-          50% {
-            box-shadow: 0 0 0 12px rgba(255, 43, 43, 0);
+          100% {
+            transform: scale(1.55);
+            opacity: 0;
           }
         }
 
         .guide-icon svg {
-          width: 20px;
-          height: 20px;
+          width: 22px;
+          height: 22px;
+          animation: cursorTap 1.6s ease-in-out infinite;
+          transform-origin: center;
+        }
+
+        @keyframes cursorTap {
+          0%, 100% {
+            transform: scale(1) rotate(0deg);
+          }
+          50% {
+            transform: scale(0.9) rotate(-4deg);
+          }
         }
 
         .guide-text {
@@ -281,7 +320,7 @@ export default function AllBrandsPage() {
           transform: scale(1.1);
         }
 
-        /* মোবাইল রেসপন্সিভ */
+        /* Responsive */
         @media (max-width: 600px) {
           .all-brands-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -334,14 +373,17 @@ export default function AllBrandsPage() {
       </header>
 
       {loading && <PageLoader label="Loading brands..." />}
-      
-      {/* এরর চিন্হ সরিয়ে সাধারণ টেক্সট করা হয়েছে */}
-      {error && <p style={{ color: '#888', padding: '20px', textAlign: 'center' }}>{error}</p>}
-      
-      {!loading && !error && brands.length === 0 && (
-        <div className="empty-state" style={{ textAlign: 'center', color: '#666' }}>No brands are available yet.</div>
+
+      {error && (
+        <p style={{ color: '#888', padding: '20px', textAlign: 'center' }}>{error}</p>
       )}
-      
+
+      {!loading && !error && brands.length === 0 && (
+        <div className="empty-state" style={{ textAlign: 'center', color: '#666' }}>
+          No brands are available yet.
+        </div>
+      )}
+
       {!loading && !error && brands.length > 0 && (
         <section className="all-brands-grid" aria-label="All car brands">
           {brands.map((brand) => (
@@ -363,7 +405,7 @@ export default function AllBrandsPage() {
                   </span>
                 )}
               </div>
-              
+
               <div className="brand-info">
                 <span className="brand-name">{brand.manufacturer_name}</span>
               </div>
@@ -372,7 +414,7 @@ export default function AllBrandsPage() {
         </section>
       )}
 
-      {/* ===== প্রথম ভিজিটের প্রিমিয়াম গাইড টোস্ট ===== */}
+      {/* ===== First-visit guide toast ===== */}
       {showGuide && (
         <div className="guide-toast" role="status" aria-live="polite">
           <div className="guide-icon" aria-hidden="true">
@@ -384,15 +426,16 @@ export default function AllBrandsPage() {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12" />
-              <path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12" />
-              <path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V13" />
-              <path d="M17 13v-1a1.5 1.5 0 0 1 3 0v4a6 6 0 0 1-6 6h-2a6 6 0 0 1-4.24-1.76L4 16.24a1.5 1.5 0 0 1 2.12-2.12L8 16" />
+              <path d="M14 4.1 12 6" />
+              <path d="m5.1 8-2.9-.8" />
+              <path d="m6 12-1.9 2" />
+              <path d="M7.2 2.2 8 5.1" />
+              <path d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z" />
             </svg>
           </div>
           <div className="guide-text">
             <strong>Quick Tip</strong>
-            <span>কোনো ব্র্যান্ডের লোগোতে ক্লিক করুন, তাদের সব মডেল ওপেন হবে।</span>
+            <span>Click any brand logo to explore all of its models.</span>
           </div>
           <button
             type="button"
