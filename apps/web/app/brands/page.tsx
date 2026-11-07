@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../../../../packages/shared/src/api';
+import { hasCookieConsent } from '../../lib/cookie-consent';
 import { PageLoader } from '../../components/PageLoader';
 
 type Brand = {
@@ -19,9 +20,26 @@ const GUIDE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 function getCookie(name: string): string | null {
   if (typeof document === 'undefined') return null;
   const match = document.cookie.match(
-    new RegExp('(?:^|; )' + name.replace(/([.*+?^${}()|[\]\\])/g, '\\$1') + '=([^;]*)'),
+    new RegExp('(?:^|; )' + name.replace(/([.*+?^${}()|[\\]\\])/g, '\\$1') + '=([^;]*)'),
   );
-  return match ? decodeURIComponent(match[1]) : null;
+  const cookieValue = match?.[1];
+  if (cookieValue !== undefined) return decodeURIComponent(cookieValue);
+  try {
+    const stored = window.localStorage.getItem(`${name}_fallback`);
+    if (!stored) return null;
+    const fallback = JSON.parse(stored) as { value?: unknown; expiresAt?: unknown };
+    if (
+      typeof fallback.value !== 'string' ||
+      typeof fallback.expiresAt !== 'number' ||
+      fallback.expiresAt <= Date.now()
+    ) {
+      window.localStorage.removeItem(`${name}_fallback`);
+      return null;
+    }
+    return fallback.value;
+  } catch {
+    return null;
+  }
 }
 
 function setCookie(name: string, value: string, maxAgeSeconds: number): void {
@@ -31,6 +49,20 @@ function setCookie(name: string, value: string, maxAgeSeconds: number): void {
     `path=/; max-age=${maxAgeSeconds}; ` +
     `SameSite=Lax` +
     (window.location.protocol === 'https:' ? '; Secure' : '');
+  try {
+    const cookieSaved = document.cookie.match(
+      new RegExp('(?:^|; )' + name.replace(/([.*+?^${}()|[\\]\\])/g, '\\$1') + '=([^;]*)'),
+    );
+    if (cookieSaved) window.localStorage.removeItem(`${name}_fallback`);
+    else {
+      window.localStorage.setItem(
+        `${name}_fallback`,
+        JSON.stringify({ value, expiresAt: Date.now() + maxAgeSeconds * 1000 }),
+      );
+    }
+  } catch {
+    // Keep the guide usable even when browser storage is disabled.
+  }
 }
 
 export default function AllBrandsPage() {
@@ -55,18 +87,17 @@ export default function AllBrandsPage() {
       .finally(() => setLoading(false));
   }, [apiUrl]);
 
-  /* Show guide on first visit (cookie-based) */
+  /* Show the guide until it is dismissed with optional Preferences consent. */
   useEffect(() => {
-    if (getCookie(GUIDE_COOKIE)) return;
+    if (hasCookieConsent('preferences') && getCookie(GUIDE_COOKIE)) return;
     const t = setTimeout(() => setShowGuide(true), 700);
     return () => clearTimeout(t);
   }, []);
 
   /*
-   * Auto-hide visually after 7 seconds — but DO NOT set the cookie.
-   * If the user never clicks dismiss, the guide will show again on the
-   * next visit. The cookie is only written when the user explicitly
-   * dismisses the toast.
+   * Auto-hide visually after 7 seconds, but do not set a cookie.
+   * The dismissal is saved only after an explicit click and when optional
+   * Preferences cookies are allowed.
    */
   useEffect(() => {
     if (!showGuide) return;
@@ -76,7 +107,9 @@ export default function AllBrandsPage() {
 
   const dismissGuide = () => {
     setShowGuide(false);
-    setCookie(GUIDE_COOKIE, '1', GUIDE_COOKIE_MAX_AGE);
+    if (hasCookieConsent('preferences')) {
+      setCookie(GUIDE_COOKIE, '1', GUIDE_COOKIE_MAX_AGE);
+    }
   };
 
   return (

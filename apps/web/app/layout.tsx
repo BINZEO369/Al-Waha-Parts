@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Header, Footer } from '../components/Header';
 import { CartProvider } from '../components/CartProvider';
 import { LanguageProvider } from '../components/LanguageProvider';
+import { CookieConsentManager } from '../components/CookieConsentManager';
 const globalStyles = String.raw`@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
 
 :root {
@@ -1120,6 +1121,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           {children}
           <Footer />
         </CartProvider>
+        <CookieConsentManager />
       </LanguageProvider>
       </body>
     </html>
