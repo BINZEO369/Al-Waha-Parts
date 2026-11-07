@@ -200,20 +200,20 @@ export default function BrandModelPage({
         /* Floating Back Button */
         .glass-back-btn {
           position: absolute;
-          top: 20px;
-          left: 20px;
+          top: 16px;
+          left: 16px;
           z-index: 10;
           display: inline-flex;
           align-items: center;
-          gap: 6px;
-          padding: 8px 14px;
+          gap: 4px;
+          padding: 6px 12px;
           background: rgba(255, 255, 255, 0.15);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           border: 1px solid rgba(255, 255, 255, 0.3);
           border-radius: 50px;
           color: #fff;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 600;
           text-decoration: none;
           transition: all 0.3s ease;
@@ -222,20 +222,20 @@ export default function BrandModelPage({
           background: rgba(255, 255, 255, 0.25);
         }
 
-        /* LIQUID GLASS CARD (Positioned Bottom-Left) */
+        /* LIQUID GLASS CARD (Ultra-Compact Size) */
         .liquid-details-card {
           position: absolute;
-          bottom: 24px;
-          left: 24px;
+          bottom: 16px;
+          left: 16px;
           z-index: 5;
-          padding: 16px;
+          padding: 12px;
           background: rgba(255, 255, 255, 0.85);
           backdrop-filter: blur(20px) saturate(180%);
           -webkit-backdrop-filter: blur(20px) saturate(180%);
           border: 1px solid rgba(255, 255, 255, 0.9);
-          border-radius: 16px;
-          width: 280px; /* Extremely small card */
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+          border-radius: 12px;
+          width: 220px; /* Extremely small card */
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
           transition: transform 0.3s ease;
         }
         
@@ -246,20 +246,20 @@ export default function BrandModelPage({
         .brand-header {
           display: flex;
           align-items: center;
-          gap: 8px;
-          margin-bottom: 8px;
+          gap: 6px;
+          margin-bottom: 6px;
         }
         .brand-header img {
-          width: 24px;
-          height: 24px;
+          width: 18px;
+          height: 18px;
           object-fit: contain;
-          border-radius: 6px;
+          border-radius: 4px;
           padding: 2px;
           background: #fff;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .brand-header strong {
-          font-size: 10px;
+          font-size: 9px;
           color: #222;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -267,9 +267,9 @@ export default function BrandModelPage({
         }
 
         .vehicle-title {
-          font-size: 18px; /* Very small title */
+          font-size: 14px; /* Very small title */
           font-weight: 800;
-          margin: 0 0 12px 0;
+          margin: 0 0 8px 0;
           color: #000;
           line-height: 1.2;
         }
@@ -277,24 +277,24 @@ export default function BrandModelPage({
         .specs-grid {
           display: grid;
           grid-template-columns: 1fr 1fr; /* 2 columns for compact layout */
-          gap: 8px;
-          margin-bottom: 12px;
-          padding-top: 10px;
+          gap: 6px;
+          margin-bottom: 10px;
+          padding-top: 8px;
           border-top: 1px solid rgba(0,0,0,0.1);
         }
         .spec-item {
           display: flex;
           flex-direction: column;
-          gap: 2px;
+          gap: 1px;
         }
         .spec-label {
-          font-size: 8px;
+          font-size: 7px;
           color: #666;
           text-transform: uppercase;
           font-weight: 700;
         }
         .spec-value {
-          font-size: 11px;
+          font-size: 9px;
           font-weight: 700;
           color: #111;
         }
@@ -306,10 +306,10 @@ export default function BrandModelPage({
           justify-content: center;
           background: #111;
           color: #fff;
-          padding: 10px;
-          border-radius: 8px;
+          padding: 8px;
+          border-radius: 6px;
           font-weight: 600;
-          font-size: 11px;
+          font-size: 10px;
           text-decoration: none;
           transition: all 0.3s ease;
           width: 100%;
@@ -367,16 +367,16 @@ export default function BrandModelPage({
           .glass-back-btn {
             top: 12px;
             left: 12px;
-            padding: 6px 10px;
-            font-size: 11px;
+            padding: 5px 10px;
+            font-size: 10px;
           }
           .liquid-details-card {
-            bottom: 16px;
-            left: 16px;
-            width: calc(100% - 32px); /* Takes full width minus margins on mobile */
-            max-width: 300px;
-            padding: 14px;
+            bottom: 12px;
+            left: 12px;
+            width: 180px; /* Even smaller on mobile */
+            padding: 10px;
           }
+          .vehicle-title { font-size: 13px; }
           .parts-section-wrapper {
             padding: 40px 16px;
           }
@@ -398,7 +398,7 @@ export default function BrandModelPage({
 
         {/* Glass Back Button */}
         <Link className="glass-back-btn" href={`/brands/${encodeURIComponent(brand.slug)}`}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
           Back
