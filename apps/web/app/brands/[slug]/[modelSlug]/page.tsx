@@ -25,6 +25,10 @@ type Vehicle = {
   chassis_code?: string | null;
   year_start?: number | null;
   year_end?: number | null;
+  engine_code?: string | null;
+  engine_capacity?: string | number | null;
+  fuel_type?: string | null;
+  transmission?: string | null;
   vehicle_type?: string | null;
   cover_image_url?: string | null;
   vehicle_images?: string[] | null;
@@ -131,6 +135,25 @@ export default function BrandModelPage({
   const gallery = [vehicle.cover_image_url, ...(vehicle.vehicle_images ?? [])].filter(
     Boolean,
   ) as string[];
+  const specs = [
+    { label: 'Vehicle type', value: vehicle.vehicle_type },
+    { label: 'Generation', value: vehicle.generation },
+    { label: 'Chassis', value: vehicle.chassis_code },
+    {
+      label: 'Year range',
+      value:
+        vehicle.year_start && vehicle.year_end
+          ? `${vehicle.year_start}–${vehicle.year_end}`
+          : vehicle.year_start || vehicle.year_end,
+    },
+    { label: 'Engine code', value: vehicle.engine_code },
+    { label: 'Engine capacity', value: vehicle.engine_capacity },
+    { label: 'Fuel type', value: vehicle.fuel_type },
+    { label: 'Transmission / gearbox', value: vehicle.transmission },
+  ].filter(
+    (spec): spec is { label: string; value: string | number } =>
+      spec.value !== null && spec.value !== undefined && String(spec.value).trim() !== '',
+  );
 
   return (
     <main className="vehicle-detail-wrapper">
@@ -222,19 +245,21 @@ export default function BrandModelPage({
           background: rgba(255, 255, 255, 0.25);
         }
 
-        /* LIQUID GLASS CARD (Ultra-Micro Size) */
+        /* Vehicle details card */
         .liquid-details-card {
           position: absolute;
           bottom: 12px;
           left: 12px;
           z-index: 5;
-          padding: 8px;
+          padding: 16px;
           background: rgba(255, 255, 255, 0.85);
           backdrop-filter: blur(16px) saturate(180%);
           -webkit-backdrop-filter: blur(16px) saturate(180%);
           border: 1px solid rgba(255, 255, 255, 0.9);
-          border-radius: 8px;
-          width: 160px; /* Extremely tiny card */
+          border-radius: 14px;
+          width: min(440px, calc(100vw - 24px));
+          max-height: min(52vh, 390px);
+          overflow-y: auto;
           box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
           transition: transform 0.3s ease;
         }
@@ -246,12 +271,12 @@ export default function BrandModelPage({
         .brand-header {
           display: flex;
           align-items: center;
-          gap: 4px;
-          margin-bottom: 4px;
+          gap: 8px;
+          margin-bottom: 8px;
         }
         .brand-header img {
-          width: 12px;
-          height: 12px;
+          width: 22px;
+          height: 22px;
           object-fit: contain;
           border-radius: 2px;
           padding: 1px;
@@ -259,7 +284,7 @@ export default function BrandModelPage({
           box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         .brand-header strong {
-          font-size: 7px;
+          font-size: 11px;
           color: #222;
           text-transform: uppercase;
           letter-spacing: 0.3px;
@@ -267,36 +292,42 @@ export default function BrandModelPage({
         }
 
         .vehicle-title {
-          font-size: 11px; /* Micro title */
+          font-size: 20px;
           font-weight: 800;
-          margin: 0 0 4px 0;
+          margin: 0 0 10px 0;
           color: #000;
           line-height: 1.1;
         }
 
         .specs-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 4px;
-          margin-bottom: 6px;
-          padding-top: 4px;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+          margin-bottom: 12px;
+          padding-top: 10px;
           border-top: 1px solid rgba(0,0,0,0.1);
         }
         .spec-item {
           display: flex;
           flex-direction: column;
-          gap: 0px;
+          gap: 4px;
+          padding: 8px 10px;
+          border: 1px solid rgba(0,0,0,0.08);
+          border-radius: 8px;
+          background: rgba(255,255,255,0.72);
         }
         .spec-label {
-          font-size: 6px;
+          font-size: 9px;
           color: #666;
           text-transform: uppercase;
           font-weight: 700;
         }
         .spec-value {
-          font-size: 8px;
+          font-size: 12px;
           font-weight: 700;
           color: #111;
+          line-height: 1.35;
+          overflow-wrap: anywhere;
         }
 
         /* Micro Liquid Button */
@@ -306,10 +337,10 @@ export default function BrandModelPage({
           justify-content: center;
           background: #111;
           color: #fff;
-          padding: 4px;
-          border-radius: 4px;
+          padding: 9px 12px;
+          border-radius: 7px;
           font-weight: 600;
-          font-size: 8px;
+          font-size: 12px;
           text-decoration: none;
           transition: all 0.3s ease;
           width: 100%;
@@ -373,10 +404,15 @@ export default function BrandModelPage({
           .liquid-details-card {
             bottom: 8px;
             left: 8px;
-            width: 140px; /* Tiny on mobile */
-            padding: 6px;
+            width: min(440px, calc(100vw - 16px));
+            max-height: 48vh;
+            padding: 12px;
           }
-          .vehicle-title { font-size: 10px; }
+          .vehicle-title { font-size: 18px; }
+          .specs-grid { gap: 6px; }
+          .spec-item { padding: 7px 8px; }
+          .spec-label { font-size: 8px; }
+          .spec-value { font-size: 11px; }
           .parts-section-wrapper {
             padding: 40px 16px;
           }
@@ -396,7 +432,7 @@ export default function BrandModelPage({
           <div className="hero-placeholder">No Image Available</div>
         )}
 
-        {/* Tiny Glass Back Button */}
+        {/* Glass Back Button */}
         <Link className="glass-back-btn" href={`/brands/${encodeURIComponent(brand.slug)}`}>
           <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -404,7 +440,7 @@ export default function BrandModelPage({
           Back
         </Link>
 
-        {/* Ultra-Micro Liquid Glass Details Card (Bottom-Left) */}
+        {/* Vehicle details card with populated database specifications */}
         <div className="liquid-details-card">
           <div className="brand-header">
             {manufacturerLogo && <img src={manufacturerLogo} alt={`${brand.manufacturer_name} logo`} />}
@@ -413,27 +449,16 @@ export default function BrandModelPage({
           
           <h1 className="vehicle-title">{title}</h1>
           
-          {/* Specs Grid */}
-          <div className="specs-grid">
-            {vehicle.vehicle_type && (
-              <div className="spec-item">
-                <span className="spec-label">Type</span>
-                <span className="spec-value">{vehicle.vehicle_type}</span>
-              </div>
-            )}
-            {vehicle.generation && (
-              <div className="spec-item">
-                <span className="spec-label">Gen</span>
-                <span className="spec-value">{vehicle.generation}</span>
-              </div>
-            )}
-            {vehicle.chassis_code && (
-              <div className="spec-item">
-                <span className="spec-label">Chassis</span>
-                <span className="spec-value">{vehicle.chassis_code}</span>
-              </div>
-            )}
-          </div>
+          {specs.length > 0 && (
+            <div className="specs-grid">
+              {specs.map(({ label, value }) => (
+                <div className="spec-item" key={label}>
+                  <span className="spec-label">{label}</span>
+                  <span className="spec-value">{value}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <Link className="liquid-btn" href={`/category?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
             Parts
