@@ -5,6 +5,7 @@ import { use, useEffect, useState } from 'react';
 import { apiFetch } from '../../../../../packages/shared/src/api';
 import { PartCard, type PartCardData } from '../../../components/PartCard';
 import { PageLoader } from '../../../components/PageLoader';
+import { ProductDetailView } from '../../../components/ProductDetailView';
 
 type Category = {
   id: string;
@@ -20,23 +21,57 @@ type CategoryDetail = { category: Category; parts: PartCardData[] };
 export default function CategoryDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const [detail, setDetail] = useState<CategoryDetail | null>(null);
+  const [showProduct, setShowProduct] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError('');
+    setDetail(null);
+    setShowProduct(false);
     if (!apiUrl) {
       setError('Catalog API is not configured.');
       setLoading(false);
-      return;
+      return () => {
+        active = false;
+      };
     }
-    apiFetch<CategoryDetail>(apiUrl, `/api/v1/categories/slug/${encodeURIComponent(slug)}`)
-      .then(setDetail)
-      .catch((cause: unknown) => setError(cause instanceof Error ? cause.message : 'Unable to load category details.'))
-      .finally(() => setLoading(false));
+    void apiFetch<CategoryDetail>(
+      apiUrl,
+      `/api/v1/categories/slug/${encodeURIComponent(slug)}`,
+    )
+      .then((category) => {
+        if (active) setDetail(category);
+      })
+      .catch(async (categoryError: unknown) => {
+        try {
+          await apiFetch<unknown>(
+            apiUrl,
+            `/api/v1/parts/slug/${encodeURIComponent(slug)}`,
+          );
+          if (active) setShowProduct(true);
+        } catch {
+          if (active)
+            setError(
+              categoryError instanceof Error
+                ? categoryError.message
+                : 'Unable to load category details.',
+            );
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [apiUrl, slug]);
 
   if (loading) return <PageLoader label="Loading category details" />;
+  if (showProduct) return <ProductDetailView slug={slug} />;
   if (error || !detail) return <main className="page-shell"><div className="data-alert">{error || 'Category not found.'}</div><Link className="button" href="/category">Back to categories</Link></main>;
 
   const { category, parts } = detail;

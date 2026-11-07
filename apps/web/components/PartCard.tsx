@@ -41,7 +41,7 @@ export function PartCard({ part }: { part: PartCardData }) {
 
   return (
     <article className="part-card">
-      <Link className="part-card-media" href={`/catalog/${part.slug ?? part.id}`} aria-label={`View ${part.part_name}`}>
+      <Link className="part-card-media" href={`/category/${part.slug ?? part.id}`} aria-label={`View ${part.part_name}`}>
         <span className="part-tag">{part.condition ?? 'New'}</span>
         {part.primary_image_url || part.image_urls?.[0] ? (
           <img src={part.primary_image_url ?? part.image_urls?.[0]} alt={part.part_name} className="part-card-image" />
@@ -51,7 +51,7 @@ export function PartCard({ part }: { part: PartCardData }) {
       </Link>
       <div className="part-card-body">
         <div className="eyebrow">{part.brand_name || 'Al Waha Select'} · {part.sku}</div>
-        <h3><Link href={`/catalog/${part.slug ?? part.id}`}>{part.part_name}</Link></h3>
+        <h3><Link href={`/category/${part.slug ?? part.id}`}>{part.part_name}</Link></h3>
         <div className="part-meta">
           <span>{part.tested_status === 'tested' ? 'Tested' : 'Verified fit'}</span>
           <span>{part.stock_quantity ? `${part.stock_quantity} in stock` : 'Available to order'}</span>

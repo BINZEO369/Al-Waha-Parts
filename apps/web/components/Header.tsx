@@ -189,7 +189,7 @@ export function Footer() {
           <h3>Shop</h3>
           <Link href="/category">All categories</Link>
           <Link href="/vehicles">Vehicle finder</Link>
-          <Link href="/catalog">New arrivals</Link>
+          <Link href="/category">New arrivals</Link>
         </div>
         <div className="footer-column">
           <h3>Contact us</h3>

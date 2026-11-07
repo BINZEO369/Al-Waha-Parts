@@ -1799,7 +1799,7 @@ export default function Home() {
             {homeSelectedParts.map((part) => (
               <article className="arrival-card" key={part.id}>
                 <Link
-                  href={`/catalog/${part.slug ?? part.id}`}
+                  href={`/category/${part.slug ?? part.id}`}
                   className="arrival-image"
                   aria-label={`View ${part.part_name}`}
                 >
@@ -1820,7 +1820,7 @@ export default function Home() {
                     {part.parts_categories?.category_name || 'Database catalog'}
                   </small>
                   <h3>
-                    <Link href={`/catalog/${part.slug ?? part.id}`}>
+                    <Link href={`/category/${part.slug ?? part.id}`}>
                       {part.part_name}
                     </Link>
                   </h3>

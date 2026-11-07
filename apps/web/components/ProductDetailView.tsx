@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiFetch } from '../../../../../packages/shared/src/api';
-import { formatSar } from '../../../../../packages/shared/src/currency';
-import { useCart } from '../../../components/CartProvider';
-import { PageLoader } from '../../../components/PageLoader';
+import { apiFetch } from '../../../packages/shared/src/api';
+import { formatSar } from '../../../packages/shared/src/currency';
+import { useCart } from './CartProvider';
+import { PageLoader } from './PageLoader';
 
 type VehicleFitment = {
   id: string;
@@ -42,8 +42,7 @@ type Product = {
   part_vehicle_fitments?: PartFitment | PartFitment[] | null;
 };
 
-export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
+export function ProductDetailView({ slug }: { slug: string }) {
   const [product, setProduct] = useState<Product | null>(null);
   const [activeImage, setActiveImage] = useState('');
   const [error, setError] = useState('');

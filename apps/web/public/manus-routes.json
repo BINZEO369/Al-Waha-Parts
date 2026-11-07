@@ -6,7 +6,6 @@
     { "path": "/brands", "title": "Car Brands" },
     { "path": "/brands/:slug", "title": "Brand Models" },
     { "path": "/brands/:slug/:modelSlug", "title": "Brand Model Details" },
-    { "path": "/catalog/:slug", "title": "Product Details" },
     { "path": "/category", "title": "Categories" },
     { "path": "/category/:slug", "title": "Category Details" },
     { "path": "/contact", "title": "Contact" },
