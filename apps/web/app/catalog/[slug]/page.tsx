@@ -53,7 +53,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
   useEffect(() => {
     if (!apiUrl) {
-      setError('Catalog API is not configured.');
+      setError('Product API is not configured.');
       return;
     }
     apiFetch<Product>(apiUrl, `/api/v1/parts/slug/${encodeURIComponent(slug)}`)
@@ -229,7 +229,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           {error}
           <br />
           <Link className="text-link" href="/category">
-            Back to catalog
+            Back to categories
           </Link>
         </div>
       </main>
