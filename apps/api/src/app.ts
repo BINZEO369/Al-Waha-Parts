@@ -1027,6 +1027,8 @@ app.get('/api/v1/admin/parts', { preHandler: requireAdmin as any }, async (_requ
 const editablePartFields = [
   'part_name',
   'category_id',
+  'manufacturer_id',
+  'model_id',
   'brand_name',
   'sku',
   'oem_number',
