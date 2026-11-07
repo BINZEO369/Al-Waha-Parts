@@ -12,10 +12,13 @@ type Brand = {
   logo_url?: string | null;
 };
 
+const GUIDE_KEY = 'all-brands-guide-seen';
+
 export default function AllBrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showGuide, setShowGuide] = useState(false);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -32,6 +35,37 @@ export default function AllBrandsPage() {
       )
       .finally(() => setLoading(false));
   }, [apiUrl]);
+
+  /* প্রথম ভিজিটে গাইডলাইন দেখানো */
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      if (localStorage.getItem(GUIDE_KEY)) return;
+    } catch {
+      return;
+    }
+    const t = setTimeout(() => setShowGuide(true), 700);
+    return () => clearTimeout(t);
+  }, []);
+
+  /* গাইডলাইন ৭ সেকেন্ড পরে নিজে থেকে বন্ধ হবে */
+  useEffect(() => {
+    if (!showGuide) return;
+    const t = setTimeout(() => {
+      setShowGuide(false);
+      try {
+        localStorage.setItem(GUIDE_KEY, '1');
+      } catch {}
+    }, 7000);
+    return () => clearTimeout(t);
+  }, [showGuide]);
+
+  const dismissGuide = () => {
+    setShowGuide(false);
+    try {
+      localStorage.setItem(GUIDE_KEY, '1');
+    } catch {}
+  };
 
   return (
     <main className="page-shell all-brands-page">
@@ -130,15 +164,15 @@ export default function AllBrandsPage() {
           font-weight: 700;
         }
 
-        /* টেক্সট এবং প্রিমিয়াম বাটন */
+        /* ব্র্যান্ডের নাম — মাঝখানে, নিচে */
         .brand-info {
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content: center;
           margin-top: auto;
           border-top: 1px solid #f0f0f0;
           padding-top: 16px;
-          gap: 10px;
+          text-align: center;
         }
 
         .brand-name {
@@ -149,40 +183,102 @@ export default function AllBrandsPage() {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          flex: 1;
+          max-width: 100%;
         }
 
-        /* নতুন প্রিমিয়াম বাটন ডিজাইন */
-        .view-btn {
+        /* ===== প্রিমিয়াম গাইড টোস্ট ===== */
+        .guide-toast {
+          position: fixed;
+          bottom: 32px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 2000;
           display: flex;
           align-items: center;
-          gap: 4px;
-          padding: 8px 14px;
-          font-size: 12px;
-          font-weight: 600;
-          color: #555;
-          background-color: #f8f9fa;
-          border: 1px solid #e0e0e0;
-          border-radius: 50px; /* পিল শেইপ */
-          transition: all 0.3s ease;
-          white-space: nowrap;
-        }
-
-        .view-btn svg {
-          width: 14px;
-          height: 14px;
-          transition: transform 0.3s ease;
-        }
-
-        /* কার্ডে হোভার করলে বাটন কালো হয়ে যাবে */
-        .all-brand-card:hover .view-btn {
-          background-color: #111;
+          gap: 14px;
+          padding: 14px 16px 14px 14px;
+          background: linear-gradient(135deg, #141414 0%, #242424 100%);
           color: #fff;
-          border-color: #111;
+          border-radius: 16px;
+          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35),
+            0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+          max-width: 380px;
+          animation: guideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
-        .all-brand-card:hover .view-btn svg {
-          transform: translateX(3px);
+        @keyframes guideIn {
+          from {
+            opacity: 0;
+            transform: translate(-50%, 26px) scale(0.94);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0) scale(1);
+          }
+        }
+
+        .guide-icon {
+          display: grid;
+          place-items: center;
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          background: #ff2b2b;
+          flex-shrink: 0;
+          color: #fff;
+          animation: guidePulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes guidePulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(255, 43, 43, 0.5);
+          }
+          50% {
+            box-shadow: 0 0 0 12px rgba(255, 43, 43, 0);
+          }
+        }
+
+        .guide-icon svg {
+          width: 20px;
+          height: 20px;
+        }
+
+        .guide-text {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          line-height: 1.35;
+          min-width: 0;
+        }
+
+        .guide-text strong {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          color: #fff;
+        }
+
+        .guide-text span {
+          font-size: 12.5px;
+          color: #c9c9c9;
+        }
+
+        .guide-close {
+          background: transparent;
+          border: none;
+          color: #7d7d7d;
+          font-size: 20px;
+          line-height: 1;
+          padding: 4px 6px;
+          cursor: pointer;
+          transition: color 0.2s ease, transform 0.2s ease;
+          flex-shrink: 0;
+        }
+
+        .guide-close:hover {
+          color: #fff;
+          transform: scale(1.1);
         }
 
         /* মোবাইল রেসপন্সিভ */
@@ -202,16 +298,30 @@ export default function AllBrandsPage() {
           .brand-name {
             font-size: 13px;
           }
-          .view-btn {
-            padding: 6px 10px;
-          }
-          .view-btn span {
-            display: none; /* মোবাইলে লেখা লুকিয়ে শুধু অ্যারো দেখাবে */
-          }
           .header-section {
             flex-direction: column;
             align-items: flex-start;
             gap: 10px;
+          }
+
+          .guide-toast {
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
+            transform: none;
+            max-width: none;
+            animation: guideInMobile 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+          }
+
+          @keyframes guideInMobile {
+            from {
+              opacity: 0;
+              transform: translateY(26px) scale(0.94);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
           }
         }
       `}</style>
@@ -256,17 +366,43 @@ export default function AllBrandsPage() {
               
               <div className="brand-info">
                 <span className="brand-name">{brand.manufacturer_name}</span>
-                {/* প্রিমিয়াম ভিউ বাটন */}
-                <div className="view-btn">
-                  <span>Models</span>
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
               </div>
             </Link>
           ))}
         </section>
+      )}
+
+      {/* ===== প্রথম ভিজিটের প্রিমিয়াম গাইড টোস্ট ===== */}
+      {showGuide && (
+        <div className="guide-toast" role="status" aria-live="polite">
+          <div className="guide-icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12" />
+              <path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12" />
+              <path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V13" />
+              <path d="M17 13v-1a1.5 1.5 0 0 1 3 0v4a6 6 0 0 1-6 6h-2a6 6 0 0 1-4.24-1.76L4 16.24a1.5 1.5 0 0 1 2.12-2.12L8 16" />
+            </svg>
+          </div>
+          <div className="guide-text">
+            <strong>Quick Tip</strong>
+            <span>কোনো ব্র্যান্ডের লোগোতে ক্লিক করুন, তাদের সব মডেল ওপেন হবে।</span>
+          </div>
+          <button
+            type="button"
+            className="guide-close"
+            onClick={dismissGuide}
+            aria-label="Dismiss guide"
+          >
+            ×
+          </button>
+        </div>
       )}
     </main>
   );
