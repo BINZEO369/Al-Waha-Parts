@@ -50,9 +50,7 @@ export default function BrandModelPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // State to manage the details card visibility
   const [isCardOpen, setIsCardOpen] = useState(true);
-
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -121,7 +119,6 @@ export default function BrandModelPage({
       const timer = setTimeout(() => {
         setIsCardOpen(false);
       }, 5000);
-
       return () => clearTimeout(timer);
     }
   }, [detail]);
@@ -192,7 +189,9 @@ export default function BrandModelPage({
           display: flex;
           flex-direction: column;
           justify-content: flex-end;
-          overflow: hidden;
+          overflow: hidden; 
+          /* Added min-height so tiny images don't clip the card */
+          min-height: 350px; 
         }
 
         .hero-bg-image {
@@ -221,39 +220,34 @@ export default function BrandModelPage({
           background: #111;
         }
 
-        /* PREMIUM "i" INFO TOGGLE BUTTON (Top Right) */
+        /* "i" INFO TOGGLE BUTTON */
         .info-toggle-btn {
           position: absolute;
-          top: 20px;
-          right: 20px;
+          top: 16px;
+          right: 16px;
           z-index: 20;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 46px;
-          height: 46px;
+          width: 32px; 
+          height: 32px; 
           background: rgba(255, 255, 255, 0.2);
-          backdrop-filter: blur(16px) saturate(180%);
-          -webkit-backdrop-filter: blur(16px) saturate(180%);
-          border: 1px solid rgba(255, 255, 255, 0.5);
+          backdrop-filter: blur(12px) saturate(180%);
+          -webkit-backdrop-filter: blur(12px) saturate(180%);
+          border: 1px solid rgba(255, 255, 255, 0.4);
           border-radius: 50%;
           color: #fff;
           cursor: pointer;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 0 10px rgba(255,255,255,0.2);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15), inset 0 0 8px rgba(255,255,255,0.2);
           transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .info-toggle-btn:hover {
           background: rgba(255, 255, 255, 0.35);
-          transform: scale(1.08);
-          box-shadow: 0 10px 40px rgba(0,0,0,0.3), inset 0 0 15px rgba(255,255,255,0.3);
+          transform: scale(1.1);
         }
         .info-toggle-btn svg {
-          width: 22px;
-          height: 22px;
-          transition: transform 0.4s ease;
-        }
-        .info-toggle-btn:hover svg {
-          transform: rotate(15deg) scale(1.1);
+          width: 16px; 
+          height: 16px; 
         }
 
         /* FULL-WIDTH GLASS BOTTOM SHEET CARD */
@@ -263,22 +257,20 @@ export default function BrandModelPage({
           left: 0;
           right: 0;
           z-index: 10;
-          padding: 30px 40px;
-          background: rgba(255, 255, 255, 0.85);
+          /* Reduced padding to save space */
+          padding: 16px 24px; 
+          background: rgba(255, 255, 255, 0.88);
           backdrop-filter: blur(24px) saturate(180%);
           -webkit-backdrop-filter: blur(24px) saturate(180%);
           border-top: 1px solid rgba(255, 255, 255, 0.9);
-          border-radius: 24px 24px 0 0;
+          border-radius: 20px 20px 0 0;
           box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
-          
-          /* Slide up/down animation */
           transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
           transform: translateY(0);
         }
 
-        /* Hidden state for the card */
         .liquid-details-card.hidden {
-          transform: translateY(105%); /* Slides completely out of view */
+          transform: translateY(105%); 
         }
 
         .card-content-wrapper {
@@ -286,84 +278,92 @@ export default function BrandModelPage({
           margin: 0 auto;
           display: flex;
           flex-direction: column;
-          gap: 24px;
+          /* Reduced gap between rows */
+          gap: 12px; 
         }
 
         .card-header-row {
           display: flex;
           justify-content: space-between;
-          align-items: flex-start;
+          align-items: center;
           flex-wrap: wrap;
-          gap: 16px;
+          gap: 10px;
         }
 
         .brand-header {
           display: flex;
           align-items: center;
-          gap: 12px;
-          margin-bottom: 8px;
+          gap: 8px;
+          margin-bottom: 2px;
         }
+        /* Smaller Logo */
         .brand-header img {
-          width: 32px;
-          height: 32px;
+          width: 22px; 
+          height: 22px;
           object-fit: contain;
-          border-radius: 6px;
+          border-radius: 4px;
           padding: 2px;
           background: #fff;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
+        /* Smaller Brand Name */
         .brand-header strong {
-          font-size: 14px;
-          color: #222;
+          font-size: 11px; 
+          color: #444;
           text-transform: uppercase;
           letter-spacing: 0.5px;
           font-weight: 800;
         }
 
+        /* Smaller Vehicle Title */
         .vehicle-title {
-          font-size: 28px;
+          font-size: 20px; 
           font-weight: 800;
           margin: 0;
           color: #000;
-          line-height: 1.2;
+          line-height: 1.15;
         }
 
+        /* Compact Specs Grid */
         .specs-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-          gap: 16px;
-          padding-top: 20px;
+          grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+          gap: 8px 12px; /* Reduced gap */
+          padding-top: 10px; /* Reduced padding */
           border-top: 1px solid rgba(0,0,0,0.08);
         }
         .spec-item {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 2px;
         }
+        /* Smaller Labels */
         .spec-label {
-          font-size: 11px;
+          font-size: 9px; 
           color: #666;
           text-transform: uppercase;
           font-weight: 700;
           letter-spacing: 0.5px;
         }
+        /* Smaller Values */
         .spec-value {
-          font-size: 14px;
+          font-size: 12px; 
           font-weight: 700;
           color: #111;
-          line-height: 1.3;
+          line-height: 1.2;
         }
 
+        /* Smaller Button */
         .liquid-btn {
           display: inline-flex;
           align-items: center;
           justify-content: center;
           background: #111;
           color: #fff;
-          padding: 14px 24px;
-          border-radius: 10px;
+          padding: 10px 18px; /* Reduced padding */
+          border-radius: 8px;
           font-weight: 600;
-          font-size: 15px;
+          font-size: 12px; /* Smaller text */
           text-decoration: none;
           transition: all 0.3s ease;
           border: none;
@@ -416,28 +416,34 @@ export default function BrandModelPage({
         /* Responsive */
         @media (max-width: 768px) {
           .info-toggle-btn {
-            top: 16px;
-            right: 16px;
-            width: 40px;
-            height: 40px;
+            top: 12px;
+            right: 12px;
+            width: 28px; 
+            height: 28px;
+          }
+          .info-toggle-btn svg {
+            width: 14px; 
+            height: 14px;
           }
           .liquid-details-card {
-            padding: 20px;
-            border-radius: 20px 20px 0 0;
+            padding: 12px 16px; /* Even smaller on mobile */
+            border-radius: 16px 16px 0 0;
           }
           .card-header-row {
             flex-direction: column;
             align-items: flex-start;
+            gap: 8px;
           }
-          .vehicle-title { font-size: 22px; }
+          .vehicle-title { font-size: 18px; }
           .specs-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            padding-top: 16px;
+            gap: 6px 10px;
+            padding-top: 8px;
           }
           .liquid-btn {
             width: 100%;
-            margin-top: 10px;
+            padding: 8px 12px;
+            font-size: 11px;
           }
           .parts-section-wrapper {
             padding: 40px 16px;
@@ -446,7 +452,6 @@ export default function BrandModelPage({
         }
       `}</style>
 
-      {/* Dynamic Full-Width Hero Section */}
       <section className="full-bleed-hero">
         {gallery.length ? (
           <>
@@ -457,7 +462,6 @@ export default function BrandModelPage({
           <div className="hero-placeholder">No Image Available</div>
         )}
 
-        {/* Premium "i" Toggle Button */}
         <button 
           className="info-toggle-btn" 
           onClick={() => setIsCardOpen(!isCardOpen)}
@@ -470,7 +474,6 @@ export default function BrandModelPage({
           </svg>
         </button>
 
-        {/* Full-Width Glass Bottom Sheet Card */}
         <div className={`liquid-details-card ${isCardOpen ? '' : 'hidden'}`}>
           <div className="card-content-wrapper">
             
@@ -484,7 +487,7 @@ export default function BrandModelPage({
               </div>
               
               <Link className="liquid-btn" href={`/category?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
-                Browse Compatible Parts
+                Browse Parts
               </Link>
             </div>
             
@@ -503,7 +506,6 @@ export default function BrandModelPage({
         </div>
       </section>
 
-      {/* Parts List Section */}
       <section className="parts-section-wrapper">
         <div className="parts-section">
           <h2>
