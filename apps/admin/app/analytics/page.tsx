@@ -55,14 +55,16 @@ const duration = (value: number | null) => {
 };
 
 function BreakdownPanel({ title, note, rows }: { title: string; note: string; rows: Breakdown[] }) {
+  const max = Math.max(...rows.map((row) => row.count), 1);
   return (
     <section className="content-section analytics-panel">
-      <div className="section-title"><div><span className="eyebrow">Consent-based sample</span><h2>{title}</h2><p>{note}</p></div></div>
+      <div className="section-title analytics-panel-heading"><div><span className="eyebrow">Live signal</span><h2>{title}</h2><p>{note}</p></div><span className="analytics-panel-count">{number.format(rows.reduce((sum, row) => sum + row.count, 0))}</span></div>
       {rows.length ? (
         <div className="analytics-breakdown">
-          {rows.map((row) => (
+          {rows.map((row, index) => (
             <div className="analytics-breakdown-row" key={row.label}>
-              <span title={row.label}>{row.label}</span><strong>{number.format(row.count)}</strong>
+              <div className="analytics-breakdown-label"><b>{String(index + 1).padStart(2, '0')}</b><span title={row.label}>{row.label}</span><strong>{number.format(row.count)}</strong></div>
+              <span className="analytics-bar"><i style={{ width: `${Math.max((row.count / max) * 100, 4)}%` }} /></span>
             </div>
           ))}
         </div>
@@ -101,11 +103,11 @@ export default function AnalyticsPage() {
         description="Review page paths, visit timing, coarse location, and browser/device categories only from visitors who chose Allow."
       />
       <div className="analytics-toolbar">
-        <label htmlFor="analytics-period">Reporting period</label>
-        <select id="analytics-period" value={days} onChange={(event) => setDays(Number(event.target.value))}>
+        <div><span className="eyebrow">Reporting window</span><strong>Consent-aware traffic intelligence</strong><small>Only visitors who selected Allow are included.</small></div>
+        <label htmlFor="analytics-period">Period<select id="analytics-period" value={days} onChange={(event) => setDays(Number(event.target.value))}>
           <option value={7}>Last 7 days</option><option value={30}>Last 30 days</option><option value={90}>Last 90 days</option>
-        </select>
-        <button className="secondary-button" type="button" onClick={() => setReloadKey((key) => key + 1)} disabled={loading}>Refresh</button>
+        </select></label>
+        <button className="secondary-button" type="button" onClick={() => setReloadKey((key) => key + 1)} disabled={loading}>{loading ? 'Refreshing…' : 'Refresh data ↻'}</button>
       </div>
       {error && <div className="admin-alert" role="alert"><span>{error}</span> <button className="text-button" type="button" onClick={() => setReloadKey((key) => key + 1)}>Try again</button></div>}
       {loading && !data ? <div className="empty-table-state" role="status">Loading consented analytics…</div> : null}
@@ -116,7 +118,8 @@ export default function AnalyticsPage() {
             <MetricCard label="Page views" value={number.format(data.totals.page_views)} note="Recorded after Allow" accent="dark" />
             <MetricCard label="Active, last 30 min" value={number.format(data.totals.active_last_30m)} note="Based on recent event activity" />
           </section>
-          <p className="analytics-disclaimer">Raw IP addresses and raw user-agent strings are not stored in analytics tables. Location is approximate and can be unavailable. Breakdowns use up to the latest {number.format(data.sample_sizes.sessions)} sessions and page rankings use up to {number.format(data.sample_sizes.events)} recent events; headline totals are exact.</p>
+          <div className="analytics-trust-strip"><span className="analytics-live-dot" /> <strong>Tracking is consent-gated</strong><span>IP is visible only to verified admins</span><span>Location is approximate</span><span>Raw user-agent is never stored</span></div>
+          <p className="analytics-disclaimer">Breakdowns use up to the latest {number.format(data.sample_sizes.sessions)} sessions and {number.format(data.sample_sizes.events)} recent events; headline totals are exact. Missing location or device values remain Unknown rather than being guessed.</p>
           <div className="analytics-overview-grid">
             <BreakdownPanel title="Top pages" note="Most viewed paths in the recent event sample." rows={data.top_pages.map((row) => ({ label: row.path, count: row.views }))} />
             <BreakdownPanel title="Countries & locations" note="Approximate hosting-proxy location, when available." rows={data.locations} />
