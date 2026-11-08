@@ -920,8 +920,11 @@ app.post(
     if (body.consent_granted !== true || body.consent_version !== 2)
       return jsonError(reply, 400, 'Explicit analytics consent is required.');
     const sessionId = typeof body.session_id === 'string' ? body.session_id : '';
+    const visitorId = typeof body.visitor_id === 'string' ? body.visitor_id : '';
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(sessionId))
       return jsonError(reply, 400, 'A valid analytics session identifier is required.');
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(visitorId))
+      return jsonError(reply, 400, 'A valid analytics visitor identifier is required.');
     if (body.event_name !== 'page_view' && body.event_name !== 'page_exit')
       return jsonError(reply, 400, 'Unsupported analytics event.');
     const pagePath = cleanAnalyticsPath(body.page_path);
@@ -949,11 +952,22 @@ app.post(
     const supabase = getSupabaseAdmin();
     const now = new Date().toISOString();
     const sessionHash = createHash('sha256').update(sessionId).digest('hex');
+    const visitorHash = createHmac('sha256', config.serviceRoleKey).update(visitorId).digest('hex');
+    const { data: visitorVisitNumber, error: visitorError } = await supabase.rpc('upsert_analytics_visitor', {
+      p_visitor_hash: visitorHash, p_session_id: sessionId, p_page_path: pagePath, p_referrer: referrer,
+      p_country_code: country, p_region: region, p_city: city, p_device_type: profile.deviceType,
+      p_device_model: profile.deviceModel, p_browser: profile.browser, p_operating_system: profile.operatingSystem,
+      p_language: clientData.language, p_timezone: clientData.timezone, p_consent_version: 2,
+      p_is_page_view: body.event_name === 'page_view',
+    });
+    if (visitorError) return jsonError(reply, 500, 'Analytics visitor could not be saved.');
 
     const { error: createSessionError } = await supabase.from('analytics_sessions').upsert(
       {
         id: sessionId,
         visitor_hash: sessionHash,
+        visitor_id_hash: visitorHash,
+        visit_number: Number(visitorVisitNumber ?? 1),
         started_at: now,
         last_seen_at: now,
         landing_path: pagePath,
@@ -1031,7 +1045,7 @@ app.get(
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
     const activeSince = new Date(Date.now() - 30 * 60 * 1000).toISOString();
     const supabase = getSupabaseAdmin();
-    const [sessionsCount, pageViewsCount, activeCount, sampledSessions, sampledEvents] =
+    const [sessionsCount, pageViewsCount, activeCount, uniqueVisitorsCount, returningVisitorsCount, sampledSessions, sampledEvents, sampledVisitors] =
       await Promise.all([
         supabase.from('analytics_sessions').select('id', { count: 'exact', head: true }).gte('started_at', since),
         supabase
@@ -1044,8 +1058,17 @@ app.get(
           .select('id', { count: 'exact', head: true })
           .gte('last_seen_at', activeSince),
         supabase
+          .from('analytics_visitors')
+          .select('visitor_hash', { count: 'exact', head: true })
+          .gte('last_seen_at', since),
+        supabase
+          .from('analytics_visitors')
+          .select('visitor_hash', { count: 'exact', head: true })
+          .gte('last_seen_at', since)
+          .gt('visit_count', 1),
+        supabase
           .from('analytics_sessions')
-          .select('id,started_at,last_seen_at,landing_path,current_path,exit_path,referrer,ip_address,country_code,region,city,device_type,device_model,browser,operating_system,language,timezone')
+          .select('id,visitor_id_hash,visit_number,started_at,last_seen_at,landing_path,current_path,exit_path,referrer,ip_address,country_code,region,city,device_type,device_model,browser,operating_system,language,timezone')
           .gte('started_at', since)
           .order('last_seen_at', { ascending: false })
           .limit(1000),
@@ -1055,8 +1078,14 @@ app.get(
           .gte('created_at', since)
           .order('created_at', { ascending: false })
           .limit(2000),
+        supabase
+          .from('analytics_visitors')
+          .select('visitor_hash,first_seen_at,last_seen_at,visit_count,total_page_views,first_landing_path,last_path,first_referrer,country_code,region,city,device_type,device_model,browser,operating_system,language,timezone,last_session_id')
+          .gte('last_seen_at', since)
+          .order('last_seen_at', { ascending: false })
+          .limit(100),
       ]);
-    const queryError = sessionsCount.error ?? pageViewsCount.error ?? activeCount.error ?? sampledSessions.error ?? sampledEvents.error;
+    const queryError = sessionsCount.error ?? pageViewsCount.error ?? activeCount.error ?? uniqueVisitorsCount.error ?? returningVisitorsCount.error ?? sampledSessions.error ?? sampledEvents.error ?? sampledVisitors.error;
     if (queryError) return jsonError(reply, 500, 'Analytics could not be loaded.');
 
     const pageCounts = new Map<string, number>();
@@ -1097,6 +1126,8 @@ app.get(
           sessions: sessionsCount.count ?? 0,
           page_views: pageViewsCount.count ?? 0,
           active_last_30m: activeCount.count ?? 0,
+          unique_visitors: uniqueVisitorsCount.count ?? 0,
+          returning_visitors: returningVisitorsCount.count ?? 0,
         },
         sample_sizes: { sessions: sessionRows.length, events: eventRows.length },
         top_pages: topPages,
@@ -1104,8 +1135,21 @@ app.get(
         locations,
         devices,
         browsers,
+        visitors: (sampledVisitors.data ?? []).map((visitor) => ({
+          visitor_ref: `V-${visitor.visitor_hash.slice(0, 10).toUpperCase()}`,
+          first_seen_at: visitor.first_seen_at, last_seen_at: visitor.last_seen_at,
+          visit_count: visitor.visit_count, total_page_views: visitor.total_page_views,
+          first_landing_path: visitor.first_landing_path, last_path: visitor.last_path,
+          first_referrer: visitor.first_referrer, country_code: visitor.country_code,
+          region: visitor.region, city: visitor.city, device_type: visitor.device_type,
+          device_model: visitor.device_model, browser: visitor.browser,
+          operating_system: visitor.operating_system, language: visitor.language,
+          timezone: visitor.timezone, last_session_ref: visitor.last_session_id ? visitor.last_session_id.slice(0, 8) : null,
+        })),
         recent_sessions: sessionRows.slice(0, 50).map((session) => ({
           session_ref: session.id.slice(0, 8),
+          visitor_ref: session.visitor_id_hash ? `V-${session.visitor_id_hash.slice(0, 10).toUpperCase()}` : 'Legacy visitor',
+          visit_number: session.visit_number ?? 1,
           started_at: session.started_at,
           last_seen_at: session.last_seen_at,
           duration_ms: Math.max(0, new Date(session.last_seen_at).getTime() - new Date(session.started_at).getTime()),

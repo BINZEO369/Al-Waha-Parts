@@ -8,15 +8,24 @@ import { adminFetch } from '../../lib/auth';
 type Breakdown = { label: string; count: number };
 type AnalyticsData = {
   days: number;
-  totals: { sessions: number; page_views: number; active_last_30m: number };
+  totals: { sessions: number; page_views: number; active_last_30m: number; unique_visitors: number; returning_visitors: number };
   sample_sizes: { sessions: number; events: number };
   top_pages: Array<{ path: string; views: number }>;
   countries: Breakdown[];
   locations: Breakdown[];
   devices: Breakdown[];
   browsers: Breakdown[];
+  visitors: Array<{
+    visitor_ref: string; first_seen_at: string; last_seen_at: string; visit_count: number; total_page_views: number;
+    first_landing_path: string | null; last_path: string | null; first_referrer: string | null;
+    country_code: string | null; region: string | null; city: string | null; device_type: string | null;
+    device_model: string | null; browser: string | null; operating_system: string | null; language: string | null;
+    timezone: string | null; last_session_ref: string | null;
+  }>;
   recent_sessions: Array<{
     session_ref: string;
+    visitor_ref: string;
+    visit_number: number;
     started_at: string;
     last_seen_at: string;
     duration_ms: number;
@@ -117,6 +126,8 @@ export default function AnalyticsPage() {
             <MetricCard label="Consented sessions" value={number.format(data.totals.sessions)} note={`Last ${data.days} days`} />
             <MetricCard label="Page views" value={number.format(data.totals.page_views)} note="Recorded after Allow" accent="dark" />
             <MetricCard label="Active, last 30 min" value={number.format(data.totals.active_last_30m)} note="Based on recent event activity" />
+            <MetricCard label="Unique visitors" value={number.format(data.totals.unique_visitors)} note="Anonymous IDs, consented only" accent="dark" />
+            <MetricCard label="Returning visitors" value={number.format(data.totals.returning_visitors)} note="Seen in more than one visit" />
           </section>
           <div className="analytics-trust-strip"><span className="analytics-live-dot" /> <strong>Tracking is consent-gated</strong><span>IP is visible only to verified admins</span><span>Location is approximate</span><span>Raw user-agent is never stored</span></div>
           <p className="analytics-disclaimer">Breakdowns use up to the latest {number.format(data.sample_sizes.sessions)} sessions and {number.format(data.sample_sizes.events)} recent events; headline totals are exact. Missing location or device values remain Unknown rather than being guessed.</p>
@@ -127,13 +138,30 @@ export default function AnalyticsPage() {
             <BreakdownPanel title="Browsers" note="Browser family inferred from the request header." rows={data.browsers} />
           </div>
           <section className="content-section">
+            <div className="section-title"><div><span className="eyebrow">Identity map</span><h2>Visitors</h2><p>Anonymous first-party IDs connect repeat visits without collecting names or guessing identity.</p></div><span className="section-meta">Showing {data.visitors.length} of {number.format(data.totals.unique_visitors)}</span></div>
+            {data.visitors.length ? (
+              <div className="data-table analytics-table">
+                <div className="analytics-table-head analytics-visitor-grid"><span>Visitor / frequency</span><span>First seen</span><span>Latest journey</span><span>Location / device</span><span>Source / last session</span></div>
+                {data.visitors.map((visitor) => (
+                  <div className="analytics-table-row analytics-visitor-grid" key={visitor.visitor_ref}>
+                    <span><strong>{visitor.visitor_ref}</strong><small>{visitor.visit_count === 1 ? 'First visit' : `${visitor.visit_count} visits · Returning`} · {visitor.total_page_views} page views</small></span>
+                    <span><strong>{dateTime(visitor.first_seen_at)}</strong><small>Latest {dateTime(visitor.last_seen_at)}</small></span>
+                    <span><strong>{visitor.first_landing_path || 'Unknown'} → {visitor.last_path || 'Unknown'}</strong><small>{visitor.last_session_ref ? `Session ${visitor.last_session_ref}` : 'Session unavailable'}</small></span>
+                    <span><strong>{[visitor.city, visitor.region, visitor.country_code].filter(Boolean).join(', ') || 'Unknown location'}</strong><small>{[visitor.device_type, visitor.operating_system, visitor.browser].filter(Boolean).join(' · ') || 'Unknown device'}</small></span>
+                    <span><strong>{visitor.first_referrer || 'Direct / unavailable'}</strong><small>{visitor.timezone || 'Timezone unavailable'}</small></span>
+                  </div>
+                ))}
+              </div>
+            ) : <div className="empty-table-state">No consented visitor IDs in this period.</div>}
+          </section>
+          <section className="content-section">
             <div className="section-title"><div><span className="eyebrow">Journey snapshots</span><h2>Recent sessions</h2><p>Landing, latest page, last exit, source, device and elapsed session time.</p></div><span className="section-meta">Showing {data.recent_sessions.length} of {number.format(data.totals.sessions)}</span></div>
             {data.recent_sessions.length ? (
               <div className="data-table analytics-table">
-                <div className="analytics-table-head analytics-session-grid"><span>Started / session</span><span>Landing → current</span><span>Exit / duration</span><span>Location / IP</span><span>Device / browser</span><span>Referrer</span></div>
+                <div className="analytics-table-head analytics-session-grid"><span>Visitor / session</span><span>Landing → current</span><span>Exit / duration</span><span>Location / IP</span><span>Device / browser</span><span>Referrer</span></div>
                 {data.recent_sessions.map((session) => (
                   <div className="analytics-table-row analytics-session-grid" key={session.session_ref}>
-                    <span><strong>{dateTime(session.started_at)}</strong><small>Session {session.session_ref}</small></span>
+                    <span><strong>{session.visitor_ref}</strong><small>Session {session.session_ref} · Visit #{session.visit_number} · {dateTime(session.started_at)}</small></span>
                     <span><strong>{session.landing_path}</strong><small>→ {session.current_path || 'Unknown'}</small></span>
                     <span><strong>{session.exit_path || 'Still active / not recorded'}</strong><small>{duration(session.duration_ms)}</small></span>
                     <span><strong>{[session.city, session.region, session.country_code].filter(Boolean).join(', ') || 'Unknown'}</strong><small>{session.ip_address || 'IP unavailable'} · {session.timezone || 'Timezone unavailable'}</small></span>

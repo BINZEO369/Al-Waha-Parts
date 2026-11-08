@@ -5,7 +5,9 @@ import { useEffect, useState } from 'react';
 import { getCookieConsentEventName, hasCookieConsent } from '../lib/cookie-consent';
 
 const SESSION_KEY = 'alwaha-analytics-session-v1';
+const VISITOR_KEY = 'alwaha-analytics-visitor-v1';
 let memorySessionId: string | null = null;
+let memoryVisitorId: string | null = null;
 
 function createSessionUuid(): string {
   const bytes = new Uint8Array(16);
@@ -19,6 +21,7 @@ function createSessionUuid(): string {
 
 type AnalyticsPayload = {
   session_id: string;
+  visitor_id: string;
   event_name: 'page_view' | 'page_exit';
   page_path: string;
   page_title: string;
@@ -49,6 +52,19 @@ function getSessionId(): string | null {
   }
 }
 
+function getVisitorId(): string | null {
+  try {
+    const existing = window.localStorage.getItem(VISITOR_KEY);
+    if (existing) return existing;
+    const id = window.crypto?.randomUUID?.() ?? createSessionUuid();
+    window.localStorage.setItem(VISITOR_KEY, id);
+    return id;
+  } catch {
+    memoryVisitorId ??= window.crypto?.randomUUID?.() ?? createSessionUuid();
+    return memoryVisitorId;
+  }
+}
+
 function cleanReferrer(): string | null {
   try {
     if (!document.referrer) return null;
@@ -68,11 +84,7 @@ export function AnalyticsTracker() {
       const permitted = hasCookieConsent('analytics');
       setAllowed(permitted);
       if (!permitted) {
-        try {
-          window.sessionStorage.removeItem(SESSION_KEY);
-        } catch {
-          // Session storage can be disabled by the browser.
-        }
+        try { window.sessionStorage.removeItem(SESSION_KEY); } catch { /* storage disabled */ }
         memorySessionId = null;
       }
     };
@@ -87,8 +99,8 @@ export function AnalyticsTracker() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     if (!apiUrl) return;
     const sessionId = getSessionId();
-    if (!sessionId) return;
-
+    const visitorId = getVisitorId();
+    if (!sessionId || !visitorId) return;
     const clientData: AnalyticsPayload['client_data'] = {
       language: navigator.language?.slice(0, 32) ?? null,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone?.slice(0, 64) ?? null,
@@ -99,11 +111,11 @@ export function AnalyticsTracker() {
     };
     const startedAt = Date.now();
     let exitSent = false;
-
     const send = (eventName: AnalyticsPayload['event_name'], duration: number | null) => {
       if (!hasCookieConsent('analytics')) return;
       const payload: AnalyticsPayload = {
         session_id: sessionId,
+        visitor_id: visitorId,
         event_name: eventName,
         page_path: pathname.split(/[?#]/, 1)[0]?.slice(0, 300) || '/',
         page_title: document.title.slice(0, 180),
@@ -114,26 +126,18 @@ export function AnalyticsTracker() {
         client_data: clientData,
       };
       void fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/analytics/events`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        keepalive: eventName === 'page_exit',
-        cache: 'no-store',
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload), keepalive: eventName === 'page_exit', cache: 'no-store',
       }).catch(() => undefined);
     };
-
     const sendExit = () => {
       if (exitSent) return;
       exitSent = true;
       send('page_exit', Math.min(Date.now() - startedAt, 24 * 60 * 60 * 1000));
     };
-
     send('page_view', null);
     window.addEventListener('pagehide', sendExit);
-    return () => {
-      window.removeEventListener('pagehide', sendExit);
-      sendExit();
-    };
+    return () => { window.removeEventListener('pagehide', sendExit); sendExit(); };
   }, [allowed, pathname]);
 
   return null;

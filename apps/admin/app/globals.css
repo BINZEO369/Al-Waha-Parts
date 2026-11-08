@@ -1961,6 +1961,7 @@ select:focus-visible {
 .analytics-table-row:hover { background: #fffafa; }
 .analytics-session-grid { grid-template-columns: 1.15fr 1fr 1.15fr 1.1fr 1.1fr 1.15fr; min-width: 1080px; }
 .analytics-event-grid { grid-template-columns: 1fr .8fr 1.25fr .8fr .9fr 1.35fr; min-width: 900px; }
+.analytics-visitor-grid { grid-template-columns: 1.15fr 1fr 1.25fr 1.15fr 1.1fr; min-width: 980px; }
 .analytics-table-row > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .analytics-table-row strong, .analytics-table-row small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .analytics-table-row strong { color: #44484f; font-size: 10px; }
