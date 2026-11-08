@@ -5,6 +5,7 @@ import { CartProvider } from '../components/CartProvider';
 import { LanguageProvider } from '../components/LanguageProvider';
 import { CookieConsentManager } from '../components/CookieConsentManager';
 import { SiteInteractionGuards } from '../components/SiteInteractionGuards';
+import { AnalyticsTracker } from '../components/AnalyticsTracker';
 const globalStyles = String.raw`@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
 
 :root {
@@ -1129,6 +1130,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Footer />
         </CartProvider>
         <CookieConsentManager />
+        <AnalyticsTracker />
       </LanguageProvider>
       </body>
     </html>

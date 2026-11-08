@@ -111,3 +111,25 @@ Turn the admin app into a premium operations workspace backed by the connected S
 - `apps/admin/components/ImageKitUploadField.tsx`: direct browser upload and preview control.
 - `apps/admin/components/AdminResourcePanel.tsx`: ImageKit control wiring for resource image fields.
 - `docs/imagekit-setup.md`: production environment variables and deployment instructions.
+
+
+# Consent-based storefront analytics addendum
+
+## Implementation
+- Reuse the existing `analytics_sessions` and `analytics_events` tables; extend them additively, add query indexes, and enforce row-level security with no direct browser-role grants.
+- Storefront tracking runs only after explicit Allow consent. Reject records a necessary-only choice and causes the tracking client to send no analytics requests or persist an analytics session identifier. Consent version 2 forces visitors with an older choice to make a fresh decision before IP collection begins.
+- A small first-party client records page views/exits, path transitions, session timing, sanitized referrer/title, language/timezone, coarse device/browser/OS, and viewport dimensions. Paths omit query strings and fragments; no form values or click-level behavior is collected.
+- The Fastify API validates and rate-limits incoming events, stores the API-observed request IP only after explicit consent, uses a session-scoped pseudonymous ID, reads coarse location only from trusted Vercel metadata when available, and never stores a raw user-agent string. No GPS/geolocation request or cross-session fingerprint is used.
+- A verified-admin-only API summarizes bounded event/session windows; the admin `/analytics` page presents totals, top paths, coarse location/device summaries, and recent landing/current/exit paths.
+
+## Project structure
+- `database/migrations/019_consent_based_analytics.sql`, `020_analytics_device_model.sql`, and `021_analytics_ip_address.sql`: additive schema/index/access-control and consented device/IP fields.
+- `apps/web/lib/cookie-consent.ts` and `apps/web/components/CookieConsentManager.tsx`: persistent Allow/Reject choice and consent broadcast.
+- `apps/web/components/AnalyticsTracker.tsx`: consent-gated page/session event client mounted from `apps/web/app/layout.tsx`.
+- `apps/api/src/app.ts`: validated public event intake and verified-admin reporting endpoints.
+- `apps/admin/app/analytics/page.tsx` and `apps/admin/components/AdminShell.tsx`: authenticated analytics screen and navigation.
+
+## Data boundaries
+- Store an IP address only in a consented session and expose it only through the verified-admin API; do not store exact GPS coordinates, full user-agent strings, URL query strings/fragments, form contents, or a device-derived cross-session identity.
+- Country/region/city are approximate and only shown when trusted hosting-proxy metadata exists; missing values remain unknown.
+- Database tables are not directly readable or writable by `anon` or `authenticated`; access is mediated by the server-only service role and active-admin authorization.

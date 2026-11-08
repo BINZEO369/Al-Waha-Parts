@@ -1,5 +1,5 @@
 export type CookiePreferences = {
-  version: 1;
+  version: 2;
   necessary: true;
   preferences: boolean;
   analytics: boolean;
@@ -17,7 +17,8 @@ export type CookieCategory = keyof Pick<
 >;
 
 const COOKIE_NAME = 'alwaha_cookie_consent';
-const STORAGE_KEY = 'alwaha-cookie-consent-v1';
+const STORAGE_KEY = 'alwaha-cookie-consent-v2';
+const LEGACY_STORAGE_KEY = 'alwaha-cookie-consent-v1';
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 180;
 const CONSENT_EVENT = 'alwaha:cookie-preferences-updated';
 
@@ -25,7 +26,7 @@ function isCookiePreferences(value: unknown): value is CookiePreferences {
   if (!value || typeof value !== 'object') return false;
   const candidate = value as Partial<CookiePreferences>;
   return (
-    candidate.version === 1 &&
+    candidate.version === 2 &&
     candidate.necessary === true &&
     typeof candidate.preferences === 'boolean' &&
     typeof candidate.analytics === 'boolean' &&
@@ -51,7 +52,10 @@ export function readCookiePreferences(): CookiePreferences | null {
 
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (!stored) return null;
+    if (!stored) {
+      window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+      return null;
+    }
     const parsed: unknown = JSON.parse(stored);
     if (!isCookiePreferences(parsed)) return null;
     const savedAt = new Date(parsed.updatedAt).getTime();
@@ -67,7 +71,7 @@ export function readCookiePreferences(): CookiePreferences | null {
 
 export function saveCookiePreferences(preferences: OptionalCookiePreferences): CookiePreferences {
   const value: CookiePreferences = {
-    version: 1,
+    version: 2,
     necessary: true,
     preferences: preferences.preferences,
     analytics: preferences.analytics,

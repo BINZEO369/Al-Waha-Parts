@@ -1,6 +1,7 @@
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
-import { createHmac, randomUUID } from 'node:crypto';
+import { createHash, createHmac, randomUUID } from 'node:crypto';
+import { isIP } from 'node:net';
 type ApiHealth = {
   status: 'ok';
   service: 'al-waha-parts-api';
@@ -39,10 +40,14 @@ app.addHook('onRequest', async (request, reply) => {
   const isBooking = request.method === 'POST' && request.url.split('?')[0] === '/api/v1/bookings';
   const isTracking =
     request.method === 'GET' && request.url.split('?')[0] === '/api/v1/bookings/track';
+  const isAnalytics =
+    request.method === 'POST' && request.url.split('?')[0] === '/api/v1/analytics/events';
   const retryAfter = isBooking
     ? checkRate(bookingBuckets, request.ip, 5, 10 * 60 * 1000)
     : isTracking
       ? checkRate(trackingBuckets, request.ip, 20, 10 * 60 * 1000)
+      : isAnalytics
+        ? checkRate(trackingBuckets, request.ip, 120, 10 * 60 * 1000)
       : checkRate(publicBuckets, request.ip, 120, 60 * 1000);
   if (retryAfter !== null) {
     reply.header('Retry-After', String(retryAfter));
@@ -804,6 +809,334 @@ app.get('/api/v1/admin/dashboard', { preHandler: requireAdmin as any }, async (_
     },
   });
 });
+
+type AnalyticsClientData = {
+  language: string | null;
+  timezone: string | null;
+  screen_width: number | null;
+  screen_height: number | null;
+  viewport_width: number | null;
+  viewport_height: number | null;
+};
+
+const cleanAnalyticsText = (value: unknown, maxLength: number): string | null => {
+  if (typeof value !== 'string') return null;
+  const cleaned = value.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, maxLength);
+  return cleaned || null;
+};
+
+const cleanAnalyticsPath = (value: unknown): string | null => {
+  if (typeof value !== 'string') return null;
+  const path = value.trim();
+  if (!path.startsWith('/') || path.startsWith('//') || /[?#\\\u0000-\u001f\u007f]/.test(path))
+    return null;
+  return path.slice(0, 300);
+};
+
+const cleanAnalyticsReferrer = (value: unknown): string | null => {
+  if (typeof value !== 'string' || value.length > 2000) return null;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    return `${url.origin}${url.pathname}`.slice(0, 400);
+  } catch {
+    return null;
+  }
+};
+
+const safeDimension = (value: unknown): number | null =>
+  Number.isInteger(value) && Number(value) >= 1 && Number(value) <= 10000 ? Number(value) : null;
+
+const parseAnalyticsClientData = (value: unknown): AnalyticsClientData => {
+  const input = value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+  return {
+    language: cleanAnalyticsText(input.language, 32),
+    timezone: cleanAnalyticsText(input.timezone, 64),
+    screen_width: safeDimension(input.screen_width),
+    screen_height: safeDimension(input.screen_height),
+    viewport_width: safeDimension(input.viewport_width),
+    viewport_height: safeDimension(input.viewport_height),
+  };
+};
+
+const analyticsUserAgentProfile = (userAgentValue: unknown) => {
+  const userAgent = typeof userAgentValue === 'string' ? userAgentValue.slice(0, 1000) : '';
+  const deviceType = /ipad|tablet/i.test(userAgent)
+    ? 'tablet'
+    : /mobile|iphone|ipod|android/i.test(userAgent)
+      ? 'mobile'
+      : 'desktop';
+  const browser = /edg\//i.test(userAgent)
+    ? 'Edge'
+    : /opr\//i.test(userAgent)
+      ? 'Opera'
+      : /samsungbrowser/i.test(userAgent)
+        ? 'Samsung Internet'
+        : /firefox\//i.test(userAgent)
+          ? 'Firefox'
+          : /chrome\//i.test(userAgent)
+            ? 'Chrome'
+            : /safari\//i.test(userAgent)
+              ? 'Safari'
+              : 'Other';
+  const operatingSystem = /android/i.test(userAgent)
+    ? 'Android'
+    : /iphone|ipad|ipod/i.test(userAgent)
+      ? 'iOS'
+      : /windows/i.test(userAgent)
+        ? 'Windows'
+        : /mac os|macintosh/i.test(userAgent)
+          ? 'macOS'
+          : /cros/i.test(userAgent)
+            ? 'ChromeOS'
+            : /linux/i.test(userAgent)
+              ? 'Linux'
+              : 'Other';
+  const iosDevice = /ipad/i.test(userAgent) ? 'iPad' : /ipod/i.test(userAgent) ? 'iPod' : /iphone/i.test(userAgent) ? 'iPhone' : null;
+  const androidModel = userAgent.match(/Android[^;)]*;\s*([^;)]+)/i)?.[1]
+    ?.replace(/\s+Build\/.*$/i, '')
+    .trim();
+  const deviceModel = iosDevice ?? (androidModel && !/^k$/i.test(androidModel)
+    ? cleanAnalyticsText(androidModel, 64)
+    : null);
+  return { deviceType, browser, operatingSystem, deviceModel };
+};
+
+const proxyLocationValue = (value: unknown, maxLength = 80): string | null => {
+  if (typeof value !== 'string') return null;
+  let decoded = value;
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    // Keep the original proxy value if it is not percent-encoded.
+  }
+  return cleanAnalyticsText(decoded, maxLength);
+};
+
+app.post(
+  '/api/v1/analytics/events',
+  async (request: FastifyRequest<{ Body: Record<string, unknown> }>, reply) => {
+    const body = request.body ?? {};
+    if (body.consent_granted !== true || body.consent_version !== 2)
+      return jsonError(reply, 400, 'Explicit analytics consent is required.');
+    const sessionId = typeof body.session_id === 'string' ? body.session_id : '';
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(sessionId))
+      return jsonError(reply, 400, 'A valid analytics session identifier is required.');
+    if (body.event_name !== 'page_view' && body.event_name !== 'page_exit')
+      return jsonError(reply, 400, 'Unsupported analytics event.');
+    const pagePath = cleanAnalyticsPath(body.page_path);
+    if (!pagePath) return jsonError(reply, 400, 'A sanitized page path is required.');
+
+    const clientData = parseAnalyticsClientData(body.client_data);
+    const pageTitle = cleanAnalyticsText(body.page_title, 180);
+    const referrer = cleanAnalyticsReferrer(body.referrer);
+    const duration = body.duration_ms;
+    const durationMs =
+      body.event_name === 'page_exit' && Number.isInteger(duration)
+        ? Math.min(Math.max(Number(duration), 0), 24 * 60 * 60 * 1000)
+        : null;
+    const profile = analyticsUserAgentProfile(request.headers['user-agent']);
+    const ipAddress = isIP(request.ip) ? request.ip : null;
+    const hasVercelProxy = typeof request.headers['x-vercel-id'] === 'string';
+    const countryHeader = hasVercelProxy ? request.headers['x-vercel-ip-country'] : null;
+    const country = typeof countryHeader === 'string' && /^[A-Z]{2}$/i.test(countryHeader)
+      ? countryHeader.toUpperCase()
+      : null;
+    const region = hasVercelProxy
+      ? proxyLocationValue(request.headers['x-vercel-ip-country-region'])
+      : null;
+    const city = hasVercelProxy ? proxyLocationValue(request.headers['x-vercel-ip-city']) : null;
+    const supabase = getSupabaseAdmin();
+    const now = new Date().toISOString();
+    const sessionHash = createHash('sha256').update(sessionId).digest('hex');
+
+    const { error: createSessionError } = await supabase.from('analytics_sessions').upsert(
+      {
+        id: sessionId,
+        visitor_hash: sessionHash,
+        started_at: now,
+        last_seen_at: now,
+        landing_path: pagePath,
+        current_path: pagePath,
+        exit_path: body.event_name === 'page_exit' ? pagePath : null,
+        referrer,
+        ip_address: ipAddress,
+        country_code: country,
+        region,
+        city,
+        device_type: profile.deviceType,
+        device_model: profile.deviceModel,
+        browser: profile.browser,
+        operating_system: profile.operatingSystem,
+        language: clientData.language,
+        timezone: clientData.timezone,
+        screen_width: clientData.screen_width,
+        screen_height: clientData.screen_height,
+        viewport_width: clientData.viewport_width,
+        viewport_height: clientData.viewport_height,
+        consent_version: 2,
+        consent_granted_at: now,
+      },
+      { onConflict: 'id', ignoreDuplicates: true },
+    );
+    if (createSessionError) return jsonError(reply, 500, 'Analytics session could not be saved.');
+
+    const { error: updateSessionError } = await supabase
+      .from('analytics_sessions')
+      .update({
+        last_seen_at: now,
+        current_path: pagePath,
+        exit_path: body.event_name === 'page_exit' ? pagePath : null,
+        ip_address: ipAddress,
+        country_code: country,
+        region,
+        city,
+        device_type: profile.deviceType,
+        device_model: profile.deviceModel,
+        browser: profile.browser,
+        operating_system: profile.operatingSystem,
+        language: clientData.language,
+        timezone: clientData.timezone,
+        screen_width: clientData.screen_width,
+        screen_height: clientData.screen_height,
+        viewport_width: clientData.viewport_width,
+        viewport_height: clientData.viewport_height,
+      })
+      .eq('id', sessionId);
+    if (updateSessionError) return jsonError(reply, 500, 'Analytics session could not be updated.');
+
+    const { error: eventError } = await supabase.from('analytics_events').insert({
+      session_id: sessionId,
+      event_name: body.event_name,
+      page_path: pagePath,
+      page_title: pageTitle,
+      referrer,
+      duration_ms: durationMs,
+      event_data: clientData,
+    });
+    if (eventError) return jsonError(reply, 500, 'Analytics event could not be saved.');
+    return reply.code(202).send({ data: { accepted: true } });
+  },
+);
+
+app.get(
+  '/api/v1/admin/analytics',
+  { preHandler: requireAdmin as any },
+  async (
+    request: FastifyRequest<{ Querystring: { days?: string } }>,
+    reply,
+  ) => {
+    const requestedDays = Number(request.query.days);
+    const days = [7, 30, 90].includes(requestedDays) ? requestedDays : 30;
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+    const activeSince = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    const supabase = getSupabaseAdmin();
+    const [sessionsCount, pageViewsCount, activeCount, sampledSessions, sampledEvents] =
+      await Promise.all([
+        supabase.from('analytics_sessions').select('id', { count: 'exact', head: true }).gte('started_at', since),
+        supabase
+          .from('analytics_events')
+          .select('id', { count: 'exact', head: true })
+          .eq('event_name', 'page_view')
+          .gte('created_at', since),
+        supabase
+          .from('analytics_sessions')
+          .select('id', { count: 'exact', head: true })
+          .gte('last_seen_at', activeSince),
+        supabase
+          .from('analytics_sessions')
+          .select('id,started_at,last_seen_at,landing_path,current_path,exit_path,referrer,ip_address,country_code,region,city,device_type,device_model,browser,operating_system,language,timezone')
+          .gte('started_at', since)
+          .order('last_seen_at', { ascending: false })
+          .limit(1000),
+        supabase
+          .from('analytics_events')
+          .select('id,session_id,event_name,page_path,page_title,referrer,duration_ms,created_at')
+          .gte('created_at', since)
+          .order('created_at', { ascending: false })
+          .limit(2000),
+      ]);
+    const queryError = sessionsCount.error ?? pageViewsCount.error ?? activeCount.error ?? sampledSessions.error ?? sampledEvents.error;
+    if (queryError) return jsonError(reply, 500, 'Analytics could not be loaded.');
+
+    const pageCounts = new Map<string, number>();
+    for (const event of sampledEvents.data ?? []) {
+      if (event.event_name === 'page_view')
+        pageCounts.set(event.page_path, (pageCounts.get(event.page_path) ?? 0) + 1);
+    }
+    const groupCounts = (values: Array<string | null | undefined>) => {
+      const counts = new Map<string, number>();
+      for (const value of values) {
+        const label = value?.trim() || 'Unknown';
+        counts.set(label, (counts.get(label) ?? 0) + 1);
+      }
+      return [...counts.entries()]
+        .map(([label, count]) => ({ label, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+    };
+    const sessionRows = sampledSessions.data ?? [];
+    const eventRows = sampledEvents.data ?? [];
+    const topPages = [...pageCounts.entries()]
+      .map(([path, views]) => ({ path, views }))
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 10);
+    const countries = groupCounts(sessionRows.map((session) => session.country_code));
+    const locations = groupCounts(
+      sessionRows.map((session) => [session.city, session.region, session.country_code].filter(Boolean).join(', ')),
+    );
+    const devices = groupCounts(
+      sessionRows.map((session) => [session.device_type, session.operating_system].filter(Boolean).join(' · ')),
+    );
+    const browsers = groupCounts(sessionRows.map((session) => session.browser));
+
+    return {
+      data: {
+        days,
+        totals: {
+          sessions: sessionsCount.count ?? 0,
+          page_views: pageViewsCount.count ?? 0,
+          active_last_30m: activeCount.count ?? 0,
+        },
+        sample_sizes: { sessions: sessionRows.length, events: eventRows.length },
+        top_pages: topPages,
+        countries,
+        locations,
+        devices,
+        browsers,
+        recent_sessions: sessionRows.slice(0, 50).map((session) => ({
+          session_ref: session.id.slice(0, 8),
+          started_at: session.started_at,
+          last_seen_at: session.last_seen_at,
+          duration_ms: Math.max(0, new Date(session.last_seen_at).getTime() - new Date(session.started_at).getTime()),
+          landing_path: session.landing_path,
+          current_path: session.current_path,
+          exit_path: session.exit_path,
+          referrer: session.referrer,
+          ip_address: session.ip_address,
+          country_code: session.country_code,
+          region: session.region,
+          city: session.city,
+          device_type: session.device_type,
+          device_model: session.device_model,
+          browser: session.browser,
+          operating_system: session.operating_system,
+          language: session.language,
+          timezone: session.timezone,
+        })),
+        recent_events: eventRows.slice(0, 100).map((event) => ({
+          session_ref: event.session_id.slice(0, 8),
+          event_name: event.event_name,
+          page_path: event.page_path,
+          page_title: event.page_title,
+          referrer: event.referrer,
+          duration_ms: event.duration_ms,
+          created_at: event.created_at,
+        })),
+      },
+    };
+  },
+);
 
 const editableBannerFields = [
   'slug',

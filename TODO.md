@@ -74,3 +74,12 @@
 - Parts, gallery images, manufacturer logos, model covers, category images, and hero desktop/mobile images must have direct upload controls that save the returned URL into the existing database fields.
 - Uploads must accept image files up to 10 MB each, show progress/error feedback, preview uploaded images, and retain a manual URL fallback.
 - Production configuration documentation must list `IMAGEKIT_PRIVATE_KEY` and `IMAGEKIT_PUBLIC_KEY`, with the private value added only to the central API environment.
+
+
+## Consent-based storefront analytics are private by default and visible to admins
+- Keep the existing `analytics_sessions` and `analytics_events` tables and all existing records; add only missing analytics columns, indexes, and access controls.
+- Store analytics only after the visitor selects “Allow”; “Reject” must prevent analytics requests and optional browser storage, while required storefront functionality continues to work.
+- After explicit Allow, store the API-observed request IP with the consented session and collect page views/exits, session timing, sanitized path/title/referrer, coarse browser/OS/device (and model when available), and viewport details; approximate country/region/city only when trusted hosting metadata is available.
+- Reject must result in no analytics request or analytics database write. Never persist raw user-agent strings, precise GPS location, query strings, form inputs, or cross-session fingerprint identifiers; report unavailable metadata as unknown rather than inventing values.
+- Deny direct `anon`/`authenticated` database access to analytics tables; only the service-role API may write events, and only verified active admins may read analytics through admin-protected endpoints.
+- Add an authenticated admin Analytics section showing bounded summaries, top pages, location/device breakdowns, and recent session landing/current/exit pages and durations with clear empty/error/loading states.
