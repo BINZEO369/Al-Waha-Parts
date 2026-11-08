@@ -258,7 +258,7 @@ app.get(
     const { data: parts, error: partsError } = await supabase
       .from('parts')
       .select(
-        '*,parts_categories(id,category_name,slug),manufacturers(id,manufacturer_name,slug,logo_url),part_model_fitments(model_id,compatible_years,vehicles:car_models!part_model_fitments_model_id_fkey(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code,slug))',
+        '*,parts_categories(id,category_name,slug),manufacturers(id,manufacturer_name,slug,logo_url),part_model_fitments(model_id,compatible_years,vehicles:car_models!part_model_fitments_model_id_fkey(id,model_name,year_start,year_end,generation,chassis_code,slug))',
       )
       .eq('category_id', category.id)
       .eq('status', 'active')
@@ -307,7 +307,7 @@ app.get(
     const { data, error } = await getSupabaseAdmin()
       .from('parts')
       .select(
-        '*,parts_categories(id,category_name,slug),manufacturers(id,manufacturer_name,slug,logo_url),part_model_fitments(model_id,compatible_years,vehicles:car_models!part_model_fitments_model_id_fkey(id,manufacturer_name,model_name,year_start,year_end,generation,chassis_code,slug))',
+        '*,parts_categories(id,category_name,slug),manufacturers(id,manufacturer_name,slug,logo_url),part_model_fitments(model_id,compatible_years,vehicles:car_models!part_model_fitments_model_id_fkey(id,model_name,year_start,year_end,generation,chassis_code,slug))',
       )
       .eq('status', 'active')
       .not('brand_name', 'is', null)
