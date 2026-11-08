@@ -49,8 +49,6 @@ export default function BrandModelPage({
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
-  const [isCardOpen, setIsCardOpen] = useState(true);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -112,16 +110,6 @@ export default function BrandModelPage({
       active = false;
     };
   }, [apiUrl, slug, modelSlug]);
-
-  // Auto-hide the card after 5 seconds
-  useEffect(() => {
-    if (detail) {
-      const timer = setTimeout(() => {
-        setIsCardOpen(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [detail]);
 
   if (loading)
     return (
@@ -216,56 +204,21 @@ export default function BrandModelPage({
           background: #111;
         }
 
-        /* "i" INFO TOGGLE BUTTON */
-        .info-toggle-btn {
-          position: absolute;
-          top: 16px;
-          right: 16px;
-          z-index: 20;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 32px; 
-          height: 32px; 
-          background: rgba(255, 255, 255, 0.2);
-          backdrop-filter: blur(12px) saturate(180%);
-          -webkit-backdrop-filter: blur(12px) saturate(180%);
-          border: 1px solid rgba(255, 255, 255, 0.4);
-          border-radius: 50%;
-          color: #fff;
-          cursor: pointer;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15), inset 0 0 8px rgba(255,255,255,0.2);
-          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .info-toggle-btn:hover {
-          background: rgba(255, 255, 255, 0.35);
-          transform: scale(1.1);
-        }
-        .info-toggle-btn svg {
-          width: 16px; 
-          height: 16px; 
-        }
-
-        /* FULL-WIDTH GLASS BOTTOM SHEET CARD */
+        /* Vehicle details card, displayed below the image */
         .liquid-details-card {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 10;
+          position: relative;
           padding: 16px 24px; 
-          background: rgba(255, 255, 255, 0.88);
-          backdrop-filter: blur(24px) saturate(180%);
-          -webkit-backdrop-filter: blur(24px) saturate(180%);
-          border-top: 1px solid rgba(255, 255, 255, 0.9);
-          border-radius: 20px 20px 0 0;
-          box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
-          transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-          transform: translateY(0);
+          width: min(1200px, calc(100% - 32px));
+          margin: 20px auto 0;
+          background: #fff;
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          border-radius: 16px;
+          box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+          box-sizing: border-box;
         }
 
-        .liquid-details-card.hidden {
-          transform: translateY(105%); 
+        .vehicle-details-section {
+          width: 100%;
         }
 
         .card-content-wrapper {
@@ -402,19 +355,9 @@ export default function BrandModelPage({
 
         /* Responsive */
         @media (max-width: 768px) {
-          .info-toggle-btn {
-            top: 12px;
-            right: 12px;
-            width: 28px; 
-            height: 28px;
-          }
-          .info-toggle-btn svg {
-            width: 14px; 
-            height: 14px;
-          }
           .liquid-details-card {
             padding: 12px 16px; 
-            border-radius: 16px 16px 0 0;
+            border-radius: 14px;
           }
           .card-header-row {
             flex-direction: column;
@@ -449,19 +392,10 @@ export default function BrandModelPage({
           <div className="hero-placeholder">No Image Available</div>
         )}
 
-        <button 
-          className="info-toggle-btn" 
-          onClick={() => setIsCardOpen(!isCardOpen)}
-          aria-label="Toggle Vehicle Details"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-          </svg>
-        </button>
+      </section>
 
-        <div className={`liquid-details-card ${isCardOpen ? '' : 'hidden'}`}>
+      <section className="vehicle-details-section">
+        <div className="liquid-details-card">
           <div className="card-content-wrapper">
             
             <div className="card-header-row">
