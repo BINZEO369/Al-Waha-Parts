@@ -1759,11 +1759,27 @@ const editableModelFields = [
   'seo_description',
 ] as const;
 
+type PageResult<T> = { data: T[] | null; error: { message: string } | null };
+async function fetchAllPages<T>(
+  fetchPage: (start: number, end: number) => PromiseLike<PageResult<T>>,
+) {
+  const rows: T[] = [];
+  const pageSize = 500;
+  for (let start = 0; ; start += pageSize) {
+    const { data, error } = await fetchPage(start, start + pageSize - 1);
+    if (error) return { data: null as T[] | null, error };
+    const page = data ?? [];
+    rows.push(...page);
+    if (page.length < pageSize) break;
+  }
+  return { data: rows, error: null };
+}
+
 app.get('/api/v1/admin/lookups', { preHandler: requireAdmin as any }, async (_request, reply) => {
   const supabase = getSupabaseAdmin();
   const [manufacturers, models, categories] = await Promise.all([
     supabase.from('manufacturers').select('id,manufacturer_name,slug,logo_url').order('manufacturer_name').limit(500),
-    supabase.from('car_models').select('id,manufacturer_id,model_name,generation,year_start,year_end').order('model_name').limit(2000),
+    fetchAllPages((start, end) => supabase.from('car_models').select('id,manufacturer_id,model_name,generation,year_start,year_end').order('model_name').order('manufacturer_id').order('id').range(start, end)),
     supabase.from('parts_categories').select('id,category_name,slug').eq('status', 'active').order('category_name').limit(200),
   ]);
   const failed = [manufacturers, models, categories].find((result) => result.error);
@@ -1795,7 +1811,8 @@ app.delete('/api/v1/admin/manufacturers/:id', { preHandler: requireAdmin as any 
 });
 
 app.get('/api/v1/admin/vehicles', { preHandler: requireAdmin as any }, async (_request, reply) => {
-  const { data, error } = await getSupabaseAdmin().from('car_models').select('*,manufacturers(id,manufacturer_name,slug,logo_url)').order('sort_order').order('model_name').limit(2000);
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await fetchAllPages((start, end) => supabase.from('car_models').select('*,manufacturers(id,manufacturer_name,slug,logo_url)').order('sort_order').order('model_name').order('id').range(start, end));
   if (error) return jsonError(reply, 500, error.message);
   return { data: (data ?? []).map((row, index) => { const record = row as CarBrandRecord; const manufacturer = (record.manufacturers as CarBrandRecord | undefined) ?? { id: record.manufacturer_id, manufacturer_name: '' }; return { ...record, ...normalizeModel(record, manufacturer, index), manufacturer_id: record.manufacturer_id }; }) };
 });

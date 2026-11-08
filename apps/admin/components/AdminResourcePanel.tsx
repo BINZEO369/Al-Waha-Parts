@@ -280,15 +280,21 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
     }
   }
   async function remove(row: Resource, title: string) {
+    const isPermanentDelete = kind === 'banners';
     const confirmation =
-      kind === 'banners'
+      isPermanentDelete
         ? `Permanently delete ${title}? It will be removed from the database and live storefront. This cannot be undone.`
         : `Deactivate ${title}? It will be hidden from the storefront while keeping its history safe.`;
     if (!window.confirm(confirmation)) return;
     setError('');
     setBusyId(row.id);
     try {
-      await adminFetch(`${meta.endpoint}/${row.id}`, { method: 'DELETE' });
+      const requestOptions: RequestInit = { method: isPermanentDelete ? 'DELETE' : 'PATCH' };
+      if (!isPermanentDelete)
+        requestOptions.body = JSON.stringify(
+          kind === 'manufacturers' ? { status: 'inactive', is_active: false } : { status: 'inactive' },
+        );
+      await adminFetch(`${meta.endpoint}/${row.id}`, requestOptions);
       load();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'This record could not be deleted.');
