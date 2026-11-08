@@ -55,6 +55,7 @@ export function ImageKitUploadField({ value, multiple = false, folder, onChange 
         form.append('token', auth.token);
         form.append('folder', `/al-waha-parts/${folder}`);
         form.append('useUniqueFileName', 'false');
+        form.append('overwriteFile', 'true');
         const response = await fetch('https://upload.imagekit.io/api/v1/files/upload', { method: 'POST', body: form });
         const payload = (await response.json()) as { url?: string; message?: string; error?: string };
         if (!response.ok || !payload.url) throw new Error(payload.message ?? payload.error ?? 'ImageKit upload failed.');

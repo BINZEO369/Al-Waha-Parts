@@ -1893,3 +1893,13 @@ select:focus-visible {
 .booking-product-thumb img { width:100%; height:100%; object-fit:cover; }
 .booking-fitment { color:var(--red) !important; }
 @media (max-width:760px) { .imagekit-name-row { align-items:stretch; flex-direction:column; } .imagekit-extension { padding-bottom:0; } .imagekit-upload-row { align-items:flex-start; flex-direction:column; } }
+
+.resource-avatar.is-clickable { cursor:zoom-in; border:0; padding:0; }
+.resource-avatar.is-clickable:hover { outline:3px solid rgba(229,35,47,.18); transform:scale(1.04); }
+.resource-actions button:disabled { opacity:.5; cursor:wait; }
+.media-lightbox { position:fixed; inset:0; z-index:80; display:grid; place-items:center; padding:24px; background:rgba(25,27,31,.72); }
+.media-lightbox-card { width:min(720px,100%); padding:16px; background:#fff; border-radius:12px; box-shadow:0 24px 70px rgba(0,0,0,.25); }
+.media-lightbox-heading { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-bottom:12px; font-size:13px; }
+.media-lightbox-heading button { display:grid; place-items:center; width:30px; height:30px; border:0; border-radius:50%; color:var(--ink); background:var(--paper); font-size:20px; }
+.media-lightbox-card > img { display:block; width:100%; max-height:70vh; object-fit:contain; background:var(--paper); border-radius:7px; }
+.media-lightbox-card > a { display:inline-block; margin-top:12px; color:var(--red); font-size:11px; font-weight:800; }

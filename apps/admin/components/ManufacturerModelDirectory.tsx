@@ -27,7 +27,7 @@ export function ManufacturerModelDirectory() {
 
   useEffect(() => {
     Promise.all([
-      adminFetch<Manufacturer[]>('/api/v1/admin/car-brands'),
+      adminFetch<Manufacturer[]>('/api/v1/admin/manufacturers'),
       adminFetch<Model[]>('/api/v1/admin/vehicles'),
     ])
       .then(([brandRows, modelRows]) => {

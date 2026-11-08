@@ -227,6 +227,8 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
   const [actionError, setActionError] = useState('');
   const [editing, setEditing] = useState<Resource | null>(null);
   const [creating, setCreating] = useState(false);
+  const [preview, setPreview] = useState<{ url: string; title: string } | null>(null);
+  const [busyId, setBusyId] = useState('');
   const meta = config[kind];
 
   const load = () => {
@@ -262,6 +264,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
   const otherStatuses = statuses.filter((value) => value !== 'active' && value !== 'inactive');
   async function setAvailability(row: Resource, nextStatus: 'active' | 'inactive') {
     setActionError('');
+    setBusyId(row.id);
     try {
       await adminFetch(`${meta.endpoint}/${row.id}`, {
         method: 'PATCH',
@@ -270,20 +273,25 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
       load();
     } catch (cause) {
       setActionError(cause instanceof Error ? cause.message : 'Status could not be updated.');
+    } finally {
+      setBusyId('');
     }
   }
   async function remove(row: Resource, title: string) {
     const confirmation =
       kind === 'banners'
         ? `Permanently delete ${title}? It will be removed from the database and live storefront. This cannot be undone.`
-        : `Delete ${title}? This will hide it from the storefront and keep its history safe.`;
+        : `Deactivate ${title}? It will be hidden from the storefront while keeping its history safe.`;
     if (!window.confirm(confirmation)) return;
     setError('');
+    setBusyId(row.id);
     try {
       await adminFetch(`${meta.endpoint}/${row.id}`, { method: 'DELETE' });
       load();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'This record could not be deleted.');
+    } finally {
+      setBusyId('');
     }
   }
 
@@ -405,9 +413,9 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
             const canToggleStatus = kind !== 'admins' || row.can_manage_access === true;
             return (
               <article className="resource-row" key={row.id}>
-                <div className="resource-avatar resource-avatar-media">
+                <button className={`resource-avatar resource-avatar-media ${imageFor(kind, row) ? 'is-clickable' : ''}`} type="button" disabled={!imageFor(kind, row)} onClick={() => imageFor(kind, row) && setPreview({ url: imageFor(kind, row), title: item.title })} aria-label={imageFor(kind, row) ? `Open image for ${item.title}` : undefined}>
                   {imageFor(kind, row) ? <img src={imageFor(kind, row)} alt="" loading="lazy" /> : item.title.slice(0, 2).toUpperCase()}
-                </div>
+                </button>
                 <div className="resource-main">
                   <strong>{item.title}</strong>
                   <small>{item.meta}</small>
@@ -430,6 +438,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
                     <button
                       className={`availability-action-button ${nextStatus === 'active' ? 'activate' : 'deactivate'}`}
                       type="button"
+                      disabled={busyId === row.id}
                       onClick={() => void setAvailability(row, nextStatus)}
                     >
                       {nextStatus === 'active' ? 'Set active' : 'Set inactive'}
@@ -440,6 +449,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
                       <button
                         className="edit-button"
                         type="button"
+                        disabled={busyId === row.id}
                         onClick={() => {
                           setCreating(false);
                           setEditing(row);
@@ -450,9 +460,10 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
                       <button
                         className="delete-button"
                         type="button"
+                        disabled={busyId === row.id}
                         onClick={() => void remove(row, item.title)}
                       >
-                        Delete
+                        {kind === 'banners' ? 'Delete' : 'Deactivate'}
                       </button>
                     </>
                   )}
@@ -480,6 +491,15 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
             load();
           }}
         />
+      )}
+      {preview && (
+        <div className="media-lightbox" role="dialog" aria-modal="true" aria-label={`${preview.title} image preview`} onClick={() => setPreview(null)}>
+          <div className="media-lightbox-card" onClick={(event) => event.stopPropagation()}>
+            <div className="media-lightbox-heading"><strong>{preview.title}</strong><button type="button" onClick={() => setPreview(null)} aria-label="Close image preview">×</button></div>
+            <img src={preview.url} alt={preview.title} />
+            <a href={preview.url} target="_blank" rel="noreferrer">Open original image ↗</a>
+          </div>
+        </div>
       )}
     </section>
   );
