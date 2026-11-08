@@ -510,7 +510,7 @@ app.get(
     let { data, error } = await getSupabaseAdmin()
       .from('parts')
       .select(
-        '*,parts_categories(id,category_name,slug,image_url),manufacturers(id,manufacturer_name,slug,logo_url),part_model_fitments(model_id,compatible_years,vehicles:car_models!part_model_fitments_model_id_fkey(id,model_name,generation,chassis_code,slug))',
+        '*,parts_categories(id,category_name,slug,image_url),manufacturers(id,manufacturer_name,slug,logo_url),part_model_fitments(model_id,compatible_years,vehicles:car_models!part_model_fitments_model_id_fkey(id,manufacturer_id,model_name,generation,chassis_code,slug,year_start,year_end,manufacturers(id,manufacturer_name,slug,logo_url)))',
       )
       .eq('slug', request.params.slug)
       .eq('status', 'active')
@@ -1388,7 +1388,18 @@ app.get('/api/v1/admin/parts', { preHandler: requireAdmin as any }, async (_requ
     )
     .order('created_at', { ascending: false });
   if (error) return jsonError(reply, 500, error.message);
-  return { data: data ?? [] };
+  const rows = (data ?? []) as unknown as Array<{
+    model_id?: string | null;
+    part_model_fitments?: { model_id: string; compatible_years?: number[] | null }[] | null;
+    [key: string]: unknown;
+  }>;
+  return {
+    data: rows.map((part) => {
+      const fitments = part.part_model_fitments ?? [];
+      const primaryFitment = fitments.find((fitment) => fitment.model_id === part.model_id) ?? fitments[0];
+      return { ...part, compatible_years: primaryFitment?.compatible_years ?? [] };
+    }),
+  };
 });
 
 const editablePartFields = [
@@ -1433,9 +1444,25 @@ function validatePartPricing(body: Record<string, unknown>, existingPrice?: unkn
   if (salePrice !== null && salePrice > price) return 'Sale price cannot be higher than the regular price.';
   return null;
 }
+function normalizeCompatibleYears(value: unknown) {
+  const rawYears = Array.isArray(value)
+    ? value
+    : typeof value === 'string'
+      ? value.split(/[ ,\n\t]+/).filter(Boolean)
+      : [];
+  const years = rawYears.map(Number);
+  if (years.some((year) => !Number.isInteger(year) || year < 1900 || year > 2200))
+    return { years: [] as number[], error: 'Compatible years must be between 1900 and 2200.' };
+  return { years: [...new Set(years)].sort((a, b) => a - b), error: null };
+}
 
 app.post('/api/v1/admin/parts', { preHandler: requireAdmin as any }, async (request, reply) => {
-  const body = pickFields((request.body ?? {}) as Record<string, unknown>, editablePartFields);
+  const rawBody = (request.body ?? {}) as Record<string, unknown>;
+  const body = pickFields(rawBody, editablePartFields);
+  const { years: compatibleYears, error: yearsError } = normalizeCompatibleYears(rawBody.compatible_years);
+  if (yearsError) return jsonError(reply, 400, yearsError);
+  if (compatibleYears.length && !(typeof body.model_id === 'string' && body.model_id))
+    return jsonError(reply, 400, 'Select a vehicle model before entering compatible years.');
   if (!body.part_name || !body.sku || body.price === undefined)
     return jsonError(reply, 400, 'part_name, sku and price are required');
   const pricingError = validatePartPricing(body);
@@ -1449,7 +1476,7 @@ app.post('/api/v1/admin/parts', { preHandler: requireAdmin as any }, async (requ
   if (createError) return jsonError(reply, 400, createError.message);
   if (typeof body.model_id === 'string' && body.model_id) {
     const { error: fitmentError } = await supabase.from('part_model_fitments').upsert(
-      { part_id: created.id, model_id: body.model_id, compatible_years: [] },
+      { part_id: created.id, model_id: body.model_id, compatible_years: compatibleYears },
       { onConflict: 'part_id,model_id' },
     );
     if (fitmentError) {
@@ -1475,7 +1502,11 @@ app.patch(
     request: FastifyRequest<{ Params: { id: string }; Body: Record<string, unknown> }>,
     reply,
   ) => {
-    const body = pickFields(request.body ?? {}, editablePartFields);
+    const rawBody = request.body ?? {};
+    const body = pickFields(rawBody, editablePartFields);
+    const hasCompatibleYears = Object.prototype.hasOwnProperty.call(rawBody, 'compatible_years');
+    const { years: compatibleYears, error: yearsError } = normalizeCompatibleYears(rawBody.compatible_years);
+    if (yearsError) return jsonError(reply, 400, yearsError);
     const supabase = getSupabaseAdmin();
     const current = await supabase.from('parts').select('price,sale_price,model_id').eq('id', request.params.id).maybeSingle();
     if (current.error || !current.data) return jsonError(reply, 404, 'Part could not be found.');
@@ -1485,9 +1516,20 @@ app.patch(
     };
     const pricingError = validatePartPricing(effectiveBody);
     if (pricingError) return jsonError(reply, 400, pricingError);
-    if (typeof body.model_id === 'string' && body.model_id) {
+    const fitmentModelId =
+      typeof body.model_id === 'string' && body.model_id
+        ? body.model_id
+        : (current.data.model_id as string | null);
+    if (compatibleYears.length && !fitmentModelId)
+      return jsonError(reply, 400, 'Select a vehicle model before entering compatible years.');
+    if (fitmentModelId && (body.model_id !== undefined || hasCompatibleYears)) {
+      const fitmentInput: { part_id: string; model_id: string; compatible_years?: number[] } = {
+        part_id: request.params.id,
+        model_id: fitmentModelId,
+      };
+      if (hasCompatibleYears) fitmentInput.compatible_years = compatibleYears;
       const { error: fitmentError } = await supabase.from('part_model_fitments').upsert(
-        { part_id: request.params.id, model_id: body.model_id, compatible_years: [] },
+        fitmentInput,
         { onConflict: 'part_id,model_id' },
       );
       if (fitmentError) return jsonError(reply, 400, fitmentError.message);

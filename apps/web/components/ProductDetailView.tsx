@@ -10,13 +10,21 @@ import { PageLoader } from './PageLoader';
 
 type VehicleFitment = {
   id: string;
-  manufacturer_name: string;
   model_name: string;
   generation?: string | null;
   chassis_code?: string | null;
+  slug?: string | null;
+  year_start?: number | null;
+  year_end?: number | null;
+  manufacturers?: {
+    id?: string;
+    manufacturer_name?: string | null;
+    slug?: string | null;
+    logo_url?: string | null;
+  } | null;
 };
 type PartFitment = {
-  vehicle_id: string;
+  model_id: string;
   compatible_years?: number[] | null;
   vehicles?: VehicleFitment | null;
 };
@@ -38,9 +46,18 @@ type Product = {
   primary_image_url?: string | null;
   image_urls?: string[] | null;
   parts_categories?: { category_name?: string | null; slug?: string | null } | null;
-  car_brands?: { id?: string; manufacturer_name?: string | null; slug?: string | null; logo_url?: string | null } | null;
-  part_vehicle_fitments?: PartFitment | PartFitment[] | null;
+  part_model_fitments?: PartFitment | PartFitment[] | null;
 };
+
+function formatCompatibleYears(fitment: PartFitment) {
+  const years = [...new Set((fitment.compatible_years ?? []).map(Number).filter(Number.isInteger))].sort((a, b) => a - b);
+  if (years.length) return years.join(', ');
+  const start = fitment.vehicles?.year_start;
+  const end = fitment.vehicles?.year_end;
+  if (start && end) return `${start}–${end}`;
+  if (start || end) return String(start ?? end);
+  return 'Year not specified';
+}
 
 export function ProductDetailView({ slug }: { slug: string }) {
   const [product, setProduct] = useState<Product | null>(null);
@@ -401,10 +418,13 @@ export function ProductDetailView({ slug }: { slug: string }) {
   const images = [
     ...new Set([product.primary_image_url, ...(product.image_urls ?? [])].filter(Boolean)),
   ] as string[];
-  const rawFitment = product.part_vehicle_fitments;
-  const fitment = Array.isArray(rawFitment) ? rawFitment[0] : rawFitment;
-  const vehicle = fitment?.vehicles;
-  const compatibleYears = [...new Set((fitment?.compatible_years ?? []).map(Number))].sort((a, b) => a - b);
+  const rawFitments = product.part_model_fitments;
+  const fitments = (Array.isArray(rawFitments) ? rawFitments : rawFitments ? [rawFitments] : [])
+    .filter((fitment) => Boolean(fitment.vehicles));
+  const primaryFitment = fitments[0];
+  const vehicle = primaryFitment?.vehicles;
+  const manufacturerName = vehicle?.manufacturers?.manufacturer_name ?? 'Vehicle';
+  const manufacturerLogo = vehicle?.manufacturers?.logo_url;
   const currentPrice = product.sale_price ?? product.price;
   const outOfStock = product.stock_quantity === 0;
 
@@ -589,6 +609,7 @@ export function ProductDetailView({ slug }: { slug: string }) {
         .product-vehicle-bar { display: flex; align-items: center; gap: 14px; min-height: 86px; padding: 14px 24px; margin-bottom: 22px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; background: #fff; font-size: 20px; }
         .product-vehicle-bar strong, .product-vehicle-bar small { display: block; }
         .product-vehicle-bar small { margin-top: 4px; color: #777; font-size: 14px; }
+        .product-vehicle-mark { display: grid; width: 64px; height: 48px; flex: 0 0 64px; place-items: center; border-radius: 12px; background: #f2f2f2; font-size: 16px; }
         .product-vehicle-mark img { width: 42px; height: 32px; object-fit: contain; }
         .product-grid { display: block; }
         .product-reference-media { position: relative; }
@@ -616,6 +637,8 @@ export function ProductDetailView({ slug }: { slug: string }) {
         .product-vehicle-information > div:first-child p { max-width: 330px; margin-top: 18px; color: #777; font-size: 16px; line-height: 1.55; }
         .product-fitmentList div { display: grid; gap: 6px; border-radius: 12px; }
         .product-fitmentList small { color: var(--red); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+        .product-fitmentList .product-fitment-brand { display: flex; align-items: center; gap: 10px; }
+        .product-fitmentList .product-fitment-brand img { width: 40px; height: 32px; object-fit: contain; }
         .product-fitmentList strong { font-size: 20px; }
         .product-fitmentList span { margin-top: 0; font-size: 14px; line-height: 1.45; }
         @media (max-width: 800px) {
@@ -652,12 +675,16 @@ export function ProductDetailView({ slug }: { slug: string }) {
         }
       `}</style>
 
-      {vehicle && (
+      <div className="product-reference-heading">
+        <h1>{product.part_name}</h1>
+        <span className="product-sku-badge">SKU {product.sku}</span>
+      </div>
+      {vehicle && primaryFitment && (
         <div className="product-vehicle-bar">
           <span className="product-vehicle-mark">
-            {product.car_brands?.logo_url ? <img src={product.car_brands.logo_url} alt={product.car_brands.manufacturer_name ?? vehicle.manufacturer_name} /> : vehicle.manufacturer_name.slice(0, 2).toUpperCase()}
+            {manufacturerLogo ? <img src={manufacturerLogo} alt={`${manufacturerName} logo`} /> : manufacturerName.slice(0, 2).toUpperCase()}
           </span>
-          <span><strong>{vehicle.manufacturer_name} {vehicle.model_name}</strong><small>{compatibleYears.length ? compatibleYears.join(', ') : 'Year not specified'}{vehicle.generation ? ` · ${vehicle.generation}` : ''}</small></span>
+          <span><strong>{manufacturerName} {vehicle.model_name}</strong><small>{formatCompatibleYears(primaryFitment)}{vehicle.generation ? ` · ${vehicle.generation}` : ''}</small></span>
         </div>
       )}
       <div className="product-grid">
@@ -734,19 +761,27 @@ export function ProductDetailView({ slug }: { slug: string }) {
           <h2>Compatible vehicles</h2>
           <p>This product is listed for the following vehicle models and production years.</p>
         </div>
-        {vehicle ? (
+        {fitments.length ? (
           <div className="product-fitmentList">
-              <div key={vehicle.id}>
-                <small>Vehicle fitment</small>
-                <strong>
-                  {vehicle.manufacturer_name} {vehicle.model_name}
-                </strong>
-                <span>
-                  Compatible years: {compatibleYears.length ? compatibleYears.join(', ') : 'Year not specified'}
-                  {vehicle.generation ? ` · ${vehicle.generation}` : ''}
-                  {vehicle.chassis_code ? ` · ${vehicle.chassis_code}` : ''}
-                </span>
-              </div>
+            {fitments.map((fitment) => {
+              const compatibleVehicle = fitment.vehicles!;
+              const brandName = compatibleVehicle.manufacturers?.manufacturer_name ?? 'Vehicle';
+              const logoUrl = compatibleVehicle.manufacturers?.logo_url;
+              return (
+                <div key={fitment.model_id}>
+                  <div className="product-fitment-brand">
+                    {logoUrl && <img src={logoUrl} alt={`${brandName} logo`} />}
+                    <small>Vehicle fitment</small>
+                  </div>
+                  <strong>{brandName} {compatibleVehicle.model_name}</strong>
+                  <span>
+                    Compatible years: {formatCompatibleYears(fitment)}
+                    {compatibleVehicle.generation ? ` · ${compatibleVehicle.generation}` : ''}
+                    {compatibleVehicle.chassis_code ? ` · ${compatibleVehicle.chassis_code}` : ''}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p>

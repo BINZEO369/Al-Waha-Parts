@@ -33,6 +33,7 @@ const config: Record<
       { key: 'category_id', label: 'Category', type: 'select', required: true },
       { key: 'manufacturer_id', label: 'Manufacturer', type: 'select' },
       { key: 'model_id', label: 'Vehicle model', type: 'select' },
+      { key: 'compatible_years', label: 'Compatible years (comma separated)' },
       { key: 'sku', label: 'SKU', required: true },
       { key: 'brand_name', label: 'Brand' },
       { key: 'oem_number', label: 'OEM number' },
@@ -543,6 +544,16 @@ function ResourceForm({
         if (field.type === 'number' && payload[field.key] !== undefined)
           payload[field.key] = Number(payload[field.key]);
       if (kind === 'parts') {
+        const rawYears = String(values.compatible_years ?? '')
+          .split(/[,\s]+/)
+          .map((value) => value.trim())
+          .filter(Boolean);
+        const years = rawYears.map(Number);
+        if (years.some((year) => !Number.isInteger(year) || year < 1900 || year > 2200))
+          throw new Error('Enter compatible years as four-digit years between 1900 and 2200.');
+        if (years.length && !payload.model_id)
+          throw new Error('Select a vehicle model before entering compatible years.');
+        payload.compatible_years = [...new Set(years)].sort((a, b) => a - b);
         const price = Number(payload.price);
         const salePrice = payload.sale_price === undefined ? null : Number(payload.sale_price);
         if (!Number.isFinite(price) || price < 0) throw new Error('Price must be 0 or greater.');
