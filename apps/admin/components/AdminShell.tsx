@@ -8,7 +8,8 @@ import { adminFetch, supabase } from '../lib/auth';
 const links: Array<[string, string, string, string]> = [
   ['/dashboard', 'Overview', '01', 'Live workspace'],
   ['/parts', 'Inventory', '02', 'Parts & stock'],
-  ['/vehicles', 'Vehicles', '03', 'Fitment library'],
+  ['/manufacturers', 'Manufacturers', '03A', 'Brand identity'],
+  ['/vehicles', 'Models', '03', 'Fitment library'],
   ['/categories', 'Categories', '04', 'Catalog structure'],
   ['/bookings', 'Bookings', '05', 'Customer requests'],
   ['/admins', 'Admin access', '06', 'Team permissions'],

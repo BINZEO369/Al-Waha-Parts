@@ -5,7 +5,7 @@ import { adminFetch } from '../lib/auth';
 
 type Part = { id: string; part_name: string; sku: string; status?: string };
 type Vehicle = { id: string; manufacturer_name: string; model_name: string; generation?: string | null; chassis_code?: string | null };
-type Fitment = { vehicle_id: string; compatible_years?: number[] | null; vehicles?: Vehicle | null } | null;
+type Fitment = { model_id: string; compatible_years?: number[] | null; vehicles?: Vehicle | null } | null;
 
 export function PartFitmentEditor() {
   const [parts, setParts] = useState<Part[]>([]);
@@ -39,7 +39,7 @@ export function PartFitmentEditor() {
     adminFetch<Fitment>(`/api/v1/admin/parts/${partId}/fitment`)
       .then((data) => {
         setFitment(data);
-        setVehicleId(data?.vehicle_id ?? '');
+        setVehicleId(data?.model_id ?? '');
         setYearsText((data?.compatible_years ?? []).join(', '));
       })
       .catch((cause: unknown) => setError(cause instanceof Error ? cause.message : 'Fitment could not be loaded.'));
@@ -61,7 +61,7 @@ export function PartFitmentEditor() {
     try {
       const saved = await adminFetch<Fitment>(`/api/v1/admin/parts/${partId}/fitment`, {
         method: 'PUT',
-        body: JSON.stringify({ vehicle_id: vehicleId, compatible_years: years }),
+        body: JSON.stringify({ model_id: vehicleId, compatible_years: years }),
       });
       setFitment(saved);
       setMessage(`Saved: ${selectedPart?.part_name ?? 'Part'} → ${selectedVehicle?.manufacturer_name} ${selectedVehicle?.model_name}.`);

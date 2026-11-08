@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { adminFetch } from '../lib/auth';
 
-type ResourceKind = 'parts' | 'vehicles' | 'categories' | 'admins' | 'banners' | 'carBrands';
+type ResourceKind = 'parts' | 'vehicles' | 'manufacturers' | 'categories' | 'admins' | 'banners';
 type Resource = Record<string, unknown> & { id: string };
+
+type Lookup = { id: string; manufacturer_id?: string; manufacturer_name?: string; model_name?: string; category_name?: string; generation?: string | null; slug?: string | null };
 
 type Field = {
   key: string;
@@ -25,9 +27,10 @@ const config: Record<
     search: 'Search part, SKU, brand, or OEM number…',
     fields: [
       { key: 'part_name', label: 'Part name', required: true },
+      { key: 'category_id', label: 'Category', type: 'select', required: true },
+      { key: 'manufacturer_id', label: 'Manufacturer', type: 'select' },
+      { key: 'model_id', label: 'Vehicle model', type: 'select' },
       { key: 'sku', label: 'SKU', required: true },
-      { key: 'manufacturer_id', label: 'Manufacturer ID' },
-      { key: 'model_id', label: 'Model ID' },
       { key: 'brand_name', label: 'Brand' },
       { key: 'oem_number', label: 'OEM number' },
       { key: 'price', label: 'Price', type: 'number', required: true },
@@ -41,7 +44,26 @@ const config: Record<
         options: ['active', 'inactive', 'draft', 'out_of_stock'],
       },
       { key: 'description', label: 'Description', type: 'textarea' },
+      { key: 'primary_image_url', label: 'Primary image URL' },
+      { key: 'image_urls', label: 'Gallery image URLs (JSON)', type: 'textarea' },
       { key: 'is_featured', label: 'Featured record', type: 'checkbox' },
+    ],
+  },
+  manufacturers: {
+    endpoint: '/api/v1/admin/manufacturers',
+    title: 'Manufacturer records',
+    empty: 'No manufacturers found in the live database.',
+    search: 'Search manufacturer, slug, or country…',
+    fields: [
+      { key: 'manufacturer_name', label: 'Manufacturer name', required: true },
+      { key: 'slug', label: 'URL slug', required: true },
+      { key: 'logo_url', label: 'Logo image URL' },
+      { key: 'country', label: 'Country' },
+      { key: 'founded_year', label: 'Founded year', type: 'number' },
+      { key: 'company_description', label: 'Description', type: 'textarea' },
+      { key: 'status', label: 'Status', type: 'select', options: ['active', 'inactive', 'draft'] },
+      { key: 'is_active', label: 'Visible in storefront', type: 'checkbox' },
+      { key: 'sort_order', label: 'Display order', type: 'number' },
     ],
   },
   vehicles: {
@@ -50,17 +72,23 @@ const config: Record<
     empty: 'No vehicles found in the fitment library.',
     search: 'Search manufacturer, model, or chassis…',
     fields: [
-      { key: 'manufacturer_name', label: 'Manufacturer', required: true },
-      { key: 'model_name', label: 'Model', required: true },
+      { key: 'manufacturer_id', label: 'Manufacturer', type: 'select', required: true },
+      { key: 'model_name', label: 'Model name', required: true },
       { key: 'generation', label: 'Generation' },
       { key: 'chassis_code', label: 'Chassis code' },
-      { key: 'manufacturer_id', label: 'Manufacturer ID' },
+      { key: 'year_start', label: 'Start year', type: 'number' },
+      { key: 'year_end', label: 'End year', type: 'number' },
+      { key: 'engine_code', label: 'Engine code' },
+      { key: 'engine_capacity', label: 'Engine capacity', type: 'number' },
+      { key: 'fuel_type', label: 'Fuel type' },
+      { key: 'transmission', label: 'Transmission' },
       { key: 'vehicle_type', label: 'Vehicle type' },
-      { key: 'slug', label: 'URL slug' },
+      { key: 'slug', label: 'URL slug', required: true },
       { key: 'status', label: 'Status', type: 'select', options: ['active', 'inactive', 'draft'] },
       { key: 'cover_image_url', label: 'Cover image URL' },
       { key: 'is_featured', label: 'Featured vehicle', type: 'checkbox' },
     ],
+
   },
   categories: {
     endpoint: '/api/v1/admin/categories',
@@ -101,23 +129,6 @@ const config: Record<
       { key: 'sort_order', label: 'Display order', type: 'number' },
     ],
   },
-  carBrands: {
-    endpoint: '/api/v1/admin/car-brands',
-    title: 'Car brand logo records',
-    empty: 'No car brand records found.',
-    search: 'Search manufacturer, slug, or logo URL…',
-    fields: [
-      { key: 'manufacturer_name', label: 'Manufacturer', required: true },
-      { key: 'slug', label: 'URL slug', required: true },
-      { key: 'logo_url', label: 'Logo image URL', required: true },
-      { key: 'company_description', label: 'Company description', type: 'textarea' },
-      { key: 'country', label: 'Country' },
-      { key: 'founded_year', label: 'Founded year', type: 'number' },
-      { key: 'status', label: 'Status', type: 'select', options: ['active', 'inactive', 'draft'] },
-      { key: 'sort_order', label: 'Display order', type: 'number' },
-      { key: 'is_active', label: 'Active logo', type: 'checkbox' },
-    ],
-  },
   admins: {
     endpoint: '/api/v1/admin/admins',
     title: 'Team access records',
@@ -135,16 +146,6 @@ function statusClass(value: unknown) {
     .toLowerCase()
     .replace(/\s+/g, '-')}`;
 }
-
-function mediaFor(kind: ResourceKind, row: Resource) {
-  if (kind === 'carBrands') return row.logo_url;
-  if (kind === 'vehicles') return row.cover_image_url;
-  if (kind === 'parts') return row.primary_image_url;
-  if (kind === 'categories') return row.image_url;
-  if (kind === 'banners') return row.image_url;
-  return null;
-}
-
 function summary(kind: ResourceKind, row: Resource) {
   if (kind === 'parts')
     return {
@@ -153,11 +154,18 @@ function summary(kind: ResourceKind, row: Resource) {
       detail: `${text(row.stock_quantity, '0')} units · ${formatSar(Number(row.sale_price ?? row.price ?? 0))}`,
       status: row.status,
     };
+  if (kind === 'manufacturers')
+    return {
+      title: text(row.manufacturer_name),
+      meta: `${text(row.slug)} · ${text(row.country, 'Country not set')}`,
+      detail: `${row.is_active === false ? 'Hidden' : 'Visible'} · ${text(row.logo_url, 'No logo')}`,
+      status: row.status,
+    };
   if (kind === 'vehicles')
     return {
       title: `${text(row.manufacturer_name)} ${text(row.model_name)}`,
       meta: `${text(row.generation, 'Generation not set')} · ${text(row.chassis_code, 'No chassis')}`,
-      detail: `${text(row.vehicle_type, 'Vehicle')} · manufacturer ID ${text(row.manufacturer_id, 'not linked')}`,
+      detail: `${text(row.vehicle_type, 'Vehicle')} · logo ID ${text(row.manufacturer_id, 'not linked')}`,
       status: row.status,
     };
   if (kind === 'categories')
@@ -173,13 +181,6 @@ function summary(kind: ResourceKind, row: Resource) {
       meta: `${text(row.slug)} · ${text(row.eyebrow, 'No eyebrow')}`,
       detail: `${text(row.cta_label)} → ${text(row.cta_href)} · order ${text(row.sort_order, '0')}`,
       status: row.status,
-    };
-  if (kind === 'carBrands')
-    return {
-      title: text(row.manufacturer_name),
-      meta: `${text(row.slug)} · ${text(row.country, 'Country not set')}`,
-      detail: `${text(row.active_model_count ?? row.model_count, '0')} active models · order ${text(row.sort_order, '0')}`,
-      status: row.is_active ? 'active' : 'inactive',
     };
   return {
     title: text(row.name),
@@ -256,12 +257,9 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
   async function setAvailability(row: Resource, nextStatus: 'active' | 'inactive') {
     setActionError('');
     try {
-      const body = kind === 'carBrands'
-        ? { status: nextStatus, is_active: nextStatus === 'active' }
-        : { status: nextStatus };
       await adminFetch(`${meta.endpoint}/${row.id}`, {
         method: 'PATCH',
-        body: JSON.stringify(body),
+        body: JSON.stringify({ status: nextStatus }),
       });
       load();
     } catch (cause) {
@@ -269,7 +267,10 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
     }
   }
   async function remove(row: Resource, title: string) {
-    const confirmation = `Permanently delete ${title}? It will be removed from the database and live storefront. Related fitment links may also be removed. This cannot be undone.`;
+    const confirmation =
+      kind === 'banners'
+        ? `Permanently delete ${title}? It will be removed from the database and live storefront. This cannot be undone.`
+        : `Delete ${title}? This will hide it from the storefront and keep its history safe.`;
     if (!window.confirm(confirmation)) return;
     setError('');
     try {
@@ -290,13 +291,13 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
                 ? '02'
                 : kind === 'vehicles'
                   ? '03'
+                  : kind === 'manufacturers'
+                    ? '03A'
                   : kind === 'categories'
                     ? '04'
                     : kind === 'admins'
                       ? '06'
-                      : kind === 'banners'
-                        ? '08'
-                        : '09'}
+                      : '08'}
             </b>
             {meta.title}
           </span>
@@ -371,9 +372,8 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
         </div>
       </div>
       {loading && (
-        <div className="resource-loading-state" role="status" aria-live="polite">
-          <div className="resource-loading-heading"><span className="loading-spinner" /><div><strong>Loading {meta.title.toLowerCase()}</strong><small>Fetching the latest records from Supabase</small></div></div>
-          <div className="loading-skeleton-list" aria-hidden="true"><i /><i /><i /></div>
+        <div className="empty-table-state loading-state">
+          <span className="loading-spinner" /> Loading live {kind} from Supabase…
         </div>
       )}
       {!loading && error && (
@@ -399,13 +399,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
             const canToggleStatus = kind !== 'admins' || row.can_manage_access === true;
             return (
               <article className="resource-row" key={row.id}>
-                <div className={`resource-avatar ${mediaFor(kind, row) ? 'resource-media' : ''}`}>
-                  {typeof mediaFor(kind, row) === 'string' ? (
-                    <img src={String(mediaFor(kind, row))} alt="" loading="lazy" />
-                  ) : (
-                    item.title.slice(0, 2).toUpperCase()
-                  )}
-                </div>
+                <div className="resource-avatar">{item.title.slice(0, 2).toUpperCase()}</div>
                 <div className="resource-main">
                   <strong>{item.title}</strong>
                   <small>{item.meta}</small>
@@ -417,9 +411,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
                       ? `Price · ${text(row.currency, 'SAR')}`
                       : kind === 'admins'
                         ? 'Access review'
-                        : kind === 'carBrands'
-                          ? 'Database logo relation'
-                          : 'Live database record'}
+                        : 'Live database record'}
                   </small>
                 </div>
                 <span className={statusClass(item.status)}>
@@ -501,6 +493,11 @@ function ResourceForm({
   const [values, setValues] = useState<Record<string, unknown>>(initialValues(fields, row));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [lookups, setLookups] = useState<{ manufacturers: Lookup[]; models: Lookup[]; categories: Lookup[] }>({ manufacturers: [], models: [], categories: [] });
+  useEffect(() => {
+    if (kind !== 'parts' && kind !== 'vehicles') return;
+    adminFetch<typeof lookups>('/api/v1/admin/lookups').then(setLookups).catch(() => undefined);
+  }, [kind]);
   const set = (key: string, value: unknown) =>
     setValues((current) => ({ ...current, [key]: value }));
   async function submit(event: React.FormEvent) {
@@ -516,6 +513,10 @@ function ResourceForm({
       for (const field of fields)
         if (field.type === 'number' && payload[field.key] !== undefined)
           payload[field.key] = Number(payload[field.key]);
+      if (typeof payload.image_urls === 'string') {
+        try { payload.image_urls = JSON.parse(payload.image_urls); }
+        catch { payload.image_urls = String(payload.image_urls).split(/[,\n]/).map((url: string) => url.trim()).filter(Boolean); }
+      }
       await adminFetch(row ? `${config[kind].endpoint}/${row.id}` : config[kind].endpoint, {
         method: row ? 'PATCH' : 'POST',
         body: JSON.stringify(payload),
@@ -542,8 +543,11 @@ function ResourceForm({
           </button>
         </div>
         <div className="form-grid">
-          {fields.map((field) => (
-            <label
+          {fields.map((field) => {
+            const dynamicOptions = field.key === 'manufacturer_id' ? lookups.manufacturers : field.key === 'model_id' ? lookups.models.filter((model) => !values.manufacturer_id || model.manufacturer_id === values.manufacturer_id) : field.key === 'category_id' ? lookups.categories : undefined;
+            const optionLabel = (option: string | Lookup) => typeof option === 'string' ? option.replace(/_/g, ' ') : option.manufacturer_name ?? option.model_name ?? option.category_name ?? option.slug ?? option.id;
+            const optionValue = (option: string | Lookup) => typeof option === 'string' ? option : option.id;
+            return (<label
               className={
                 field.type === 'textarea'
                   ? 'form-field full-width'
@@ -581,9 +585,9 @@ function ResourceForm({
                       onChange={(event) => set(field.key, event.target.value)}
                     >
                       <option value="">Choose…</option>
-                      {field.options?.map((option) => (
-                        <option key={option} value={option}>
-                          {option.replace(/_/g, ' ')}
+                      {(dynamicOptions ?? field.options ?? []).map((option) => (
+                        <option key={optionValue(option)} value={optionValue(option)}>
+                          {optionLabel(option)}
                         </option>
                       ))}
                     </select>
@@ -598,7 +602,8 @@ function ResourceForm({
                 </>
               )}
             </label>
-          ))}
+          );
+          })}
         </div>
         {error && (
           <div className="admin-alert" role="alert">
