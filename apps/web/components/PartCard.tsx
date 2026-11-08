@@ -292,7 +292,7 @@ export function PartCard({ part }: { part: PartCardData }) {
         }
       `}</style>
 
-      <Link className="part-card-media" href={`/category/${part.slug ?? part.id}`} aria-label={`View ${part.part_name}`}>
+      <Link className="part-card-media" href={`/products/${part.slug ?? part.id}`} aria-label={`View ${part.part_name}`}>
         <span className="part-tag">{part.condition ?? 'New'}</span>
         {part.primary_image_url || part.image_urls?.[0] ? (
           <img src={part.primary_image_url ?? part.image_urls?.[0]} alt={part.part_name} className="part-card-image" />
@@ -305,7 +305,7 @@ export function PartCard({ part }: { part: PartCardData }) {
         <div className="eyebrow">{part.brand_name || 'Al Waha Select'} · {part.sku}</div>
         
         <h3>
-          <Link href={`/category/${part.slug ?? part.id}`}>{part.part_name}</Link>
+          <Link href={`/products/${part.slug ?? part.id}`}>{part.part_name}</Link>
         </h3>
         
         <div className="part-meta">

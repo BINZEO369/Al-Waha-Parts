@@ -649,6 +649,22 @@ app.get(
       .eq('slug', request.params.slug)
       .eq('status', 'active')
       .maybeSingle();
+    if (
+      !data &&
+      !error &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(request.params.slug)
+    ) {
+      const byId = await getSupabaseAdmin()
+        .from('parts')
+        .select(
+          '*,parts_categories(id,category_name,slug,image_url),car_brands:manufacturers(id,manufacturer_name,slug,logo_url),part_vehicle_fitments:part_model_fitments(vehicle_id:model_id,compatible_years,vehicles:car_models!part_model_fitments_model_id_fkey(id,manufacturer_id,model_name,generation,chassis_code,slug,manufacturers(id,manufacturer_name,slug,logo_url)))',
+        )
+        .eq('id', request.params.slug)
+        .eq('status', 'active')
+        .maybeSingle();
+      data = byId.data;
+      error = byId.error;
+    }
     if (error) return jsonError(reply, 500, error.message);
     if (!data) return jsonError(reply, 404, 'Part not found');
     return { data };
