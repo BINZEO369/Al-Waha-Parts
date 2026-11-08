@@ -541,6 +541,13 @@ function ResourceForm({
       for (const field of fields)
         if (field.type === 'number' && payload[field.key] !== undefined)
           payload[field.key] = Number(payload[field.key]);
+      if (kind === 'parts') {
+        const price = Number(payload.price);
+        const salePrice = payload.sale_price === undefined ? null : Number(payload.sale_price);
+        if (!Number.isFinite(price) || price < 0) throw new Error('Price must be 0 or greater.');
+        if (salePrice !== null && (!Number.isFinite(salePrice) || salePrice < 0)) throw new Error('Sale price must be 0 or greater.');
+        if (salePrice !== null && salePrice > price) throw new Error('Sale price cannot be higher than the regular price.');
+      }
       if (typeof payload.image_urls === 'string') {
         try { payload.image_urls = JSON.parse(payload.image_urls); }
         catch { payload.image_urls = String(payload.image_urls).split(/[,\n]/).map((url: string) => url.trim()).filter(Boolean); }
@@ -639,6 +646,7 @@ function ResourceForm({
                     <input
                       required={field.required}
                       type={field.type ?? 'text'}
+                      min={kind === 'parts' && field.type === 'number' ? 0 : undefined}
                       value={String(values[field.key] ?? '')}
                       onChange={(event) => set(field.key, event.target.value)}
                     />

@@ -974,11 +974,21 @@ const editablePartFields = [
 function pickFields(body: Record<string, unknown>, fields: readonly string[]) {
   return Object.fromEntries(Object.entries(body).filter(([key]) => fields.includes(key)));
 }
+function validatePartPricing(body: Record<string, unknown>, existingPrice?: unknown) {
+  const price = body.price === undefined ? Number(existingPrice) : Number(body.price);
+  const salePrice = body.sale_price === undefined || body.sale_price === null || body.sale_price === '' ? null : Number(body.sale_price);
+  if (!Number.isFinite(price) || price < 0) return 'Price must be 0 or greater.';
+  if (salePrice !== null && (!Number.isFinite(salePrice) || salePrice < 0)) return 'Sale price must be 0 or greater.';
+  if (salePrice !== null && salePrice > price) return 'Sale price cannot be higher than the regular price.';
+  return null;
+}
 
 app.post('/api/v1/admin/parts', { preHandler: requireAdmin as any }, async (request, reply) => {
   const body = pickFields((request.body ?? {}) as Record<string, unknown>, editablePartFields);
   if (!body.part_name || !body.sku || body.price === undefined)
     return jsonError(reply, 400, 'part_name, sku and price are required');
+  const pricingError = validatePartPricing(body);
+  if (pricingError) return jsonError(reply, 400, pricingError);
   const { data, error } = await getSupabaseAdmin()
     .from('parts')
     .insert(body)
@@ -998,6 +1008,14 @@ app.patch(
     reply,
   ) => {
     const body = pickFields(request.body ?? {}, editablePartFields);
+    const current = await getSupabaseAdmin().from('parts').select('price,sale_price').eq('id', request.params.id).maybeSingle();
+    if (current.error || !current.data) return jsonError(reply, 404, 'Part could not be found.');
+    const effectiveBody = {
+      price: body.price === undefined ? current.data.price : body.price,
+      sale_price: body.sale_price === undefined ? current.data.sale_price : body.sale_price,
+    };
+    const pricingError = validatePartPricing(effectiveBody);
+    if (pricingError) return jsonError(reply, 400, pricingError);
     const { data, error } = await getSupabaseAdmin()
       .from('parts')
       .update(body)
