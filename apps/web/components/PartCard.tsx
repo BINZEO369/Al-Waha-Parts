@@ -38,11 +38,10 @@ export function PartCard({ part }: { part: PartCardData }) {
       condition: part.condition,
     });
 
-    // Show success state on button
     setIsAdded(true);
     setTimeout(() => {
       setIsAdded(false);
-    }, 2000); // Reverts back after 2 seconds
+    }, 2000);
   }
 
   return (
@@ -57,6 +56,7 @@ export function PartCard({ part }: { part: PartCardData }) {
           overflow: hidden;
           transition: all 0.3s ease;
           position: relative;
+          height: 100%; /* Ensures all cards in a row are same height */
         }
 
         .part-card:hover {
@@ -142,7 +142,7 @@ export function PartCard({ part }: { part: PartCardData }) {
           -webkit-box-orient: vertical;
           overflow: hidden;
           text-overflow: ellipsis;
-          min-height: 44px; /* Keeps card heights uniform */
+          min-height: 44px;
         }
 
         .part-card h3 a {
@@ -227,14 +227,70 @@ export function PartCard({ part }: { part: PartCardData }) {
         }
 
         .part-booking-button.added {
-          background: #10b981; /* Success Green */
+          background: #10b981;
           color: #fff;
         }
 
-        /* Svg Icon size */
         .part-booking-button svg {
           width: 18px;
           height: 18px;
+        }
+
+        /* 
+         * MOBILE RESPONSIVE STYLES 
+         * (Optimized for 2 columns side-by-side on small screens)
+         */
+        @media (max-width: 768px) {
+          .part-card {
+            border-radius: 12px;
+          }
+          .part-card-body {
+            padding: 10px;
+          }
+          .eyebrow {
+            font-size: 9px;
+            margin-bottom: 4px;
+          }
+          .part-card h3 {
+            font-size: 13px;
+            line-height: 1.3;
+            min-height: 34px;
+            margin-bottom: 6px;
+          }
+          .part-meta {
+            font-size: 10px;
+            margin-bottom: 10px;
+            gap: 4px;
+            flex-wrap: wrap; /* Allows meta to wrap if too long */
+          }
+          .part-meta span::before {
+            margin-right: 2px;
+          }
+          .part-price {
+            margin-bottom: 10px;
+            gap: 4px;
+          }
+          .part-price strong {
+            font-size: 16px;
+          }
+          .part-price del {
+            font-size: 11px;
+          }
+          .part-booking-button {
+            padding: 8px;
+            font-size: 12px;
+            border-radius: 8px;
+          }
+          .part-booking-button svg {
+            width: 14px;
+            height: 14px;
+          }
+          .part-tag {
+            top: 8px;
+            left: 8px;
+            font-size: 9px;
+            padding: 2px 6px;
+          }
         }
       `}</style>
 
@@ -277,7 +333,7 @@ export function PartCard({ part }: { part: PartCardData }) {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
-              Added to Cart
+              Added
             </>
           ) : (
             <>
