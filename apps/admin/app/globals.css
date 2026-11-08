@@ -617,21 +617,34 @@ button {
 }
 .fitment-editor-card {
   display: grid;
-  grid-template-columns: 1.2fr 1.2fr 1fr auto;
-  align-items: end;
-  gap: 12px;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  gap: 16px;
 }
 .fitment-editor-card .form-field { margin: 0; }
 .fitment-editor-card .form-field small { color: var(--muted); font-size: 10px; font-weight: 400; }
+.fitment-model-list { display: grid; gap: 10px; }
+.fitment-model-row {
+  display: grid;
+  grid-template-columns: minmax(200px, 1.1fr) minmax(240px, 1.5fr) auto;
+  align-items: end;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+.fitment-model-row .form-field { margin: 0; }
+.fitment-add-button { justify-self: start; }
 .fitment-editor-actions { display: flex; gap: 8px; align-items: center; }
 .fitment-editor .admin-success { margin-top: 12px; color: var(--green); font-size: 12px; }
 @media (max-width: 900px) {
-  .fitment-editor-card { grid-template-columns: 1fr 1fr; }
-  .fitment-editor-actions { grid-column: 1 / -1; }
+  .fitment-model-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; }
 }
 @media (max-width: 560px) {
-  .fitment-editor-card { grid-template-columns: 1fr; }
-  .fitment-editor-actions { grid-column: auto; flex-wrap: wrap; }
+  .fitment-model-row { grid-template-columns: 1fr; }
+  .fitment-remove-button { justify-self: end; }
+  .fitment-editor-actions { flex-wrap: wrap; }
 }
 .workspace-hero {
   display: flex;
