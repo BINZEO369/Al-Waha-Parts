@@ -29,6 +29,7 @@ const config: Record<
     search: 'Search part, SKU, brand, or OEM number…',
     fields: [
       { key: 'part_name', label: 'Part name', required: true },
+      { key: 'slug', label: 'URL slug', required: true },
       { key: 'category_id', label: 'Category', type: 'select', required: true },
       { key: 'manufacturer_id', label: 'Manufacturer', type: 'select' },
       { key: 'model_id', label: 'Vehicle model', type: 'select' },
