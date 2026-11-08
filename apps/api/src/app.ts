@@ -1,5 +1,6 @@
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
+import { createHmac, randomUUID } from 'node:crypto';
 type ApiHealth = {
   status: 'ok';
   service: 'al-waha-parts-api';
@@ -167,6 +168,18 @@ async function requireAdmin(request: FastifyRequest, reply: FastifyReply) {
   if (adminError || !admin) return jsonError(reply, 403, 'Active admin access required');
   (request as FastifyRequest & { admin?: typeof admin }).admin = admin;
 }
+
+app.get('/api/v1/admin/imagekit/auth', { preHandler: requireAdmin as any }, async (_request, reply) => {
+  if (!config.imageKitPrivateKey || !config.imageKitPublicKey) {
+    return jsonError(reply, 503, 'ImageKit is not configured. Add IMAGEKIT_PRIVATE_KEY and IMAGEKIT_PUBLIC_KEY to the API environment.');
+  }
+  const expire = Math.floor(Date.now() / 1000) + 10 * 60;
+  const token = randomUUID();
+  const signature = createHmac('sha1', config.imageKitPrivateKey)
+    .update(`${token}${expire}`)
+    .digest('hex');
+  return { data: { token, expire, signature, publicKey: config.imageKitPublicKey } };
+});
 
 app.get('/', async () => ({
   name: 'Al Waha Parts API',

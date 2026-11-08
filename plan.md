@@ -94,3 +94,20 @@ Turn the admin app into a premium operations workspace backed by the connected S
 - `apps/admin/app/car-brands/page.tsx`: manufacturer/logo management.
 - `apps/admin/app/vehicles/page.tsx`: model and fitment management.
 - `apps/admin/app/globals.css`: premium responsive workspace styling.
+
+# ImageKit admin media upload addendum
+
+## Implementation
+
+- Keep ImageKit private-key operations inside the central Fastify API and expose an admin-authenticated `/api/v1/admin/imagekit/auth` endpoint that returns a short-lived token, expiry, HMAC-SHA1 signature, and public key.
+- Let the authenticated Admin browser upload directly to ImageKit, then save the returned URL into the existing `parts`, `manufacturers`, `car_models`, `parts_categories`, and `hero_banners` image fields.
+- Support primary images, multiple gallery images, manufacturer logos, model cover images, category images, and desktop/mobile hero images without exposing the private key to the browser.
+- Add file type and 10 MB per-image validation in the Admin uploader and retain manual URL editing as a fallback.
+
+## Project structure
+
+- `apps/api/src/env.ts`: server-only ImageKit key configuration.
+- `apps/api/src/app.ts`: authenticated short-lived ImageKit upload signature endpoint.
+- `apps/admin/components/ImageKitUploadField.tsx`: direct browser upload and preview control.
+- `apps/admin/components/AdminResourcePanel.tsx`: ImageKit control wiring for resource image fields.
+- `docs/imagekit-setup.md`: production environment variables and deployment instructions.

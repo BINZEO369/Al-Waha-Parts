@@ -67,3 +67,10 @@
 - The dashboard must expose live counts for parts, manufacturers, models, bookings, categories, hero banners, and active admins, with pending booking visibility where available.
 - Image and logo fields must be visibly previewed in the resource rows while preserving the existing database/API CRUD behavior.
 - Admin and API typechecks and production builds must pass before the updated admin projects are deployed.
+
+## Admin uploads media directly to ImageKit
+- The central API must expose an admin-authenticated ImageKit upload-auth endpoint that returns short-lived token, expiry, signature, and public key values.
+- The ImageKit private key must remain server-only; the browser must never receive or bundle it.
+- Parts, gallery images, manufacturer logos, model covers, category images, and hero desktop/mobile images must have direct upload controls that save the returned URL into the existing database fields.
+- Uploads must accept image files up to 10 MB each, show progress/error feedback, preview uploaded images, and retain a manual URL fallback.
+- Production configuration documentation must list `IMAGEKIT_PRIVATE_KEY` and `IMAGEKIT_PUBLIC_KEY`, with the private value added only to the central API environment.

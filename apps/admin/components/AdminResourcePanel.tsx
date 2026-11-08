@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { adminFetch } from '../lib/auth';
+import { ImageKitUploadField } from './ImageKitUploadField';
 
 type ResourceKind = 'parts' | 'vehicles' | 'manufacturers' | 'categories' | 'admins' | 'banners';
 type Resource = Record<string, unknown> & { id: string };
@@ -15,6 +16,7 @@ type Field = {
   type?: 'text' | 'number' | 'textarea' | 'select' | 'checkbox';
   options?: string[];
   required?: boolean;
+  upload?: 'single' | 'multiple';
 };
 const config: Record<
   ResourceKind,
@@ -44,8 +46,8 @@ const config: Record<
         options: ['active', 'inactive', 'draft', 'out_of_stock'],
       },
       { key: 'description', label: 'Description', type: 'textarea' },
-      { key: 'primary_image_url', label: 'Primary image URL' },
-      { key: 'image_urls', label: 'Gallery image URLs (JSON)', type: 'textarea' },
+      { key: 'primary_image_url', label: 'Primary image', upload: 'single' },
+      { key: 'image_urls', label: 'Gallery images', type: 'textarea', upload: 'multiple' },
       { key: 'is_featured', label: 'Featured record', type: 'checkbox' },
     ],
   },
@@ -57,7 +59,7 @@ const config: Record<
     fields: [
       { key: 'manufacturer_name', label: 'Manufacturer name', required: true },
       { key: 'slug', label: 'URL slug', required: true },
-      { key: 'logo_url', label: 'Logo image URL' },
+      { key: 'logo_url', label: 'Logo image', upload: 'single' },
       { key: 'country', label: 'Country' },
       { key: 'founded_year', label: 'Founded year', type: 'number' },
       { key: 'company_description', label: 'Description', type: 'textarea' },
@@ -85,7 +87,7 @@ const config: Record<
       { key: 'vehicle_type', label: 'Vehicle type' },
       { key: 'slug', label: 'URL slug', required: true },
       { key: 'status', label: 'Status', type: 'select', options: ['active', 'inactive', 'draft'] },
-      { key: 'cover_image_url', label: 'Cover image URL' },
+      { key: 'cover_image_url', label: 'Cover image', upload: 'single' },
       { key: 'is_featured', label: 'Featured vehicle', type: 'checkbox' },
     ],
 
@@ -100,7 +102,7 @@ const config: Record<
       { key: 'slug', label: 'URL slug', required: true },
       { key: 'description', label: 'Description', type: 'textarea' },
       { key: 'status', label: 'Status', type: 'select', options: ['active', 'inactive'] },
-      { key: 'image_url', label: 'Image URL' },
+      { key: 'image_url', label: 'Category image', upload: 'single' },
       { key: 'sort_order', label: 'Display order', type: 'number' },
       { key: 'is_featured', label: 'Featured category', type: 'checkbox' },
     ],
@@ -117,8 +119,8 @@ const config: Record<
       { key: 'description', label: 'Description', type: 'textarea' },
       { key: 'cta_label', label: 'CTA label', required: true },
       { key: 'cta_href', label: 'CTA link', required: true },
-      { key: 'image_url', label: 'Desktop image URL', required: true },
-      { key: 'mobile_image_url', label: 'Mobile image URL' },
+      { key: 'image_url', label: 'Desktop image', required: true, upload: 'single' },
+      { key: 'mobile_image_url', label: 'Mobile image', upload: 'single' },
       { key: 'badge_text', label: 'Badge text' },
       {
         key: 'status',
@@ -572,7 +574,23 @@ function ResourceForm({
                     {field.label}
                     {field.required ? ' *' : ''}
                   </span>
-                  {field.type === 'textarea' ? (
+                  {field.upload ? (
+                    <>
+                      <ImageKitUploadField
+                        value={values[field.key]}
+                        multiple={field.upload === 'multiple'}
+                        folder={kind}
+                        onChange={(value) => set(field.key, value)}
+                      />
+                      <input
+                        required={field.required}
+                        type="text"
+                        value={String(values[field.key] ?? '')}
+                        onChange={(event) => set(field.key, event.target.value)}
+                        placeholder="ImageKit URL will appear here"
+                      />
+                    </>
+                  ) : field.type === 'textarea' ? (
                     <textarea
                       value={String(values[field.key] ?? '')}
                       onChange={(event) => set(field.key, event.target.value)}

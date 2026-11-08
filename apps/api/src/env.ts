@@ -4,6 +4,8 @@ export interface ApiConfig {
   corsOrigins: string[];
   supabaseUrl: string;
   serviceRoleKey: string;
+  imageKitPrivateKey: string;
+  imageKitPublicKey: string;
 }
 
 export function getConfig(): ApiConfig {
@@ -15,6 +17,8 @@ export function getConfig(): ApiConfig {
       .map((v) => v.trim()),
     supabaseUrl: process.env.SUPABASE_URL ?? '',
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+    imageKitPrivateKey: process.env.IMAGEKIT_PRIVATE_KEY ?? '',
+    imageKitPublicKey: process.env.IMAGEKIT_PUBLIC_KEY ?? '',
   };
 }
 
