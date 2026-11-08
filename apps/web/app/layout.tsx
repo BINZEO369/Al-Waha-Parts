@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { Header, Footer } from '../components/Header';
 import { CartProvider } from '../components/CartProvider';
 import { LanguageProvider } from '../components/LanguageProvider';
 import { CookieConsentManager } from '../components/CookieConsentManager';
+import { SiteInteractionGuards } from '../components/SiteInteractionGuards';
 const globalStyles = String.raw`@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
 
 :root {
@@ -34,7 +35,7 @@ const globalStyles = String.raw`@import url('https://fonts.googleapis.com/css2?f
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: auto; }
 body {
   margin: 0;
   background: var(--white);
@@ -46,6 +47,9 @@ a { color: inherit; text-decoration: none; }
 button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
 img { max-width: 100%; }
+body, body * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea, select, [contenteditable="true"] { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+img { -webkit-user-drag: none; user-drag: none; }
 h1, h2, h3, p { margin-top: 0; }
 
 /* ---------- TOP UTILITY / HEADER ---------- */
@@ -1115,6 +1119,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <style>{globalStyles}</style>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([localBusinessSchema, websiteSchema]) }} />
+      <Suspense fallback={null}>
+        <SiteInteractionGuards />
+      </Suspense>
       <LanguageProvider>
         <CartProvider>
           <Header />
