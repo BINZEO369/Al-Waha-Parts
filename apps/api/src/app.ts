@@ -953,13 +953,43 @@ app.post(
     const now = new Date().toISOString();
     const sessionHash = createHash('sha256').update(sessionId).digest('hex');
     const visitorHash = createHmac('sha256', config.serviceRoleKey).update(visitorId).digest('hex');
-    const { data: visitorVisitNumber, error: visitorError } = await supabase.rpc('upsert_analytics_visitor', {
-      p_visitor_hash: visitorHash, p_session_id: sessionId, p_page_path: pagePath, p_referrer: referrer,
-      p_country_code: country, p_region: region, p_city: city, p_device_type: profile.deviceType,
-      p_device_model: profile.deviceModel, p_browser: profile.browser, p_operating_system: profile.operatingSystem,
-      p_language: clientData.language, p_timezone: clientData.timezone, p_consent_version: 2,
-      p_is_page_view: body.event_name === 'page_view',
-    });
+    const { data: existingSession, error: existingSessionError } = await supabase
+      .from('analytics_sessions')
+      .select('id,visit_number')
+      .eq('id', sessionId)
+      .maybeSingle();
+    if (existingSessionError) return jsonError(reply, 500, 'Analytics session could not be checked.');
+    const { data: existingVisitor, error: existingVisitorError } = await supabase
+      .from('analytics_visitors')
+      .select('visit_count,total_page_views,first_landing_path,first_referrer')
+      .eq('visitor_hash', visitorHash)
+      .maybeSingle();
+    if (existingVisitorError) return jsonError(reply, 500, 'Analytics visitor could not be checked.');
+    const isPageView = body.event_name === 'page_view';
+    const isNewVisit = isPageView && !existingSession;
+    const visitorVisitNumber = Math.max(1, (existingVisitor?.visit_count ?? 0) + (isNewVisit ? 1 : 0));
+    const { error: visitorError } = await supabase.from('analytics_visitors').upsert({
+      visitor_hash: visitorHash,
+      first_seen_at: existingVisitor ? undefined : now,
+      last_seen_at: now,
+      visit_count: visitorVisitNumber,
+      total_page_views: (existingVisitor?.total_page_views ?? 0) + (isPageView ? 1 : 0),
+      last_session_id: sessionId,
+      first_landing_path: existingVisitor?.first_landing_path ?? pagePath,
+      last_path: pagePath,
+      first_referrer: existingVisitor?.first_referrer ?? referrer,
+      country_code: country,
+      region,
+      city,
+      device_type: profile.deviceType,
+      device_model: profile.deviceModel,
+      browser: profile.browser,
+      operating_system: profile.operatingSystem,
+      language: clientData.language,
+      timezone: clientData.timezone,
+      consent_version: 2,
+      updated_at: now,
+    }, { onConflict: 'visitor_hash' });
     if (visitorError) return jsonError(reply, 500, 'Analytics visitor could not be saved.');
 
     const { error: createSessionError } = await supabase.from('analytics_sessions').upsert(
