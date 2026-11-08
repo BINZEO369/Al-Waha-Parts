@@ -56,7 +56,8 @@ export function PartCard({ part }: { part: PartCardData }) {
           overflow: hidden;
           transition: all 0.3s ease;
           position: relative;
-          height: 100%; /* Ensures all cards in a row are same height */
+          height: 100%;
+          min-width: 0; /* Prevents grid blowout */
         }
 
         .part-card:hover {
@@ -143,6 +144,7 @@ export function PartCard({ part }: { part: PartCardData }) {
           overflow: hidden;
           text-overflow: ellipsis;
           min-height: 44px;
+          word-break: break-word;
         }
 
         .part-card h3 a {
@@ -236,59 +238,55 @@ export function PartCard({ part }: { part: PartCardData }) {
           height: 18px;
         }
 
-        /* 
-         * MOBILE RESPONSIVE STYLES 
-         * (Optimized for 2 columns side-by-side on small screens)
-         */
-        @media (max-width: 768px) {
+        /* Mobile Responsive Styles */
+        @media (max-width: 767px) {
           .part-card {
             border-radius: 12px;
           }
           .part-card-body {
-            padding: 10px;
+            padding: 8px; /* Reduced padding to fit 2 columns */
           }
           .eyebrow {
-            font-size: 9px;
+            font-size: 8px;
             margin-bottom: 4px;
           }
           .part-card h3 {
-            font-size: 13px;
+            font-size: 12px;
             line-height: 1.3;
-            min-height: 34px;
+            min-height: 32px;
             margin-bottom: 6px;
           }
           .part-meta {
-            font-size: 10px;
-            margin-bottom: 10px;
-            gap: 4px;
-            flex-wrap: wrap; /* Allows meta to wrap if too long */
-          }
-          .part-meta span::before {
-            margin-right: 2px;
+            font-size: 9px;
+            margin-bottom: 8px;
+            gap: 3px;
+            flex-wrap: wrap;
           }
           .part-price {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             gap: 4px;
+            flex-wrap: wrap;
           }
           .part-price strong {
-            font-size: 16px;
+            font-size: 15px;
           }
           .part-price del {
-            font-size: 11px;
+            font-size: 10px;
           }
           .part-booking-button {
-            padding: 8px;
-            font-size: 12px;
-            border-radius: 8px;
+            padding: 6px;
+            font-size: 11px;
+            border-radius: 6px;
+            gap: 4px;
           }
           .part-booking-button svg {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
           }
           .part-tag {
-            top: 8px;
-            left: 8px;
-            font-size: 9px;
+            top: 6px;
+            left: 6px;
+            font-size: 8px;
             padding: 2px 6px;
           }
         }
