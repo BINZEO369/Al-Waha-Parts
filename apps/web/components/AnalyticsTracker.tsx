@@ -19,6 +19,13 @@ function createSessionUuid(): string {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
+type AnalyticsAttribution = {
+  source: string;
+  medium: string;
+  campaign: string | null;
+  referrer_host: string | null;
+};
+
 type AnalyticsPayload = {
   session_id: string;
   visitor_id: string;
@@ -29,6 +36,7 @@ type AnalyticsPayload = {
   duration_ms: number | null;
   consent_granted: true;
   consent_version: 2;
+  attribution: AnalyticsAttribution;
   client_data: {
     language: string | null;
     timezone: string | null;
@@ -63,6 +71,28 @@ function getVisitorId(): string | null {
     memoryVisitorId ??= window.crypto?.randomUUID?.() ?? createSessionUuid();
     return memoryVisitorId;
   }
+}
+
+function getAcquisitionAttribution(): AnalyticsAttribution {
+  const key = 'alwaha-analytics-attribution-v1';
+  try {
+    const saved = window.sessionStorage.getItem(key);
+    if (saved) return JSON.parse(saved) as AnalyticsAttribution;
+  } catch { /* session storage can be disabled */ }
+  const params = new URLSearchParams(window.location.search);
+  const rawSource = (params.get('utm_source') || '').toLowerCase().trim();
+  const campaign = params.get('utm_campaign')?.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 120) || null;
+  let host: string | null = null;
+  try { host = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : null; } catch { host = null; }
+  const sourceValue = rawSource || host || 'direct';
+  const is = (values: string[]) => values.some((value) => sourceValue.includes(value));
+  const source = is(['google']) ? 'Google' : is(['bing']) ? 'Bing' : is(['yahoo']) ? 'Yahoo' : is(['duckduckgo']) ? 'DuckDuckGo' : is(['facebook', 'fb.']) ? 'Facebook' : is(['instagram']) ? 'Instagram' : is(['tiktok']) ? 'TikTok' : is(['youtube', 'youtu.be']) ? 'YouTube' : is(['snapchat']) ? 'Snapchat' : is(['linkedin']) ? 'LinkedIn' : is(['twitter', 'x.com']) ? 'X' : is(['whatsapp']) ? 'WhatsApp' : sourceValue === 'direct' ? 'Direct' : 'Other referral';
+  const search = ['Google', 'Bing', 'Yahoo', 'DuckDuckGo'].includes(source);
+  const social = ['Facebook', 'Instagram', 'TikTok', 'YouTube', 'Snapchat', 'LinkedIn', 'X', 'WhatsApp'].includes(source);
+  const medium = params.get('utm_medium')?.slice(0, 40) || (search ? 'organic_search' : social ? 'social' : source === 'Direct' ? 'direct' : 'referral');
+  const attribution = { source, medium, campaign, referrer_host: host };
+  try { window.sessionStorage.setItem(key, JSON.stringify(attribution)); } catch { /* optional persistence */ }
+  return attribution;
 }
 
 function cleanReferrer(): string | null {
@@ -100,6 +130,7 @@ export function AnalyticsTracker() {
     if (!apiUrl) return;
     const sessionId = getSessionId();
     const visitorId = getVisitorId();
+    const attribution = getAcquisitionAttribution();
     if (!sessionId || !visitorId) return;
     const clientData: AnalyticsPayload['client_data'] = {
       language: navigator.language?.slice(0, 32) ?? null,
@@ -123,6 +154,7 @@ export function AnalyticsTracker() {
         duration_ms: duration,
         consent_granted: true,
         consent_version: 2,
+        attribution,
         client_data: clientData,
       };
       void fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/analytics/events`, {

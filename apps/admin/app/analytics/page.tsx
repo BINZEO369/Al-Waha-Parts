@@ -15,9 +15,12 @@ type AnalyticsData = {
   locations: Breakdown[];
   devices: Breakdown[];
   browsers: Breakdown[];
+  acquisition_sources: Breakdown[];
+  acquisition_mediums: Breakdown[];
   visitors: Array<{
     visitor_ref: string; first_seen_at: string; last_seen_at: string; visit_count: number; total_page_views: number;
     first_landing_path: string | null; last_path: string | null; first_referrer: string | null;
+    first_acquisition_source: string | null; first_acquisition_medium: string | null; first_acquisition_campaign: string | null;
     country_code: string | null; region: string | null; city: string | null; device_type: string | null;
     device_model: string | null; browser: string | null; operating_system: string | null; language: string | null;
     timezone: string | null; last_session_ref: string | null;
@@ -25,6 +28,7 @@ type AnalyticsData = {
   recent_sessions: Array<{
     session_ref: string;
     visitor_ref: string;
+    acquisition_source: string; acquisition_medium: string; acquisition_campaign: string | null; landing_referrer_host: string | null;
     visit_number: number;
     started_at: string;
     last_seen_at: string;
@@ -136,6 +140,7 @@ export default function AnalyticsPage() {
             <BreakdownPanel title="Countries & locations" note="Approximate hosting-proxy location, when available." rows={data.locations} />
             <BreakdownPanel title="Devices & operating systems" note="Coarse categories inferred from browser data." rows={data.devices} />
             <BreakdownPanel title="Browsers" note="Browser family inferred from the request header." rows={data.browsers} />
+            <BreakdownPanel title="Acquisition sources" note="Normalized first-touch source: search, social, referral or direct." rows={data.acquisition_sources} />
           </div>
           <section className="content-section">
             <div className="section-title"><div><span className="eyebrow">Identity map</span><h2>Visitors</h2><p>Anonymous first-party IDs connect repeat visits without collecting names or guessing identity.</p></div><span className="section-meta">Showing {data.visitors.length} of {number.format(data.totals.unique_visitors)}</span></div>
@@ -148,7 +153,7 @@ export default function AnalyticsPage() {
                     <span><strong>{dateTime(visitor.first_seen_at)}</strong><small>Latest {dateTime(visitor.last_seen_at)}</small></span>
                     <span><strong>{visitor.first_landing_path || 'Unknown'} → {visitor.last_path || 'Unknown'}</strong><small>{visitor.last_session_ref ? `Session ${visitor.last_session_ref}` : 'Session unavailable'}</small></span>
                     <span><strong>{[visitor.city, visitor.region, visitor.country_code].filter(Boolean).join(', ') || 'Unknown location'}</strong><small>{[visitor.device_type, visitor.operating_system, visitor.browser].filter(Boolean).join(' · ') || 'Unknown device'}</small></span>
-                    <span><strong>{visitor.first_referrer || 'Direct / unavailable'}</strong><small>{visitor.timezone || 'Timezone unavailable'}</small></span>
+                    <span><strong>{visitor.first_acquisition_source || 'Direct'}</strong><small>{visitor.first_acquisition_medium || 'direct'} · {visitor.first_referrer || 'No referrer'}</small></span>
                   </div>
                 ))}
               </div>
@@ -161,7 +166,7 @@ export default function AnalyticsPage() {
                 <div className="analytics-table-head analytics-session-grid"><span>Visitor / session</span><span>Landing → current</span><span>Exit / duration</span><span>Location / IP</span><span>Device / browser</span><span>Referrer</span></div>
                 {data.recent_sessions.map((session) => (
                   <div className="analytics-table-row analytics-session-grid" key={session.session_ref}>
-                    <span><strong>{session.visitor_ref}</strong><small>Session {session.session_ref} · Visit #{session.visit_number} · {dateTime(session.started_at)}</small></span>
+                    <span><strong>{session.visitor_ref} · {session.acquisition_source}</strong><small>{session.acquisition_medium}{session.acquisition_campaign ? ` · ${session.acquisition_campaign}` : ''} · Session {session.session_ref} · Visit #{session.visit_number} · {dateTime(session.started_at)}</small></span>
                     <span><strong>{session.landing_path}</strong><small>→ {session.current_path || 'Unknown'}</small></span>
                     <span><strong>{session.exit_path || 'Still active / not recorded'}</strong><small>{duration(session.duration_ms)}</small></span>
                     <span><strong>{[session.city, session.region, session.country_code].filter(Boolean).join(', ') || 'Unknown'}</strong><small>{session.ip_address || 'IP unavailable'} · {session.timezone || 'Timezone unavailable'}</small></span>

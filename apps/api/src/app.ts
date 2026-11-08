@@ -810,6 +810,13 @@ app.get('/api/v1/admin/dashboard', { preHandler: requireAdmin as any }, async (_
   });
 });
 
+type AnalyticsAttribution = {
+  source: string;
+  medium: string;
+  campaign: string | null;
+  referrer_host: string | null;
+};
+
 type AnalyticsClientData = {
   language: string | null;
   timezone: string | null;
@@ -846,6 +853,18 @@ const cleanAnalyticsReferrer = (value: unknown): string | null => {
 
 const safeDimension = (value: unknown): number | null =>
   Number.isInteger(value) && Number(value) >= 1 && Number(value) <= 10000 ? Number(value) : null;
+
+const parseAnalyticsAttribution = (value: unknown): AnalyticsAttribution => {
+  const input = value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+  const source = cleanAnalyticsText(input.source, 40) ?? 'Direct';
+  const medium = cleanAnalyticsText(input.medium, 40) ?? 'direct';
+  return {
+    source,
+    medium,
+    campaign: cleanAnalyticsText(input.campaign, 120),
+    referrer_host: cleanAnalyticsText(input.referrer_host, 160),
+  };
+};
 
 const parseAnalyticsClientData = (value: unknown): AnalyticsClientData => {
   const input = value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
@@ -931,6 +950,7 @@ app.post(
     if (!pagePath) return jsonError(reply, 400, 'A sanitized page path is required.');
 
     const clientData = parseAnalyticsClientData(body.client_data);
+    const attribution = parseAnalyticsAttribution(body.attribution);
     const pageTitle = cleanAnalyticsText(body.page_title, 180);
     const referrer = cleanAnalyticsReferrer(body.referrer);
     const duration = body.duration_ms;
@@ -961,7 +981,7 @@ app.post(
     if (existingSessionError) return jsonError(reply, 500, 'Analytics session could not be checked.');
     const { data: existingVisitor, error: existingVisitorError } = await supabase
       .from('analytics_visitors')
-      .select('visit_count,total_page_views,first_landing_path,first_referrer')
+      .select('visit_count,total_page_views,first_landing_path,first_referrer,first_acquisition_source,first_acquisition_medium,first_acquisition_campaign')
       .eq('visitor_hash', visitorHash)
       .maybeSingle();
     if (existingVisitorError) return jsonError(reply, 500, 'Analytics visitor could not be checked.');
@@ -978,6 +998,9 @@ app.post(
       first_landing_path: existingVisitor?.first_landing_path ?? pagePath,
       last_path: pagePath,
       first_referrer: existingVisitor?.first_referrer ?? referrer,
+      first_acquisition_source: existingVisitor?.first_acquisition_source ?? attribution.source,
+      first_acquisition_medium: existingVisitor?.first_acquisition_medium ?? attribution.medium,
+      first_acquisition_campaign: existingVisitor?.first_acquisition_campaign ?? attribution.campaign,
       country_code: country,
       region,
       city,
@@ -1020,6 +1043,10 @@ app.post(
         viewport_height: clientData.viewport_height,
         consent_version: 2,
         consent_granted_at: now,
+        acquisition_source: attribution.source,
+        acquisition_medium: attribution.medium,
+        acquisition_campaign: attribution.campaign,
+        landing_referrer_host: attribution.referrer_host,
       },
       { onConflict: 'id', ignoreDuplicates: true },
     );
@@ -1050,6 +1077,10 @@ app.post(
         screen_height: clientData.screen_height,
         viewport_width: clientData.viewport_width,
         viewport_height: clientData.viewport_height,
+        acquisition_source: attribution.source,
+        acquisition_medium: attribution.medium,
+        acquisition_campaign: attribution.campaign,
+        landing_referrer_host: attribution.referrer_host,
       })
       .eq('id', sessionId);
     if (updateSessionError) return jsonError(reply, 500, 'Analytics session could not be updated.');
@@ -1103,7 +1134,7 @@ app.get(
           .gt('visit_count', 1),
         supabase
           .from('analytics_sessions')
-          .select('id,visitor_id_hash,visit_number,started_at,last_seen_at,landing_path,current_path,exit_path,referrer,ip_address,country_code,region,city,device_type,device_model,browser,operating_system,language,timezone')
+          .select('id,visitor_id_hash,visit_number,started_at,last_seen_at,landing_path,current_path,exit_path,referrer,acquisition_source,acquisition_medium,acquisition_campaign,landing_referrer_host,ip_address,country_code,region,city,device_type,device_model,browser,operating_system,language,timezone')
           .gte('started_at', since)
           .order('last_seen_at', { ascending: false })
           .limit(1000),
@@ -1115,7 +1146,7 @@ app.get(
           .limit(2000),
         supabase
           .from('analytics_visitors')
-          .select('visitor_hash,first_seen_at,last_seen_at,visit_count,total_page_views,first_landing_path,last_path,first_referrer,country_code,region,city,device_type,device_model,browser,operating_system,language,timezone,last_session_id')
+          .select('visitor_hash,first_seen_at,last_seen_at,visit_count,total_page_views,first_landing_path,last_path,first_referrer,first_acquisition_source,first_acquisition_medium,first_acquisition_campaign,country_code,region,city,device_type,device_model,browser,operating_system,language,timezone,last_session_id')
           .gte('last_seen_at', since)
           .order('last_seen_at', { ascending: false })
           .limit(100),
@@ -1153,6 +1184,8 @@ app.get(
       sessionRows.map((session) => [session.device_type, session.operating_system].filter(Boolean).join(' · ')),
     );
     const browsers = groupCounts(sessionRows.map((session) => session.browser));
+    const acquisition_sources = groupCounts(sessionRows.map((session) => session.acquisition_source));
+    const acquisition_mediums = groupCounts(sessionRows.map((session) => session.acquisition_medium));
 
     return {
       data: {
@@ -1170,12 +1203,14 @@ app.get(
         locations,
         devices,
         browsers,
+        acquisition_sources,
+        acquisition_mediums,
         visitors: (sampledVisitors.data ?? []).map((visitor) => ({
           visitor_ref: `V-${visitor.visitor_hash.slice(0, 10).toUpperCase()}`,
           first_seen_at: visitor.first_seen_at, last_seen_at: visitor.last_seen_at,
           visit_count: visitor.visit_count, total_page_views: visitor.total_page_views,
           first_landing_path: visitor.first_landing_path, last_path: visitor.last_path,
-          first_referrer: visitor.first_referrer, country_code: visitor.country_code,
+          first_referrer: visitor.first_referrer, first_acquisition_source: visitor.first_acquisition_source, first_acquisition_medium: visitor.first_acquisition_medium, first_acquisition_campaign: visitor.first_acquisition_campaign, country_code: visitor.country_code,
           region: visitor.region, city: visitor.city, device_type: visitor.device_type,
           device_model: visitor.device_model, browser: visitor.browser,
           operating_system: visitor.operating_system, language: visitor.language,
@@ -1184,6 +1219,10 @@ app.get(
         recent_sessions: sessionRows.slice(0, 50).map((session) => ({
           session_ref: session.id.slice(0, 8),
           visitor_ref: session.visitor_id_hash ? `V-${session.visitor_id_hash.slice(0, 10).toUpperCase()}` : 'Legacy visitor',
+          acquisition_source: session.acquisition_source ?? 'Direct',
+          acquisition_medium: session.acquisition_medium ?? 'direct',
+          acquisition_campaign: session.acquisition_campaign,
+          landing_referrer_host: session.landing_referrer_host,
           visit_number: session.visit_number ?? 1,
           started_at: session.started_at,
           last_seen_at: session.last_seen_at,
