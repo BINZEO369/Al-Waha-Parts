@@ -1870,3 +1870,26 @@ select:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+
+/* Media-first admin polish */
+.resource-avatar-media { overflow:hidden; padding:0; }
+.resource-avatar-media img { width:100%; height:100%; object-fit:cover; display:block; }
+.imagekit-name-row { display:flex; align-items:end; gap:10px; margin-bottom:10px; }
+.imagekit-name-row label { flex:1; display:grid; gap:5px; color:#555a60; font-size:10px; font-weight:700; }
+.imagekit-name-row label small { color:#9b9ea2; font-weight:400; }
+.imagekit-name-row input { min-height:38px; padding:0 10px; border:1px solid var(--line); border-radius:6px; color:var(--ink); font-size:11px; }
+.imagekit-name-row input:focus { outline:2px solid rgba(229,35,47,.14); border-color:var(--red); }
+.imagekit-extension { padding-bottom:11px; color:var(--muted); font:9px 'DM Mono'; }
+.imagekit-upload-row { display:flex; align-items:center; gap:10px; }
+.imagekit-upload-row small { color:var(--muted); font:9px 'DM Mono'; }
+.upload-progress { height:4px; margin-top:9px; overflow:hidden; border-radius:99px; background:var(--red-pale); }
+.upload-progress span { display:block; height:100%; border-radius:99px; background:var(--red); transition:width .2s ease; }
+.imagekit-previews { display:flex; flex-wrap:wrap; gap:8px; margin-top:11px; }
+.imagekit-preview { position:relative; width:64px; height:64px; overflow:hidden; border:1px solid var(--line); border-radius:7px; background:var(--red-pale); }
+.imagekit-preview img { display:block; width:100%; height:100%; object-fit:cover; }
+.imagekit-preview button { position:absolute; top:3px; right:3px; display:grid; place-items:center; width:19px; height:19px; border:0; border-radius:50%; color:#fff; background:rgba(25,27,31,.78); font-size:14px; line-height:1; }
+.booking-product-line { display:flex !important; align-items:center; gap:8px; }
+.booking-product-thumb { display:grid; place-items:center; flex:none; width:32px; height:32px; overflow:hidden; color:var(--red); background:var(--red-pale); font:8px 'DM Mono'; }
+.booking-product-thumb img { width:100%; height:100%; object-fit:cover; }
+.booking-fitment { color:var(--red) !important; }
+@media (max-width:760px) { .imagekit-name-row { align-items:stretch; flex-direction:column; } .imagekit-extension { padding-bottom:0; } .imagekit-upload-row { align-items:flex-start; flex-direction:column; } }

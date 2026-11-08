@@ -148,6 +148,10 @@ function statusClass(value: unknown) {
     .toLowerCase()
     .replace(/\s+/g, '-')}`;
 }
+function imageFor(kind: ResourceKind, row: Resource) {
+  const value = kind === 'parts' ? row.primary_image_url : kind === 'manufacturers' ? row.logo_url : kind === 'vehicles' ? row.cover_image_url : kind === 'categories' ? row.image_url : kind === 'banners' ? row.image_url : undefined;
+  return typeof value === 'string' && value.trim() ? value : '';
+}
 function summary(kind: ResourceKind, row: Resource) {
   if (kind === 'parts')
     return {
@@ -401,7 +405,9 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
             const canToggleStatus = kind !== 'admins' || row.can_manage_access === true;
             return (
               <article className="resource-row" key={row.id}>
-                <div className="resource-avatar">{item.title.slice(0, 2).toUpperCase()}</div>
+                <div className="resource-avatar resource-avatar-media">
+                  {imageFor(kind, row) ? <img src={imageFor(kind, row)} alt="" loading="lazy" /> : item.title.slice(0, 2).toUpperCase()}
+                </div>
                 <div className="resource-main">
                   <strong>{item.title}</strong>
                   <small>{item.meta}</small>

@@ -48,3 +48,16 @@ References:
 
 - [ImageKit React integration and client-side upload authentication](https://imagekit.io/docs/integration/react)
 - [ImageKit API keys and key security](https://imagekit.io/docs/api-keys)
+
+## Custom filenames and environment check
+
+The admin uploader now accepts an optional custom filename before upload. It sanitizes the name, keeps the original image extension, and adds an index for multi-image uploads. Leave the field empty to derive a safe name from the selected file.
+
+To check only whether required Production variable names exist—without printing secret values—run from a Vercel-linked project after `vercel login`:
+
+```bash
+./scripts/check-vercel-env.sh api
+./scripts/check-vercel-env.sh admin
+```
+
+For ImageKit, the API check must report `IMAGEKIT_PRIVATE_KEY` and `IMAGEKIT_PUBLIC_KEY`. The Admin check must not require any ImageKit variable because the browser receives a short-lived signed upload payload from the API.
