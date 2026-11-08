@@ -84,12 +84,14 @@ function getAcquisitionAttribution(): AnalyticsAttribution {
   const campaign = params.get('utm_campaign')?.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 120) || null;
   let host: string | null = null;
   try { host = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : null; } catch { host = null; }
-  const sourceValue = rawSource || host || 'direct';
+  const clickSource = params.has('gclid') ? 'google' : params.has('msclkid') ? 'bing' : params.has('fbclid') ? 'facebook' : params.has('ttclid') ? 'tiktok' : '';
+  const sourceValue = rawSource || clickSource || host || 'direct';
   const is = (values: string[]) => values.some((value) => sourceValue.includes(value));
   const source = is(['google']) ? 'Google' : is(['bing']) ? 'Bing' : is(['yahoo']) ? 'Yahoo' : is(['duckduckgo']) ? 'DuckDuckGo' : is(['facebook', 'fb.']) ? 'Facebook' : is(['instagram']) ? 'Instagram' : is(['tiktok']) ? 'TikTok' : is(['youtube', 'youtu.be']) ? 'YouTube' : is(['snapchat']) ? 'Snapchat' : is(['linkedin']) ? 'LinkedIn' : is(['twitter', 'x.com']) ? 'X' : is(['whatsapp']) ? 'WhatsApp' : sourceValue === 'direct' ? 'Direct' : 'Other referral';
   const search = ['Google', 'Bing', 'Yahoo', 'DuckDuckGo'].includes(source);
   const social = ['Facebook', 'Instagram', 'TikTok', 'YouTube', 'Snapchat', 'LinkedIn', 'X', 'WhatsApp'].includes(source);
-  const medium = params.get('utm_medium')?.slice(0, 40) || (search ? 'organic_search' : social ? 'social' : source === 'Direct' ? 'direct' : 'referral');
+  const clickMedium = params.has('gclid') || params.has('msclkid') ? 'paid_search' : params.has('fbclid') || params.has('ttclid') ? 'paid_social' : null;
+  const medium = params.get('utm_medium')?.slice(0, 40) || clickMedium || (search ? 'organic_search' : social ? 'social' : source === 'Direct' ? 'direct' : 'referral');
   const attribution = { source, medium, campaign, referrer_host: host };
   try { window.sessionStorage.setItem(key, JSON.stringify(attribution)); } catch { /* optional persistence */ }
   return attribution;
