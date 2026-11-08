@@ -898,7 +898,7 @@ app.get(
     const start = Number(q.offset) || 0;
     let query = getSupabaseAdmin()
       .from('bookings')
-      .select('*,booking_items(*,parts(part_name,sku,primary_image_url,image_urls),vehicles:car_models!booking_items_vehicle_id_car_models_fkey(manufacturer_name,model_name,cover_image_url))')
+      .select('*,booking_items(*,parts(part_name,sku,primary_image_url,image_urls),vehicles:car_models!booking_items_vehicle_id_car_models_fkey(model_name,cover_image_url,manufacturers(manufacturer_name)))')
       .order('created_at', { ascending: false })
       .range(start, start + limit(q.limit) - 1);
     if (q.status) query = query.eq('booking_status', q.status);

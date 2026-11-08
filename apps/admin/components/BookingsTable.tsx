@@ -11,7 +11,7 @@ type BookingItem = {
   part_name_snapshot?: string | null;
   sku_snapshot?: string | null;
   parts?: { part_name?: string | null; sku?: string | null; primary_image_url?: string | null } | null;
-  vehicles?: { manufacturer_name?: string | null; model_name?: string | null; cover_image_url?: string | null } | null;
+  vehicles?: { model_name?: string | null; cover_image_url?: string | null; manufacturers?: { manufacturer_name?: string | null } | null } | null;
 };
 
 type BookingRow = {
@@ -126,7 +126,7 @@ export function BookingsTable() {
                 items.map((item, index) => (
                   <span className="booking-product-line" key={`${row.id}-${index}`}>
                     <span className="booking-product-thumb">{item.parts?.primary_image_url ? <img src={item.parts.primary_image_url} alt="" loading="lazy" /> : 'AWP'}</span>
-                    <span><strong>{item.part_name_snapshot || item.parts?.part_name || 'Catalog product'}</strong><small>{item.sku_snapshot || item.parts?.sku || '—'} · Qty {item.quantity}</small>{item.vehicles && <small className="booking-fitment">{item.vehicles.manufacturer_name} {item.vehicles.model_name}</small>}</span>
+                    <span><strong>{item.part_name_snapshot || item.parts?.part_name || 'Catalog product'}</strong><small>{item.sku_snapshot || item.parts?.sku || '—'} · Qty {item.quantity}</small>{item.vehicles && <small className="booking-fitment">{item.vehicles.manufacturers?.manufacturer_name ?? 'Manufacturer'} {item.vehicles.model_name}</small>}</span>
                   </span>
                 ))
               ) : (
