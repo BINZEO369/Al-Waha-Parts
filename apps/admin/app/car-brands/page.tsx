@@ -19,7 +19,7 @@ export default function CarBrands() {
         <div className="hero-mark" aria-hidden="true">BR</div>
       </section>
       <ManufacturerModelDirectory />
-      <AdminResourcePanel kind="carBrands" />
+      <AdminResourcePanel kind="manufacturers" />
     </div>
   );
 }
