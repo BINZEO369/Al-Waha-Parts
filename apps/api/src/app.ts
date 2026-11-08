@@ -974,7 +974,7 @@ app.post(
       last_seen_at: now,
       visit_count: visitorVisitNumber,
       total_page_views: (existingVisitor?.total_page_views ?? 0) + (isPageView ? 1 : 0),
-      last_session_id: sessionId,
+      last_session_id: existingSession ? sessionId : null,
       first_landing_path: existingVisitor?.first_landing_path ?? pagePath,
       last_path: pagePath,
       first_referrer: existingVisitor?.first_referrer ?? referrer,
@@ -1024,6 +1024,11 @@ app.post(
       { onConflict: 'id', ignoreDuplicates: true },
     );
     if (createSessionError) return jsonError(reply, 500, 'Analytics session could not be saved.');
+    const { error: visitorSessionLinkError } = await supabase
+      .from('analytics_visitors')
+      .update({ last_session_id: sessionId, updated_at: now })
+      .eq('visitor_hash', visitorHash);
+    if (visitorSessionLinkError) return jsonError(reply, 500, 'Analytics visitor session link could not be saved.');
 
     const { error: updateSessionError } = await supabase
       .from('analytics_sessions')
