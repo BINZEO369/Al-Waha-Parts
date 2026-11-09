@@ -115,6 +115,8 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
   const rawFitments = product.part_model_fitments;
   const fitments = (Array.isArray(rawFitments) ? rawFitments : rawFitments ? [rawFitments] : []).filter((fitment) => Boolean(fitment.vehicles));
   
+  const primaryFitment = fitments[0]; // Get the first fitment for the top display
+  
   const currentPrice = product.sale_price ?? product.price;
   const hasDiscount = product.sale_price && product.sale_price < product.price;
   const outOfStock = product.stock_quantity === 0;
@@ -144,24 +146,11 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .product-page-wrapper {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 30px 20px 80px;
+          /* Top padding removed to touch header */
+          padding: 0 20px 80px;
           font-family: system-ui, -apple-system, sans-serif;
           color: #333;
         }
-
-        /* Breadcrumbs */
-        .breadcrumbs {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 13px;
-          color: #666;
-          margin-bottom: 24px;
-          flex-wrap: wrap;
-        }
-        .breadcrumbs a { color: #666; text-decoration: none; transition: color 0.2s; }
-        .breadcrumbs a:hover { color: #111; }
-        .breadcrumbs span { color: #999; }
 
         /* Layout */
         .product-layout {
@@ -178,7 +167,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         }
 
         /* ---------------------------------
-         * GALLERY / IMAGE FIX (NO ZOOM)
+         * GALLERY / IMAGE FIX (Starts from top)
          * --------------------------------- */
         .gallery { 
           display: flex; 
@@ -191,24 +180,31 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           width: 100%;
           height: auto;
           min-height: 300px;
-          max-height: 550px; /* সর্বোচ্চ উচ্চতা নির্ধারণ করা হয়েছে */
+          max-height: 550px; 
           background: #f8f9fa; 
-          border-radius: 16px;
+          /* Border radius only at bottom on mobile to touch header, full radius on desktop */
+          border-radius: 0 0 16px 16px;
           border: 1px solid #eaeaea;
+          border-top: none;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 20px; 
           overflow: hidden;
         }
+        @media (min-width: 900px) {
+          .main-image {
+            border-radius: 16px;
+            border-top: 1px solid #eaeaea;
+          }
+        }
         
-        /* ইমেজকে জোর করে কন্টেইনারের ভেতরে ফিট করা হয়েছে */
         .main-image :global(img) {
           max-width: 100%;
           max-height: 100%;
           width: auto !important; 
           height: auto !important; 
-          object-fit: contain !important; /* ছবি কাটা পড়বে না বা জুম হবে না */
+          object-fit: contain !important; 
           display: block;
         }
 
@@ -243,8 +239,52 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         }
 
         /* Info Section */
-        .info { display: flex; flex-direction: column; }
+        .info { display: flex; flex-direction: column; padding-top: 20px; }
+        @media (min-width: 900px) {
+          .info { padding-top: 0; }
+        }
         
+        /* Top Fitment Card (Moved from bottom) */
+        .top-fitment-card {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          background: #f3f4f6;
+          border: 1px solid #e5e7eb;
+          padding: 10px 16px;
+          border-radius: 10px;
+          margin-bottom: 20px;
+          width: max-content;
+          max-width: 100%;
+        }
+        .top-fitment-logo {
+          width: 36px;
+          height: 36px;
+          background: #fff;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px;
+          border: 1px solid #eaeaea;
+        }
+        .top-fitment-logo img {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+        }
+        .top-fitment-text strong {
+          display: block;
+          font-size: 14px;
+          color: #111;
+          margin-bottom: 2px;
+        }
+        .top-fitment-text span {
+          display: block;
+          font-size: 12px;
+          color: #666;
+        }
+
         .brand-category {
           display: flex;
           align-items: center;
@@ -367,7 +407,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .spec-row span { color: #666; }
         .spec-row strong { color: #111; text-align: right; }
 
-        /* Fitments */
+        /* Bottom Fitments (Other Vehicles) */
         .fitments {
           grid-column: 1 / -1;
           margin-top: 40px;
@@ -409,14 +449,13 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
 
         /* Mobile Adjustments */
         @media (max-width: 768px) {
-          .product-page-wrapper { padding: 16px 16px 60px; }
+          .product-page-wrapper { padding: 0 16px 60px; }
           .title { font-size: 24px; }
           .price { font-size: 28px; }
           
           .main-image { 
-            max-height: 400px; /* মোবাইলে ছবি আরও কম জায়গা নেবে */
+            max-height: 400px; 
             padding: 12px;
-            border-radius: 12px;
           }
           
           .thumb-btn {
@@ -428,23 +467,8 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         }
       `}</style>
 
-      {/* Breadcrumbs */}
-      <nav className="breadcrumbs">
-        <Link href="/">Home</Link>
-        <span>/</span>
-        {product.parts_categories?.slug && product.parts_categories.category_name ? (
-          <>
-            <Link href={`/category/${encodeURIComponent(product.parts_categories.slug)}`}>
-              {product.parts_categories.category_name}
-            </Link>
-            <span>/</span>
-          </>
-        ) : null}
-        <span>{product.part_name}</span>
-      </nav>
-
       <div className="product-layout">
-        {/* Gallery */}
+        {/* Gallery (Starts from very top) */}
         <div className="gallery">
           <div className="main-image">
             {activeImage ? (
@@ -470,6 +494,31 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
 
         {/* Info */}
         <div className="info">
+          
+          {/* TOP FITMENT CARD (Moved from bottom) */}
+          {primaryFitment && primaryFitment.vehicles && (
+            <div className="top-fitment-card">
+              <div className="top-fitment-logo">
+                {primaryFitment.vehicles.manufacturers?.logo_url ? (
+                  <img src={primaryFitment.vehicles.manufacturers.logo_url} alt={primaryFitment.vehicles.manufacturers.manufacturer_name || 'Logo'} />
+                ) : (
+                  <span style={{ fontSize: 10, fontWeight: 'bold' }}>
+                    {primaryFitment.vehicles.manufacturers?.manufacturer_name?.slice(0, 2).toUpperCase() || 'V'}
+                  </span>
+                )}
+              </div>
+              <div className="top-fitment-text">
+                <strong>
+                  {primaryFitment.vehicles.manufacturers?.manufacturer_name} {primaryFitment.vehicles.model_name}
+                </strong>
+                <span>
+                  {formatCompatibleYears(primaryFitment)}
+                  {primaryFitment.vehicles.generation ? ` · ${primaryFitment.vehicles.generation}` : ''}
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className="brand-category">
             {product.brand_name && <span>{product.brand_name}</span>}
             {product.brand_name && product.parts_categories && <span>•</span>}
@@ -526,15 +575,15 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           </div>
         </div>
 
-        {/* Fitments (Full width inside grid) */}
-        <div className="fitments">
-          <div className="fitments-header">
-            <h2>Compatible Vehicles</h2>
-            <p>This product is verified for the following vehicles.</p>
-          </div>
-          {fitments.length ? (
+        {/* Fitments (Full width inside grid) - ONLY show if there are multiple vehicles */}
+        {fitments.length > 1 && (
+          <div className="fitments">
+            <div className="fitments-header">
+              <h2>Other Compatible Vehicles</h2>
+              <p>This product is also verified for the following vehicles.</p>
+            </div>
             <div className="fitment-grid">
-              {fitments.map((fitment) => {
+              {fitments.slice(1).map((fitment) => {
                 const vehicle = fitment.vehicles!;
                 const brandName = vehicle.manufacturers?.manufacturer_name ?? 'Vehicle';
                 const logoUrl = vehicle.manufacturers?.logo_url;
@@ -555,10 +604,8 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
                 );
               })}
             </div>
-          ) : (
-            <p style={{ fontSize: 14, color: '#666' }}>Send your vehicle details with the booking and our parts desk will verify fitment.</p>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </main>
   );
