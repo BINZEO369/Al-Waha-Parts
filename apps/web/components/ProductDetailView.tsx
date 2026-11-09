@@ -60,6 +60,16 @@ function formatCompatibleYears(fitment: PartFitment) {
   return 'Year not specified';
 }
 
+function getYearChips(fitment: PartFitment): string[] {
+  const years = [...new Set((fitment.compatible_years ?? []).map(Number).filter(Number.isInteger))].sort((a, b) => a - b);
+  if (years.length) return years.map(String);
+  const start = fitment.vehicles?.year_start;
+  const end = fitment.vehicles?.year_end;
+  if (start && end) return [`${start}–${end}`];
+  if (start || end) return [String(start ?? end)];
+  return ['N/A'];
+}
+
 export function ProductDetailView({ slug, initialProduct = null }: { slug: string; initialProduct?: Product | null }) {
   const [product, setProduct] = useState<Product | null>(initialProduct);
   const [activeImage, setActiveImage] = useState(initialProduct?.primary_image_url ?? initialProduct?.image_urls?.[0] ?? '');
@@ -343,15 +353,31 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .model-right {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 10px;
+          flex-shrink: 0;
         }
-        .year-badge {
+        .year-chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          justify-content: flex-end;
+          align-items: center;
+        }
+        .year-chip {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           background: #dc2626;
           color: #fff;
-          padding: 4px 10px;
+          padding: 5px 10px;
           border-radius: 6px;
           font-size: 12px;
           font-weight: 700;
+          min-width: 56px;
+          height: 26px;
+          text-align: center;
+          line-height: 1;
+          white-space: nowrap;
         }
         .gen-text {
           font-size: 12px;
@@ -497,6 +523,10 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           .model-right {
             width: 100%;
             justify-content: space-between;
+            align-items: flex-start;
+          }
+          .year-chips {
+            justify-content: flex-start;
           }
 
           .price-stock-row {
@@ -576,7 +606,11 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
                   </div>
                 </div>
                 <div className="model-right">
-                  <span className="year-badge">{formatCompatibleYears(primaryFitment)}</span>
+                  <div className="year-chips">
+                    {getYearChips(primaryFitment).map((year, idx) => (
+                      <span key={`${year}-${idx}`} className="year-chip">{year}</span>
+                    ))}
+                  </div>
                   {primaryFitment.vehicles.generation && (
                     <span className="gen-text">{primaryFitment.vehicles.generation}</span>
                   )}
