@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { adminFetch } from '../lib/auth';
-import { InventoryAiAssistant } from './InventoryAiAssistant';
 import { ImageKitUploadField } from './ImageKitUploadField';
 
 type ResourceKind = 'parts' | 'vehicles' | 'manufacturers' | 'categories' | 'admins' | 'banners';
@@ -681,15 +680,6 @@ function ResourceForm({
           );
           })}
         </div>
-        {kind === 'parts' && (
-          <InventoryAiAssistant
-            values={values}
-            manufacturers={lookups.manufacturers}
-            models={lookups.models}
-            categories={lookups.categories}
-            onApply={set}
-          />
-        )}
         {error && (
           <div className="admin-alert" role="alert">
             {error}

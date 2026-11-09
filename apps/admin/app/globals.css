@@ -1703,16 +1703,6 @@ select:focus-visible {
 .model-group-brand h3 { margin: 2px 0 0; font-size: 18px; letter-spacing: -.05em; }
 .model-group-logo { display: grid; place-items: center; width: 37px; height: 37px; overflow: hidden; color: var(--red); background: #fff7f8; border: 1px solid #f0d5d8; border-radius: 50%; font: 800 10px 'DM Mono'; }
 .model-group-logo img { width: 100%; height: 100%; object-fit: contain; padding: 5px; }
-.inventory-ai-panel { margin-top: 16px; padding: 16px; border: 1px solid #f0d5d8; border-radius: 9px; background: linear-gradient(135deg, #fff8f9, #fff); }
-.inventory-ai-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
-.inventory-ai-heading h4 { margin: 5px 0 5px; font-size: 17px; letter-spacing: -.04em; }
-.inventory-ai-heading p { max-width: 590px; margin: 0; color: var(--muted); font-size: 11px; font-weight: 500; line-height: 1.55; }
-.ai-suggest-button { flex: none; }
-.ai-suggestion-list { display: grid; gap: 8px; margin-top: 14px; padding-top: 13px; border-top: 1px solid #f0d5d8; }
-.ai-suggestion { display: flex; align-items: flex-start; justify-content: space-between; gap: 13px; padding: 10px; background: #fff; border: 1px solid var(--line); border-radius: 6px; }
-.ai-suggestion div { display: grid; gap: 4px; }
-.ai-suggestion small { color: var(--muted); font: 10px 'DM Mono'; text-transform: uppercase; }
-.ai-suggestion span { color: var(--ink); font-size: 12px; line-height: 1.45; }
 .full-width {
   grid-column: 1 / -1;
 }
@@ -1769,8 +1759,6 @@ select:focus-visible {
     width: 100%;
   }
   .inventory-hero-steps { min-width: 0; margin-top: 8px; padding: 14px 0 0; border-top: 1px solid #f0c8cc; border-left: 0; }
-  .inventory-ai-heading { display: grid; }
-  .ai-suggest-button { width: 100%; }
   .directory-result-count { display: none; }
 }
 

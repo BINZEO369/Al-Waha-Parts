@@ -1,5 +1,6 @@
 import { AdminResourcePanel } from '../../components/AdminResourcePanel';
 import { SectionHeader } from '../../components/AdminSection';
+import { AiProductAssistant } from '../../components/AiProductAssistant';
 
 export default function Parts() {
   return (
@@ -22,6 +23,7 @@ export default function Parts() {
         </div>
       </section>
       <AdminResourcePanel kind="parts" />
+      <AiProductAssistant />
     </div>
   );
 }
