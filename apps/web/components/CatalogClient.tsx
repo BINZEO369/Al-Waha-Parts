@@ -17,10 +17,10 @@ export function CatalogClient() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [vehicleId, setVehicleId] = useState('');
+  const [modelId, setModelId] = useState('');
   const [carBrandId, setCarBrandId] = useState('');
-  const [vehicleYear, setVehicleYear] = useState('');
-  const [vehicleName, setVehicleName] = useState('');
+  const [modelYear, setModelYear] = useState('');
+  const [modelName, setModelName] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -30,11 +30,11 @@ export function CatalogClient() {
     setSearch(params.get('search') ?? '');
     setCategoryId(params.get('category') ?? '');
     setCarBrandId(params.get('car_brand_id') ?? '');
-    setVehicleId(params.get('vehicle_id') ?? '');
-    setVehicleYear(params.get('year') ?? '');
+    setModelId(params.get('model_id') ?? params.get('vehicle_id') ?? '');
+    setModelYear(params.get('year') ?? '');
     const make = params.get('make') ?? '';
     const model = params.get('model') ?? '';
-    setVehicleName([make, model].filter(Boolean).join(' '));
+    setModelName([make, model].filter(Boolean).join(' '));
   }, []);
 
   useEffect(() => {
@@ -45,11 +45,11 @@ export function CatalogClient() {
     }
     setLoading(true);
     setError('');
-    const yearParam = vehicleYear ? `&year=${encodeURIComponent(vehicleYear)}` : '';
+    const yearParam = modelYear ? `&year=${encodeURIComponent(modelYear)}` : '';
     Promise.all([
       apiFetch<PartCardData[]>(
         apiUrl,
-        `/api/v1/parts?limit=100&search=${encodeURIComponent(search)}${categoryId ? `&category_id=${encodeURIComponent(categoryId)}` : ''}${carBrandId ? `&car_brand_id=${encodeURIComponent(carBrandId)}` : ''}${vehicleId ? `&vehicle_id=${encodeURIComponent(vehicleId)}${yearParam}` : ''}`,
+        `/api/v1/parts?limit=100&search=${encodeURIComponent(search)}${categoryId ? `&category_id=${encodeURIComponent(categoryId)}` : ''}${carBrandId ? `&car_brand_id=${encodeURIComponent(carBrandId)}` : ''}${modelId ? `&model_id=${encodeURIComponent(modelId)}${yearParam}` : ''}`,
       ),
       apiFetch<Category[]>(apiUrl, '/api/v1/categories'),
     ])
@@ -62,12 +62,12 @@ export function CatalogClient() {
         setError(cause instanceof Error ? cause.message : 'Unable to load the live catalog.');
       })
       .finally(() => setLoading(false));
-  }, [apiUrl, search, categoryId, carBrandId, vehicleId, vehicleYear]);
+  }, [apiUrl, search, categoryId, carBrandId, modelId, modelYear]);
 
   const clearVehicleFilter = () => {
-    setVehicleId('');
-    setVehicleYear('');
-    setVehicleName('');
+    setModelId('');
+    setModelYear('');
+    setModelName('');
   };
 
   return (
@@ -86,14 +86,19 @@ export function CatalogClient() {
           />
         </div>
       </div>
-      {vehicleId && (
+      {modelId && (
         <div className="vehicle-filter-summary">
           <div>
             <small>Vehicle fitment active</small>
-            <strong>{vehicleName || 'Selected vehicle'}{vehicleYear ? ` · ${vehicleYear}` : ''}</strong>
+            <strong>
+              {modelName || 'Selected model'}
+              {modelYear ? ` · ${modelYear}` : ''}
+            </strong>
             <span>Only parts compatible with this saved vehicle fitment are requested.</span>
           </div>
-          <button type="button" onClick={clearVehicleFilter}>Clear vehicle</button>
+          <button type="button" onClick={clearVehicleFilter}>
+            Clear vehicle
+          </button>
         </div>
       )}
       <div className="category-list" aria-label="Part categories">
@@ -109,7 +114,9 @@ export function CatalogClient() {
             key={category.id}
             onClick={() => setCategoryId(category.id)}
           >
-            {category.image_url && <img className="category-chip-image" src={category.image_url} alt="" />}
+            {category.image_url && (
+              <img className="category-chip-image" src={category.image_url} alt="" />
+            )}
             {category.category_name}
           </button>
         ))}
@@ -124,7 +131,7 @@ export function CatalogClient() {
           <div className="empty-state">
             <strong>No compatible parts found.</strong>
             <span>
-              {vehicleId
+              {modelId
                 ? 'Try another model year or vehicle generation, or ask the parts desk to verify fitment.'
                 : 'When an active part is added in Supabase, it will appear here automatically.'}
             </span>

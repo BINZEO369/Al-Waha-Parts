@@ -10,6 +10,11 @@ type ApiHealth = {
 };
 import { getConfig } from './env.js';
 import { getSupabaseAdmin } from './supabase.js';
+import {
+  sanitizeProductAiInput,
+  suggestProductMetadata,
+  type ProductAiInput,
+} from './ai.js';
 
 const config = getConfig();
 export const app = Fastify({ logger: true, trustProxy: true });
@@ -19,6 +24,7 @@ type RateBucket = { count: number; resetAt: number };
 const publicBuckets = new Map<string, RateBucket>();
 const bookingBuckets = new Map<string, RateBucket>();
 const trackingBuckets = new Map<string, RateBucket>();
+const aiBuckets = new Map<string, RateBucket>();
 const checkRate = (
   buckets: Map<string, RateBucket>,
   key: string,
@@ -173,6 +179,61 @@ async function requireAdmin(request: FastifyRequest, reply: FastifyReply) {
   if (adminError || !admin) return jsonError(reply, 403, 'Active admin access required');
   (request as FastifyRequest & { admin?: typeof admin }).admin = admin;
 }
+
+app.post(
+  '/api/v1/admin/ai/suggest-product',
+  { preHandler: requireAdmin as any },
+  async (request: FastifyRequest<{ Body: ProductAiInput }>, reply) => {
+    const admin = (request as FastifyRequest & { admin?: { id: string } }).admin;
+    if (!admin) return jsonError(reply, 403, 'Active admin access required');
+    const retryAfter = checkRate(aiBuckets, admin.id, 20, 60 * 60 * 1000);
+    if (retryAfter !== null) {
+      reply.header('Retry-After', String(retryAfter));
+      return reply.code(429).send({
+        error: { message: `AI limit reached. Try again in ${retryAfter} seconds.` },
+      });
+    }
+    const input = sanitizeProductAiInput(request.body ?? ({} as ProductAiInput));
+    if (!input.part_name) return jsonError(reply, 400, 'part_name is required');
+    const supabase = getSupabaseAdmin();
+    try {
+      const suggestion = await suggestProductMetadata(config.geminiApiKey, config.geminiModel, input);
+      const { data: run, error: auditError } = await supabase
+        .from('admin_ai_runs')
+        .insert({
+          admin_id: admin.id,
+          action: 'suggest_product_metadata',
+          status: 'preview',
+          input_data: input,
+          output_data: suggestion,
+        })
+        .select('id,action,status,created_at')
+        .single();
+      if (auditError) request.log.warn({ err: auditError }, 'Could not write AI audit log');
+      return { data: { run_id: run?.id ?? null, suggestion, requires_approval: true } };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'AI request failed';
+      await supabase.from('admin_ai_runs').insert({
+        admin_id: admin.id,
+        action: 'suggest_product_metadata',
+        status: 'failed',
+        input_data: input,
+        error_message: message,
+      });
+      return jsonError(reply, message.startsWith('AI is not configured') ? 503 : 502, message);
+    }
+  },
+);
+
+app.get('/api/v1/admin/ai/runs', { preHandler: requireAdmin as any }, async (_request, reply) => {
+  const { data, error } = await getSupabaseAdmin()
+    .from('admin_ai_runs')
+    .select('id,admin_id,action,status,input_data,output_data,error_message,created_at,updated_at')
+    .order('created_at', { ascending: false })
+    .limit(50);
+  if (error) return jsonError(reply, 500, error.message);
+  return { data: data ?? [] };
+});
 
 app.get('/api/v1/admin/imagekit/auth', { preHandler: requireAdmin as any }, async (_request, reply) => {
   if (!config.imageKitPrivateKey || !config.imageKitPublicKey) {

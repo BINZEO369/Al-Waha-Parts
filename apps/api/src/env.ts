@@ -6,6 +6,8 @@ export interface ApiConfig {
   serviceRoleKey: string;
   imageKitPrivateKey: string;
   imageKitPublicKey: string;
+  geminiApiKey: string;
+  geminiModel: string;
 }
 
 export function getConfig(): ApiConfig {
@@ -19,6 +21,8 @@ export function getConfig(): ApiConfig {
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
     imageKitPrivateKey: process.env.IMAGEKIT_PRIVATE_KEY ?? '',
     imageKitPublicKey: process.env.IMAGEKIT_PUBLIC_KEY ?? '',
+    geminiApiKey: process.env.GEMINI_API_KEY ?? '',
+    geminiModel: process.env.GEMINI_MODEL ?? 'gemini-3.5-flash-lite',
   };
 }
 
