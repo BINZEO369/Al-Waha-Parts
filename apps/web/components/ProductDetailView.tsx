@@ -64,6 +64,8 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
   const [product, setProduct] = useState<Product | null>(initialProduct);
   const [activeImage, setActiveImage] = useState(initialProduct?.primary_image_url ?? initialProduct?.image_urls?.[0] ?? '');
   const [error, setError] = useState('');
+  const [isAdded, setIsAdded] = useState(false);
+  
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const router = useRouter();
   const { addItem } = useCart();
@@ -92,351 +94,34 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
   if (error) {
     return (
       <main className="product-page">
-        <style jsx global>{`
-          .product-page {
-            max-width: 1200px;
-            padding: 55px 18px 90px;
-            margin: 0 auto;
-          }
-          .product-back {
-            display: inline-block;
-            margin-bottom: 28px;
-            color: #777;
-            font-size: 12px;
-          }
-          .product-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
-            gap: 7vw;
-            align-items: start;
-          }
-          .product-image {
-            min-height: 520px;
-            display: grid;
-            place-items: center;
-            overflow: hidden;
-            background: #f3f3f3;
-          }
-          .product-image img {
-            width: 100%;
-            height: 520px;
-            object-fit: cover;
-          }
-          .product-thumbnails {
-            display: flex;
-            gap: 10px;
-            margin-top: 12px;
-          }
-          .product-thumbnail {
-            width: 72px;
-            height: 72px;
-            padding: 0;
-            border: 2px solid transparent;
-            background: #fff;
-            cursor: pointer;
-          }
-          .product-thumbnail.product-active {
-            border-color: var(--red);
-          }
-          .product-thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-          .product-copy h1 {
-            margin: 15px 0 18px;
-            font-family: 'Montserrat';
-            font-size: clamp(38px, 5vw, 66px);
-            line-height: 1;
-            letter-spacing: -0.06em;
-          }
-          .product-description {
-            max-width: 540px;
-            color: #777;
-            line-height: 1.75;
-          }
-          .product-price {
-            display: flex;
-            gap: 14px;
-            align-items: center;
-            margin: 28px 0 16px;
-          }
-          .product-price strong {
-            font-size: 27px;
-          }
-          .product-price del {
-            color: #999;
-          }
-          .product-status {
-            display: flex;
-            justify-content: space-between;
-            border-top: 1px solid #e9e9e9;
-            border-bottom: 1px solid #e9e9e9;
-            padding: 14px 0;
-            margin-bottom: 24px;
-            color: #777;
-            font-size: 11px;
-          }
-          .product-specs {
-            margin: 42px 0 0;
-            border-top: 1px solid #e9e9e9;
-          }
-          .product-specs div {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            padding: 14px 0;
-            border-bottom: 1px solid #e9e9e9;
-          }
-          .product-specs dt {
-            color: #777;
-            font-size: 10px;
-            text-transform: uppercase;
-          }
-          .product-specs dd {
-            margin: 0;
-            text-align: right;
-          }
-          .product-fitment {
-            display: grid;
-            grid-template-columns: 0.8fr 1.2fr;
-            gap: 8vw;
-            margin-top: 90px;
-            padding: 52px 0;
-            border-top: 1px solid #e9e9e9;
-          }
-          .product-fitment h2 {
-            margin: 12px 0 0;
-            font-family: 'Montserrat';
-            font-size: 36px;
-            line-height: 1.05;
-          }
-          .product-fitmentList {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-          }
-          .product-fitmentList div {
-            padding: 18px;
-            border: 1px solid #e9e9e9;
-            background: #fff;
-          }
-          .product-fitmentList strong,
-          .product-fitmentList span {
-            display: block;
-          }
-          .product-fitmentList span {
-            margin-top: 7px;
-            color: #777;
-            font-size: 10px;
-          }
-          @media (max-width: 800px) {
-            .product-page {
-              padding: 50px 18px 75px;
-            }
-            .product-grid,
-            .product-fitment {
-              grid-template-columns: 1fr;
-            }
-            .product-image,
-            .product-image img {
-              min-height: 330px;
-              height: 330px;
-            }
-            .product-fitment {
-              margin-top: 65px;
-            }
-          }
-        `}</style>
         <div className="data-alert">
           {error}
           <br />
-          <Link className="text-link" href="/category">
-            Back to categories
-          </Link>
+          <Link className="text-link" href="/category">Back to categories</Link>
         </div>
       </main>
     );
   }
+
   if (!product) {
     return (
       <main className="product-page">
-        <style jsx global>{`
-          .product-page {
-            max-width: 1200px;
-            padding: 55px 18px 90px;
-            margin: 0 auto;
-          }
-          .product-back {
-            display: inline-block;
-            margin-bottom: 28px;
-            color: #777;
-            font-size: 12px;
-          }
-          .product-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
-            gap: 7vw;
-            align-items: start;
-          }
-          .product-image {
-            min-height: 520px;
-            display: grid;
-            place-items: center;
-            overflow: hidden;
-            background: #f3f3f3;
-          }
-          .product-image img {
-            width: 100%;
-            height: 520px;
-            object-fit: cover;
-          }
-          .product-thumbnails {
-            display: flex;
-            gap: 10px;
-            margin-top: 12px;
-          }
-          .product-thumbnail {
-            width: 72px;
-            height: 72px;
-            padding: 0;
-            border: 2px solid transparent;
-            background: #fff;
-            cursor: pointer;
-          }
-          .product-thumbnail.product-active {
-            border-color: var(--red);
-          }
-          .product-thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-          .product-copy h1 {
-            margin: 15px 0 18px;
-            font-family: 'Montserrat';
-            font-size: clamp(38px, 5vw, 66px);
-            line-height: 1;
-            letter-spacing: -0.06em;
-          }
-          .product-description {
-            max-width: 540px;
-            color: #777;
-            line-height: 1.75;
-          }
-          .product-price {
-            display: flex;
-            gap: 14px;
-            align-items: center;
-            margin: 28px 0 16px;
-          }
-          .product-price strong {
-            font-size: 27px;
-          }
-          .product-price del {
-            color: #999;
-          }
-          .product-status {
-            display: flex;
-            justify-content: space-between;
-            border-top: 1px solid #e9e9e9;
-            border-bottom: 1px solid #e9e9e9;
-            padding: 14px 0;
-            margin-bottom: 24px;
-            color: #777;
-            font-size: 11px;
-          }
-          .product-specs {
-            margin: 42px 0 0;
-            border-top: 1px solid #e9e9e9;
-          }
-          .product-specs div {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            padding: 14px 0;
-            border-bottom: 1px solid #e9e9e9;
-          }
-          .product-specs dt {
-            color: #777;
-            font-size: 10px;
-            text-transform: uppercase;
-          }
-          .product-specs dd {
-            margin: 0;
-            text-align: right;
-          }
-          .product-fitment {
-            display: grid;
-            grid-template-columns: 0.8fr 1.2fr;
-            gap: 8vw;
-            margin-top: 90px;
-            padding: 52px 0;
-            border-top: 1px solid #e9e9e9;
-          }
-          .product-fitment h2 {
-            margin: 12px 0 0;
-            font-family: 'Montserrat';
-            font-size: 36px;
-            line-height: 1.05;
-          }
-          .product-fitmentList {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-          }
-          .product-fitmentList div {
-            padding: 18px;
-            border: 1px solid #e9e9e9;
-            background: #fff;
-          }
-          .product-fitmentList strong,
-          .product-fitmentList span {
-            display: block;
-          }
-          .product-fitmentList span {
-            margin-top: 7px;
-            color: #777;
-            font-size: 10px;
-          }
-          @media (max-width: 800px) {
-            .product-page {
-              padding: 50px 18px 75px;
-            }
-            .product-grid,
-            .product-fitment {
-              grid-template-columns: 1fr;
-            }
-            .product-image,
-            .product-image img {
-              min-height: 330px;
-              height: 330px;
-            }
-            .product-fitment {
-              margin-top: 65px;
-            }
-          }
-        `}</style>
         <PageLoader label="Loading product details" />
       </main>
     );
   }
 
-  const images = [
-    ...new Set([product.primary_image_url, ...(product.image_urls ?? [])].filter(Boolean)),
-  ] as string[];
+  const images = [...new Set([product.primary_image_url, ...(product.image_urls ?? [])].filter(Boolean))] as string[];
   const rawFitments = product.part_model_fitments;
-  const fitments = (Array.isArray(rawFitments) ? rawFitments : rawFitments ? [rawFitments] : [])
-    .filter((fitment) => Boolean(fitment.vehicles));
-  const primaryFitment = fitments[0];
-  const vehicle = primaryFitment?.vehicles;
-  const manufacturerName = vehicle?.manufacturers?.manufacturer_name ?? 'Vehicle';
-  const manufacturerLogo = vehicle?.manufacturers?.logo_url;
+  const fitments = (Array.isArray(rawFitments) ? rawFitments : rawFitments ? [rawFitments] : []).filter((fitment) => Boolean(fitment.vehicles));
+  
   const currentPrice = product.sale_price ?? product.price;
+  const hasDiscount = product.sale_price && product.sale_price < product.price;
   const outOfStock = product.stock_quantity === 0;
 
-  function startBooking() {
+  function handleBooking() {
     if (!product || outOfStock) return;
+    
     addItem({
       part_id: product.id,
       part_name: product.part_name,
@@ -446,370 +131,402 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
       stock_quantity: product.stock_quantity,
       condition: product.condition,
     });
-    router.push('/booking');
+
+    // Short visual feedback before redirecting
+    setIsAdded(true);
+    setTimeout(() => {
+      router.push('/booking');
+    }, 800);
   }
 
   return (
-    <main className="product-page product-reference-page">
-      <style jsx global>{`
-        .product-page {
+    <main className="product-page-wrapper">
+      <style jsx>{`
+        .product-page-wrapper {
           max-width: 1200px;
-          padding: 55px 18px 90px;
           margin: 0 auto;
+          padding: 40px 20px 80px;
+          font-family: system-ui, -apple-system, sans-serif;
+          color: #333;
         }
-        .product-back {
-          display: inline-block;
-          margin-bottom: 28px;
-          color: #777;
-          font-size: 12px;
-        }
-        .product-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
-          gap: 7vw;
-          align-items: start;
-        }
-        .product-image {
-          min-height: 520px;
-          display: grid;
-          place-items: center;
-          overflow: hidden;
-          background: #f3f3f3;
-        }
-        .product-image img {
-          width: 100%;
-          height: 520px;
-          object-fit: cover;
-        }
-        .product-thumbnails {
+
+        /* Breadcrumbs */
+        .breadcrumbs {
           display: flex;
-          gap: 10px;
-          margin-top: 12px;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+          color: #666;
+          margin-bottom: 30px;
+          flex-wrap: wrap;
         }
-        .product-thumbnail {
-          width: 72px;
-          height: 72px;
-          padding: 0;
-          border: 2px solid transparent;
-          background: #fff;
-          cursor: pointer;
+        .breadcrumbs a { color: #666; text-decoration: none; transition: color 0.2s; }
+        .breadcrumbs a:hover { color: #111; }
+        .breadcrumbs span { color: #999; }
+
+        /* Layout */
+        .product-layout {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 40px;
         }
-        .product-thumbnail.product-active {
-          border-color: var(--red);
+        @media (min-width: 900px) {
+          .product-layout {
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+          }
         }
-        .product-thumbnail img {
+
+        /* Gallery */
+        .gallery { display: flex; flex-direction: column; gap: 16px; }
+        .main-image {
+          width: 100%;
+          aspect-ratio: 4 / 3;
+          background: #f8f9fa;
+          border-radius: 20px;
+          border: 1px solid #eaeaea;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+        }
+        .main-image img {
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          object-fit: contain;
+          transition: transform 0.3s ease;
         }
-        .product-copy h1 {
-          margin: 15px 0 18px;
-          font-family: 'Montserrat';
-          font-size: clamp(38px, 5vw, 66px);
-          line-height: 1;
-          letter-spacing: -0.06em;
-        }
-        .product-description {
-          max-width: 540px;
-          color: #777;
-          line-height: 1.75;
-        }
-        .product-price {
+        .thumbnails {
           display: flex;
-          gap: 14px;
-          align-items: center;
-          margin: 28px 0 16px;
-        }
-        .product-price strong {
-          font-size: 27px;
-        }
-        .product-price del {
-          color: #999;
-        }
-        .product-status {
-          display: flex;
-          justify-content: space-between;
-          border-top: 1px solid #e9e9e9;
-          border-bottom: 1px solid #e9e9e9;
-          padding: 14px 0;
-          margin-bottom: 24px;
-          color: #777;
-          font-size: 11px;
-        }
-        .product-specs {
-          margin: 42px 0 0;
-          border-top: 1px solid #e9e9e9;
-        }
-        .product-specs div {
-          display: flex;
-          justify-content: space-between;
-          gap: 20px;
-          padding: 14px 0;
-          border-bottom: 1px solid #e9e9e9;
-        }
-        .product-specs dt {
-          color: #777;
-          font-size: 10px;
-          text-transform: uppercase;
-        }
-        .product-specs dd {
-          margin: 0;
-          text-align: right;
-        }
-        .product-fitment {
-          display: grid;
-          grid-template-columns: 0.8fr 1.2fr;
-          gap: 8vw;
-          margin-top: 90px;
-          padding: 52px 0;
-          border-top: 1px solid #e9e9e9;
-        }
-        .product-fitment h2 {
-          margin: 12px 0 0;
-          font-family: 'Montserrat';
-          font-size: 36px;
-          line-height: 1.05;
-        }
-        .product-fitmentList {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
           gap: 12px;
+          overflow-x: auto;
+          padding-bottom: 4px;
         }
-        .product-fitmentList div {
-          padding: 18px;
-          border: 1px solid #e9e9e9;
+        .thumbnails::-webkit-scrollbar { display: none; }
+        .thumb-btn {
+          width: 76px;
+          height: 76px;
+          flex-shrink: 0;
+          border-radius: 12px;
+          border: 2px solid transparent;
+          background: #f8f9fa;
+          overflow: hidden;
+          cursor: pointer;
+          transition: all 0.2s;
+          padding: 0;
+        }
+        .thumb-btn.active { border-color: #111; }
+        .thumb-btn img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Info Section */
+        .info { display: flex; flex-direction: column; }
+        
+        .brand-category {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: #2563eb;
+          margin-bottom: 12px;
+        }
+        
+        .title {
+          font-size: 32px;
+          font-weight: 800;
+          color: #111;
+          line-height: 1.2;
+          margin: 0 0 16px 0;
+        }
+        @media (min-width: 768px) { .title { font-size: 38px; } }
+
+        .meta-tags {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          font-size: 13px;
+          color: #666;
+          margin-bottom: 24px;
+          padding-bottom: 24px;
+          border-bottom: 1px solid #eaeaea;
+        }
+        .meta-tags strong { color: #111; }
+        .badge {
+          background: #e0f2fe;
+          color: #0369a1;
+          padding: 4px 10px;
+          border-radius: 20px;
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        /* Price */
+        .price-box {
+          display: flex;
+          align-items: baseline;
+          gap: 12px;
+          margin-bottom: 12px;
+        }
+        .price {
+          font-size: 36px;
+          font-weight: 800;
+          color: #111;
+        }
+        .old-price {
+          font-size: 18px;
+          color: #999;
+          text-decoration: line-through;
+          font-weight: 500;
+        }
+
+        /* Stock */
+        .stock {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 14px;
+          font-weight: 600;
+          margin-bottom: 24px;
+        }
+        .stock.in { color: #10b981; }
+        .stock.out { color: #ef4444; }
+        .stock-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+        /* Actions */
+        .actions {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-bottom: 32px;
+        }
+        .btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 16px 24px;
+          border-radius: 12px;
+          font-size: 16px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s;
+          border: none;
+          width: 100%;
+        }
+        .btn-book {
+          background: #111;
+          color: #fff;
+        }
+        .btn-book:hover:not(:disabled) { background: #333; }
+        .btn-book.added { background: #10b981; }
+        .btn:disabled { background: #eaeaea; color: #999; cursor: not-allowed; }
+
+        /* Description */
+        .description { margin-bottom: 32px; }
+        .description h3 { font-size: 18px; font-weight: 700; margin: 0 0 12px; color: #111; }
+        .description p { font-size: 15px; line-height: 1.6; color: #555; white-space: pre-wrap; margin: 0; }
+
+        /* Specs */
+        .specs {
+          border-top: 1px solid #eaeaea;
+          margin-bottom: 40px;
+        }
+        .spec-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 12px 0;
+          border-bottom: 1px solid #eaeaea;
+          font-size: 14px;
+        }
+        .spec-row span { color: #666; }
+        .spec-row strong { color: #111; text-align: right; }
+
+        /* Fitments */
+        .fitments {
+          grid-column: 1 / -1;
+          margin-top: 40px;
+          padding-top: 40px;
+          border-top: 1px solid #eaeaea;
+        }
+        .fitments-header { margin-bottom: 24px; }
+        .fitments-header h2 { font-size: 24px; font-weight: 800; margin: 0 0 8px; }
+        .fitments-header p { font-size: 15px; color: #666; margin: 0; }
+        
+        .fitment-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 16px;
+        }
+        .fitment-card {
+          border: 1px solid #eaeaea;
+          border-radius: 12px;
+          padding: 16px;
           background: #fff;
+          display: flex;
+          align-items: center;
+          gap: 16px;
         }
-        .product-fitmentList strong,
-        .product-fitmentList span {
-          display: block;
+        .fitment-logo {
+          width: 48px;
+          height: 48px;
+          background: #f8f9fa;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px;
+          flex-shrink: 0;
         }
-        .product-fitmentList span {
-          margin-top: 7px;
-          color: #777;
-          font-size: 10px;
-        }
-        @media (max-width: 800px) {
-          .product-page {
-            padding: 50px 18px 75px;
-          }
-          .product-grid,
-          .product-fitment {
-            grid-template-columns: 1fr;
-          }
-          .product-image,
-          .product-image img {
-            min-height: 330px;
-            height: 330px;
-          }
-          .product-fitment {
-            margin-top: 65px;
-          }
-        }
-        .product-reference-page { max-width: 1080px; padding-top: 38px; background: #f8f9fb; }
-        .product-breadcrumb { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 26px; color: #777; font-size: 18px; }
-        .product-reference-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 26px; }
-        .product-reference-heading h1 { margin: 0 0 20px; color: #202124; font-size: clamp(40px, 5vw, 62px); font-weight: 800; line-height: 1; letter-spacing: -.055em; }
-        .product-sku-badge { padding: 17px 32px; border: 3px solid #292929; border-radius: 18px; color: #292929; font-size: 28px; white-space: nowrap; }
-        .product-genuine { display: inline-flex; align-items: center; gap: 10px; padding: 7px 18px; border: 1px solid #ddd; border-radius: 14px; background: #fff; font-size: 22px; }
-        .product-genuine b { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 50%; background: #2166d1; color: #fff; }
-        .product-vehicle-bar { display: flex; align-items: center; gap: 14px; min-height: 86px; padding: 14px 24px; margin-bottom: 22px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; background: #fff; font-size: 20px; }
-        .product-vehicle-bar strong, .product-vehicle-bar small { display: block; }
-        .product-vehicle-bar small { margin-top: 4px; color: #777; font-size: 14px; }
-        .product-vehicle-mark { display: grid; width: 64px; height: 48px; flex: 0 0 64px; place-items: center; border-radius: 12px; background: #f2f2f2; font-size: 16px; }
-        .product-vehicle-mark img { width: 42px; height: 32px; object-fit: contain; }
-        .product-grid { display: block; }
-        .product-reference-media { position: relative; }
-        .product-image { min-height: 560px; background: #f2f3f5; }
-        .product-image img { height: 560px; object-fit: contain; }
-        .product-copy { padding: 54px 16px 0; }
-        .product-copy h1, .product-copy > .product-status, .product-copy > .product-specs { display: none; }
-        .product-description { display: none; }
-        .product-price { margin: 0 0 26px; gap: 18px; }
-        .product-price strong { color: #202124; font-size: 54px; font-weight: 800; }
-        .product-price span { color: #777; font-size: 24px; }
-        .product-installment { position: relative; padding: 28px 30px; margin-bottom: 26px; border: 2px solid #e2e2e2; border-radius: 28px; background: #fff; }
-        .product-installment p { margin: 0 0 16px; color: #777; font-size: 24px; }
-        .product-installment strong { font-size: 30px; }
-        .product-installment small { color: #777; font-size: 20px; font-weight: 500; }
-        .product-installment > span { position: absolute; right: 28px; bottom: 34px; color: #6040a8; font-size: 18px; font-weight: 700; }
-        .product-delivery { display: flex; align-items: center; gap: 12px; margin: 20px 0; font-size: 24px; }
-        .product-stock { margin-left: 18px; color: #239955; }
-        .product-fitment-ok { padding: 17px 22px; margin: 28px 0 18px; border-radius: 10px; background: #edfff4; color: #257d50; font-size: 20px; font-weight: 600; }
-        .product-booking-button { width: 100%; min-height: 72px; border-radius: 22px; background: #f3444a; font-size: 24px; }
-        .product-details-copy { padding: 42px 0 0; }
-        .product-details-copy h2 { margin: 0 0 22px; font-size: 28px; }
-        .product-details-copy p { margin: 0; color: #444; font-size: 22px; line-height: 1.65; }
-        .product-vehicle-information { gap: 42px; padding-top: 60px; }
-        .product-vehicle-information > div:first-child p { max-width: 330px; margin-top: 18px; color: #777; font-size: 16px; line-height: 1.55; }
-        .product-fitmentList div { display: grid; gap: 6px; border-radius: 12px; }
-        .product-fitmentList small { color: var(--red); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
-        .product-fitmentList .product-fitment-brand { display: flex; align-items: center; gap: 10px; }
-        .product-fitmentList .product-fitment-brand img { width: 40px; height: 32px; object-fit: contain; }
-        .product-fitmentList strong { font-size: 20px; }
-        .product-fitmentList span { margin-top: 0; font-size: 14px; line-height: 1.45; }
-        @media (max-width: 800px) {
-          .product-reference-page { padding: 18px 0 50px; }
-          .product-breadcrumb, .product-reference-heading { padding-left: 32px; padding-right: 32px; }
-          .product-breadcrumb { margin-bottom: 18px; font-size: 15px; }
-          .product-reference-heading { align-items: flex-start; margin-bottom: 0; }
-          .product-reference-heading h1 { font-size: 31px; margin-bottom: 14px; }
-          .product-sku-badge { padding: 10px 14px; border-width: 2px; border-radius: 12px; font-size: 17px; }
-          .product-genuine { padding: 5px 12px; font-size: 16px; }
-          .product-genuine b { width: 22px; height: 22px; }
-          .product-vehicle-bar { padding-left: 32px; padding-right: 32px; margin-bottom: 0; }
-          .product-vehicle-mark { display: grid; width: 64px; height: 48px; place-items: center; border-radius: 12px; background: #f2f2f2; font-size: 16px; }
-          .product-vehicle-mark img { width: 42px; height: 30px; }
-          .product-vehicle-edit { margin-left: auto; font-size: 28px; }
-          .product-vehicle-bar small { font-size: 13px; }
-          .product-image, .product-image img { min-height: 280px; height: 280px; }
-          .product-copy { padding: 40px 32px 0; }
-          .product-price strong { font-size: 42px; }
-          .product-price span { font-size: 18px; }
-          .product-installment { padding: 22px 24px; border-radius: 24px; }
-          .product-installment p { max-width: 250px; font-size: 19px; line-height: 1.45; }
-          .product-installment strong { font-size: 25px; }
-          .product-installment > span { right: 20px; bottom: 30px; font-size: 13px; }
-          .product-delivery { font-size: 20px; }
-          .product-fitment-ok { font-size: 17px; }
-          .product-booking-button { min-height: 64px; font-size: 22px; }
-          .product-details-copy p { font-size: 19px; }
-          .product-vehicle-information { gap: 24px; padding-top: 42px; }
-          .product-vehicle-information > div:first-child p { font-size: 14px; }
-          .product-fitmentList { grid-template-columns: 1fr; }
-          .product-fitmentList strong { font-size: 17px; }
-          .product-fitmentList span { font-size: 12px; }
+        .fitment-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .fitment-info strong { display: block; font-size: 15px; color: #111; margin-bottom: 4px; }
+        .fitment-info span { display: block; font-size: 12px; color: #666; }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+          .product-page-wrapper { padding: 20px 16px 60px; }
+          .title { font-size: 26px; }
+          .price { font-size: 30px; }
+          .main-image { aspect-ratio: 1 / 1; }
+          .fitment-grid { grid-template-columns: 1fr; }
         }
       `}</style>
 
-      <nav className="product-breadcrumb" aria-label="Breadcrumb">
+      {/* Breadcrumbs */}
+      <nav className="breadcrumbs">
         <Link href="/">Home</Link>
-        <span aria-hidden="true">/</span>
+        <span>/</span>
         {product.parts_categories?.slug && product.parts_categories.category_name ? (
           <>
             <Link href={`/category/${encodeURIComponent(product.parts_categories.slug)}`}>
               {product.parts_categories.category_name}
             </Link>
-            <span aria-hidden="true">/</span>
+            <span>/</span>
           </>
         ) : null}
-        <span aria-current="page">{product.part_name}</span>
+        <span>{product.part_name}</span>
       </nav>
-      <div className="product-reference-heading">
-        <h1>{product.part_name}</h1>
-        <span className="product-sku-badge">SKU {product.sku}</span>
-      </div>
-      {vehicle && primaryFitment && (
-        <div className="product-vehicle-bar">
-          <span className="product-vehicle-mark">
-            {manufacturerLogo ? <img src={manufacturerLogo} alt={`${manufacturerName} logo`} /> : manufacturerName.slice(0, 2).toUpperCase()}
-          </span>
-          <span><strong>{manufacturerName} {vehicle.model_name}</strong><small>{formatCompatibleYears(primaryFitment)}{vehicle.generation ? ` · ${vehicle.generation}` : ''}</small></span>
-        </div>
-      )}
-      <div className="product-grid">
-        <div className="product-reference-media">
-          <div className="product-image">
+
+      <div className="product-layout">
+        {/* Gallery */}
+        <div className="gallery">
+          <div className="main-image">
             {activeImage ? (
               <OptimizedImage src={activeImage} alt={product.part_name} width={1200} height={900} sizes="(max-width: 800px) 100vw, 50vw" loading="eager" fetchPriority="high" quality={80} />
             ) : (
-              <span className="part-glyph">AWP</span>
+              <span style={{ color: '#ccc', fontSize: '24px', fontWeight: 800 }}>AWP</span>
             )}
           </div>
           {images.length > 1 && (
-            <div className="product-thumbnails">
+            <div className="thumbnails">
               {images.map((image) => (
                 <button
-                  className={
-                    activeImage === image ? 'product-thumbnail product-active' : 'product-thumbnail'
-                  }
                   key={image}
+                  className={`thumb-btn ${activeImage === image ? 'active' : ''}`}
                   onClick={() => setActiveImage(image)}
                 >
-                  <OptimizedImage src={image} alt="" width={72} height={72} sizes="72px" loading="lazy" quality={70} />
+                  <OptimizedImage src={image} alt="" width={76} height={76} sizes="76px" loading="lazy" quality={70} />
                 </button>
               ))}
             </div>
           )}
         </div>
-        <section className="product-copy">
-          <p className="product-description">
-            {product.description ??
-              'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}
-          </p>
-          <div className="product-price">
-            <strong>{formatSar(currentPrice)}</strong>
-            {product.sale_price && <del>{formatSar(product.price)}</del>}
+
+        {/* Info */}
+        <div className="info">
+          <div className="brand-category">
+            {product.brand_name && <span>{product.brand_name}</span>}
+            {product.brand_name && product.parts_categories && <span>•</span>}
+            {product.parts_categories && <span>{product.parts_categories.category_name}</span>}
           </div>
-          <div className="product-status">
-            <span>{product.tested_status === 'tested' ? 'Tested' : 'Fitment checked'}</span>
-            <span>
-              {product.stock_quantity ? `${product.stock_quantity} in stock` : 'Available to order'}
-            </span>
+
+          <h1 className="title">{product.part_name}</h1>
+
+          <div className="meta-tags">
+            {product.sku && <span>SKU: <strong>{product.sku}</strong></span>}
+            {product.tested_status === 'tested' && <span className="badge">Tested</span>}
+            {product.condition && <span className="badge" style={{ background: '#f3f4f6', color: '#374151' }}>{product.condition}</span>}
           </div>
-          <button className="button product-booking-button" type="button" disabled={outOfStock} onClick={startBooking}>
-            {outOfStock ? 'Out of stock' : 'Booking now'}
-          </button>
-          <section className="product-details-copy"><h2>Details</h2><p>{product.description ?? 'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}</p></section>
-          <dl className="product-specs">
-            <div>
-              <dt>Brand</dt>
-              <dd>{product.brand_name ?? 'Al Waha Select'}</dd>
-            </div>
-            <div>
-              <dt>SKU</dt>
-              <dd>{product.sku}</dd>
-            </div>
-            <div>
-              <dt>OEM number</dt>
-              <dd>{product.oem_number ?? 'On request'}</dd>
-            </div>
-            <div>
-              <dt>Warranty</dt>
-              <dd>
-                {product.warranty_months
-                  ? `${product.warranty_months} months`
-                  : 'Confirm with desk'}
-              </dd>
-            </div>
-          </dl>
-        </section>
-      </div>
-      <section className="product-fitment product-vehicle-information">
-        <div>
-          <span className="eyebrow">Compatibility</span>
-          <h2>Compatible vehicles</h2>
-          <p>This product is listed for the following vehicle models and production years.</p>
+
+          <div className="price-box">
+            <span className="price">{formatSar(currentPrice)}</span>
+            {hasDiscount && <span className="old-price">{formatSar(product.price)}</span>}
+          </div>
+
+          <div className={`stock ${outOfStock ? 'out' : 'in'}`}>
+            <span className="stock-dot"></span>
+            {outOfStock ? 'Out of Stock' : `In Stock (${product.stock_quantity} available)`}
+          </div>
+
+          <div className="actions">
+            <button 
+              className={`btn btn-book ${isAdded ? 'added' : ''}`} 
+              type="button" 
+              disabled={outOfStock} 
+              onClick={handleBooking}
+            >
+              {outOfStock ? 'Out of stock' : isAdded ? (
+                <>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  Added! Redirecting...
+                </>
+              ) : (
+                'Book Now'
+              )}
+            </button>
+          </div>
+
+          <div className="description">
+            <h3>Product Details</h3>
+            <p>{product.description ?? 'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}</p>
+          </div>
+
+          <div className="specs">
+            <div className="spec-row"><span>Brand</span><strong>{product.brand_name ?? 'Al Waha Select'}</strong></div>
+            <div className="spec-row"><span>OEM Number</span><strong>{product.oem_number ?? 'On request'}</strong></div>
+            <div className="spec-row"><span>Warranty</span><strong>{product.warranty_months ? `${product.warranty_months} months` : 'Confirm with desk'}</strong></div>
+          </div>
         </div>
-        {fitments.length ? (
-          <div className="product-fitmentList">
-            {fitments.map((fitment) => {
-              const compatibleVehicle = fitment.vehicles!;
-              const brandName = compatibleVehicle.manufacturers?.manufacturer_name ?? 'Vehicle';
-              const logoUrl = compatibleVehicle.manufacturers?.logo_url;
-              return (
-                <div key={fitment.model_id}>
-                  <div className="product-fitment-brand">
-                    {logoUrl && <img src={logoUrl} alt={`${brandName} logo`} />}
-                    <small>Vehicle fitment</small>
-                  </div>
-                  <strong>{brandName} {compatibleVehicle.model_name}</strong>
-                  <span>
-                    Compatible years: {formatCompatibleYears(fitment)}
-                    {compatibleVehicle.generation ? ` · ${compatibleVehicle.generation}` : ''}
-                    {compatibleVehicle.chassis_code ? ` · ${compatibleVehicle.chassis_code}` : ''}
-                  </span>
-                </div>
-              );
-            })}
+
+        {/* Fitments (Full width inside grid) */}
+        <div className="fitments">
+          <div className="fitments-header">
+            <h2>Compatible Vehicles</h2>
+            <p>This product is verified for the following vehicles.</p>
           </div>
-        ) : (
-          <p>
-            Send your vehicle details with the booking and our parts desk will verify fitment before
-            confirmation.
-          </p>
-        )}
-      </section>
+          {fitments.length ? (
+            <div className="fitment-grid">
+              {fitments.map((fitment) => {
+                const vehicle = fitment.vehicles!;
+                const brandName = vehicle.manufacturers?.manufacturer_name ?? 'Vehicle';
+                const logoUrl = vehicle.manufacturers?.logo_url;
+                return (
+                  <div key={fitment.model_id} className="fitment-card">
+                    <div className="fitment-logo">
+                      {logoUrl ? <img src={logoUrl} alt={brandName} /> : <span style={{ fontSize: 12, fontWeight: 'bold' }}>{brandName.slice(0, 2)}</span>}
+                    </div>
+                    <div className="fitment-info">
+                      <strong>{brandName} {vehicle.model_name}</strong>
+                      <span>
+                        {formatCompatibleYears(fitment)}
+                        {vehicle.generation ? ` · ${vehicle.generation}` : ''}
+                        {vehicle.chassis_code ? ` · ${vehicle.chassis_code}` : ''}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p style={{ fontSize: 14, color: '#666' }}>Send your vehicle details with the booking and our parts desk will verify fitment.</p>
+          )}
+        </div>
+      </div>
     </main>
   );
 }
