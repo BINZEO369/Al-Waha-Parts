@@ -587,7 +587,9 @@ function ResourceForm({
         <div className="modal-heading">
           <div>
             <span className="eyebrow">{row ? 'Edit record' : 'New record'}</span>
-            <h3>{kind === 'parts' ? (row ? 'Update product' : 'Add product') : `${row ? 'Update' : 'Create'} ${config[kind].title.replace(' records', '')}`}</h3>
+            <h3>
+              {row ? 'Update' : 'Create'} {config[kind].title.replace(' records', '')}
+            </h3>
           </div>
           <button className="modal-close" type="button" onClick={onClose} aria-label="Close form">
             ×
@@ -649,14 +651,7 @@ function ResourceForm({
                     <select
                       required={field.required}
                       value={String(values[field.key] ?? '')}
-                      onChange={(event) => {
-                        const nextValue = event.target.value;
-                        set(field.key, nextValue);
-                        if (field.key === 'manufacturer_id') {
-                          const selectedModel = lookups.models.find((model) => model.id === values.model_id);
-                          if (selectedModel && selectedModel.manufacturer_id !== nextValue) set('model_id', '');
-                        }
-                      }}
+                      onChange={(event) => set(field.key, event.target.value)}
                     >
                       <option value="">Choose…</option>
                       {(dynamicOptions ?? field.options ?? []).map((option) => (
@@ -690,7 +685,7 @@ function ResourceForm({
             Cancel
           </button>
           <button className="primary-button" type="submit" disabled={saving}>
-            {saving ? 'Saving…' : row ? 'Save changes' : kind === 'parts' ? 'Create product' : 'Create record'}
+            {saving ? 'Saving…' : row ? 'Save changes' : 'Create record'}
           </button>
         </div>
       </form>

@@ -42,8 +42,6 @@ The uploader supports primary product images, product gallery images, manufactur
 3. Log in at `https://admin.al-waha.shop`, open Parts, Manufacturers, Models, Categories, or Hero banners, and use the new Upload image control.
 4. Confirm that the returned ImageKit URL is saved to the record and that the storefront preview loads it.
 
-For the inventory Product assistant, keep the existing `GEMINI_API_KEY` and optional `GEMINI_MODEL` configured in the central API project. Gemini suggestions remain preview-only and use the existing admin approval workflow.
-
 ImageKit's official guidance says browser uploads should use short-lived `token`, `signature`, and `expire` values generated on a secure backend, and that private keys must remain server-side. The implementation follows that flow.
 
 References:
