@@ -12,6 +12,7 @@ export function BookingForm() {
   const [message, setMessage] = useState('');
   const [bookingNumber, setBookingNumber] = useState('');
   const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
+  const [copied, setCopied] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,6 +26,7 @@ export function BookingForm() {
     setState('loading');
     setMessage('');
     setBookingNumber('');
+    setCopied(false);
     const form = new FormData(formElement);
     const isDelivery = deliveryMethod === 'delivery';
 
@@ -68,6 +70,17 @@ export function BookingForm() {
     }
   }
 
+  async function copyBookingNumber() {
+    if (!bookingNumber) return;
+    try {
+      await navigator.clipboard.writeText(bookingNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* ignore */
+    }
+  }
+
   return (
     <form className="booking-form" onSubmit={submit}>
       <style>{`
@@ -85,6 +98,7 @@ export function BookingForm() {
           padding: 24px;
           font-family: system-ui, -apple-system, sans-serif;
           color: #111;
+          position: relative;
         }
         @media (max-width: 600px) {
           .booking-form { padding: 16px; gap: 16px; }
@@ -179,10 +193,7 @@ export function BookingForm() {
           object-fit: contain;
           padding: 3px;
         }
-        .bf-item-info {
-          flex: 1;
-          min-width: 140px;
-        }
+        .bf-item-info { flex: 1; min-width: 140px; }
         .bf-item-name {
           font-size: 13px;
           font-weight: 700;
@@ -228,9 +239,7 @@ export function BookingForm() {
           outline: none;
           font-family: inherit;
         }
-        .bf-qty input:focus {
-          border-color: #111;
-        }
+        .bf-qty input:focus { border-color: #111; }
         .bf-line-total {
           font-size: 13px;
           font-weight: 800;
@@ -289,11 +298,7 @@ export function BookingForm() {
         }
 
         /* ================= FIELDS ================= */
-        .bf-fields {
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-        }
+        .bf-fields { display: flex; flex-direction: column; gap: 14px; }
         .bf-row {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -302,11 +307,7 @@ export function BookingForm() {
         @media (max-width: 600px) {
           .bf-row { grid-template-columns: 1fr; gap: 14px; }
         }
-        .bf-field {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
+        .bf-field { display: flex; flex-direction: column; gap: 6px; }
         .bf-field label {
           font-size: 11px;
           font-weight: 800;
@@ -330,19 +331,14 @@ export function BookingForm() {
           font-family: inherit;
         }
         .bf-field input::placeholder,
-        .bf-field textarea::placeholder {
-          color: #999;
-        }
+        .bf-field textarea::placeholder { color: #999; }
         .bf-field input:focus,
         .bf-field select:focus,
         .bf-field textarea:focus {
           border-color: #111;
           background: #fff;
         }
-        .bf-field textarea {
-          resize: vertical;
-          min-height: 80px;
-        }
+        .bf-field textarea { resize: vertical; min-height: 80px; }
 
         /* ================= PICKUP INFO CARD ================= */
         .bf-pickup {
@@ -371,16 +367,8 @@ export function BookingForm() {
           justify-content: center;
           flex-shrink: 0;
         }
-        .bf-pickup-icon svg {
-          width: 18px;
-          height: 18px;
-        }
-        .bf-pickup-info {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-          min-width: 0;
-        }
+        .bf-pickup-icon svg { width: 18px; height: 18px; }
+        .bf-pickup-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
         .bf-pickup-title {
           font-size: 13px;
           font-weight: 800;
@@ -412,13 +400,8 @@ export function BookingForm() {
           cursor: pointer;
           width: 100%;
         }
-        .bf-map-btn:hover {
-          background: #dc2626;
-        }
-        .bf-map-btn svg {
-          width: 14px;
-          height: 14px;
-        }
+        .bf-map-btn:hover { background: #dc2626; }
+        .bf-map-btn svg { width: 14px; height: 14px; }
 
         /* ================= SUBMIT ================= */
         .bf-submit {
@@ -435,42 +418,330 @@ export function BookingForm() {
           transition: all 0.2s;
           text-transform: uppercase;
           font-family: inherit;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
         }
-        .bf-submit:hover:not(:disabled) {
-          background: #dc2626;
-        }
+        .bf-submit:hover:not(:disabled) { background: #dc2626; }
         .bf-submit:disabled {
           background: #ccc;
           color: #fff;
           cursor: not-allowed;
         }
+        .bf-submit .spinner {
+          width: 14px;
+          height: 14px;
+          border: 2px solid rgba(255,255,255,0.35);
+          border-top-color: #fff;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
 
-        /* ================= MESSAGES ================= */
-        .bf-message {
+        /* ================= ERROR ================= */
+        .bf-error {
           padding: 14px 16px;
           border-radius: 10px;
           font-size: 13px;
           line-height: 1.5;
+          background: #dc2626;
+          color: #fff;
+          animation: shakeIn 0.4s ease;
+        }
+        @keyframes shakeIn {
+          0% { transform: translateX(0); opacity: 0; }
+          20% { transform: translateX(-6px); }
+          40% { transform: translateX(6px); }
+          60% { transform: translateX(-4px); }
+          80% { transform: translateX(4px); }
+          100% { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ================= SUCCESS MODAL ================= */
+        .success-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.65);
+          backdrop-filter: blur(4px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 20px;
+          animation: overlayIn 0.3s ease forwards;
+        }
+        @keyframes overlayIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .success-card {
+          position: relative;
+          background: #fff;
+          border-radius: 20px;
+          padding: 36px 28px 28px;
+          max-width: 440px;
+          width: 100%;
+          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          align-items: center;
+          gap: 14px;
+          text-align: center;
+          animation: cardIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          overflow: hidden;
         }
-        .bf-message.success {
+        @keyframes cardIn {
+          0% {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        /* Decorative red dots at corners */
+        .success-card::before,
+        .success-card::after {
+          content: '';
+          position: absolute;
+          width: 120px;
+          height: 120px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(220,38,38,0.1) 0%, transparent 70%);
+          pointer-events: none;
+        }
+        .success-card::before {
+          top: -40px;
+          left: -40px;
+        }
+        .success-card::after {
+          bottom: -40px;
+          right: -40px;
+        }
+
+        /* Animated checkmark circle */
+        .success-circle {
+          width: 78px;
+          height: 78px;
+          border-radius: 50%;
           background: #111;
           color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          flex-shrink: 0;
+          animation: circlePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s backwards;
         }
-        .bf-message.error {
+        @keyframes circlePop {
+          0% { transform: scale(0); opacity: 0; }
+          60% { transform: scale(1.15); opacity: 1; }
+          100% { transform: scale(1); }
+        }
+        .success-circle::after {
+          content: '';
+          position: absolute;
+          inset: -6px;
+          border-radius: 50%;
+          border: 2px solid #dc2626;
+          animation: ringPulse 1.4s ease-out 0.4s infinite;
+          opacity: 0;
+        }
+        @keyframes ringPulse {
+          0% { transform: scale(0.9); opacity: 0.8; }
+          100% { transform: scale(1.35); opacity: 0; }
+        }
+        .success-check {
+          stroke-dasharray: 50;
+          stroke-dashoffset: 50;
+          animation: drawCheck 0.5s ease-out 0.5s forwards;
+        }
+        @keyframes drawCheck {
+          to { stroke-dashoffset: 0; }
+        }
+
+        .success-title {
+          font-size: 22px;
+          font-weight: 800;
+          color: #111;
+          margin: 6px 0 0;
+          letter-spacing: -0.4px;
+          animation: fadeUp 0.4s ease 0.5s backwards;
+        }
+        .success-subtitle {
+          font-size: 13px;
+          color: #666;
+          font-weight: 500;
+          line-height: 1.5;
+          margin: 0;
+          animation: fadeUp 0.4s ease 0.6s backwards;
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Booking number copy box */
+        .success-id-box {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          width: 100%;
+          padding: 14px 16px;
+          background: #fafafa;
+          border: 1px dashed #d4d4d4;
+          border-radius: 12px;
+          margin-top: 8px;
+          animation: fadeUp 0.4s ease 0.7s backwards;
+        }
+        .success-id-content {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          text-align: left;
+          min-width: 0;
+          flex: 1;
+        }
+        .success-id-label {
+          font-size: 9px;
+          font-weight: 800;
+          color: #888;
+          text-transform: uppercase;
+          letter-spacing: 0.6px;
+        }
+        .success-id-value {
+          font-size: 15px;
+          font-weight: 800;
+          color: #111;
+          letter-spacing: 0.3px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .success-copy-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 12px;
+          border-radius: 8px;
+          background: #111;
+          color: #fff;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.4px;
+          text-transform: uppercase;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+          flex-shrink: 0;
+          font-family: inherit;
+        }
+        .success-copy-btn:hover {
+          background: #dc2626;
+        }
+        .success-copy-btn.copied {
+          background: #dc2626;
+        }
+        .success-copy-btn svg {
+          width: 12px;
+          height: 12px;
+        }
+
+        /* CTA buttons */
+        .success-actions {
+          display: flex;
+          gap: 8px;
+          width: 100%;
+          margin-top: 8px;
+          animation: fadeUp 0.4s ease 0.8s backwards;
+        }
+        .success-btn {
+          flex: 1;
+          padding: 12px;
+          border-radius: 10px;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.4px;
+          text-transform: uppercase;
+          text-align: center;
+          text-decoration: none;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-family: inherit;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+        }
+        .success-btn.primary {
           background: #dc2626;
           color: #fff;
         }
-        .bf-message strong {
-          font-size: 13px;
-          font-weight: 800;
+        .success-btn.primary:hover {
+          background: #111;
         }
-        .bf-message span {
-          font-size: 12px;
-          opacity: 0.92;
-          line-height: 1.5;
+        .success-btn.secondary {
+          background: #fff;
+          color: #111;
+          border: 1px solid #e5e5e5;
+        }
+        .success-btn.secondary:hover {
+          border-color: #111;
+        }
+        .success-btn svg {
+          width: 12px;
+          height: 12px;
+        }
+
+        /* Confetti dots */
+        .confetti {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 0;
+          pointer-events: none;
+          z-index: 1;
+        }
+        .confetti-dot {
+          position: absolute;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #dc2626;
+          opacity: 0;
+          animation: confettiFall 1.6s ease-out 0.3s forwards;
+        }
+        .confetti-dot:nth-child(1) { left: 15%; animation-delay: 0.3s; }
+        .confetti-dot:nth-child(2) { left: 30%; background: #111; animation-delay: 0.4s; width: 8px; height: 8px; }
+        .confetti-dot:nth-child(3) { left: 45%; animation-delay: 0.35s; }
+        .confetti-dot:nth-child(4) { left: 60%; background: #111; animation-delay: 0.45s; width: 5px; height: 5px; }
+        .confetti-dot:nth-child(5) { left: 75%; animation-delay: 0.4s; }
+        .confetti-dot:nth-child(6) { left: 85%; background: #111; animation-delay: 0.5s; width: 7px; height: 7px; }
+        @keyframes confettiFall {
+          0% {
+            transform: translateY(40px) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(420px) rotate(540deg);
+            opacity: 0;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .success-card { padding: 28px 20px 22px; }
+          .success-title { font-size: 18px; }
+          .success-circle { width: 66px; height: 66px; }
+          .success-actions { flex-direction: column; }
         }
       `}</style>
 
@@ -659,18 +930,116 @@ export function BookingForm() {
         type="submit"
         disabled={state === 'loading' || !items.length}
       >
-        {state === 'loading' ? 'Saving…' : 'Confirm Booking'}
+        {state === 'loading' ? (
+          <>
+            <span className="spinner" />
+            Saving…
+          </>
+        ) : (
+          'Confirm Booking'
+        )}
       </button>
 
-      {state === 'success' && (
-        <div className="bf-message success" role="status" aria-live="polite">
-          <strong>Booking received: {bookingNumber}</strong>
-          <span>{message}</span>
+      {state === 'error' && (
+        <div className="bf-error" role="alert">
+          {message}
         </div>
       )}
-      {state === 'error' && (
-        <div className="bf-message error" role="alert">
-          {message}
+
+      {/* ================= SUCCESS MODAL ================= */}
+      {state === 'success' && (
+        <div className="success-overlay" onClick={() => setState('idle')}>
+          <div
+            className="success-card"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="success-title"
+          >
+            {/* Confetti dots */}
+            <div className="confetti" aria-hidden="true">
+              <span className="confetti-dot" />
+              <span className="confetti-dot" />
+              <span className="confetti-dot" />
+              <span className="confetti-dot" />
+              <span className="confetti-dot" />
+              <span className="confetti-dot" />
+            </div>
+
+            {/* Animated checkmark */}
+            <div className="success-circle">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                width="34"
+                height="34"
+                aria-hidden="true"
+              >
+                <polyline
+                  className="success-check"
+                  points="20 6 9 17 4 12"
+                />
+              </svg>
+            </div>
+
+            <h2 id="success-title" className="success-title">
+              Booking Confirmed
+            </h2>
+            <p className="success-subtitle">{message}</p>
+
+            {/* Booking ID copy box */}
+            <div className="success-id-box">
+              <div className="success-id-content">
+                <span className="success-id-label">Booking ID</span>
+                <span className="success-id-value">{bookingNumber}</span>
+              </div>
+              <button
+                type="button"
+                className={`success-copy-btn ${copied ? 'copied' : ''}`}
+                onClick={copyBookingNumber}
+                aria-label={copied ? 'Copied' : 'Copy booking ID'}
+              >
+                {copied ? (
+                  <>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                    Copy
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Actions */}
+            <div className="success-actions">
+              <Link href="/track" className="success-btn primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                Track Booking
+              </Link>
+              <button
+                type="button"
+                className="success-btn secondary"
+                onClick={() => setState('idle')}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </form>
