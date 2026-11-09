@@ -178,7 +178,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         }
 
         /* ---------------------------------
-         * GALLERY / IMAGE FIX
+         * GALLERY / IMAGE FIX (NO ZOOM)
          * --------------------------------- */
         .gallery { 
           display: flex; 
@@ -187,31 +187,29 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           width: 100%;
         }
         
-        /* Fixed Height Container */
         .main-image {
           width: 100%;
-          height: 450px; /* Fixed height for desktop */
+          height: auto;
+          min-height: 300px;
+          max-height: 550px; /* সর্বোচ্চ উচ্চতা নির্ধারণ করা হয়েছে */
           background: #f8f9fa; 
           border-radius: 16px;
           border: 1px solid #eaeaea;
-          overflow: hidden;
           display: flex;
           align-items: center;
           justify-content: center;
-          position: relative;
-          padding: 16px; /* Slight padding so image doesn't touch edges */
+          padding: 20px; 
+          overflow: hidden;
         }
         
-        .main-image img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain; /* Image will scale to fit within the box without stretching */
-          transition: transform 0.3s ease;
+        /* ইমেজকে জোর করে কন্টেইনারের ভেতরে ফিট করা হয়েছে */
+        .main-image :global(img) {
+          max-width: 100%;
+          max-height: 100%;
+          width: auto !important; 
+          height: auto !important; 
+          object-fit: contain !important; /* ছবি কাটা পড়বে না বা জুম হবে না */
           display: block;
-        }
-        
-        .main-image:hover img {
-          transform: scale(1.03);
         }
 
         .thumbnails {
@@ -415,9 +413,8 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           .title { font-size: 24px; }
           .price { font-size: 28px; }
           
-          /* Fixed height for mobile image box */
           .main-image { 
-            height: 320px; 
+            max-height: 400px; /* মোবাইলে ছবি আরও কম জায়গা নেবে */
             padding: 12px;
             border-radius: 12px;
           }
