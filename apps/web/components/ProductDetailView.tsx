@@ -240,88 +240,157 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           .info { padding-top: 0; }
         }
 
-        /* --- PREMIUM VEHICLE MODEL CARD --- */
-        .vehicle-model-card {
+        /* --- MAIN UNIFIED CARD --- */
+        .main-product-card {
+          background: #ffffff;
+          border: 1px solid #e5e7eb;
+          border-radius: 20px;
+          padding: 24px;
+          box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+          margin-bottom: 20px;
+        }
+
+        /* Product Details inside Card */
+        .brand-category {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: #2563eb;
+          margin-bottom: 10px;
+        }
+        
+        .title {
+          font-size: 28px;
+          font-weight: 800;
+          color: #111;
+          line-height: 1.2;
+          margin: 0 0 16px 0;
+        }
+        @media (min-width: 768px) { .title { font-size: 32px; } }
+
+        .meta-tags {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 13px;
+          color: #666;
+          margin-bottom: 20px;
+          padding-bottom: 20px;
+          border-bottom: 1px solid #eaeaea;
+        }
+        .meta-tags strong { color: #111; }
+        .badge {
+          background: #e0f2fe;
+          color: #0369a1;
+          padding: 4px 10px;
+          border-radius: 20px;
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        /* Vehicle Fitment Box (Inside Main Card) */
+        .vehicle-fitment-box {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: linear-gradient(to right, #ffffff, #f8f9fa);
+          background: #f8f9fa;
           border: 1px solid #e5e7eb;
-          padding: 16px 20px;
-          border-radius: 16px;
-          margin-bottom: 16px;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-          transition: all 0.3s ease;
+          padding: 14px 16px;
+          border-radius: 12px;
+          margin-bottom: 24px;
         }
-        .vehicle-model-card:hover {
-          box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-          border-color: #d1d5db;
-        }
-
-        .model-card-left {
+        .fitment-left {
           display: flex;
           align-items: center;
-          gap: 16px;
+          gap: 14px;
         }
-        .model-logo {
-          width: 50px;
-          height: 50px;
-          background: #ffffff;
-          border-radius: 12px;
+        .fitment-logo {
+          width: 44px;
+          height: 44px;
+          background: #fff;
+          border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 6px;
           border: 1px solid #eaeaea;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-          flex-shrink: 0;
         }
-        .model-logo img {
+        .fitment-logo img {
           max-width: 100%;
           max-height: 100%;
           object-fit: contain;
         }
-        .model-info {
+        .fitment-text {
           display: flex;
           flex-direction: column;
         }
-        .model-label {
+        .fitment-label {
           font-size: 11px;
           color: #6b7280;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
           font-weight: 700;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
         }
-        .model-name {
-          font-size: 18px;
+        .fitment-name {
+          font-size: 16px;
           font-weight: 800;
           color: #111827;
-          line-height: 1.2;
         }
-        .model-card-right {
+        .fitment-right {
           display: flex;
           flex-direction: column;
           align-items: flex-end;
-          text-align: right;
         }
-        .model-year-badge {
-          background: #eff6ff;
-          color: #2563eb;
-          padding: 6px 12px;
-          border-radius: 8px;
-          font-size: 14px;
-          font-weight: 800;
-          border: 1px solid #bfdbfe;
+        .fitment-year {
+          background: #2563eb;
+          color: #fff;
+          padding: 4px 10px;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 700;
         }
-        .model-gen {
+        .fitment-gen {
           font-size: 12px;
           color: #6b7280;
-          margin-top: 6px;
+          margin-top: 4px;
           font-weight: 600;
         }
 
-        /* Booking Button (Moved below vehicle card) */
+        /* Price & Stock (Inside Main Card) */
+        .price-box {
+          display: flex;
+          align-items: baseline;
+          gap: 12px;
+          margin-bottom: 8px;
+        }
+        .price {
+          font-size: 32px;
+          font-weight: 800;
+          color: #111;
+        }
+        .old-price {
+          font-size: 18px;
+          color: #999;
+          text-decoration: line-through;
+          font-weight: 500;
+        }
+
+        .stock {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 14px;
+          font-weight: 600;
+        }
+        .stock.in { color: #10b981; }
+        .stock.out { color: #ef4444; }
+        .stock-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+        /* --- BOOKING BUTTON (Below Main Card) --- */
         .booking-action-container {
           margin-bottom: 32px;
         }
@@ -352,88 +421,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .btn-book.added { background: #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
         .btn:disabled { background: #eaeaea; color: #999; cursor: not-allowed; box-shadow: none; }
 
-        /* Divider */
-        .divider {
-          border: 0;
-          height: 1px;
-          background: #eaeaea;
-          margin-bottom: 24px;
-        }
-
-        /* Product Details below */
-        .brand-category {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 12px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          color: #2563eb;
-          margin-bottom: 8px;
-        }
-        
-        .title {
-          font-size: 28px;
-          font-weight: 800;
-          color: #111;
-          line-height: 1.2;
-          margin: 0 0 16px 0;
-        }
-        @media (min-width: 768px) { .title { font-size: 36px; } }
-
-        .meta-tags {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 13px;
-          color: #666;
-          margin-bottom: 20px;
-          padding-bottom: 20px;
-          border-bottom: 1px solid #eaeaea;
-        }
-        .meta-tags strong { color: #111; }
-        .badge {
-          background: #e0f2fe;
-          color: #0369a1;
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-size: 11px;
-          font-weight: 700;
-        }
-
-        /* Price & Stock */
-        .price-box {
-          display: flex;
-          align-items: baseline;
-          gap: 12px;
-          margin-bottom: 8px;
-        }
-        .price {
-          font-size: 32px;
-          font-weight: 800;
-          color: #111;
-        }
-        .old-price {
-          font-size: 18px;
-          color: #999;
-          text-decoration: line-through;
-          font-weight: 500;
-        }
-
-        .stock {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 14px;
-          font-weight: 600;
-          margin-bottom: 24px;
-        }
-        .stock.in { color: #10b981; }
-        .stock.out { color: #ef4444; }
-        .stock-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-
-        /* Description & Specs */
+        /* --- DESCRIPTION & SPECS (Below Button) --- */
         .description { margin-bottom: 32px; }
         .description h3 { font-size: 18px; font-weight: 700; margin: 0 0 12px; color: #111; }
         .description p { font-size: 15px; line-height: 1.6; color: #555; white-space: pre-wrap; margin: 0; }
@@ -477,7 +465,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           align-items: center;
           gap: 16px;
         }
-        .fitment-logo {
+        .fitment-card-logo {
           width: 48px;
           height: 48px;
           background: #f8f9fa;
@@ -488,7 +476,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           padding: 4px;
           flex-shrink: 0;
         }
-        .fitment-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .fitment-card-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .fitment-info strong { display: block; font-size: 15px; color: #111; margin-bottom: 4px; }
         .fitment-info span { display: block; font-size: 12px; color: #666; }
 
@@ -504,12 +492,20 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           }
           .thumb-btn { width: 60px; height: 60px; }
           
-          .vehicle-model-card {
-            padding: 12px 16px;
+          .main-product-card {
+            padding: 16px;
           }
-          .model-logo { width: 44px; height: 44px; }
-          .model-name { font-size: 16px; }
-          .model-year-badge { padding: 4px 8px; font-size: 12px; }
+          .vehicle-fitment-box {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+          }
+          .fitment-right {
+            align-items: flex-start;
+            flex-direction: row;
+            gap: 8px;
+            align-items: center;
+          }
           
           .fitment-grid { grid-template-columns: 1fr; }
         }
@@ -543,39 +539,66 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         {/* Info Column */}
         <div className="info">
           
-          {/* 1. PREMIUM VEHICLE FITMENT CARD */}
-          {primaryFitment && primaryFitment.vehicles && (
-            <div className="vehicle-model-card">
-              {/* Left: Logo & Name */}
-              <div className="model-card-left">
-                <div className="model-logo">
-                  {primaryFitment.vehicles.manufacturers?.logo_url ? (
-                    <img src={primaryFitment.vehicles.manufacturers.logo_url} alt={primaryFitment.vehicles.manufacturers.manufacturer_name || 'Logo'} />
-                  ) : (
-                    <span style={{ fontSize: 14, fontWeight: 'bold' }}>
-                      {primaryFitment.vehicles.manufacturers?.manufacturer_name?.slice(0, 2).toUpperCase() || 'V'}
+          {/* MAIN UNIFIED CARD */}
+          <div className="main-product-card">
+            
+            {/* 1. Brand & Title */}
+            <div className="brand-category">
+              {product.brand_name && <span>{product.brand_name}</span>}
+              {product.brand_name && product.parts_categories && <span>•</span>}
+              {product.parts_categories && <span>{product.parts_categories.category_name}</span>}
+            </div>
+            <h1 className="title">{product.part_name}</h1>
+
+            {/* 2. SKU & Badges */}
+            <div className="meta-tags">
+              {product.sku && <span>SKU: <strong>{product.sku}</strong></span>}
+              {product.tested_status === 'tested' && <span className="badge">Tested</span>}
+              {product.condition && <span className="badge" style={{ background: '#f3f4f6', color: '#374151' }}>{product.condition}</span>}
+            </div>
+
+            {/* 3. Vehicle Fitment Box */}
+            {primaryFitment && primaryFitment.vehicles && (
+              <div className="vehicle-fitment-box">
+                <div className="fitment-left">
+                  <div className="fitment-logo">
+                    {primaryFitment.vehicles.manufacturers?.logo_url ? (
+                      <img src={primaryFitment.vehicles.manufacturers.logo_url} alt="Logo" />
+                    ) : (
+                      <span style={{ fontSize: 14, fontWeight: 'bold' }}>
+                        {primaryFitment.vehicles.manufacturers?.manufacturer_name?.slice(0, 2).toUpperCase() || 'V'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="fitment-text">
+                    <span className="fitment-label">Compatible With</span>
+                    <span className="fitment-name">
+                      {primaryFitment.vehicles.manufacturers?.manufacturer_name} {primaryFitment.vehicles.model_name}
                     </span>
+                  </div>
+                </div>
+                <div className="fitment-right">
+                  <span className="fitment-year">{formatCompatibleYears(primaryFitment)}</span>
+                  {primaryFitment.vehicles.generation && (
+                    <span className="fitment-gen">{primaryFitment.vehicles.generation}</span>
                   )}
                 </div>
-                <div className="model-info">
-                  <span className="model-label">Compatible With</span>
-                  <span className="model-name">
-                    {primaryFitment.vehicles.manufacturers?.manufacturer_name} {primaryFitment.vehicles.model_name}
-                  </span>
-                </div>
               </div>
+            )}
 
-              {/* Right: Years & Gen */}
-              <div className="model-card-right">
-                <span className="model-year-badge">{formatCompatibleYears(primaryFitment)}</span>
-                {primaryFitment.vehicles.generation && (
-                  <span className="model-gen">{primaryFitment.vehicles.generation}</span>
-                )}
-              </div>
+            {/* 4. Price & Stock */}
+            <div className="price-box">
+              <span className="price">{formatSar(currentPrice)}</span>
+              {hasDiscount && <span className="old-price">{formatSar(product.price)}</span>}
             </div>
-          )}
 
-          {/* 2. BOOKING BUTTON (Below the Card) */}
+            <div className={`stock ${outOfStock ? 'out' : 'in'}`}>
+              <span className="stock-dot"></span>
+              {outOfStock ? 'Out of Stock' : `In Stock (${product.stock_quantity} available)`}
+            </div>
+          </div>
+
+          {/* BOOKING BUTTON (Below the Card) */}
           <div className="booking-action-container">
             <button 
               className={`btn btn-book ${isAdded ? 'added' : ''}`} 
@@ -596,38 +619,13 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
             </button>
           </div>
 
-          <hr className="divider" />
-
-          {/* 3. PRODUCT DETAILS (Title, Price, etc.) */}
-          <div className="brand-category">
-            {product.brand_name && <span>{product.brand_name}</span>}
-            {product.brand_name && product.parts_categories && <span>•</span>}
-            {product.parts_categories && <span>{product.parts_categories.category_name}</span>}
-          </div>
-
-          <h1 className="title">{product.part_name}</h1>
-
-          <div className="meta-tags">
-            {product.sku && <span>SKU: <strong>{product.sku}</strong></span>}
-            {product.tested_status === 'tested' && <span className="badge">Tested</span>}
-            {product.condition && <span className="badge" style={{ background: '#f3f4f6', color: '#374151' }}>{product.condition}</span>}
-          </div>
-
-          <div className="price-box">
-            <span className="price">{formatSar(currentPrice)}</span>
-            {hasDiscount && <span className="old-price">{formatSar(product.price)}</span>}
-          </div>
-
-          <div className={`stock ${outOfStock ? 'out' : 'in'}`}>
-            <span className="stock-dot"></span>
-            {outOfStock ? 'Out of Stock' : `In Stock (${product.stock_quantity} available)`}
-          </div>
-
+          {/* DESCRIPTION (Below the Button) */}
           <div className="description">
             <h3>Product Details</h3>
             <p>{product.description ?? 'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}</p>
           </div>
 
+          {/* SPECS */}
           <div className="specs">
             <div className="spec-row"><span>Brand</span><strong>{product.brand_name ?? 'Al Waha Select'}</strong></div>
             <div className="spec-row"><span>OEM Number</span><strong>{product.oem_number ?? 'On request'}</strong></div>
@@ -649,7 +647,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
                 const logoUrl = vehicle.manufacturers?.logo_url;
                 return (
                   <div key={fitment.model_id} className="fitment-card">
-                    <div className="fitment-logo">
+                    <div className="fitment-card-logo">
                       {logoUrl ? <img src={logoUrl} alt={brandName} /> : <span style={{ fontSize: 12, fontWeight: 'bold' }}>{brandName.slice(0, 2)}</span>}
                     </div>
                     <div className="fitment-info">
