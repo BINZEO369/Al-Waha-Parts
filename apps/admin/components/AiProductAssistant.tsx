@@ -2,12 +2,22 @@
 
 import { FormEvent, useState } from 'react';
 import { adminFetch } from '../lib/auth';
+import { ImageKitUploadField } from './ImageKitUploadField';
 
 type Suggestion = {
+  product_title: string | null;
+  part_number: string | null;
+  oem_numbers: string[];
   category_name: string | null;
   manufacturer_name: string | null;
   model_name: string | null;
   compatible_years: number[];
+  part_type: string | null;
+  position: string | null;
+  condition: string | null;
+  material: string | null;
+  color: string | null;
+  package_contents: string[];
   seo_title: string | null;
   seo_description: string | null;
   keywords: string[];
@@ -18,6 +28,7 @@ type Suggestion = {
 
 export function AiProductAssistant() {
   const [partName, setPartName] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
   const [sku, setSku] = useState('');
   const [brandName, setBrandName] = useState('');
@@ -40,6 +51,7 @@ export function AiProductAssistant() {
           method: 'POST',
           body: JSON.stringify({
             part_name: partName,
+            image_url: imageUrl,
             description,
             sku,
             brand_name: brandName,
@@ -95,6 +107,11 @@ export function AiProductAssistant() {
             rows={3}
           />
         </label>
+        <div className="form-field form-field-wide">
+          <span>Part image</span>
+          <ImageKitUploadField value={imageUrl} folder="ai-product" onChange={setImageUrl} />
+          <small>The AI reads the uploaded image together with the text fields.</small>
+        </div>
         <button className="primary-button" type="submit" disabled={loading}>
           {loading ? 'Generating preview…' : 'Suggest metadata'}
         </button>
@@ -112,6 +129,13 @@ export function AiProductAssistant() {
             </span>
           </div>
           <p>
+            <strong>Suggested title:</strong> {suggestion.product_title || '—'}
+          </p>
+          <p>
+            <strong>Part / OEM number:</strong> {suggestion.part_number || '—'} /{' '}
+            {suggestion.oem_numbers.length ? suggestion.oem_numbers.join(', ') : '—'}
+          </p>
+          <p>
             <strong>Category:</strong> {suggestion.category_name || 'No confident suggestion'}
           </p>
           <p>
@@ -122,6 +146,20 @@ export function AiProductAssistant() {
             <strong>Compatible years:</strong>{' '}
             {suggestion.compatible_years.length
               ? suggestion.compatible_years.join(', ')
+              : 'Not determined'}
+          </p>
+          <p>
+            <strong>Type / position:</strong> {suggestion.part_type || '—'} /{' '}
+            {suggestion.position || '—'}
+          </p>
+          <p>
+            <strong>Condition / material / color:</strong> {suggestion.condition || '—'} /{' '}
+            {suggestion.material || '—'} / {suggestion.color || '—'}
+          </p>
+          <p>
+            <strong>Package contents:</strong>{' '}
+            {suggestion.package_contents.length
+              ? suggestion.package_contents.join(', ')
               : 'Not determined'}
           </p>
           <p>
