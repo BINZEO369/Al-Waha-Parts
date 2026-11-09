@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import Link from 'next/link';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { useCart } from './CartProvider';
 
@@ -25,14 +26,20 @@ export function BookingForm() {
     setMessage('');
     setBookingNumber('');
     const form = new FormData(formElement);
+    const isDelivery = deliveryMethod === 'delivery';
+
     const payload = {
       customer_name: String(form.get('customer_name') || '').trim(),
       customer_phone: String(form.get('customer_phone') || '').trim(),
       customer_email: String(form.get('customer_email') || '').trim() || undefined,
       customer_note: String(form.get('customer_note') || '').trim() || undefined,
       delivery_method: deliveryMethod,
-      shipping_address: String(form.get('shipping_address') || '').trim() || undefined,
-      customer_city: String(form.get('customer_city') || '').trim() || undefined,
+      shipping_address: isDelivery
+        ? String(form.get('shipping_address') || '').trim() || undefined
+        : undefined,
+      customer_city: isDelivery
+        ? String(form.get('customer_city') || '').trim() || undefined
+        : undefined,
       items: items.map((item) => ({
         part_id: item.part_id,
         quantity: item.quantity,
@@ -337,6 +344,82 @@ export function BookingForm() {
           min-height: 80px;
         }
 
+        /* ================= PICKUP INFO CARD ================= */
+        .bf-pickup {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          padding: 18px;
+          border: 1px solid #e5e5e5;
+          border-left: 3px solid #dc2626;
+          border-radius: 10px;
+          background: #fafafa;
+        }
+        .bf-pickup-head {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        .bf-pickup-icon {
+          width: 38px;
+          height: 38px;
+          border-radius: 10px;
+          background: #fee2e2;
+          color: #dc2626;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .bf-pickup-icon svg {
+          width: 18px;
+          height: 18px;
+        }
+        .bf-pickup-info {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          min-width: 0;
+        }
+        .bf-pickup-title {
+          font-size: 13px;
+          font-weight: 800;
+          color: #111;
+          line-height: 1.3;
+        }
+        .bf-pickup-desc {
+          font-size: 12px;
+          color: #666;
+          line-height: 1.5;
+          font-weight: 500;
+        }
+        .bf-map-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 12px 16px;
+          border-radius: 10px;
+          background: #111;
+          color: #fff;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          text-decoration: none;
+          transition: all 0.2s;
+          border: none;
+          cursor: pointer;
+          width: 100%;
+        }
+        .bf-map-btn:hover {
+          background: #dc2626;
+        }
+        .bf-map-btn svg {
+          width: 14px;
+          height: 14px;
+        }
+
         /* ================= SUBMIT ================= */
         .bf-submit {
           width: 100%;
@@ -497,40 +580,67 @@ export function BookingForm() {
           />
         </div>
 
-        <div className="bf-row">
-          <div className="bf-field">
-            <label htmlFor="bf-delivery">Delivery Method</label>
-            <select
-              id="bf-delivery"
-              name="delivery_method"
-              value={deliveryMethod}
-              onChange={(e) => setDeliveryMethod(e.target.value as 'pickup' | 'delivery')}
-            >
-              <option value="pickup">Pickup</option>
-              <option value="delivery">Delivery</option>
-            </select>
-          </div>
-          <div className="bf-field">
-            <label htmlFor="bf-city">City</label>
-            <input
-              id="bf-city"
-              name="customer_city"
-              autoComplete="address-level2"
-              placeholder="Al Jubail, Dammam…"
-            />
-          </div>
+        <div className="bf-field">
+          <label htmlFor="bf-delivery">Delivery Method</label>
+          <select
+            id="bf-delivery"
+            name="delivery_method"
+            value={deliveryMethod}
+            onChange={(e) => setDeliveryMethod(e.target.value as 'pickup' | 'delivery')}
+          >
+            <option value="pickup">Pickup from store</option>
+            <option value="delivery">Delivery</option>
+          </select>
         </div>
 
-        <div className="bf-field">
-          <label htmlFor="bf-address">Address</label>
-          <input
-            id="bf-address"
-            name="shipping_address"
-            autoComplete="street-address"
-            required={deliveryMethod === 'delivery'}
-            placeholder="Street address"
-          />
-        </div>
+        {deliveryMethod === 'delivery' ? (
+          <div className="bf-row">
+            <div className="bf-field">
+              <label htmlFor="bf-city">City</label>
+              <input
+                id="bf-city"
+                name="customer_city"
+                autoComplete="address-level2"
+                required
+                placeholder="Al Jubail, Dammam…"
+              />
+            </div>
+            <div className="bf-field">
+              <label htmlFor="bf-address">Delivery Address</label>
+              <input
+                id="bf-address"
+                name="shipping_address"
+                autoComplete="street-address"
+                required
+                placeholder="Street address"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="bf-pickup">
+            <div className="bf-pickup-head">
+              <div className="bf-pickup-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </div>
+              <div className="bf-pickup-info">
+                <span className="bf-pickup-title">Pickup from our store</span>
+                <span className="bf-pickup-desc">
+                  You must collect your product from our store after the booking is confirmed. Use the map below to find our location.
+                </span>
+              </div>
+            </div>
+            <Link href="/map" className="bf-map-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              View Store Location
+            </Link>
+          </div>
+        )}
 
         <div className="bf-field">
           <label htmlFor="bf-note">Notes</label>
