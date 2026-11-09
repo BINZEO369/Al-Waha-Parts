@@ -2793,3 +2793,58 @@ select:focus-visible {
     font-size: 15px;
   }
 }
+
+
+.inventory-record-meta {
+  display: grid;
+  grid-template-columns: minmax(180px, 2fr) minmax(130px, 1fr) minmax(130px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin: -3px 0 14px;
+  padding: 10px 12px;
+  color: #626771;
+  background: #f7f8fa;
+  border: 1px solid #e8eaee;
+  border-radius: 8px;
+}
+.inventory-main-fieldset {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.inventory-record-meta span { display: grid; gap: 4px; min-width: 0; }
+.inventory-record-meta b {
+  color: #8b9098;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.inventory-record-meta code,
+.inventory-record-meta time {
+  overflow: hidden;
+  color: #424750;
+  font: 600 9px 'DM Mono', monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.inventory-record-meta small { color: #92969d; font-size: 8px; }
+.inventory-ai-autofill {
+  margin: 0 0 10px !important;
+  padding: 9px 10px;
+  color: #53606a !important;
+  background: #f5f8fb;
+  border: 1px solid #e0e8ee;
+  border-radius: 7px;
+  font-size: 9px !important;
+  line-height: 1.6 !important;
+}
+@media (max-width: 760px) {
+  .inventory-record-meta { grid-template-columns: 1fr 1fr; }
+  .inventory-record-meta small { grid-column: 1 / -1; }
+}
+@media (max-width: 420px) {
+  .inventory-record-meta { grid-template-columns: 1fr; }
+  .inventory-record-meta small { grid-column: auto; }
+}

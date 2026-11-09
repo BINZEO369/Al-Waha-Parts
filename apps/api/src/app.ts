@@ -194,10 +194,19 @@ app.post(
       });
     }
     const input = sanitizeProductAiInput(request.body ?? ({} as ProductAiInput));
-    if (!input.part_name) return jsonError(reply, 400, 'part_name is required');
+    if (!input.part_name && !input.image_url) return jsonError(reply, 400, 'Add a product name or upload an image first.');
     const supabase = getSupabaseAdmin();
     try {
-      const suggestion = await suggestProductMetadata(config.geminiApiKey, config.geminiModel, input);
+      const [categories, manufacturers] = await Promise.all([
+        supabase.from('parts_categories').select('category_name').eq('status', 'active').order('category_name').limit(200),
+        supabase.from('manufacturers').select('manufacturer_name').order('manufacturer_name').limit(500),
+      ]);
+      if (categories.error || manufacturers.error)
+        throw new Error('Live category and manufacturer options could not be loaded.');
+      const suggestion = await suggestProductMetadata(config.geminiApiKey, config.geminiModel, input, {
+        categories: (categories.data ?? []).map((row) => row.category_name),
+        manufacturers: (manufacturers.data ?? []).map((row) => row.manufacturer_name),
+      });
       const { data: run, error: auditError } = await supabase
         .from('admin_ai_runs')
         .insert({

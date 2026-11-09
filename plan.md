@@ -133,3 +133,12 @@ Turn the admin app into a premium operations workspace backed by the connected S
 - Store an IP address only in a consented session and expose it only through the verified-admin API; do not store exact GPS coordinates, full user-agent strings, URL query strings/fragments, form contents, or a device-derived cross-session identity.
 - Country/region/city are approximate and only shown when trusted hosting-proxy metadata exists; missing values remain unknown.
 - Database tables are not directly readable or writable by `anon` or `authenticated`; access is mediated by the server-only service role and active-admin authorization.
+
+
+# Complete parts editor and image-aware AI suggestions
+
+The admin editor remains driven by the live `public.parts` table and the current verified-admin API. It exposes all writable part fields with schema-matched controls, while generated `id`, `created_at`, and `updated_at` remain visible but read-only. Normalized manufacturer/model fitments, categories, and the existing ImageKit path remain intact. In particular, integer display `position`, storefront `sort_order`, and physical vehicle-side descriptions are distinct concepts.
+
+The existing Gemini image/text analysis and AI audit trail will be reused. The AI receives active database category and manufacturer choices, and only exact live matches may populate relationship IDs. One admin action analyzes the primary image (or the first gallery image) plus entered text and fills supported empty fields in the current draft; existing manual entries remain untouched. It can suggest product name/slug, description, brand/part/OEM references, safe exact category/manufacturer/model links, condition, SEO and tags. It never fabricates SKU, price, sale price, inventory, tested status, ordering values or unsupported fitment. Every AI suggestion remains an unsaved draft until the admin explicitly saves.
+
+Implementation stays in `apps/admin/components/InventoryProductForm.tsx`, `apps/api/src/ai.ts`, and the protected AI route in `apps/api/src/app.ts`. No database migration is expected because the production schema already contains the missing columns; the live table was audited before making the UI changes.

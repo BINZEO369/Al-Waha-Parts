@@ -34,6 +34,8 @@ type FitmentDraft = { manufacturer_id: string; model_id: string; years_text: str
 type FormValues = Record<string, string | boolean>;
 type ProductSuggestion = {
   product_title: string | null;
+  brand_name: string | null;
+  description: string | null;
   part_number: string | null;
   oem_numbers: string[];
   category_name: string | null;
@@ -44,6 +46,7 @@ type ProductSuggestion = {
   position: string | null;
   seo_title: string | null;
   seo_description: string | null;
+  keywords: string[];
   duplicate_risk: 'low' | 'medium' | 'high';
   confidence: number;
   notes: string[];
@@ -62,6 +65,7 @@ function rowText(row: ProductRecord | null, key: string, fallback = '') {
 
 function initialValues(row: ProductRecord | null): FormValues {
   const gallery = row?.image_urls;
+  const tags = row?.tags;
   return {
     part_name: rowText(row, 'part_name'),
     slug: rowText(row, 'slug'),
@@ -77,11 +81,15 @@ function initialValues(row: ProductRecord | null): FormValues {
     currency: rowText(row, 'currency', 'SAR') || 'SAR',
     status: rowText(row, 'status', 'active') || 'active',
     description: rowText(row, 'description'),
-    condition: rowText(row, 'condition'),
-    tested_status: rowText(row, 'tested_status'),
-    position: rowText(row, 'position'),
+    condition: rowText(row, 'condition', 'new') || 'new',
+    tested_status: rowText(row, 'tested_status', 'not_tested') || 'not_tested',
+    position: rowText(row, 'position', '0'),
+    sort_order: rowText(row, 'sort_order', '0'),
+    min_order_quantity: rowText(row, 'min_order_quantity', '1'),
+    reorder_level: rowText(row, 'reorder_level', '0'),
     warranty_months: rowText(row, 'warranty_months'),
     storage_location: rowText(row, 'storage_location'),
+    tags: Array.isArray(tags) ? tags.join(', ') : rowText(row, 'tags'),
     seo_title: rowText(row, 'seo_title'),
     seo_description: rowText(row, 'seo_description'),
     primary_image_url: rowText(row, 'primary_image_url'),
@@ -108,6 +116,10 @@ function parseImageUrls(value: string) {
     // Keep compatibility with legacy comma/newline-separated image URL values.
   }
   return value.split(/[\n,]/).map((url) => url.trim()).filter(Boolean);
+}
+
+function parseStringList(value: string) {
+  return [...new Set(value.split(/[\n,;]/).map((item) => item.trim()).filter(Boolean))];
 }
 
 function slugify(value: string) {
@@ -143,6 +155,7 @@ export function InventoryProductForm({
   const [aiError, setAiError] = useState('');
   const [aiResult, setAiResult] = useState<AiResponse | null>(null);
   const [appliedFields, setAppliedFields] = useState<string[]>([]);
+  const [seoOpen, setSeoOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -218,6 +231,10 @@ export function InventoryProductForm({
     const cards: AiCard[] = [];
     if (aiSuggestion.product_title)
       cards.push({ key: 'title', label: 'Product title', value: aiSuggestion.product_title, available: true });
+    if (aiSuggestion.brand_name)
+      cards.push({ key: 'brand', label: 'Brand on product', value: aiSuggestion.brand_name, available: true });
+    if (aiSuggestion.description)
+      cards.push({ key: 'description', label: 'Product description', value: aiSuggestion.description, available: true });
     if (aiSuggestion.part_number)
       cards.push({ key: 'part_number', label: 'Part number', value: aiSuggestion.part_number, available: true });
     if (aiSuggestion.oem_numbers.length)
@@ -230,15 +247,21 @@ export function InventoryProductForm({
         hint: suggestedCategory ? 'Matched to the live category list.' : 'No exact live category match; choose a database category manually.',
         available: Boolean(suggestedCategory),
       });
+    if (aiSuggestion.manufacturer_name)
+      cards.push({
+        key: 'manufacturer',
+        label: 'Product manufacturer',
+        value: aiSuggestion.manufacturer_name,
+        hint: suggestedManufacturer ? 'Matched to the live manufacturer list.' : 'No exact live match; select a company manually.',
+        available: Boolean(suggestedManufacturer),
+      });
     if (aiSuggestion.manufacturer_name || aiSuggestion.model_name || aiSuggestion.compatible_years.length) {
       const compatibleLabel = [
         aiSuggestion.manufacturer_name,
         aiSuggestion.model_name,
         aiSuggestion.compatible_years.length ? aiSuggestion.compatible_years.join(', ') : '',
       ].filter(Boolean).join(' · ');
-      const compatibilityCanApply = Boolean(
-        suggestedModel || (suggestedManufacturer && !aiSuggestion.model_name && !aiSuggestion.compatible_years.length),
-      );
+      const compatibilityCanApply = Boolean(suggestedModel);
       cards.push({
         key: 'fitment',
         label: 'Compatible vehicle',
@@ -251,8 +274,6 @@ export function InventoryProductForm({
     }
     if (aiSuggestion.condition)
       cards.push({ key: 'condition', label: 'Condition', value: aiSuggestion.condition, available: true });
-    if (aiSuggestion.position)
-      cards.push({ key: 'position', label: 'Position', value: aiSuggestion.position, available: true });
     if (aiSuggestion.seo_title || aiSuggestion.seo_description)
       cards.push({
         key: 'seo',
@@ -260,6 +281,8 @@ export function InventoryProductForm({
         value: [aiSuggestion.seo_title, aiSuggestion.seo_description].filter(Boolean).join(' · '),
         available: true,
       });
+    if (aiSuggestion.keywords.length)
+      cards.push({ key: 'tags', label: 'Search tags', value: aiSuggestion.keywords.join(', '), available: true });
     return cards;
   }, [aiSuggestion, suggestedCategory, suggestedManufacturer, suggestedModel]);
 
@@ -267,8 +290,10 @@ export function InventoryProductForm({
     setAiError('');
     setAiResult(null);
     setAppliedFields([]);
-    if (!String(values.part_name).trim()) {
-      setAiError('Enter a product name first so the assistant has something to analyze.');
+    const imageUrls = parseImageUrls(String(values.image_urls ?? ''));
+    const analysisImage = String(values.primary_image_url ?? '').trim() || imageUrls[0] || '';
+    if (!String(values.part_name).trim() && !analysisImage) {
+      setAiError('Enter a product name or upload a product image first.');
       return;
     }
     setAiLoading(true);
@@ -280,7 +305,7 @@ export function InventoryProductForm({
         method: 'POST',
         body: JSON.stringify({
           part_name: values.part_name,
-          image_url: values.primary_image_url,
+          image_url: analysisImage,
           description: values.description,
           sku: values.sku,
           oem_number: values.oem_number,
@@ -291,6 +316,7 @@ export function InventoryProductForm({
         }),
       });
       setAiResult(result);
+      setAppliedFields(applyAllSuggestions(result.suggestion, true));
     } catch (cause) {
       setAiError(cause instanceof Error ? cause.message : 'Unable to load AI suggestions.');
     } finally {
@@ -298,44 +324,104 @@ export function InventoryProductForm({
     }
   }
 
+  function applyAllSuggestions(suggestion: ProductSuggestion, onlyEmpty: boolean) {
+    const updates: Record<string, string> = {};
+    const applied: string[] = [];
+    const canFill = (field: string) => !onlyEmpty || !String(values[field] ?? '').trim();
+    const add = (field: string, key: string, value: string | null | undefined) => {
+      if (value?.trim() && canFill(field)) { updates[field] = value.trim(); applied.push(key); }
+    };
+    add('part_name', 'title', suggestion.product_title);
+    if (suggestion.product_title && canFill('slug') && !slugManuallyEdited) {
+      updates.slug = slugify(suggestion.product_title);
+      applied.push('title');
+    }
+    add('brand_name', 'brand', suggestion.brand_name);
+    add('description', 'description', suggestion.description);
+    add('part_number', 'part_number', suggestion.part_number);
+    add('oem_number', 'oem', suggestion.oem_numbers.length ? suggestion.oem_numbers.join(', ') : null);
+    add('condition', 'condition', suggestion.condition);
+    add('seo_title', 'seo', suggestion.seo_title);
+    add('seo_description', 'seo', suggestion.seo_description);
+    add('tags', 'tags', suggestion.keywords.length ? suggestion.keywords.join(', ') : null);
+
+    const matchedCategory = suggestion.category_name
+      ? lookups.categories.find((option) => normalizeName(option.category_name) === normalizeName(suggestion.category_name ?? ''))
+      : undefined;
+    const matchedManufacturer = suggestion.manufacturer_name
+      ? lookups.manufacturers.find((option) => normalizeName(option.manufacturer_name) === normalizeName(suggestion.manufacturer_name ?? ''))
+      : undefined;
+    if (matchedCategory && canFill('category_id')) {
+      updates.category_id = matchedCategory.id;
+      applied.push('category');
+    }
+    if (matchedManufacturer && canFill('manufacturer_id')) {
+      updates.manufacturer_id = matchedManufacturer.id;
+      applied.push('manufacturer');
+    }
+
+    const matchedModels = suggestion.model_name
+      ? lookups.models.filter((option) =>
+          normalizeName(option.model_name) === normalizeName(suggestion.model_name ?? '') &&
+          (!matchedManufacturer || option.manufacturer_id === matchedManufacturer.id),
+        )
+      : [];
+    const matchedModel = matchedModels.length === 1 ? matchedModels[0] : undefined;
+    if (matchedModel && (!onlyEmpty || fitments.every((fitment) => !fitment.model_id))) {
+      const modelId = matchedModel.id;
+      const blankIndex = fitments.findIndex((fitment) => !fitment.model_id);
+      setFitments((current) => {
+        const targetIndex = blankIndex >= 0 ? blankIndex : current.length;
+        const draft = { manufacturer_id: matchedModel.manufacturer_id, model_id: modelId, years_text: suggestion.compatible_years.join(', ') };
+        return targetIndex < current.length
+          ? current.map((fitment, index) => index === targetIndex ? draft : fitment)
+          : [...current, draft];
+      });
+      applied.push('fitment');
+    }
+    if (Object.keys(updates).length) setValues((current) => ({ ...current, ...updates }));
+    if (applied.includes('seo')) setSeoOpen(true);
+    return [...new Set(applied)];
+  }
+
   function applySuggestion(key: string) {
     if (!aiSuggestion) return;
-    if (key === 'title' && aiSuggestion.product_title) {
-      setValue('part_name', aiSuggestion.product_title);
-      if (!slugManuallyEdited) setValue('slug', slugify(aiSuggestion.product_title));
-    }
-    if (key === 'part_number' && aiSuggestion.part_number)
-      setValue('part_number', aiSuggestion.part_number);
-    if (key === 'oem' && aiSuggestion.oem_numbers.length)
-      setValue('oem_number', aiSuggestion.oem_numbers.join(', '));
-    if (key === 'category' && suggestedCategory)
-      setValue('category_id', suggestedCategory.id);
-    if (key === 'condition' && aiSuggestion.condition)
-      setValue('condition', aiSuggestion.condition);
-    if (key === 'position' && aiSuggestion.position)
-      setValue('position', aiSuggestion.position);
-    if (key === 'seo') {
-      if (aiSuggestion.seo_title) setValue('seo_title', aiSuggestion.seo_title);
-      if (aiSuggestion.seo_description) setValue('seo_description', aiSuggestion.seo_description);
-    }
     if (key === 'fitment') {
-      const manufacturerId = suggestedModel?.manufacturer_id ?? suggestedManufacturer?.id ?? '';
-      const modelId = suggestedModel?.id ?? '';
+      if (!suggestedModel) return;
       const yearsText = aiSuggestion.compatible_years.join(', ');
       setFitments((current) => {
-        const existingIndex = modelId ? current.findIndex((fitment) => fitment.model_id === modelId) : -1;
+        const existingIndex = current.findIndex((fitment) => fitment.model_id === suggestedModel.id);
         const targetIndex = existingIndex >= 0 ? existingIndex : current.findIndex((fitment) => !fitment.model_id);
-        const draft = {
-          manufacturer_id: manufacturerId,
-          model_id: modelId,
-          years_text: yearsText || (targetIndex >= 0 ? current[targetIndex]?.years_text ?? '' : ''),
-        };
-        if (targetIndex >= 0)
-          return current.map((fitment, index) => index === targetIndex ? draft : fitment);
-        return [...current, draft];
+        const draft = { manufacturer_id: suggestedModel.manufacturer_id, model_id: suggestedModel.id, years_text: yearsText };
+        return targetIndex >= 0
+          ? current.map((fitment, index) => index === targetIndex ? draft : fitment)
+          : [...current, draft];
       });
+    } else if (key === 'title' && aiSuggestion.product_title) {
+      setValue('part_name', aiSuggestion.product_title);
+      if (!slugManuallyEdited) setValue('slug', slugify(aiSuggestion.product_title));
+    } else if (key === 'brand' && aiSuggestion.brand_name) {
+      setValue('brand_name', aiSuggestion.brand_name);
+    } else if (key === 'description' && aiSuggestion.description) {
+      setValue('description', aiSuggestion.description);
+    } else if (key === 'part_number' && aiSuggestion.part_number) {
+      setValue('part_number', aiSuggestion.part_number);
+    } else if (key === 'oem' && aiSuggestion.oem_numbers.length) {
+      setValue('oem_number', aiSuggestion.oem_numbers.join(', '));
+    } else if (key === 'category' && suggestedCategory) {
+      setValue('category_id', suggestedCategory.id);
+    } else if (key === 'manufacturer' && suggestedManufacturer) {
+      setValue('manufacturer_id', suggestedManufacturer.id);
+    } else if (key === 'condition' && aiSuggestion.condition) {
+      setValue('condition', aiSuggestion.condition);
+    } else if (key === 'seo') {
+      if (aiSuggestion.seo_title) setValue('seo_title', aiSuggestion.seo_title);
+      if (aiSuggestion.seo_description) setValue('seo_description', aiSuggestion.seo_description);
+      setSeoOpen(true);
+    } else if (key === 'tags' && aiSuggestion.keywords.length) {
+      setValue('tags', aiSuggestion.keywords.join(', '));
     }
-    setAppliedFields((current) => current.includes(key) ? current : [...current, key]);
+    setAppliedFields((current) => [...new Set([...current, key])]);
   }
 
   function updateFitment(index: number, key: keyof FitmentDraft, value: string) {
@@ -378,6 +464,24 @@ export function InventoryProductForm({
       setError('Stock quantity must be a whole number of 0 or greater.');
       return;
     }
+    const integerFields = {
+      position: { value: Number(values.position || 0), label: 'Display position', minimum: 0 },
+      sort_order: { value: Number(values.sort_order || 0), label: 'Storefront sort order', minimum: 0 },
+      min_order_quantity: { value: Number(values.min_order_quantity || 1), label: 'Minimum order quantity', minimum: 1 },
+      reorder_level: { value: Number(values.reorder_level || 0), label: 'Reorder level', minimum: 0 },
+    };
+    for (const field of Object.values(integerFields)) {
+      if (!Number.isInteger(field.value) || field.value < field.minimum) {
+        setError(`${field.label} must be a whole number of ${field.minimum} or greater.`);
+        return;
+      }
+    }
+    const warrantyText = String(values.warranty_months ?? '').trim();
+    const warrantyMonths = warrantyText ? Number(warrantyText) : null;
+    if (warrantyMonths !== null && (!Number.isInteger(warrantyMonths) || warrantyMonths < 0)) {
+      setError('Warranty must be a whole number of 0 months or greater.');
+      return;
+    }
 
     const nextFitments: Array<{ model_id: string; compatible_years: number[] }> = [];
     const selectedModels = new Set<string>();
@@ -401,31 +505,39 @@ export function InventoryProductForm({
     }
 
     const firstFitment = nextFitments[0];
+    const textOrNull = (key: string) => String(values[key] ?? '').trim() || null;
     const payload: Record<string, unknown> = {
       part_name: partName,
       slug,
       sku,
       category_id: values.category_id,
+      manufacturer_id: textOrNull('manufacturer_id'),
+      brand_name: textOrNull('brand_name'),
+      part_number: textOrNull('part_number'),
+      oem_number: textOrNull('oem_number'),
+      description: textOrNull('description'),
+      condition: values.condition || 'new',
+      tested_status: values.tested_status || 'not_tested',
       price,
       sale_price: salePrice,
       stock_quantity: stockQuantity,
+      position: integerFields.position.value,
+      sort_order: integerFields.sort_order.value,
+      min_order_quantity: integerFields.min_order_quantity.value,
+      reorder_level: integerFields.reorder_level.value,
+      warranty_months: warrantyMonths,
+      storage_location: textOrNull('storage_location'),
       currency: values.currency || 'SAR',
       status: values.status || 'active',
       is_featured: Boolean(values.is_featured),
+      tags: parseStringList(String(values.tags ?? '')),
+      primary_image_url: textOrNull('primary_image_url'),
       image_urls: parseImageUrls(String(values.image_urls ?? '')),
+      seo_title: textOrNull('seo_title'),
+      seo_description: textOrNull('seo_description'),
       model_id: firstFitment?.model_id ?? null,
       compatible_years: firstFitment?.compatible_years ?? [],
     };
-    const optionalFields = [
-      'manufacturer_id', 'brand_name', 'part_number', 'oem_number', 'description', 'condition',
-      'tested_status', 'position', 'warranty_months', 'storage_location', 'primary_image_url',
-      'seo_title', 'seo_description',
-    ];
-    for (const key of optionalFields) {
-      const value = values[key];
-      if (value !== undefined && String(value).trim())
-        payload[key] = ['warranty_months'].includes(key) ? Number(value) : String(value).trim();
-    }
 
     setSaving(true);
     let partRecordSaved = false;
@@ -469,6 +581,14 @@ export function InventoryProductForm({
           </div>
           <button className="modal-close" type="button" onClick={onClose} aria-label="Close product form">×</button>
         </div>
+        {row && (
+          <div className="inventory-record-meta">
+            <span><b>Record ID</b><code>{row.id}</code></span>
+            <span><b>Created</b><time>{rowText(row, 'created_at', '—')}</time></span>
+            <span><b>Last updated</b><time>{rowText(row, 'updated_at', '—')}</time></span>
+            <small>System-generated fields are read-only.</small>
+          </div>
+        )}
 
         <div className="inventory-form-steps" aria-label="Product workflow sections">
           <span><b>01</b> Product</span>
@@ -487,7 +607,7 @@ export function InventoryProductForm({
         )}
 
         <div className="inventory-composer-grid">
-          <div className="inventory-composer-main">
+          <fieldset className="inventory-composer-main inventory-main-fieldset" disabled={aiLoading} aria-busy={aiLoading}>
             <section className="inventory-form-section">
               <div className="inventory-form-section-heading">
                 <span>01</span>
@@ -608,20 +728,28 @@ export function InventoryProductForm({
             <section className="inventory-form-section">
               <div className="inventory-form-section-heading">
                 <span>03</span>
-                <div><small>COMMERCIAL DETAILS</small><h4>Price & availability</h4><p>Prices use the existing stored amount; new inventory is entered in Saudi riyals.</p></div>
+                <div><small>COMMERCIAL DETAILS</small><h4>Price & availability</h4><p>Existing amounts retain their stored currency; new inventory defaults to Saudi riyals.</p></div>
               </div>
               <div className="inventory-form-grid">
                 <label className="form-field">
-                  <span>Price (SAR) *</span>
+                  <span>Price ({String(values.currency || 'SAR')}) *</span>
                   <input type="number" min="0" step="0.01" value={String(values.price)} onChange={(event) => setValue('price', event.target.value)} placeholder="0.00" required />
                 </label>
                 <label className="form-field">
-                  <span>Sale price (SAR)</span>
+                  <span>Sale price ({String(values.currency || 'SAR')})</span>
                   <input type="number" min="0" step="0.01" value={String(values.sale_price)} onChange={(event) => setValue('sale_price', event.target.value)} placeholder="Optional" />
                 </label>
                 <label className="form-field">
                   <span>Stock quantity</span>
                   <input type="number" min="0" step="1" value={String(values.stock_quantity)} onChange={(event) => setValue('stock_quantity', event.target.value)} />
+                </label>
+                <label className="form-field">
+                  <span>Minimum order quantity</span>
+                  <input type="number" min="1" step="1" value={String(values.min_order_quantity)} onChange={(event) => setValue('min_order_quantity', event.target.value)} />
+                </label>
+                <label className="form-field">
+                  <span>Reorder level</span>
+                  <input type="number" min="0" step="1" value={String(values.reorder_level)} onChange={(event) => setValue('reorder_level', event.target.value)} />
                 </label>
                 <label className="form-field">
                   <span>Status</span>
@@ -631,15 +759,23 @@ export function InventoryProductForm({
                 </label>
                 <label className="form-field">
                   <span>Condition</span>
-                  <input value={String(values.condition)} onChange={(event) => setValue('condition', event.target.value)} placeholder="New, refurbished, used…" />
+                  <select value={String(values.condition)} onChange={(event) => setValue('condition', event.target.value)}>
+                    {['new', 'used', 'refurbished', 'damaged'].map((condition) => <option key={condition} value={condition}>{condition.replace(/_/g, ' ')}</option>)}
+                  </select>
                 </label>
                 <label className="form-field">
                   <span>Tested status</span>
-                  <input value={String(values.tested_status)} onChange={(event) => setValue('tested_status', event.target.value)} placeholder="Tested / not tested" />
+                  <select value={String(values.tested_status)} onChange={(event) => setValue('tested_status', event.target.value)}>
+                    {['not_tested', 'tested', 'failed'].map((status) => <option key={status} value={status}>{status.replace(/_/g, ' ')}</option>)}
+                  </select>
                 </label>
                 <label className="form-field">
-                  <span>Position</span>
-                  <input value={String(values.position)} onChange={(event) => setValue('position', event.target.value)} placeholder="Front / rear / left / right" />
+                  <span>Display position</span>
+                  <input type="number" min="0" step="1" value={String(values.position)} onChange={(event) => setValue('position', event.target.value)} />
+                </label>
+                <label className="form-field">
+                  <span>Storefront sort order</span>
+                  <input type="number" min="0" step="1" value={String(values.sort_order)} onChange={(event) => setValue('sort_order', event.target.value)} />
                 </label>
                 <label className="form-field">
                   <span>Warranty (months)</span>
@@ -653,7 +789,7 @@ export function InventoryProductForm({
                   <input type="checkbox" checked={Boolean(values.is_featured)} onChange={(event) => setValue('is_featured', event.target.checked)} />
                   Feature this product on the storefront
                 </label>
-                <div className="inventory-currency-lock"><span>Currency</span><strong>SAR</strong><small>Saudi Riyal</small></div>
+                <div className="inventory-currency-lock"><span>Currency</span><strong>{String(values.currency || 'SAR')}</strong><small>{String(values.currency || 'SAR') === 'SAR' ? 'Saudi Riyal · default' : 'Existing stored currency · preserved'}</small></div>
               </div>
             </section>
 
@@ -676,11 +812,15 @@ export function InventoryProductForm({
                   <span>Product gallery</span>
                   <ImageKitUploadField value={values.image_urls} multiple folder="parts" onChange={(value) => setValue('image_urls', value)} />
                 </div>
+                <label className="form-field inventory-field-wide">
+                  <span>Search tags <small>Separate tags with commas</small></span>
+                  <textarea rows={2} value={String(values.tags)} onChange={(event) => setValue('tags', event.target.value)} placeholder="brakes, ceramic, front" />
+                </label>
               </div>
             </section>
 
-            <details className="inventory-seo-section">
-              <summary><span><b>05</b> Search and SEO details</span><small>Optional</small></summary>
+            <details className="inventory-seo-section" open={seoOpen} onToggle={(event) => setSeoOpen(event.currentTarget.open)}>
+              <summary><span><b>05</b> Search and SEO details</span><small>Optional · AI can draft these</small></summary>
               <div className="inventory-form-grid">
                 <label className="form-field">
                   <span>SEO title</span>
@@ -692,20 +832,26 @@ export function InventoryProductForm({
                 </label>
               </div>
             </details>
-          </div>
+          </fieldset>
 
           <aside className="inventory-ai-column">
             <section className="inventory-ai-card" aria-labelledby="inventory-ai-title">
-              <div className="inventory-ai-topline"><span className="inventory-ai-mark">AI</span><span className="inventory-ai-protection">APPROVAL REQUIRED</span></div>
+              <div className="inventory-ai-topline"><span className="inventory-ai-mark">AI</span><span className="inventory-ai-protection">REVIEW BEFORE SAVE</span></div>
               <h4 id="inventory-ai-title">Catalog assistant</h4>
-              <p>Review suggestions from the existing AI setup. Nothing is written until you apply fields and save the product.</p>
+              <p>Analyze the uploaded image and details. One click fills supported blank fields; your existing entries stay untouched. Nothing is saved until you press Save.</p>
               <button className="primary-button inventory-ai-button" type="button" disabled={aiLoading || lookupsLoading || Boolean(lookupsError)} onClick={() => void requestAiSuggestions()}>
-                {aiLoading ? 'Analyzing product…' : aiResult ? 'Refresh suggestions' : 'Suggest product details'}
+                {aiLoading ? 'Analyzing image & details…' : aiResult ? 'Analyze again & fill blanks' : 'Analyze image & fill fields'}
               </button>
               {aiError && <div className="admin-alert inventory-ai-error" role="alert">{aiError}</div>}
               {aiLoading && <div className="inventory-ai-loading" role="status"><span className="loading-spinner" /> Checking text and uploaded image…</div>}
               {aiResult && (
                 <div className="inventory-ai-results">
+                  <p className="inventory-ai-autofill" role="status">
+                    {appliedFields.length
+                      ? `Filled ${appliedFields.length} suggestion group${appliedFields.length === 1 ? '' : 's'} into empty fields. Review them before saving.`
+                      : 'No safe suggestions matched empty fields. Review any available suggestions below.'}
+                    {' '}SKU, price, inventory, tested status and uncertain vehicle fitment still require your confirmation.
+                  </p>
                   <div className="inventory-ai-meta">
                     <span>Confidence <b>{Math.round(aiSuggestion?.confidence ? aiSuggestion.confidence * 100 : 0)}%</b></span>
                     <span className={`inventory-risk inventory-risk-${aiSuggestion?.duplicate_risk ?? 'low'}`}>Duplicate risk · {aiSuggestion?.duplicate_risk ?? 'low'}</span>
@@ -734,11 +880,11 @@ export function InventoryProductForm({
                     <p className="inventory-ai-empty">No usable field suggestions were returned. Add more product details or an image and try again.</p>
                   )}
                   {aiSuggestion?.notes?.length ? <p className="inventory-ai-notes">{aiSuggestion.notes.join(' ')}</p> : null}
-                  <small className="inventory-ai-footer">Preview recorded{aiResult.run_id ? ` · ${aiResult.run_id.slice(0, 8)}` : ''}. “Use” fills this draft; final save remains manual.</small>
+                  <small className="inventory-ai-footer">Preview recorded{aiResult.run_id ? ` · ${aiResult.run_id.slice(0, 8)}` : ''}. AI fills this draft only; final save remains manual.</small>
                 </div>
               )}
             </section>
-            <div className="inventory-ai-reminder"><b>Live database choices</b><span>AI can only apply a company, model, or category when it matches the existing database list.</span></div>
+            <div className="inventory-ai-reminder"><b>Live database choices</b><span>Category, manufacturer and model links are applied only when matched to the database. Image evidence may not reveal part numbers or compatibility.</span></div>
           </aside>
         </div>
 
@@ -746,7 +892,7 @@ export function InventoryProductForm({
         <div className="modal-actions inventory-modal-actions">
           <span className="inventory-save-note">{savedPartId && !row ? 'A draft record already exists; saving again will update it.' : 'AI suggestions only fill this form. Save when you are ready.'}</span>
           <button className="secondary-button" type="button" onClick={onClose}>Cancel</button>
-          <button className="primary-button" type="submit" disabled={saving || lookupsLoading || Boolean(lookupsError) || !fitmentsReady}>
+          <button className="primary-button" type="submit" disabled={saving || aiLoading || lookupsLoading || Boolean(lookupsError) || !fitmentsReady}>
             {saving ? 'Saving product…' : row || savedPartId ? 'Save product changes' : 'Save product'}
           </button>
         </div>
