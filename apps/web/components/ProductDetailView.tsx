@@ -35,6 +35,7 @@ export type Product = {
   slug?: string | null;
   part_name: string;
   brand_name?: string | null;
+  manufacturers?: { id?: string; manufacturer_name?: string | null; logo_url?: string | null } | null;
   sku: string;
   oem_number?: string | null;
   description?: string | null;
@@ -160,6 +161,86 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           font-family: system-ui, -apple-system, sans-serif;
           color: #333;
         }
+
+        .product-summary-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 24px;
+          margin: 24px 0 22px;
+          padding: 20px 24px;
+          background: #fff;
+          border: 1px solid #e5e7eb;
+          border-radius: 16px;
+          box-shadow: 0 8px 28px rgba(0, 0, 0, 0.045);
+        }
+        .product-summary-copy { min-width: 0; }
+        .product-summary-brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 12px;
+        }
+        .product-manufacturer-logo {
+          display: grid;
+          place-items: center;
+          width: 46px;
+          height: 46px;
+          flex: none;
+          padding: 5px;
+          color: #b91c1c;
+          background: #fff;
+          border: 1px solid #e5e7eb;
+          border-radius: 10px;
+          font-size: 12px;
+          font-weight: 800;
+        }
+        .product-manufacturer-logo img {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+        }
+        .product-summary-brand-copy { display: grid; gap: 3px; }
+        .product-summary-brand-name {
+          color: #dc2626;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+        .product-summary-category { color: #858a92; font-size: 10px; font-weight: 600; }
+        .product-summary-heading h1 {
+          margin: 0;
+          color: #111827;
+          font-size: 27px;
+          font-weight: 800;
+          line-height: 1.2;
+          letter-spacing: -0.045em;
+        }
+        .product-summary-sku {
+          display: inline-flex;
+          gap: 5px;
+          margin-top: 6px;
+          color: #858a92;
+          font-size: 10px;
+          font-weight: 600;
+        }
+        .product-summary-sku b { color: #646a72; font: 600 10px 'DM Mono', monospace; }
+        .product-summary-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .product-summary-badges span { padding: 4px 8px; color: #8e3038; background: #fff0f2; border-radius: 999px; font-size: 9px; font-weight: 800; }
+        .product-summary-badges span + span { color: #555a62; background: #f2f3f5; }
+        .product-summary-price {
+          display: grid;
+          justify-items: end;
+          gap: 6px;
+          flex: none;
+        }
+        .product-summary-price-main { display: flex; align-items: baseline; gap: 8px; }
+        .product-summary-price-main strong { color: #b91c1c; font-size: 29px; font-weight: 800; letter-spacing: -0.04em; }
+        .product-summary-price-main del { color: #999; font-size: 14px; font-weight: 500; }
+        .product-summary-stock { display: inline-flex; align-items: center; gap: 6px; color: #13804e; font-size: 10px; font-weight: 700; }
+        .product-summary-stock.out { color: #d32f3b; }
+        .product-summary-stock i { width: 7px; height: 7px; background: currentColor; border-radius: 50%; }
 
         /* Layout */
         .product-layout {
@@ -506,6 +587,10 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           .product-page-wrapper { padding: 0 16px 60px; }
           .title { font-size: 24px; }
           .price { font-size: 28px; }
+          .product-summary-header { align-items: flex-start; flex-direction: column; gap: 13px; margin: 14px 0 16px; padding: 16px; }
+          .product-summary-heading h1 { font-size: 23px; }
+          .product-summary-price { justify-items: start; width: 100%; padding-top: 11px; border-top: 1px solid #eee; }
+          .product-summary-price-main strong { font-size: 26px; }
           
           .main-image { max-height: 400px; padding: 12px; }
           .thumb-btn { width: 60px; height: 60px; }
@@ -540,6 +625,43 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         }
       `}</style>
 
+      <div className="product-summary-header">
+        <div className="product-summary-copy">
+          <div className="product-summary-brand">
+            <div className="product-manufacturer-logo">
+              {product.manufacturers?.logo_url ? (
+                <img src={product.manufacturers.logo_url} alt={`${product.manufacturers.manufacturer_name ?? 'Manufacturer'} logo`} />
+              ) : (
+                <span>{(product.manufacturers?.manufacturer_name ?? product.brand_name ?? 'AW').slice(0, 2).toUpperCase()}</span>
+              )}
+            </div>
+            <div className="product-summary-brand-copy">
+              <span className="product-summary-brand-name">{product.manufacturers?.manufacturer_name ?? product.brand_name ?? 'Al Waha Parts'}</span>
+              {product.parts_categories?.category_name && <span className="product-summary-category">{product.parts_categories.category_name}</span>}
+            </div>
+          </div>
+          <div className="product-summary-heading">
+            <h1>{product.part_name}</h1>
+            {product.sku && <span className="product-summary-sku">SKU <b>{product.sku}</b></span>}
+            {(product.tested_status === 'tested' || product.condition) && (
+              <div className="product-summary-badges">
+                {product.tested_status === 'tested' && <span>Tested</span>}
+                {product.condition && <span>{product.condition}</span>}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="product-summary-price">
+          <div className="product-summary-price-main">
+            <strong>{formatSar(currentPrice)}</strong>
+            {hasDiscount && <del>{formatSar(product.price)}</del>}
+          </div>
+          <span className={`product-summary-stock ${outOfStock ? 'out' : ''}`}>
+            <i />{outOfStock ? 'Out of stock' : `In stock${product.stock_quantity == null ? '' : ` · ${product.stock_quantity} available`}`}
+          </span>
+        </div>
+      </div>
+
       <div className="product-layout">
         {/* Gallery (Left Side) */}
         <div className="gallery">
@@ -569,21 +691,6 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         <div className="info">
           
           <div className="unified-main-card">
-            
-            {/* 1. Header: Brand, Title, SKU */}
-            <div>
-              <div className="brand-category">
-                {product.brand_name && <span>{product.brand_name}</span>}
-                {product.brand_name && product.parts_categories && <span>•</span>}
-                {product.parts_categories && <span>{product.parts_categories.category_name}</span>}
-              </div>
-              <h1 className="title">{product.part_name}</h1>
-              <div className="meta-tags">
-                {product.sku && <span>SKU: <strong>{product.sku}</strong></span>}
-                {product.tested_status === 'tested' && <span className="badge">Tested</span>}
-                {product.condition && <span className="badge" style={{ background: '#f3f4f6', color: '#374151' }}>{product.condition}</span>}
-              </div>
-            </div>
 
             {/* 2. Compact Vehicle Model Card (Inside) */}
             {primaryFitment && primaryFitment.vehicles && (
@@ -618,19 +725,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
               </div>
             )}
 
-            {/* 3. Price & Stock */}
-            <div className="price-stock-row">
-              <div className="price-box">
-                <span className="price">{formatSar(currentPrice)}</span>
-                {hasDiscount && <span className="old-price">{formatSar(product.price)}</span>}
-              </div>
-              <div className={`stock ${outOfStock ? 'out' : 'in'}`}>
-                <span className="stock-dot"></span>
-                {outOfStock ? 'Out of Stock' : `In Stock (${product.stock_quantity} available)`}
-              </div>
-            </div>
-
-            {/* 4. Book Now Button */}
+            {/* 3. Book Now Button */}
             <button 
               className={`btn-book ${isAdded ? 'added' : ''}`} 
               type="button" 
@@ -649,13 +744,13 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
               )}
             </button>
 
-            {/* 5. Description */}
+            {/* 4. Description */}
             <div className="description">
               <h3>Product Details</h3>
               <p>{product.description ?? 'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}</p>
             </div>
 
-            {/* 6. Specs */}
+            {/* 5. Specs */}
             <div className="specs">
               <div className="spec-row"><span>Brand</span><strong>{product.brand_name ?? 'Al Waha Select'}</strong></div>
               <div className="spec-row"><span>OEM Number</span><strong>{product.oem_number ?? 'On request'}</strong></div>

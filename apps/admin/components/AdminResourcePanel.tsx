@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { adminFetch } from '../lib/auth';
 import { ImageKitUploadField } from './ImageKitUploadField';
+import { InventoryProductForm } from './InventoryProductForm';
 
 type ResourceKind = 'parts' | 'vehicles' | 'manufacturers' | 'categories' | 'admins' | 'banners';
 type Resource = Record<string, unknown> & { id: string };
@@ -231,6 +232,7 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
   const [creating, setCreating] = useState(false);
   const [preview, setPreview] = useState<{ url: string; title: string } | null>(null);
   const [busyId, setBusyId] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const meta = config[kind];
 
   const load = () => {
@@ -247,6 +249,31 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
   useEffect(() => {
     load();
   }, [meta.endpoint]);
+  useEffect(() => {
+    if (kind !== 'parts') return;
+    function handleInventoryShortcut(event: KeyboardEvent) {
+      const target = event.target;
+      const isEditingText = target instanceof HTMLElement && Boolean(target.closest('input, textarea, select, [contenteditable="true"]'));
+      if (event.key === 'Escape' && (creating || editing)) {
+        setCreating(false);
+        setEditing(null);
+        return;
+      }
+      if (creating || editing) return;
+      if (isEditingText || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.key.toLowerCase() === 'n') {
+        event.preventDefault();
+        setEditing(null);
+        setCreating(true);
+      }
+      if (event.key === '/' && searchInputRef.current) {
+        event.preventDefault();
+        searchInputRef.current.focus();
+      }
+    }
+    window.addEventListener('keydown', handleInventoryShortcut);
+    return () => window.removeEventListener('keydown', handleInventoryShortcut);
+  }, [kind, creating, editing]);
   const filtered = useMemo(
     () =>
       rows.filter((row) => {
@@ -339,15 +366,17 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
                 setCreating(true);
               }}
             >
-              + Add new
+              {kind === 'parts' ? '+ Add product' : '+ Add new'}
             </button>
           )}
+          {kind === 'parts' && <span className="inventory-toolbar-shortcuts"><kbd>N</kbd> New <kbd>/</kbd> Search</span>}
         </div>
       </div>
       <div className="toolbar-card resource-toolbar">
         <div className="field-search">
           <span>⌕</span>
           <input
+            ref={searchInputRef}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={meta.search}
@@ -513,19 +542,27 @@ export function AdminResourcePanel({ kind }: { kind: ResourceKind }) {
   );
 }
 
-function ResourceForm({
-  kind,
-  row,
-  fields,
-  onClose,
-  onSaved,
-}: {
+type ResourceFormProps = {
   kind: ResourceKind;
   row: Resource | null;
   fields: Field[];
   onClose: () => void;
   onSaved: () => void;
-}) {
+};
+
+function ResourceForm(props: ResourceFormProps) {
+  if (props.kind === 'parts')
+    return <InventoryProductForm row={props.row} onClose={props.onClose} onSaved={props.onSaved} />;
+  return <GenericResourceForm {...props} />;
+}
+
+function GenericResourceForm({
+  kind,
+  row,
+  fields,
+  onClose,
+  onSaved,
+}: ResourceFormProps) {
   const [values, setValues] = useState<Record<string, unknown>>(initialValues(fields, row));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
