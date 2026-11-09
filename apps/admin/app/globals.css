@@ -1683,6 +1683,36 @@ select:focus-visible {
   font-size: 10px;
   font-weight: 700;
 }
+.inventory-hero { align-items: stretch; }
+.inventory-hero-steps { display: flex; flex-direction: column; justify-content: center; gap: 9px; min-width: 185px; padding: 18px; border-left: 1px solid #f0c8cc; }
+.inventory-hero-steps span { display: flex; align-items: center; gap: 10px; color: #6d3037; font-size: 11px; font-weight: 800; }
+.inventory-hero-steps b { display: grid; place-items: center; width: 25px; height: 25px; color: #fff; background: var(--red); border-radius: 50%; font: 10px 'DM Mono'; }
+.manufacturer-logo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 10px; margin-top: 18px; }
+.manufacturer-logo-card { display: grid; justify-items: center; gap: 7px; min-height: 145px; padding: 14px 9px 12px; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; text-align: center; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.manufacturer-logo-card:hover, .manufacturer-logo-card.selected { border-color: #e77982; box-shadow: 0 10px 25px rgba(229, 35, 47, .1); transform: translateY(-2px); }
+.manufacturer-logo-card.selected { background: #fff7f8; }
+.manufacturer-logo-mark { display: grid; place-items: center; width: 65px; height: 65px; overflow: hidden; color: var(--red); background: #fff; border: 1px solid #f0d5d8; border-radius: 50%; font: 800 14px 'DM Mono'; }
+.manufacturer-logo-mark img { width: 100%; height: 100%; object-fit: contain; padding: 9px; }
+.manufacturer-logo-mark.all-mark { color: #fff; background: var(--red); border-color: var(--red); font-size: 10px; }
+.manufacturer-logo-card strong { max-width: 120px; font-size: 11px; line-height: 1.25; }
+.manufacturer-logo-card small { color: var(--muted); font-size: 10px; }
+.directory-result-count { color: var(--muted); font: 10px 'DM Mono'; white-space: nowrap; }
+.model-group { margin-top: 22px; }
+.model-group-heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 11px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.model-group-brand { display: flex; align-items: center; gap: 10px; }
+.model-group-brand h3 { margin: 2px 0 0; font-size: 18px; letter-spacing: -.05em; }
+.model-group-logo { display: grid; place-items: center; width: 37px; height: 37px; overflow: hidden; color: var(--red); background: #fff7f8; border: 1px solid #f0d5d8; border-radius: 50%; font: 800 10px 'DM Mono'; }
+.model-group-logo img { width: 100%; height: 100%; object-fit: contain; padding: 5px; }
+.inventory-ai-panel { margin-top: 16px; padding: 16px; border: 1px solid #f0d5d8; border-radius: 9px; background: linear-gradient(135deg, #fff8f9, #fff); }
+.inventory-ai-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.inventory-ai-heading h4 { margin: 5px 0 5px; font-size: 17px; letter-spacing: -.04em; }
+.inventory-ai-heading p { max-width: 590px; margin: 0; color: var(--muted); font-size: 11px; font-weight: 500; line-height: 1.55; }
+.ai-suggest-button { flex: none; }
+.ai-suggestion-list { display: grid; gap: 8px; margin-top: 14px; padding-top: 13px; border-top: 1px solid #f0d5d8; }
+.ai-suggestion { display: flex; align-items: flex-start; justify-content: space-between; gap: 13px; padding: 10px; background: #fff; border: 1px solid var(--line); border-radius: 6px; }
+.ai-suggestion div { display: grid; gap: 4px; }
+.ai-suggestion small { color: var(--muted); font: 10px 'DM Mono'; text-transform: uppercase; }
+.ai-suggestion span { color: var(--ink); font-size: 12px; line-height: 1.45; }
 .full-width {
   grid-column: 1 / -1;
 }
@@ -1738,6 +1768,10 @@ select:focus-visible {
   .modal-actions button {
     width: 100%;
   }
+  .inventory-hero-steps { min-width: 0; margin-top: 8px; padding: 14px 0 0; border-top: 1px solid #f0c8cc; border-left: 0; }
+  .inventory-ai-heading { display: grid; }
+  .ai-suggest-button { width: 100%; }
+  .directory-result-count { display: none; }
 }
 
 .resource-actions {

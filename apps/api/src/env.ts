@@ -8,6 +8,9 @@ export interface ApiConfig {
   imageKitPublicKey: string;
   geminiApiKey: string;
   geminiModel: string;
+  openAiApiKey: string;
+  openAiBaseUrl: string;
+  openAiModel: string;
 }
 
 export function getConfig(): ApiConfig {
@@ -23,6 +26,9 @@ export function getConfig(): ApiConfig {
     imageKitPublicKey: process.env.IMAGEKIT_PUBLIC_KEY ?? '',
     geminiApiKey: process.env.GEMINI_API_KEY ?? '',
     geminiModel: process.env.GEMINI_MODEL ?? 'gemini-3.5-flash-lite',
+    openAiApiKey: process.env.OPENAI_API_KEY ?? '',
+    openAiBaseUrl: (process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1').replace(/\/$/, ''),
+    openAiModel: process.env.OPENAI_MODEL ?? 'gpt-4o-mini',
   };
 }
 

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { adminFetch } from '../lib/auth';
+import { InventoryAiAssistant } from './InventoryAiAssistant';
 import { ImageKitUploadField } from './ImageKitUploadField';
 
 type ResourceKind = 'parts' | 'vehicles' | 'manufacturers' | 'categories' | 'admins' | 'banners';
@@ -587,9 +588,7 @@ function ResourceForm({
         <div className="modal-heading">
           <div>
             <span className="eyebrow">{row ? 'Edit record' : 'New record'}</span>
-            <h3>
-              {row ? 'Update' : 'Create'} {config[kind].title.replace(' records', '')}
-            </h3>
+            <h3>{kind === 'parts' ? (row ? 'Update product' : 'Add product') : `${row ? 'Update' : 'Create'} ${config[kind].title.replace(' records', '')}`}</h3>
           </div>
           <button className="modal-close" type="button" onClick={onClose} aria-label="Close form">
             ×
@@ -651,7 +650,14 @@ function ResourceForm({
                     <select
                       required={field.required}
                       value={String(values[field.key] ?? '')}
-                      onChange={(event) => set(field.key, event.target.value)}
+                      onChange={(event) => {
+                        const nextValue = event.target.value;
+                        set(field.key, nextValue);
+                        if (field.key === 'manufacturer_id') {
+                          const selectedModel = lookups.models.find((model) => model.id === values.model_id);
+                          if (selectedModel && selectedModel.manufacturer_id !== nextValue) set('model_id', '');
+                        }
+                      }}
                     >
                       <option value="">Choose…</option>
                       {(dynamicOptions ?? field.options ?? []).map((option) => (
@@ -675,6 +681,15 @@ function ResourceForm({
           );
           })}
         </div>
+        {kind === 'parts' && (
+          <InventoryAiAssistant
+            values={values}
+            manufacturers={lookups.manufacturers}
+            models={lookups.models}
+            categories={lookups.categories}
+            onApply={set}
+          />
+        )}
         {error && (
           <div className="admin-alert" role="alert">
             {error}
@@ -685,7 +700,7 @@ function ResourceForm({
             Cancel
           </button>
           <button className="primary-button" type="submit" disabled={saving}>
-            {saving ? 'Saving…' : row ? 'Save changes' : 'Create record'}
+            {saving ? 'Saving…' : row ? 'Save changes' : kind === 'parts' ? 'Create product' : 'Create record'}
           </button>
         </div>
       </form>

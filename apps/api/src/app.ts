@@ -247,6 +247,58 @@ app.get('/api/v1/admin/imagekit/auth', { preHandler: requireAdmin as any }, asyn
   return { data: { token, expire, signature, publicKey: config.imageKitPublicKey } };
 });
 
+app.post(
+  '/api/v1/admin/parts/suggest',
+  { preHandler: requireAdmin as any },
+  async (request: FastifyRequest<{ Body: Record<string, unknown> }>, reply) => {
+    if (!config.openAiApiKey) {
+      return jsonError(reply, 503, 'AI suggestions are not configured. Add OPENAI_API_KEY to the API environment.');
+    }
+    const body = request.body ?? {};
+    const context = {
+      part_name: typeof body.part_name === 'string' ? body.part_name.trim() : '',
+      sku: typeof body.sku === 'string' ? body.sku.trim() : '',
+      manufacturer_name: typeof body.manufacturer_name === 'string' ? body.manufacturer_name.trim() : '',
+      model_name: typeof body.model_name === 'string' ? body.model_name.trim() : '',
+      category_name: typeof body.category_name === 'string' ? body.category_name.trim() : '',
+      oem_number: typeof body.oem_number === 'string' ? body.oem_number.trim() : '',
+    };
+    const upstream = await fetch(`${config.openAiBaseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.openAiApiKey}` },
+      body: JSON.stringify({
+        model: config.openAiModel,
+        temperature: 0.2,
+        max_tokens: 700,
+        response_format: { type: 'json_object' },
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You assist an automotive parts inventory admin. Return JSON only with string values for allowed fields: part_name, brand_name, oem_number, description. Improve or complete catalog copy from the provided context. Never invent a price, stock quantity, fitment, manufacturer, model, SKU, or safety claim. If a value is unknown, return an empty string.',
+          },
+          { role: 'user', content: JSON.stringify(context) },
+        ],
+      }),
+    });
+    if (!upstream.ok) return jsonError(reply, 502, `AI suggestion service returned HTTP ${upstream.status}.`);
+    const payload = (await upstream.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    const content = payload.choices?.[0]?.message?.content;
+    if (!content) return jsonError(reply, 502, 'AI suggestion service returned no content.');
+    try {
+      const parsed = JSON.parse(content) as Record<string, unknown>;
+      const suggestions = Object.fromEntries(
+        ['part_name', 'brand_name', 'oem_number', 'description']
+          .map((key) => [key, typeof parsed[key] === 'string' ? parsed[key].trim() : ''])
+          .filter(([, value]) => value),
+      );
+      return { data: { suggestions, model: config.openAiModel } };
+    } catch {
+      return jsonError(reply, 502, 'AI suggestion service returned invalid JSON.');
+    }
+  },
+);
+
 app.get('/', async () => ({
   name: 'Al Waha Parts API',
   version: 'v1',

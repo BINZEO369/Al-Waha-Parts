@@ -7,6 +7,10 @@ Add these two variables to the **`al-waha-parts-api`** Vercel project for the **
 ```text
 IMAGEKIT_PRIVATE_KEY=private_xxxxxxxxxxxxxxxxx
 IMAGEKIT_PUBLIC_KEY=public_xxxxxxxxxxxxxxxxx
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxx
+# Optional: only needed for a non-OpenAI compatible endpoint/model
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4o-mini
 ```
 
 `IMAGEKIT_PRIVATE_KEY` is secret and must never be added to the Admin or Web project, GitHub, browser code, or `NEXT_PUBLIC_*` variables. `IMAGEKIT_PUBLIC_KEY` is not a secret, but this implementation keeps it on the API project and returns it only after the authenticated admin requests a short-lived upload signature.
@@ -41,6 +45,8 @@ The uploader supports primary product images, product gallery images, manufactur
 2. Redeploy the API project. The code returns HTTP 503 for the upload-auth route until both variables exist.
 3. Log in at `https://admin.al-waha.shop`, open Parts, Manufacturers, Models, Categories, or Hero banners, and use the new Upload image control.
 4. Confirm that the returned ImageKit URL is saved to the record and that the storefront preview loads it.
+
+For the inventory Product assistant, add `OPENAI_API_KEY` to the same central API project. `OPENAI_BASE_URL` and `OPENAI_MODEL` are optional overrides. AI suggestions are deliberately limited to part name, brand, OEM number, and description. They are shown for review and are not written to Supabase until the admin clicks **Apply** and then submits the product form.
 
 ImageKit's official guidance says browser uploads should use short-lived `token`, `signature`, and `expire` values generated on a secure backend, and that private keys must remain server-side. The implementation follows that flow.
 
