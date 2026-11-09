@@ -36,74 +36,36 @@ type CustomerGroup = {
   phone: string;
   name: string;
   email?: string | null;
-  note?: string | null;
   bookings: BookingRow[];
-  totalAmount: number;
-  latestAt: string;
-  pendingCount: number;
+  totalSpent: number;
+  latestBooking: BookingRow;
 };
 
-type SortKey = 'newest' | 'oldest' | 'amount';
-
-const STATUS_OPTIONS = [
-  { value: 'pending', label: 'Pending' },
-  { value: 'confirmed', label: 'Confirmed' },
-  { value: 'processing', label: 'Processing' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'cancelled', label: 'Cancelled' },
-] as const;
-
+/* =========================================================
+ * HELPERS
+ * =======================================================*/
 function statusClass(status: string) {
   return status.replace(/\s+/g, '-');
 }
 
-function initials(name: string) {
-  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+function getGroupKey(row: BookingRow): string {
+  return (row.customer_phone || row.customer_name || row.id).trim().toLowerCase();
+}
+
+function isRecent(createdAt: string): boolean {
+  return Date.now() - new Date(createdAt).getTime() < 24 * 60 * 60 * 1000;
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return '?';
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-function groupByCustomer(rows: BookingRow[]): CustomerGroup[] {
-  const map = new Map<string, CustomerGroup>();
-  for (const row of rows) {
-    const key = (row.customer_phone || row.customer_email || row.id).toString().trim();
-    let g = map.get(key);
-    if (!g) {
-      g = {
-        key,
-        phone: row.customer_phone,
-        name: row.customer_name,
-        email: row.customer_email,
-        note: row.customer_note,
-        bookings: [],
-        totalAmount: 0,
-        latestAt: row.created_at,
-        pendingCount: 0,
-      };
-      map.set(key, g);
-    }
-    g.bookings.push(row);
-    g.totalAmount += Number(row.total_amount ?? 0);
-    if (row.booking_status === 'pending') g.pendingCount += 1;
-    if (new Date(row.created_at) > new Date(g.latestAt)) {
-      g.latestAt = row.created_at;
-      g.name = row.customer_name;
-      if (row.customer_phone) g.phone = row.customer_phone;
-      if (row.customer_email) g.email = row.customer_email;
-      if (row.customer_note) g.note = row.customer_note;
-    } else if (!g.email && row.customer_email) {
-      g.email = row.customer_email;
-    }
-  }
-  for (const g of map.values()) {
-    g.bookings.sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
-  }
-  return Array.from(map.values());
-}
-
+/* =========================================================
+ * STATUS SELECT
+ * =======================================================*/
 function BookingStatusControl({
   row,
   onSaved,
@@ -112,6 +74,7 @@ function BookingStatusControl({
   onSaved: (status: string) => void;
 }) {
   const [saving, setSaving] = useState(false);
+
   async function update(status: string) {
     setSaving(true);
     try {
@@ -124,32 +87,88 @@ function BookingStatusControl({
       setSaving(false);
     }
   }
+
   return (
-    <select
-      className={`booking-status-select ${statusClass(row.booking_status)}`}
-      value={row.booking_status}
-      disabled={saving}
-      onChange={(event) => void update(event.target.value)}
-      aria-label={`Update ${row.booking_number} status`}
-    >
-      {STATUS_OPTIONS.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
+    <div className={`status-wrap ${statusClass(row.booking_status)}`}>
+      <select
+        className="status-select"
+        value={row.booking_status}
+        disabled={saving}
+        onChange={(event) => void update(event.target.value)}
+        aria-label={`Update ${row.booking_number} status`}
+      >
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="processing">Processing</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <svg
+        className="status-arrow"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
+    </div>
   );
 }
 
+/* =========================================================
+ * COPY BUTTON
+ * =======================================================*/
+function CopyPhoneButton({ phone }: { phone: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy(e: React.MouseEvent) {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(phone);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      className={`copy-btn ${copied ? 'copied' : ''}`}
+      onClick={handleCopy}
+      aria-label={copied ? 'Copied' : 'Copy phone number'}
+      title={copied ? 'Copied!' : 'Copy phone'}
+    >
+      {copied ? (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" width="12" height="12">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="12" height="12">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+/* =========================================================
+ * MAIN COMPONENT
+ * =======================================================*/
 export function BookingsTable() {
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [query, setQuery] = useState('');
+  const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<SortKey>('newest');
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const [copiedPhone, setCopiedPhone] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'amount' | 'orders'>('newest');
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     adminFetch<BookingRow[]>('/api/v1/admin/bookings?limit=100')
@@ -160,239 +179,337 @@ export function BookingsTable() {
       .finally(() => setLoading(false));
   }, []);
 
-  const stats = useMemo(() => {
-    const totalOrders = rows.length;
-    const customerKeys = new Set(rows.map((r) => r.customer_phone || r.customer_email || r.id));
-    const totalCustomers = customerKeys.size;
-    const totalRevenue = rows.reduce((sum, r) => sum + Number(r.total_amount ?? 0), 0);
-    const pending = rows.filter((r) => r.booking_status === 'pending').length;
-    return { totalOrders, totalCustomers, totalRevenue, pending };
+  /* ---------- Group by phone ---------- */
+  const groups = useMemo<CustomerGroup[]>(() => {
+    const map = new Map<string, CustomerGroup>();
+    rows.forEach((row) => {
+      const key = getGroupKey(row);
+      if (!map.has(key)) {
+        map.set(key, {
+          key,
+          phone: row.customer_phone,
+          name: row.customer_name,
+          email: row.customer_email,
+          bookings: [],
+          totalSpent: 0,
+          latestBooking: row,
+        });
+      }
+      const group = map.get(key)!;
+      group.bookings.push(row);
+      group.totalSpent += Number(row.total_amount ?? 0);
+      if (new Date(row.created_at) > new Date(group.latestBooking.created_at)) {
+        group.latestBooking = row;
+        group.name = row.customer_name;
+        group.email = row.customer_email;
+        group.phone = row.customer_phone;
+      }
+    });
+
+    const result = Array.from(map.values());
+    result.forEach((g) => {
+      g.bookings.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+    });
+    return result;
   }, [rows]);
 
-  const filteredRows = useMemo(() => {
-    let result = rows;
-    if (statusFilter !== 'all') {
-      result = result.filter((r) => r.booking_status === statusFilter);
-    }
-    const q = query.trim().toLowerCase();
-    if (q) {
-      result = result.filter((r) => {
-        if (r.customer_name?.toLowerCase().includes(q)) return true;
-        if (r.customer_phone?.includes(q)) return true;
-        if (r.booking_number?.toLowerCase().includes(q)) return true;
-        if (r.customer_email?.toLowerCase().includes(q)) return true;
-        if (r.customer_city?.toLowerCase().includes(q)) return true;
-        if (
-          r.booking_items?.some((it) => {
-            const name = it.part_name_snapshot || it.parts?.part_name || '';
-            const sku = it.sku_snapshot || it.parts?.sku || '';
-            return name.toLowerCase().includes(q) || sku.toLowerCase().includes(q);
-          })
-        )
-          return true;
-        return false;
-      });
-    }
-    return result;
-  }, [rows, statusFilter, query]);
+  /* ---------- Stats ---------- */
+  const stats = useMemo(
+    () => ({
+      total: rows.length,
+      customers: groups.length,
+      pending: rows.filter((r) => r.booking_status === 'pending').length,
+      revenue: rows.reduce((sum, r) => sum + Number(r.total_amount ?? 0), 0),
+    }),
+    [rows, groups],
+  );
 
-  const groups = useMemo(() => {
-    const list = groupByCustomer(filteredRows);
-    if (sortBy === 'oldest') {
-      list.sort((a, b) => new Date(a.latestAt).getTime() - new Date(b.latestAt).getTime());
+  /* ---------- Filter + sort ---------- */
+  const filteredGroups = useMemo(() => {
+    const term = search.toLowerCase().trim();
+    const filtered = groups
+      .map((group) => {
+        const bookings = group.bookings.filter((b) => {
+          if (statusFilter !== 'all' && b.booking_status !== statusFilter) return false;
+          if (!term) return true;
+          return (
+            b.booking_number.toLowerCase().includes(term) ||
+            b.customer_name.toLowerCase().includes(term) ||
+            (b.customer_phone || '').toLowerCase().includes(term) ||
+            (b.customer_email || '').toLowerCase().includes(term) ||
+            (b.customer_city || '').toLowerCase().includes(term) ||
+            (b.booking_items ?? []).some((it) =>
+              (
+                it.part_name_snapshot ||
+                it.parts?.part_name ||
+                ''
+              )
+                .toLowerCase()
+                .includes(term),
+            )
+          );
+        });
+        return { ...group, bookings };
+      })
+      .filter((g) => g.bookings.length > 0);
+
+    const sorted = [...filtered];
+    if (sortBy === 'newest') {
+      sorted.sort(
+        (a, b) =>
+          new Date(b.latestBooking.created_at).getTime() -
+          new Date(a.latestBooking.created_at).getTime(),
+      );
+    } else if (sortBy === 'oldest') {
+      sorted.sort(
+        (a, b) =>
+          new Date(a.latestBooking.created_at).getTime() -
+          new Date(b.latestBooking.created_at).getTime(),
+      );
     } else if (sortBy === 'amount') {
-      list.sort((a, b) => b.totalAmount - a.totalAmount);
-    } else {
-      list.sort((a, b) => new Date(b.latestAt).getTime() - new Date(a.latestAt).getTime());
+      sorted.sort((a, b) => b.totalSpent - a.totalSpent);
+    } else if (sortBy === 'orders') {
+      sorted.sort((a, b) => b.bookings.length - a.bookings.length);
     }
-    return list;
-  }, [filteredRows, sortBy]);
+    return sorted;
+  }, [groups, search, statusFilter, sortBy]);
 
-  function isExpanded(group: CustomerGroup) {
-    const val = expanded[group.key];
-    if (val !== undefined) return val;
-    return group.bookings.length === 1 || group.pendingCount > 0;
+  /* ---------- Auto-expand ---------- */
+  useEffect(() => {
+    if (!filteredGroups.length) return;
+    const next = new Set<string>();
+    let multi = 0;
+    filteredGroups.forEach((g) => {
+      if (g.bookings.length === 1) {
+        next.add(g.key);
+      } else if (multi < 2) {
+        next.add(g.key);
+        multi++;
+      }
+    });
+    setExpanded(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredGroups.length]);
+
+  function toggleGroup(key: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
   }
 
-  function toggle(group: CustomerGroup) {
-    setExpanded((prev) => ({ ...prev, [group.key]: !isExpanded(group) }));
-  }
-
-  async function copyPhone(phone: string) {
-    try {
-      await navigator.clipboard.writeText(phone);
-      setCopiedPhone(phone);
-      setTimeout(() => setCopiedPhone((p) => (p === phone ? '' : p)), 1500);
-    } catch {
-      /* ignore */
-    }
-  }
-
-  function updateBookingStatus(bookingId: string, newStatus: string) {
-    setRows((current) =>
-      current.map((r) => (r.id === bookingId ? { ...r, booking_status: newStatus } : r)),
-    );
-  }
-
-  if (loading)
-    return <div className="empty-table-state">Loading bookings from the database…</div>;
+  /* ---------- States ---------- */
+  if (loading) return <div className="empty-table-state">Loading bookings from the database…</div>;
   if (error) return <div className="admin-alert">{error}</div>;
-  if (!rows.length)
-    return <div className="empty-table-state">No bookings have been saved yet.</div>;
 
   return (
     <>
       <style jsx>{`
-        .bookings-wrapper {
-          font-family: system-ui, -apple-system, sans-serif;
-          color: #111;
+        /* =========================================================
+         * COLOR SYSTEM: WHITE / BLACK / RED  (only 3 colors)
+         * White: #fff, #fafafa, #f5f5f5, #eee, #ddd, #ccc
+         * Black: #000, #111, #333, #555, #666, #888, #999
+         * Red:   #dc2626, #b91c1c, #fee2e2, #fca5a5
+         * =======================================================*/
+
+        .bookings-page {
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: 18px;
+          font-family: system-ui, -apple-system, sans-serif;
+          color: #111;
         }
 
-        /* ================= STATS ================= */
+        /* ================= STATS BAR ================= */
         .stats-bar {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          grid-template-columns: repeat(2, 1fr);
           gap: 12px;
+        }
+        @media (min-width: 768px) {
+          .stats-bar {
+            grid-template-columns: repeat(4, 1fr);
+          }
         }
         .stat-card {
           background: #fff;
           border: 1px solid #e5e5e5;
-          border-radius: 12px;
-          padding: 16px 18px;
-          position: relative;
-          overflow: hidden;
-          transition: border-color 0.2s ease;
+          border-radius: 14px;
+          padding: 14px 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
         .stat-card:hover {
-          border-color: #111;
-        }
-        .stat-card::before {
-          content: '';
-          position: absolute;
-          left: 0;
-          top: 0;
-          bottom: 0;
-          width: 3px;
-          background: #111;
-        }
-        .stat-card.accent::before {
-          background: #dc2626;
+          border-color: #ccc;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
         }
         .stat-label {
-          font-size: 10.5px;
+          font-size: 10px;
           font-weight: 800;
           text-transform: uppercase;
-          letter-spacing: 0.8px;
-          color: rgba(0, 0, 0, 0.5);
-          margin-bottom: 6px;
+          letter-spacing: 0.6px;
+          color: #888;
         }
         .stat-value {
           font-size: 24px;
-          font-weight: 900;
+          font-weight: 800;
           color: #111;
-          line-height: 1;
           letter-spacing: -0.5px;
+          line-height: 1.1;
         }
-        .stat-value.red {
+        .stat-card.pending {
+          border-left: 3px solid #dc2626;
+        }
+        .stat-card.pending .stat-value {
           color: #dc2626;
         }
-        .stat-sub {
-          font-size: 10.5px;
-          color: rgba(0, 0, 0, 0.4);
-          margin-top: 5px;
-          font-weight: 500;
+        .stat-card.revenue {
+          background: #111;
+          border-color: #111;
+        }
+        .stat-card.revenue .stat-label {
+          color: #aaa;
+        }
+        .stat-card.revenue .stat-value {
+          color: #fff;
         }
 
-        /* ================= TOOLBAR ================= */
-        .toolbar {
+        /* ================= FILTER BAR ================= */
+        .filter-bar {
           display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          align-items: center;
+          flex-direction: column;
+          gap: 12px;
           background: #fff;
           border: 1px solid #e5e5e5;
-          border-radius: 12px;
-          padding: 10px;
+          border-radius: 14px;
+          padding: 12px;
         }
-        .search-box {
-          flex: 1 1 220px;
+        @media (min-width: 900px) {
+          .filter-bar {
+            flex-direction: row;
+            align-items: center;
+            padding: 12px 14px;
+          }
+        }
+
+        .search-wrap {
           position: relative;
+          flex: 1;
           min-width: 0;
         }
-        .search-box input {
-          width: 100%;
-          padding: 10px 12px 10px 36px;
-          font-size: 13px;
-          border: 1px solid #e5e5e5;
-          border-radius: 8px;
-          background: #fafafa;
-          outline: none;
-          transition: all 0.2s ease;
-          font-family: inherit;
-          color: #111;
-        }
-        .search-box input:focus {
-          border-color: #111;
-          background: #fff;
-        }
-        .search-box input::placeholder {
-          color: rgba(0, 0, 0, 0.35);
-        }
-        .search-box svg {
+        .search-icon {
           position: absolute;
           left: 12px;
           top: 50%;
           transform: translateY(-50%);
           width: 14px;
           height: 14px;
-          color: rgba(0, 0, 0, 0.4);
+          color: #999;
           pointer-events: none;
         }
+        .search-input {
+          width: 100%;
+          padding: 10px 12px 10px 34px;
+          border: 1px solid #e5e5e5;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 500;
+          color: #111;
+          background: #fafafa;
+          outline: none;
+          transition: all 0.2s;
+        }
+        .search-input::placeholder {
+          color: #999;
+        }
+        .search-input:focus {
+          border-color: #111;
+          background: #fff;
+        }
 
-        .filter-select {
-          appearance: none;
-          padding: 10px 32px 10px 12px;
-          font-size: 12px;
-          font-weight: 700;
+        .status-pills {
+          display: flex;
+          gap: 6px;
+          overflow-x: auto;
+          padding-bottom: 2px;
+          flex-shrink: 0;
+        }
+        .status-pills::-webkit-scrollbar { display: none; }
+        .status-pill {
+          padding: 7px 12px;
+          border-radius: 20px;
+          font-size: 11px;
+          font-weight: 800;
+          border: 1px solid #e5e5e5;
+          background: #fff;
+          color: #111;
+          cursor: pointer;
+          transition: all 0.15s;
+          white-space: nowrap;
+          text-transform: capitalize;
+          letter-spacing: 0.2px;
+        }
+        .status-pill:hover {
+          border-color: #111;
+        }
+        .status-pill.active {
+          background: #111;
+          color: #fff;
+          border-color: #111;
+        }
+
+        .sort-wrap {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+        .sort-label {
+          font-size: 11px;
+          font-weight: 800;
+          color: #888;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
+        }
+        .sort-select {
+          padding: 8px 10px;
           border: 1px solid #e5e5e5;
           border-radius: 8px;
-          background: #fafafa;
+          font-size: 12px;
+          font-weight: 700;
+          color: #111;
+          background: #fff;
           cursor: pointer;
           outline: none;
-          font-family: inherit;
-          color: #111;
-          transition: all 0.2s ease;
-          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-          background-repeat: no-repeat;
-          background-position: right 10px center;
         }
-        .filter-select:hover,
-        .filter-select:focus {
+        .sort-select:focus {
           border-color: #111;
-          background-color: #fff;
         }
 
-        /* ================= GROUPS ================= */
+        /* ================= GROUP LIST ================= */
         .groups-list {
           display: flex;
           flex-direction: column;
-          gap: 14px;
+          gap: 12px;
         }
+
+        /* ================= CUSTOMER GROUP ================= */
         .customer-group {
           background: #fff;
           border: 1px solid #e5e5e5;
-          border-radius: 14px;
+          border-radius: 16px;
           overflow: hidden;
-          transition: box-shadow 0.2s ease;
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .customer-group:hover {
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
-        .customer-group.has-pending {
-          border-color: #dc2626;
+        .customer-group.open {
+          border-color: #d4d4d4;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
         }
 
         .group-header {
@@ -400,225 +517,243 @@ export function BookingsTable() {
           align-items: center;
           gap: 14px;
           padding: 16px 18px;
+          background: #fafafa;
           cursor: pointer;
-          user-select: none;
-          background: #fff;
-          transition: background 0.15s ease;
+          transition: background 0.15s;
+          outline: none;
+          border: none;
+          width: 100%;
+          text-align: left;
+          font: inherit;
+          color: inherit;
         }
         .group-header:hover {
+          background: #f5f5f5;
+        }
+        .group-header:focus-visible {
+          background: #f5f5f5;
+          box-shadow: inset 0 0 0 2px #111;
+        }
+        .customer-group.open .group-header {
+          border-bottom: 1px solid #ebebeb;
           background: #fafafa;
         }
 
-        .group-avatar {
-          width: 44px;
-          height: 44px;
-          border-radius: 12px;
+        .customer-avatar {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
           background: #111;
           color: #fff;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 15px;
-          font-weight: 900;
+          font-weight: 800;
+          font-size: 14px;
           flex-shrink: 0;
           letter-spacing: 0.5px;
         }
-        .customer-group.has-pending .group-avatar {
-          background: #dc2626;
-        }
 
-        .group-info {
+        .customer-meta {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
           flex: 1;
           min-width: 0;
         }
-        .group-name {
-          font-size: 15px;
-          font-weight: 800;
-          color: #111;
+        .customer-name-row {
           display: flex;
           align-items: center;
           gap: 8px;
-          flex-wrap: wrap;
+          min-width: 0;
         }
-        .group-meta {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 12px;
-          color: rgba(0, 0, 0, 0.55);
-          margin-top: 4px;
-          flex-wrap: wrap;
-        }
-        .group-meta a {
-          color: inherit;
-          text-decoration: none;
-          font-weight: 500;
-          transition: color 0.15s ease;
-        }
-        .group-meta a:hover {
-          color: #dc2626;
-        }
-        .copy-btn {
-          background: none;
-          border: none;
-          padding: 0;
-          color: rgba(0, 0, 0, 0.5);
-          cursor: pointer;
-          font-size: 10.5px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.3px;
-          text-decoration: underline;
-          font-family: inherit;
-        }
-        .copy-btn:hover {
-          color: #dc2626;
-        }
-
-        .order-count-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          background: #111;
-          color: #fff;
-          padding: 2px 8px;
-          border-radius: 20px;
-          font-size: 10px;
+        .customer-name {
+          font-size: 14px;
           font-weight: 800;
-          letter-spacing: 0.3px;
-        }
-        .order-count-badge.pending {
-          background: #dc2626;
-        }
-
-        .group-total {
-          text-align: right;
-          flex-shrink: 0;
-          margin-right: 8px;
-        }
-        .group-total-label {
-          font-size: 9.5px;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.6px;
-          color: rgba(0, 0, 0, 0.4);
-        }
-        .group-total-amount {
-          font-size: 16px;
-          font-weight: 900;
           color: #111;
-          letter-spacing: -0.3px;
-          margin-top: 2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .customer-phone-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .customer-phone {
+          font-size: 12px;
+          color: #666;
+          font-weight: 500;
         }
 
-        .expand-btn {
-          width: 32px;
-          height: 32px;
-          border-radius: 8px;
-          background: #fafafa;
+        .copy-btn {
+          width: 20px;
+          height: 20px;
+          border-radius: 6px;
           border: 1px solid #e5e5e5;
-          display: flex;
+          background: #fff;
+          color: #888;
+          display: inline-flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          color: #111;
-          transition: all 0.2s ease;
+          transition: all 0.15s;
+          padding: 0;
           flex-shrink: 0;
         }
-        .expand-btn:hover {
+        .copy-btn:hover {
+          color: #111;
+          border-color: #111;
+        }
+        .copy-btn.copied {
           background: #111;
           color: #fff;
           border-color: #111;
         }
-        .expand-btn svg {
-          width: 14px;
-          height: 14px;
-          transition: transform 0.25s ease;
-        }
-        .expand-btn.open svg {
-          transform: rotate(180deg);
-        }
 
-        /* ================= ORDERS ================= */
-        .group-orders {
-          border-top: 1px solid #f0f0f0;
-          background: #fafafa;
+        .group-stats {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          flex-shrink: 0;
+        }
+        .group-stat {
           display: flex;
           flex-direction: column;
-          gap: 12px;
-          padding: 16px;
+          align-items: flex-end;
+          gap: 1px;
         }
-
-        .order-card {
-          background: #fff;
-          border: 1px solid #e5e5e5;
-          border-radius: 10px;
-          overflow: hidden;
-        }
-        .order-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 14px;
-          border-bottom: 1px solid #f0f0f0;
-          flex-wrap: wrap;
-        }
-        .order-id {
+        .group-stat-value {
           font-size: 13px;
           font-weight: 800;
           color: #111;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          flex-wrap: wrap;
+          line-height: 1.1;
         }
-        .order-id small {
-          font-size: 11px;
-          font-weight: 500;
-          color: rgba(0, 0, 0, 0.5);
+        .group-stat.spent .group-stat-value {
+          color: #dc2626;
+        }
+        .group-stat-label {
+          font-size: 9px;
+          font-weight: 700;
+          color: #999;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
         }
 
-        .order-body {
-          padding: 14px;
+        .chevron {
+          width: 18px;
+          height: 18px;
+          color: #999;
+          transition: transform 0.25s ease, color 0.2s;
+          flex-shrink: 0;
+        }
+        .customer-group.open .chevron {
+          transform: rotate(180deg);
+          color: #111;
+        }
+
+        /* ================= GROUP BODY ================= */
+        .group-body {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          padding: 12px;
+          background: #fafafa;
+        }
+
+        /* ================= BOOKING CARD ================= */
+        .booking-item {
+          background: #fff;
+          border: 1px solid #ebebeb;
+          border-radius: 12px;
+          overflow: hidden;
+          transition: border-color 0.2s;
+        }
+        .booking-item:hover {
+          border-color: #d4d4d4;
+        }
+
+        .booking-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 10px 14px;
+          border-bottom: 1px solid #f5f5f5;
+          flex-wrap: wrap;
+        }
+
+        .booking-id-info {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          min-width: 0;
+        }
+        .booking-number {
+          font-size: 13px;
+          font-weight: 800;
+          color: #111;
+          letter-spacing: 0.2px;
+        }
+        .booking-date {
+          font-size: 11px;
+          color: #888;
+          font-weight: 500;
+        }
+        .new-badge {
+          font-size: 9px;
+          font-weight: 800;
+          padding: 2px 6px;
+          background: #dc2626;
+          color: #fff;
+          border-radius: 20px;
+          letter-spacing: 0.5px;
+        }
+
+        .booking-body {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 14px;
+          gap: 12px;
+          padding: 12px 14px;
         }
-        @media (min-width: 700px) {
-          .order-body {
+        @media (min-width: 768px) {
+          .booking-body {
             grid-template-columns: 2fr 1fr;
-            gap: 16px;
+            gap: 14px;
           }
         }
 
-        .products-list {
+        /* ---------- Products ---------- */
+        .booking-products {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 6px;
+          min-width: 0;
         }
-        .product-item {
+        .product-row {
           display: flex;
           gap: 10px;
           padding: 8px;
           background: #fafafa;
           border: 1px solid #f0f0f0;
           border-radius: 8px;
+          align-items: center;
         }
         .product-thumb {
-          width: 44px;
-          height: 44px;
+          width: 38px;
+          height: 38px;
           border-radius: 6px;
           background: #fff;
-          border: 1px solid #eaeaea;
+          border: 1px solid #ebebeb;
+          flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          overflow: hidden;
-          flex-shrink: 0;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 800;
-          color: rgba(0, 0, 0, 0.25);
+          color: #ccc;
+          overflow: hidden;
         }
         .product-thumb img {
           width: 100%;
@@ -626,14 +761,14 @@ export function BookingsTable() {
           object-fit: contain;
           padding: 2px;
         }
-        .product-info {
+        .product-detail {
+          flex: 1;
+          min-width: 0;
           display: flex;
           flex-direction: column;
           gap: 2px;
-          min-width: 0;
-          flex: 1;
         }
-        .product-name {
+        .product-title {
           font-size: 12px;
           font-weight: 700;
           color: #111;
@@ -641,410 +776,449 @@ export function BookingsTable() {
           overflow: hidden;
           text-overflow: ellipsis;
         }
-        .product-sku {
-          font-size: 10.5px;
-          color: rgba(0, 0, 0, 0.5);
+        .product-sub {
+          font-size: 10px;
+          color: #888;
           font-weight: 500;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
-        .product-chips {
-          display: flex;
-          gap: 5px;
-          margin-top: 4px;
-          flex-wrap: wrap;
-        }
-        .chip {
-          font-size: 9.5px;
+        .product-qty {
+          font-size: 10px;
           font-weight: 800;
-          padding: 2px 7px;
+          color: #b91c1c;
+          padding: 3px 8px;
+          background: #fee2e2;
           border-radius: 20px;
-          background: #111;
-          color: #fff;
-          letter-spacing: 0.2px;
-        }
-        .chip.fitment {
-          background: #fff;
-          color: #dc2626;
-          border: 1px solid #dc2626;
+          white-space: nowrap;
+          flex-shrink: 0;
         }
 
-        .no-items {
+        .no-products {
           font-size: 11px;
-          color: rgba(0, 0, 0, 0.4);
+          color: #999;
           font-style: italic;
           padding: 10px;
           background: #fafafa;
-          border-radius: 6px;
           border: 1px dashed #e5e5e5;
+          border-radius: 8px;
           text-align: center;
         }
 
-        .order-summary {
+        /* ---------- Summary ---------- */
+        .booking-summary {
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          gap: 8px;
+          padding-left: 14px;
+          border-left: 1px solid #f0f0f0;
+          justify-content: center;
         }
-        .order-total-box {
-          background: #111;
-          color: #fff;
-          border-radius: 8px;
-          padding: 10px 12px;
-        }
-        .order-total-label {
-          font-size: 9.5px;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.6px;
-          color: rgba(255, 255, 255, 0.6);
-          margin-bottom: 2px;
-        }
-        .order-total-amount {
-          font-size: 17px;
-          font-weight: 900;
-          color: #fff;
-          letter-spacing: -0.3px;
+        @media (max-width: 767px) {
+          .booking-summary {
+            padding-left: 0;
+            border-left: none;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 12px;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+          }
         }
 
-        .delivery-method {
+        .summary-total {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .summary-label {
+          font-size: 9px;
+          font-weight: 800;
+          color: #999;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .summary-amount-row {
+          display: flex;
+          align-items: baseline;
+          gap: 4px;
+        }
+        .summary-amount {
+          font-size: 18px;
+          font-weight: 800;
+          color: #111;
+          letter-spacing: -0.3px;
+          line-height: 1;
+        }
+        .summary-currency {
+          font-size: 10px;
+          font-weight: 700;
+          color: #999;
+        }
+
+        .delivery-badge {
           display: inline-flex;
           align-items: center;
-          gap: 6px;
-          font-size: 11.5px;
+          gap: 5px;
+          font-size: 10px;
           font-weight: 800;
           padding: 5px 9px;
           border-radius: 6px;
           width: fit-content;
-          border: 1.5px solid #111;
-          background: #fff;
-          color: #111;
+          letter-spacing: 0.3px;
+          text-transform: uppercase;
         }
-        .delivery-method.delivery {
+        .delivery-badge.delivery {
           background: #111;
           color: #fff;
         }
-        .delivery-method.pickup {
+        .delivery-badge.pickup {
           background: #fff;
           color: #111;
+          border: 1px solid #111;
         }
-        .delivery-method svg {
-          width: 12px;
-          height: 12px;
+        .delivery-badge svg {
+          width: 11px;
+          height: 11px;
         }
-
-        .delivery-detail {
+        .delivery-city {
           font-size: 11px;
-          color: rgba(0, 0, 0, 0.55);
-          line-height: 1.4;
+          color: #666;
+          font-weight: 500;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          max-width: 100%;
+        }
+        .delivery-address {
+          font-size: 10px;
+          color: #999;
+          font-weight: 500;
+          line-height: 1.3;
+          overflow: hidden;
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-        .delivery-detail strong {
-          color: #111;
-          font-weight: 700;
-        }
-        .order-note {
-          font-size: 11px;
-          color: rgba(0, 0, 0, 0.6);
-          background: #fafafa;
-          border-left: 2px solid #dc2626;
-          border-radius: 4px;
-          padding: 6px 9px;
-          line-height: 1.4;
-          font-style: italic;
         }
 
-        /* ================= STATUS SELECT (BW+RED ONLY) ================= */
-        :global(.booking-status-select) {
+        /* ================= STATUS SELECT ================= */
+        .status-wrap {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+        }
+        .status-select {
           appearance: none;
-          padding: 6px 28px 6px 10px;
-          border-radius: 6px;
+          -webkit-appearance: none;
+          padding: 7px 26px 7px 10px;
+          border-radius: 7px;
           font-size: 11px;
           font-weight: 800;
-          border: 1.5px solid #111;
+          border: 1px solid transparent;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.2s;
           outline: none;
           text-transform: capitalize;
           letter-spacing: 0.3px;
-          background-color: #fff;
-          color: #111;
-          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-          background-repeat: no-repeat;
-          background-position: right 8px center;
           font-family: inherit;
         }
-        :global(.booking-status-select:disabled) {
-          opacity: 0.5;
+        .status-select:disabled {
+          opacity: 0.6;
           cursor: wait;
         }
-        :global(.booking-status-select.pending) {
-          border-color: #dc2626;
-          color: #dc2626;
-          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-        }
-        :global(.booking-status-select.confirmed) {
-          border-color: #111;
-          color: #111;
-        }
-        :global(.booking-status-select.processing) {
-          border-color: #dc2626;
-          background-color: #dc2626;
-          color: #fff;
-          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-        }
-        :global(.booking-status-select.completed) {
-          border-color: #111;
-          background-color: #111;
-          color: #fff;
-          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-        }
-        :global(.booking-status-select.cancelled) {
-          border-color: #dc2626;
-          color: #dc2626;
-          border-style: dashed;
-          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+        .status-arrow {
+          position: absolute;
+          right: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 10px;
+          height: 10px;
+          pointer-events: none;
+          color: inherit;
         }
 
-        /* ================= STATES ================= */
-        .empty-table-state {
-          padding: 40px 20px;
-          text-align: center;
-          color: rgba(0, 0, 0, 0.5);
-          font-size: 13px;
-          background: #fafafa;
-          border: 1px dashed #e5e5e5;
-          border-radius: 12px;
-          font-weight: 500;
-        }
-        .admin-alert {
-          padding: 14px 18px;
+        /* pending — neutral (white / black) */
+        .status-wrap.pending { color: #111; }
+        .status-wrap.pending .status-select {
           background: #fff;
-          border: 1.5px solid #dc2626;
-          color: #dc2626;
-          border-radius: 10px;
-          font-weight: 700;
+          color: #111;
+          border-color: #d4d4d4;
+        }
+
+        /* confirmed — black outline */
+        .status-wrap.confirmed { color: #111; }
+        .status-wrap.confirmed .status-select {
+          background: #fff;
+          color: #111;
+          border-color: #111;
+        }
+
+        /* processing — light red */
+        .status-wrap.processing { color: #b91c1c; }
+        .status-wrap.processing .status-select {
+          background: #fee2e2;
+          color: #b91c1c;
+          border-color: #fca5a5;
+        }
+
+        /* completed — filled black */
+        .status-wrap.completed { color: #fff; }
+        .status-wrap.completed .status-select {
+          background: #111;
+          color: #fff;
+          border-color: #111;
+        }
+
+        /* cancelled — filled red */
+        .status-wrap.cancelled { color: #fff; }
+        .status-wrap.cancelled .status-select {
+          background: #dc2626;
+          color: #fff;
+          border-color: #dc2626;
+        }
+
+        /* ================= EMPTY ================= */
+        .empty-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          padding: 60px 20px;
+          background: #fff;
+          border: 1px dashed #e5e5e5;
+          border-radius: 16px;
+          color: #999;
+        }
+        .empty-state svg {
+          width: 36px;
+          height: 36px;
+          color: #ccc;
+        }
+        .empty-state p {
+          margin: 0;
           font-size: 13px;
+          font-weight: 600;
         }
 
         /* ================= MOBILE ================= */
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
           .group-header {
-            flex-wrap: wrap;
+            padding: 14px;
+            gap: 10px;
           }
-          .group-info {
-            flex-basis: calc(100% - 100px);
+          .customer-avatar {
+            width: 36px;
+            height: 36px;
+            font-size: 12px;
           }
-          .group-total {
-            order: 3;
-            text-align: left;
-            margin-right: 0;
-            width: 100%;
-            display: flex;
-            gap: 8px;
-            align-items: baseline;
+          .group-stats {
+            gap: 10px;
           }
-          .expand-btn {
-            margin-left: auto;
+          .group-stat-value {
+            font-size: 12px;
           }
-          .stat-value {
-            font-size: 20px;
+          .booking-body {
+            padding: 10px 12px;
           }
-          .group-orders {
-            padding: 12px;
+          .booking-header {
+            padding: 10px 12px;
           }
-          .order-body {
-            padding: 12px;
-          }
-          .group-meta {
-            gap: 8px;
+        }
+        @media (max-width: 480px) {
+          .group-stat.spent {
+            display: none;
           }
         }
       `}</style>
 
-      <div className="bookings-wrapper">
+      <div className="bookings-page">
         {/* ============ STATS ============ */}
         <div className="stats-bar">
           <div className="stat-card">
-            <div className="stat-label">Total Orders</div>
-            <div className="stat-value">{stats.totalOrders}</div>
-            <div className="stat-sub">All time</div>
+            <span className="stat-label">Total Bookings</span>
+            <span className="stat-value">{stats.total}</span>
           </div>
           <div className="stat-card">
-            <div className="stat-label">Customers</div>
-            <div className="stat-value">{stats.totalCustomers}</div>
-            <div className="stat-sub">Unique phones</div>
+            <span className="stat-label">Customers</span>
+            <span className="stat-value">{stats.customers}</span>
           </div>
-          <div className="stat-card accent">
-            <div className="stat-label">Pending</div>
-            <div className="stat-value red">{stats.pending}</div>
-            <div className="stat-sub">Needs attention</div>
+          <div className="stat-card pending">
+            <span className="stat-label">Pending</span>
+            <span className="stat-value">{stats.pending}</span>
           </div>
-          <div className="stat-card">
-            <div className="stat-label">Revenue</div>
-            <div className="stat-value">{formatSar(stats.totalRevenue)}</div>
-            <div className="stat-sub">All bookings</div>
+          <div className="stat-card revenue">
+            <span className="stat-label">Revenue</span>
+            <span className="stat-value">{formatSar(stats.revenue)}</span>
           </div>
         </div>
 
-        {/* ============ TOOLBAR ============ */}
-        <div className="toolbar">
-          <div className="search-box">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        {/* ============ FILTERS ============ */}
+        <div className="filter-bar">
+          <div className="search-wrap">
+            <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input
+              className="search-input"
               type="text"
-              placeholder="Search by name, phone, booking #, part, SKU..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by name, phone, booking #, product…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <select
-            className="filter-select"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">All statuses</option>
-            {STATUS_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
+
+          <div className="status-pills" role="tablist" aria-label="Filter by status">
+            {['all', 'pending', 'confirmed', 'processing', 'completed', 'cancelled'].map((s) => (
+              <button
+                key={s}
+                type="button"
+                className={`status-pill ${statusFilter === s ? 'active' : ''}`}
+                onClick={() => setStatusFilter(s)}
+                role="tab"
+                aria-selected={statusFilter === s}
+              >
+                {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
+              </button>
             ))}
-          </select>
-          <select
-            className="filter-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortKey)}
-          >
-            <option value="newest">Newest first</option>
-            <option value="oldest">Oldest first</option>
-            <option value="amount">Highest amount</option>
-          </select>
+          </div>
+
+          <div className="sort-wrap">
+            <span className="sort-label">Sort</span>
+            <select
+              className="sort-select"
+              value={sortBy}
+              onChange={(e) =>
+                setSortBy(e.target.value as 'newest' | 'oldest' | 'amount' | 'orders')
+              }
+              aria-label="Sort bookings"
+            >
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="amount">Highest Amount</option>
+              <option value="orders">Most Orders</option>
+            </select>
+          </div>
         </div>
 
-        {/* ============ GROUPS ============ */}
-        {!groups.length ? (
-          <div className="empty-table-state">No bookings match your filters.</div>
+        {/* ============ EMPTY ============ */}
+        {!filteredGroups.length ? (
+          <div className="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 11l3 3L22 4" />
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+            </svg>
+            <p>{rows.length ? 'No bookings match your filters' : 'No bookings yet'}</p>
+          </div>
         ) : (
           <div className="groups-list">
-            {groups.map((group) => {
-              const open = isExpanded(group);
-              const hasPending = group.pendingCount > 0;
+            {filteredGroups.map((group) => {
+              const isOpen = expanded.has(group.key);
+              const initials = getInitials(group.name);
               return (
                 <div
                   key={group.key}
-                  className={`customer-group ${hasPending ? 'has-pending' : ''}`}
+                  className={`customer-group ${isOpen ? 'open' : ''}`}
                 >
-                  <div
+                  {/* ====== GROUP HEADER ====== */}
+                  <button
+                    type="button"
                     className="group-header"
-                    onClick={() => toggle(group)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        toggle(group);
-                      }
-                    }}
+                    onClick={() => toggleGroup(group.key)}
+                    aria-expanded={isOpen}
                   >
-                    <div className="group-avatar">{initials(group.name)}</div>
-                    <div className="group-info">
-                      <div className="group-name">
-                        {group.name}
-                        <span className="order-count-badge">
-                          {group.bookings.length}{' '}
-                          {group.bookings.length === 1 ? 'order' : 'orders'}
+                    <div className="customer-avatar">{initials}</div>
+                    <div className="customer-meta">
+                      <div className="customer-name-row">
+                        <span className="customer-name">{group.name}</span>
+                      </div>
+                      <div className="customer-phone-row">
+                        <span className="customer-phone">{group.phone}</span>
+                        <CopyPhoneButton phone={group.phone} />
+                      </div>
+                    </div>
+                    <div className="group-stats">
+                      <div className="group-stat">
+                        <span className="group-stat-value">
+                          {group.bookings.length}
                         </span>
-                        {hasPending && (
-                          <span className="order-count-badge pending">
-                            {group.pendingCount} pending
-                          </span>
-                        )}
+                        <span className="group-stat-label">
+                          {group.bookings.length === 1 ? 'Order' : 'Orders'}
+                        </span>
                       </div>
-                      <div
-                        className="group-meta"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <a href={`tel:${group.phone}`}>{group.phone}</a>
-                        {group.email && (
-                          <a href={`mailto:${group.email}`}>{group.email}</a>
-                        )}
-                        {group.phone && (
-                          <button
-                            type="button"
-                            className="copy-btn"
-                            onClick={() => void copyPhone(group.phone)}
-                          >
-                            {copiedPhone === group.phone ? 'Copied!' : 'Copy'}
-                          </button>
-                        )}
+                      <div className="group-stat spent">
+                        <span className="group-stat-value">
+                          {formatSar(group.totalSpent)}
+                        </span>
+                        <span className="group-stat-label">Total</span>
                       </div>
                     </div>
-                    <div className="group-total">
-                      <div className="group-total-label">Total Spent</div>
-                      <div className="group-total-amount">
-                        {formatSar(group.totalAmount)}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      className={`expand-btn ${open ? 'open' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggle(group);
-                      }}
-                      aria-label={open ? 'Collapse' : 'Expand'}
+                    <svg
+                      className="chevron"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
                     >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                      </svg>
-                    </button>
-                  </div>
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
 
-                  {open && (
-                    <div className="group-orders">
-                      {group.bookings.map((row) => {
-                        const items = row.booking_items ?? [];
-                        const isDelivery = row.delivery_method === 'delivery';
+                  {/* ====== GROUP BODY ====== */}
+                  {isOpen && (
+                    <div className="group-body">
+                      {group.bookings.map((booking) => {
+                        const items = booking.booking_items ?? [];
+                        const isDelivery = booking.delivery_method === 'delivery';
+                        const recent = isRecent(booking.created_at);
                         return (
-                          <div className="order-card" key={row.id}>
-                            <div className="order-header">
-                              <div className="order-id">
-                                <strong>{row.booking_number}</strong>
-                                <small>
-                                  {new Date(row.created_at).toLocaleString()}
-                                </small>
+                          <div className="booking-item" key={booking.id}>
+                            {/* header row */}
+                            <div className="booking-header">
+                              <div className="booking-id-info">
+                                <span className="booking-number">
+                                  #{booking.booking_number}
+                                </span>
+                                <span className="booking-date">
+                                  {new Date(booking.created_at).toLocaleString(undefined, {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </span>
+                                {recent && <span className="new-badge">NEW</span>}
                               </div>
                               <BookingStatusControl
-                                row={row}
+                                row={booking}
                                 onSaved={(status) =>
-                                  updateBookingStatus(row.id, status)
+                                  setRows((current) =>
+                                    current.map((item) =>
+                                      item.id === booking.id
+                                        ? { ...item, booking_status: status }
+                                        : item,
+                                    ),
+                                  )
                                 }
                               />
                             </div>
-                            <div className="order-body">
-                              <div className="products-list">
+
+                            {/* body: products + summary */}
+                            <div className="booking-body">
+                              <div className="booking-products">
                                 {items.length ? (
-                                  items.map((item, i) => (
+                                  items.map((item, idx) => (
                                     <div
-                                      className="product-item"
-                                      key={`${row.id}-${i}`}
+                                      className="product-row"
+                                      key={`${booking.id}-${idx}`}
                                     >
                                       <div className="product-thumb">
                                         {item.parts?.primary_image_url ? (
@@ -1057,102 +1231,71 @@ export function BookingsTable() {
                                           'AWP'
                                         )}
                                       </div>
-                                      <div className="product-info">
-                                        <span className="product-name">
+                                      <div className="product-detail">
+                                        <span className="product-title">
                                           {item.part_name_snapshot ||
                                             item.parts?.part_name ||
                                             'Catalog product'}
                                         </span>
-                                        <span className="product-sku">
-                                          SKU:{' '}
+                                        <span className="product-sub">
                                           {item.sku_snapshot ||
                                             item.parts?.sku ||
                                             '—'}
+                                          {item.vehicles &&
+                                            ` · ${item.vehicles.manufacturers?.manufacturer_name ?? ''} ${item.vehicles.model_name ?? ''}`.trimEnd()}
                                         </span>
-                                        <div className="product-chips">
-                                          <span className="chip">
-                                            Qty {item.quantity}
-                                          </span>
-                                          {item.vehicles && (
-                                            <span className="chip fitment">
-                                              {item.vehicles.manufacturers
-                                                ?.manufacturer_name ??
-                                                'Manufacturer'}{' '}
-                                              {item.vehicles.model_name}
-                                            </span>
-                                          )}
-                                        </div>
                                       </div>
+                                      <span className="product-qty">
+                                        ×{item.quantity}
+                                      </span>
                                     </div>
                                   ))
                                 ) : (
-                                  <div className="no-items">No item snapshot</div>
+                                  <div className="no-products">
+                                    No product details available
+                                  </div>
                                 )}
                               </div>
-                              <div className="order-summary">
-                                <div className="order-total-box">
-                                  <div className="order-total-label">
-                                    Order Total
-                                  </div>
-                                  <div className="order-total-amount">
-                                    {formatSar(Number(row.total_amount ?? 0))}
+
+                              <div className="booking-summary">
+                                <div className="summary-total">
+                                  <span className="summary-label">Total</span>
+                                  <div className="summary-amount-row">
+                                    <span className="summary-amount">
+                                      {formatSar(Number(booking.total_amount ?? 0))}
+                                    </span>
+                                    <span className="summary-currency">
+                                      {booking.currency || 'SAR'}
+                                    </span>
                                   </div>
                                 </div>
+
                                 <span
-                                  className={`delivery-method ${
-                                    isDelivery ? 'delivery' : 'pickup'
-                                  }`}
+                                  className={`delivery-badge ${isDelivery ? 'delivery' : 'pickup'}`}
                                 >
                                   {isDelivery ? (
-                                    <svg
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2.5"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    >
-                                      <rect
-                                        x="1"
-                                        y="3"
-                                        width="15"
-                                        height="13"
-                                      ></rect>
-                                      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                                      <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                                      <circle
-                                        cx="18.5"
-                                        cy="18.5"
-                                        r="2.5"
-                                      ></circle>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                      <rect x="1" y="3" width="15" height="13" />
+                                      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+                                      <circle cx="5.5" cy="18.5" r="2.5" />
+                                      <circle cx="18.5" cy="18.5" r="2.5" />
                                     </svg>
                                   ) : (
-                                    <svg
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2.5"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    >
-                                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                      <polyline points="9 22 9 12 15 12 15 22" />
                                     </svg>
                                   )}
                                   {isDelivery ? 'Delivery' : 'Pickup'}
                                 </span>
-                                <span className="delivery-detail">
-                                  <strong>
-                                    {row.customer_city || 'City not provided'}
-                                  </strong>
-                                  {row.shipping_address
-                                    ? ` · ${row.shipping_address}`
-                                    : ''}
-                                </span>
-                                {row.customer_note && (
-                                  <span className="order-note">
-                                    “{row.customer_note}”
-                                  </span>
+
+                                <div className="delivery-city">
+                                  {booking.customer_city || 'City not provided'}
+                                </div>
+                                {booking.shipping_address && (
+                                  <div className="delivery-address">
+                                    {booking.shipping_address}
+                                  </div>
                                 )}
                               </div>
                             </div>
