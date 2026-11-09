@@ -178,18 +178,19 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         }
 
         /* ---------------------------------
-         * GALLERY / IMAGE FIX 
+         * GALLERY / IMAGE FIX (REAL SIZE)
          * --------------------------------- */
         .gallery { 
           display: flex; 
           flex-direction: column; 
           gap: 16px; 
+          width: 100%;
         }
         
         .main-image {
           width: 100%;
-          aspect-ratio: 4 / 3; /* Changed from 1/1 to 4/3 for a better, less bulky look */
-          background: #f8f9fa; /* Soft background */
+          /* aspect-ratio সরিয়ে দেওয়া হয়েছে যাতে ছবি তার নিজস্ব সাইজে থাকে */
+          background: #ffffff; 
           border-radius: 16px;
           border: 1px solid #eaeaea;
           overflow: hidden;
@@ -197,14 +198,15 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           align-items: center;
           justify-content: center;
           position: relative;
-          padding: 24px; /* Adds breathing room around the image */
         }
         
         .main-image img {
           width: 100%;
-          height: 100%;
-          object-fit: contain; /* Ensures the whole image is visible without cropping */
+          height: auto; /* ছবি তার নিজস্ব উচ্চতা নেবে */
+          max-height: 600px; /* যাতে ছবি অনেক বড় হয়ে পেজ নষ্ট না করে */
+          object-fit: contain; /* ছবি কাটা পড়বে না */
           transition: transform 0.3s ease;
+          display: block;
         }
         
         .main-image:hover img {
@@ -228,13 +230,18 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           overflow: hidden;
           cursor: pointer;
           transition: all 0.2s;
-          padding: 4px;
+          padding: 2px;
         }
         .thumb-btn.active { 
           border-color: #111; 
           background: #fff;
         }
-        .thumb-btn img { width: 100%; height: 100%; object-fit: contain; }
+        .thumb-btn img { 
+          width: 100%; 
+          height: 100%; 
+          object-fit: cover; /* থাম্বনেইলে সুন্দর দেখানোর জন্য */
+          border-radius: 6px;
+        }
 
         /* Info Section */
         .info { display: flex; flex-direction: column; }
@@ -407,12 +414,10 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           .title { font-size: 24px; }
           .price { font-size: 28px; }
           
-          /* Image adjustments for mobile */
-          .main-image { 
-            aspect-ratio: 4 / 3; 
-            padding: 16px; /* Less padding on mobile so image is slightly bigger */
-            border-radius: 12px;
+          .main-image img { 
+            max-height: 400px; /* মোবাইলে ছবি খুব বেশি লম্বা হবে না */
           }
+          
           .thumb-btn {
             width: 60px;
             height: 60px;
