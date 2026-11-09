@@ -263,7 +263,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          color: #2563eb;
+          color: #dc2626;
           margin-bottom: 6px;
         }
         
@@ -285,8 +285,8 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         }
         .meta-tags strong { color: #111; }
         .badge {
-          background: #e0f2fe;
-          color: #0369a1;
+          background: #fee2e2;
+          color: #b91c1c;
           padding: 4px 10px;
           border-radius: 20px;
           font-size: 11px;
@@ -346,7 +346,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           gap: 8px;
         }
         .year-badge {
-          background: #2563eb;
+          background: #dc2626;
           color: #fff;
           padding: 4px 10px;
           border-radius: 6px;
