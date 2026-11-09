@@ -146,7 +146,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .product-page-wrapper {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 0 20px 80px; /* Top padding removed */
+          padding: 0 20px 80px; 
           font-family: system-ui, -apple-system, sans-serif;
           color: #333;
         }
@@ -160,12 +160,12 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         @media (min-width: 900px) {
           .product-layout {
             grid-template-columns: 1fr 1fr;
-            gap: 60px;
+            gap: 50px;
             align-items: start;
           }
         }
 
-        /* GALLERY / IMAGE (Starts from top) */
+        /* GALLERY / IMAGE */
         .gallery { 
           display: flex; 
           flex-direction: column; 
@@ -179,7 +179,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           min-height: 300px;
           max-height: 550px; 
           background: #f8f9fa; 
-          border-radius: 0 0 16px 16px; /* Touches header on mobile */
+          border-radius: 0 0 16px 16px; 
           border: 1px solid #eaeaea;
           border-top: none;
           display: flex;
@@ -240,17 +240,21 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           .info { padding-top: 0; }
         }
 
-        /* --- MAIN UNIFIED CARD --- */
-        .main-product-card {
+        /* =========================================
+         * ONE SINGLE UNIFIED CARD FOR ALL INFO
+         * ========================================= */
+        .unified-main-card {
           background: #ffffff;
           border: 1px solid #e5e7eb;
           border-radius: 20px;
           padding: 24px;
           box-shadow: 0 8px 30px rgba(0,0,0,0.04);
-          margin-bottom: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
         }
 
-        /* Product Details inside Card */
+        /* Brand & Title */
         .brand-category {
           display: flex;
           align-items: center;
@@ -260,15 +264,15 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           text-transform: uppercase;
           letter-spacing: 0.5px;
           color: #2563eb;
-          margin-bottom: 10px;
+          margin-bottom: 6px;
         }
         
         .title {
-          font-size: 28px;
+          font-size: 26px;
           font-weight: 800;
           color: #111;
           line-height: 1.2;
-          margin: 0 0 16px 0;
+          margin: 0 0 12px 0;
         }
         @media (min-width: 768px) { .title { font-size: 32px; } }
 
@@ -278,9 +282,6 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           gap: 12px;
           font-size: 13px;
           color: #666;
-          margin-bottom: 20px;
-          padding-bottom: 20px;
-          border-bottom: 1px solid #eaeaea;
         }
         .meta-tags strong { color: #111; }
         .badge {
@@ -292,80 +293,84 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           font-weight: 700;
         }
 
-        /* Vehicle Fitment Box (Inside Main Card) */
-        .vehicle-fitment-box {
+        /* Compact Vehicle Model Card (Inside the main card) */
+        .compact-model-card {
           display: flex;
           justify-content: space-between;
           align-items: center;
           background: #f8f9fa;
           border: 1px solid #e5e7eb;
-          padding: 14px 16px;
+          padding: 12px 16px;
           border-radius: 12px;
-          margin-bottom: 24px;
         }
-        .fitment-left {
+        .model-left {
           display: flex;
           align-items: center;
-          gap: 14px;
+          gap: 12px;
         }
-        .fitment-logo {
-          width: 44px;
-          height: 44px;
+        .model-logo {
+          width: 40px;
+          height: 40px;
           background: #fff;
           border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 6px;
+          padding: 4px;
           border: 1px solid #eaeaea;
         }
-        .fitment-logo img {
+        .model-logo img {
           max-width: 100%;
           max-height: 100%;
           object-fit: contain;
         }
-        .fitment-text {
+        .model-info {
           display: flex;
           flex-direction: column;
         }
-        .fitment-label {
-          font-size: 11px;
+        .model-label {
+          font-size: 10px;
           color: #6b7280;
           text-transform: uppercase;
           font-weight: 700;
           margin-bottom: 2px;
         }
-        .fitment-name {
-          font-size: 16px;
+        .model-name {
+          font-size: 15px;
           font-weight: 800;
           color: #111827;
         }
-        .fitment-right {
+        .model-right {
           display: flex;
-          flex-direction: column;
-          align-items: flex-end;
+          align-items: center;
+          gap: 8px;
         }
-        .fitment-year {
+        .year-badge {
           background: #2563eb;
           color: #fff;
           padding: 4px 10px;
           border-radius: 6px;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 700;
         }
-        .fitment-gen {
+        .gen-text {
           font-size: 12px;
           color: #6b7280;
-          margin-top: 4px;
           font-weight: 600;
         }
 
-        /* Price & Stock (Inside Main Card) */
+        /* Price & Stock */
+        .price-stock-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          padding-bottom: 16px;
+          border-bottom: 1px solid #eaeaea;
+        }
         .price-box {
           display: flex;
           align-items: baseline;
-          gap: 12px;
-          margin-bottom: 8px;
+          gap: 8px;
         }
         .price {
           font-size: 32px;
@@ -378,28 +383,25 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           text-decoration: line-through;
           font-weight: 500;
         }
-
         .stock {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          font-size: 14px;
-          font-weight: 600;
+          font-size: 13px;
+          font-weight: 700;
+          padding-bottom: 4px;
         }
         .stock.in { color: #10b981; }
         .stock.out { color: #ef4444; }
         .stock-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
 
-        /* --- BOOKING BUTTON (Below Main Card) --- */
-        .booking-action-container {
-          margin-bottom: 32px;
-        }
-        .btn {
+        /* Booking Button */
+        .btn-book {
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 8px;
-          padding: 16px 24px;
+          padding: 16px;
           border-radius: 12px;
           font-size: 16px;
           font-weight: 700;
@@ -407,50 +409,43 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           transition: all 0.3s;
           border: none;
           width: 100%;
-        }
-        .btn-book {
           background: #111;
           color: #fff;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .btn-book:hover:not(:disabled) { 
           background: #333; 
           transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+          box-shadow: 0 6px 16px rgba(0,0,0,0.15);
         }
-        .btn-book.added { background: #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-        .btn:disabled { background: #eaeaea; color: #999; cursor: not-allowed; box-shadow: none; }
+        .btn-book.added { background: #10b981; }
+        .btn-book:disabled { background: #eaeaea; color: #999; cursor: not-allowed; box-shadow: none; }
 
-        /* --- DESCRIPTION & SPECS (Below Button) --- */
-        .description { margin-bottom: 32px; }
-        .description h3 { font-size: 18px; font-weight: 700; margin: 0 0 12px; color: #111; }
-        .description p { font-size: 15px; line-height: 1.6; color: #555; white-space: pre-wrap; margin: 0; }
+        /* Description & Specs */
+        .description h3 { font-size: 16px; font-weight: 700; margin: 0 0 8px; color: #111; }
+        .description p { font-size: 14px; line-height: 1.6; color: #555; margin: 0; white-space: pre-wrap; }
 
         .specs {
           border-top: 1px solid #eaeaea;
-          margin-bottom: 40px;
+          padding-top: 16px;
         }
         .spec-row {
           display: flex;
           justify-content: space-between;
-          padding: 12px 0;
-          border-bottom: 1px solid #eaeaea;
+          padding: 8px 0;
           font-size: 14px;
         }
         .spec-row span { color: #666; }
-        .spec-row strong { color: #111; text-align: right; }
+        .spec-row strong { color: #111; text-align: right; font-weight: 600; }
 
         /* Bottom Fitments */
-        .fitments {
+        .other-fitments {
           grid-column: 1 / -1;
-          margin-top: 40px;
+          margin-top: 20px;
           padding-top: 40px;
           border-top: 1px solid #eaeaea;
         }
-        .fitments-header { margin-bottom: 24px; }
-        .fitments-header h2 { font-size: 24px; font-weight: 800; margin: 0 0 8px; }
-        .fitments-header p { font-size: 15px; color: #666; margin: 0; }
-        
+        .other-fitments h2 { font-size: 22px; font-weight: 800; margin-bottom: 16px; }
         .fitment-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -486,33 +481,37 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           .title { font-size: 24px; }
           .price { font-size: 28px; }
           
-          .main-image { 
-            max-height: 400px; 
-            padding: 12px;
-          }
+          .main-image { max-height: 400px; padding: 12px; }
           .thumb-btn { width: 60px; height: 60px; }
           
-          .main-product-card {
+          .unified-main-card {
             padding: 16px;
+            gap: 16px;
           }
-          .vehicle-fitment-box {
+          
+          .compact-model-card {
             flex-direction: column;
             align-items: flex-start;
             gap: 12px;
           }
-          .fitment-right {
-            align-items: flex-start;
-            flex-direction: row;
-            gap: 8px;
-            align-items: center;
+          .model-right {
+            width: 100%;
+            justify-content: space-between;
           }
+
+          .price-stock-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+          }
+          .stock { padding-bottom: 0; }
           
           .fitment-grid { grid-template-columns: 1fr; }
         }
       `}</style>
 
       <div className="product-layout">
-        {/* Gallery (Starts from very top) */}
+        {/* Gallery (Left Side) */}
         <div className="gallery">
           <div className="main-image">
             {activeImage ? (
@@ -536,72 +535,70 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           )}
         </div>
 
-        {/* Info Column */}
+        {/* Info Column (Right Side - One Single Card) */}
         <div className="info">
           
-          {/* MAIN UNIFIED CARD */}
-          <div className="main-product-card">
+          <div className="unified-main-card">
             
-            {/* 1. Brand & Title */}
-            <div className="brand-category">
-              {product.brand_name && <span>{product.brand_name}</span>}
-              {product.brand_name && product.parts_categories && <span>•</span>}
-              {product.parts_categories && <span>{product.parts_categories.category_name}</span>}
+            {/* 1. Header: Brand, Title, SKU */}
+            <div>
+              <div className="brand-category">
+                {product.brand_name && <span>{product.brand_name}</span>}
+                {product.brand_name && product.parts_categories && <span>•</span>}
+                {product.parts_categories && <span>{product.parts_categories.category_name}</span>}
+              </div>
+              <h1 className="title">{product.part_name}</h1>
+              <div className="meta-tags">
+                {product.sku && <span>SKU: <strong>{product.sku}</strong></span>}
+                {product.tested_status === 'tested' && <span className="badge">Tested</span>}
+                {product.condition && <span className="badge" style={{ background: '#f3f4f6', color: '#374151' }}>{product.condition}</span>}
+              </div>
             </div>
-            <h1 className="title">{product.part_name}</h1>
 
-            {/* 2. SKU & Badges */}
-            <div className="meta-tags">
-              {product.sku && <span>SKU: <strong>{product.sku}</strong></span>}
-              {product.tested_status === 'tested' && <span className="badge">Tested</span>}
-              {product.condition && <span className="badge" style={{ background: '#f3f4f6', color: '#374151' }}>{product.condition}</span>}
-            </div>
-
-            {/* 3. Vehicle Fitment Box */}
+            {/* 2. Compact Vehicle Model Card (Inside) */}
             {primaryFitment && primaryFitment.vehicles && (
-              <div className="vehicle-fitment-box">
-                <div className="fitment-left">
-                  <div className="fitment-logo">
+              <div className="compact-model-card">
+                <div className="model-left">
+                  <div className="model-logo">
                     {primaryFitment.vehicles.manufacturers?.logo_url ? (
                       <img src={primaryFitment.vehicles.manufacturers.logo_url} alt="Logo" />
                     ) : (
-                      <span style={{ fontSize: 14, fontWeight: 'bold' }}>
+                      <span style={{ fontSize: 12, fontWeight: 'bold' }}>
                         {primaryFitment.vehicles.manufacturers?.manufacturer_name?.slice(0, 2).toUpperCase() || 'V'}
                       </span>
                     )}
                   </div>
-                  <div className="fitment-text">
-                    <span className="fitment-label">Compatible With</span>
-                    <span className="fitment-name">
+                  <div className="model-info">
+                    <span className="model-label">Compatible Vehicle</span>
+                    <span className="model-name">
                       {primaryFitment.vehicles.manufacturers?.manufacturer_name} {primaryFitment.vehicles.model_name}
                     </span>
                   </div>
                 </div>
-                <div className="fitment-right">
-                  <span className="fitment-year">{formatCompatibleYears(primaryFitment)}</span>
+                <div className="model-right">
+                  <span className="year-badge">{formatCompatibleYears(primaryFitment)}</span>
                   {primaryFitment.vehicles.generation && (
-                    <span className="fitment-gen">{primaryFitment.vehicles.generation}</span>
+                    <span className="gen-text">{primaryFitment.vehicles.generation}</span>
                   )}
                 </div>
               </div>
             )}
 
-            {/* 4. Price & Stock */}
-            <div className="price-box">
-              <span className="price">{formatSar(currentPrice)}</span>
-              {hasDiscount && <span className="old-price">{formatSar(product.price)}</span>}
+            {/* 3. Price & Stock */}
+            <div className="price-stock-row">
+              <div className="price-box">
+                <span className="price">{formatSar(currentPrice)}</span>
+                {hasDiscount && <span className="old-price">{formatSar(product.price)}</span>}
+              </div>
+              <div className={`stock ${outOfStock ? 'out' : 'in'}`}>
+                <span className="stock-dot"></span>
+                {outOfStock ? 'Out of Stock' : `In Stock (${product.stock_quantity} available)`}
+              </div>
             </div>
 
-            <div className={`stock ${outOfStock ? 'out' : 'in'}`}>
-              <span className="stock-dot"></span>
-              {outOfStock ? 'Out of Stock' : `In Stock (${product.stock_quantity} available)`}
-            </div>
-          </div>
-
-          {/* BOOKING BUTTON (Below the Card) */}
-          <div className="booking-action-container">
+            {/* 4. Book Now Button */}
             <button 
-              className={`btn btn-book ${isAdded ? 'added' : ''}`} 
+              className={`btn-book ${isAdded ? 'added' : ''}`} 
               type="button" 
               disabled={outOfStock} 
               onClick={handleBooking}
@@ -617,29 +614,27 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
                 'Book Now'
               )}
             </button>
-          </div>
 
-          {/* DESCRIPTION (Below the Button) */}
-          <div className="description">
-            <h3>Product Details</h3>
-            <p>{product.description ?? 'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}</p>
-          </div>
+            {/* 5. Description */}
+            <div className="description">
+              <h3>Product Details</h3>
+              <p>{product.description ?? 'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}</p>
+            </div>
 
-          {/* SPECS */}
-          <div className="specs">
-            <div className="spec-row"><span>Brand</span><strong>{product.brand_name ?? 'Al Waha Select'}</strong></div>
-            <div className="spec-row"><span>OEM Number</span><strong>{product.oem_number ?? 'On request'}</strong></div>
-            <div className="spec-row"><span>Warranty</span><strong>{product.warranty_months ? `${product.warranty_months} months` : 'Confirm with desk'}</strong></div>
+            {/* 6. Specs */}
+            <div className="specs">
+              <div className="spec-row"><span>Brand</span><strong>{product.brand_name ?? 'Al Waha Select'}</strong></div>
+              <div className="spec-row"><span>OEM Number</span><strong>{product.oem_number ?? 'On request'}</strong></div>
+              <div className="spec-row"><span>Warranty</span><strong>{product.warranty_months ? `${product.warranty_months} months` : 'Confirm with desk'}</strong></div>
+            </div>
+
           </div>
         </div>
 
         {/* Bottom Fitments (Other Vehicles) */}
         {fitments.length > 1 && (
-          <div className="fitments">
-            <div className="fitments-header">
-              <h2>Other Compatible Vehicles</h2>
-              <p>This product is also verified for the following vehicles.</p>
-            </div>
+          <div className="other-fitments">
+            <h2>Other Compatible Vehicles</h2>
             <div className="fitment-grid">
               {fitments.slice(1).map((fitment) => {
                 const vehicle = fitment.vehicles!;
