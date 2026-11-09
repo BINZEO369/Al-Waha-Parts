@@ -115,7 +115,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
   const rawFitments = product.part_model_fitments;
   const fitments = (Array.isArray(rawFitments) ? rawFitments : rawFitments ? [rawFitments] : []).filter((fitment) => Boolean(fitment.vehicles));
   
-  const primaryFitment = fitments[0]; // Get the first fitment for the top display
+  const primaryFitment = fitments[0]; 
   
   const currentPrice = product.sale_price ?? product.price;
   const hasDiscount = product.sale_price && product.sale_price < product.price;
@@ -146,8 +146,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .product-page-wrapper {
           max-width: 1200px;
           margin: 0 auto;
-          /* Top padding removed to touch header */
-          padding: 0 20px 80px;
+          padding: 0 20px 80px; /* Top padding removed */
           font-family: system-ui, -apple-system, sans-serif;
           color: #333;
         }
@@ -166,9 +165,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           }
         }
 
-        /* ---------------------------------
-         * GALLERY / IMAGE FIX (Starts from top)
-         * --------------------------------- */
+        /* GALLERY / IMAGE (Starts from top) */
         .gallery { 
           display: flex; 
           flex-direction: column; 
@@ -182,8 +179,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           min-height: 300px;
           max-height: 550px; 
           background: #f8f9fa; 
-          /* Border radius only at bottom on mobile to touch header, full radius on desktop */
-          border-radius: 0 0 16px 16px;
+          border-radius: 0 0 16px 16px; /* Touches header on mobile */
           border: 1px solid #eaeaea;
           border-top: none;
           display: flex;
@@ -239,52 +235,132 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         }
 
         /* Info Section */
-        .info { display: flex; flex-direction: column; padding-top: 20px; }
+        .info { display: flex; flex-direction: column; padding-top: 10px; }
         @media (min-width: 900px) {
           .info { padding-top: 0; }
         }
-        
-        /* Top Fitment Card (Moved from bottom) */
-        .top-fitment-card {
-          display: inline-flex;
+
+        /* --- PREMIUM VEHICLE MODEL CARD --- */
+        .vehicle-model-card {
+          display: flex;
+          justify-content: space-between;
           align-items: center;
-          gap: 12px;
-          background: #f3f4f6;
+          background: linear-gradient(to right, #ffffff, #f8f9fa);
           border: 1px solid #e5e7eb;
-          padding: 10px 16px;
-          border-radius: 10px;
-          margin-bottom: 20px;
-          width: max-content;
-          max-width: 100%;
+          padding: 16px 20px;
+          border-radius: 16px;
+          margin-bottom: 16px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+          transition: all 0.3s ease;
         }
-        .top-fitment-logo {
-          width: 36px;
-          height: 36px;
-          background: #fff;
-          border-radius: 6px;
+        .vehicle-model-card:hover {
+          box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+          border-color: #d1d5db;
+        }
+
+        .model-card-left {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        .model-logo {
+          width: 50px;
+          height: 50px;
+          background: #ffffff;
+          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 4px;
+          padding: 6px;
           border: 1px solid #eaeaea;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+          flex-shrink: 0;
         }
-        .top-fitment-logo img {
+        .model-logo img {
           max-width: 100%;
           max-height: 100%;
           object-fit: contain;
         }
-        .top-fitment-text strong {
-          display: block;
-          font-size: 14px;
-          color: #111;
-          margin-bottom: 2px;
+        .model-info {
+          display: flex;
+          flex-direction: column;
         }
-        .top-fitment-text span {
-          display: block;
+        .model-label {
+          font-size: 11px;
+          color: #6b7280;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-weight: 700;
+          margin-bottom: 4px;
+        }
+        .model-name {
+          font-size: 18px;
+          font-weight: 800;
+          color: #111827;
+          line-height: 1.2;
+        }
+        .model-card-right {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          text-align: right;
+        }
+        .model-year-badge {
+          background: #eff6ff;
+          color: #2563eb;
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 800;
+          border: 1px solid #bfdbfe;
+        }
+        .model-gen {
           font-size: 12px;
-          color: #666;
+          color: #6b7280;
+          margin-top: 6px;
+          font-weight: 600;
         }
 
+        /* Booking Button (Moved below vehicle card) */
+        .booking-action-container {
+          margin-bottom: 32px;
+        }
+        .btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 16px 24px;
+          border-radius: 12px;
+          font-size: 16px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s;
+          border: none;
+          width: 100%;
+        }
+        .btn-book {
+          background: #111;
+          color: #fff;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn-book:hover:not(:disabled) { 
+          background: #333; 
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+        .btn-book.added { background: #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .btn:disabled { background: #eaeaea; color: #999; cursor: not-allowed; box-shadow: none; }
+
+        /* Divider */
+        .divider {
+          border: 0;
+          height: 1px;
+          background: #eaeaea;
+          margin-bottom: 24px;
+        }
+
+        /* Product Details below */
         .brand-category {
           display: flex;
           align-items: center;
@@ -326,12 +402,12 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           font-weight: 700;
         }
 
-        /* Price */
+        /* Price & Stock */
         .price-box {
           display: flex;
           align-items: baseline;
           gap: 12px;
-          margin-bottom: 12px;
+          margin-bottom: 8px;
         }
         .price {
           font-size: 32px;
@@ -345,7 +421,6 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           font-weight: 500;
         }
 
-        /* Stock */
         .stock {
           display: inline-flex;
           align-items: center;
@@ -358,41 +433,11 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .stock.out { color: #ef4444; }
         .stock-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
 
-        /* Actions */
-        .actions {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          margin-bottom: 32px;
-        }
-        .btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          padding: 16px 24px;
-          border-radius: 12px;
-          font-size: 16px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.3s;
-          border: none;
-          width: 100%;
-        }
-        .btn-book {
-          background: #111;
-          color: #fff;
-        }
-        .btn-book:hover:not(:disabled) { background: #333; }
-        .btn-book.added { background: #10b981; }
-        .btn:disabled { background: #eaeaea; color: #999; cursor: not-allowed; }
-
-        /* Description */
+        /* Description & Specs */
         .description { margin-bottom: 32px; }
         .description h3 { font-size: 18px; font-weight: 700; margin: 0 0 12px; color: #111; }
         .description p { font-size: 15px; line-height: 1.6; color: #555; white-space: pre-wrap; margin: 0; }
 
-        /* Specs */
         .specs {
           border-top: 1px solid #eaeaea;
           margin-bottom: 40px;
@@ -407,7 +452,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .spec-row span { color: #666; }
         .spec-row strong { color: #111; text-align: right; }
 
-        /* Bottom Fitments (Other Vehicles) */
+        /* Bottom Fitments */
         .fitments {
           grid-column: 1 / -1;
           margin-top: 40px;
@@ -457,11 +502,14 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
             max-height: 400px; 
             padding: 12px;
           }
+          .thumb-btn { width: 60px; height: 60px; }
           
-          .thumb-btn {
-            width: 60px;
-            height: 60px;
+          .vehicle-model-card {
+            padding: 12px 16px;
           }
+          .model-logo { width: 44px; height: 44px; }
+          .model-name { font-size: 16px; }
+          .model-year-badge { padding: 4px 8px; font-size: 12px; }
           
           .fitment-grid { grid-template-columns: 1fr; }
         }
@@ -492,33 +540,65 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           )}
         </div>
 
-        {/* Info */}
+        {/* Info Column */}
         <div className="info">
           
-          {/* TOP FITMENT CARD (Moved from bottom) */}
+          {/* 1. PREMIUM VEHICLE FITMENT CARD */}
           {primaryFitment && primaryFitment.vehicles && (
-            <div className="top-fitment-card">
-              <div className="top-fitment-logo">
-                {primaryFitment.vehicles.manufacturers?.logo_url ? (
-                  <img src={primaryFitment.vehicles.manufacturers.logo_url} alt={primaryFitment.vehicles.manufacturers.manufacturer_name || 'Logo'} />
-                ) : (
-                  <span style={{ fontSize: 10, fontWeight: 'bold' }}>
-                    {primaryFitment.vehicles.manufacturers?.manufacturer_name?.slice(0, 2).toUpperCase() || 'V'}
+            <div className="vehicle-model-card">
+              {/* Left: Logo & Name */}
+              <div className="model-card-left">
+                <div className="model-logo">
+                  {primaryFitment.vehicles.manufacturers?.logo_url ? (
+                    <img src={primaryFitment.vehicles.manufacturers.logo_url} alt={primaryFitment.vehicles.manufacturers.manufacturer_name || 'Logo'} />
+                  ) : (
+                    <span style={{ fontSize: 14, fontWeight: 'bold' }}>
+                      {primaryFitment.vehicles.manufacturers?.manufacturer_name?.slice(0, 2).toUpperCase() || 'V'}
+                    </span>
+                  )}
+                </div>
+                <div className="model-info">
+                  <span className="model-label">Compatible With</span>
+                  <span className="model-name">
+                    {primaryFitment.vehicles.manufacturers?.manufacturer_name} {primaryFitment.vehicles.model_name}
                   </span>
-                )}
+                </div>
               </div>
-              <div className="top-fitment-text">
-                <strong>
-                  {primaryFitment.vehicles.manufacturers?.manufacturer_name} {primaryFitment.vehicles.model_name}
-                </strong>
-                <span>
-                  {formatCompatibleYears(primaryFitment)}
-                  {primaryFitment.vehicles.generation ? ` · ${primaryFitment.vehicles.generation}` : ''}
-                </span>
+
+              {/* Right: Years & Gen */}
+              <div className="model-card-right">
+                <span className="model-year-badge">{formatCompatibleYears(primaryFitment)}</span>
+                {primaryFitment.vehicles.generation && (
+                  <span className="model-gen">{primaryFitment.vehicles.generation}</span>
+                )}
               </div>
             </div>
           )}
 
+          {/* 2. BOOKING BUTTON (Below the Card) */}
+          <div className="booking-action-container">
+            <button 
+              className={`btn btn-book ${isAdded ? 'added' : ''}`} 
+              type="button" 
+              disabled={outOfStock} 
+              onClick={handleBooking}
+            >
+              {outOfStock ? 'Out of stock' : isAdded ? (
+                <>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  Added! Redirecting...
+                </>
+              ) : (
+                'Book Now'
+              )}
+            </button>
+          </div>
+
+          <hr className="divider" />
+
+          {/* 3. PRODUCT DETAILS (Title, Price, etc.) */}
           <div className="brand-category">
             {product.brand_name && <span>{product.brand_name}</span>}
             {product.brand_name && product.parts_categories && <span>•</span>}
@@ -543,26 +623,6 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
             {outOfStock ? 'Out of Stock' : `In Stock (${product.stock_quantity} available)`}
           </div>
 
-          <div className="actions">
-            <button 
-              className={`btn btn-book ${isAdded ? 'added' : ''}`} 
-              type="button" 
-              disabled={outOfStock} 
-              onClick={handleBooking}
-            >
-              {outOfStock ? 'Out of stock' : isAdded ? (
-                <>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  Added! Redirecting...
-                </>
-              ) : (
-                'Book Now'
-              )}
-            </button>
-          </div>
-
           <div className="description">
             <h3>Product Details</h3>
             <p>{product.description ?? 'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}</p>
@@ -575,7 +635,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           </div>
         </div>
 
-        {/* Fitments (Full width inside grid) - ONLY show if there are multiple vehicles */}
+        {/* Bottom Fitments (Other Vehicles) */}
         {fitments.length > 1 && (
           <div className="fitments">
             <div className="fitments-header">
