@@ -66,10 +66,6 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
   const [error, setError] = useState('');
   const [isAdded, setIsAdded] = useState(false);
   
-  // Tips State
-  const [showTip, setShowTip] = useState(false);
-  const [highlightStep, setHighlightStep] = useState(0); // 0: none, 1: vehicle, 2: price
-
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const router = useRouter();
   const { addItem } = useCart();
@@ -94,40 +90,6 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         setError(cause instanceof Error ? cause.message : 'Product not found.'),
       );
   }, [apiUrl, slug, initialProduct]);
-
-  // Handle Tip Auto-Show and LocalStorage
-  useEffect(() => {
-    const isDismissed = localStorage.getItem('hideProductTip');
-    if (!isDismissed && product) {
-      const timer = setTimeout(() => {
-        setShowTip(true);
-      }, 1500); // 1.5s delay so page loads first
-      return () => clearTimeout(timer);
-    }
-  }, [product]);
-
-  // Handle Highlight Animations
-  useEffect(() => {
-    if (!showTip) {
-      setHighlightStep(0);
-      return;
-    }
-
-    const step1 = setTimeout(() => setHighlightStep(1), 500);  // Highlight Vehicle Card
-    const step2 = setTimeout(() => setHighlightStep(2), 2500); // Highlight Price/Stock Card
-
-    return () => {
-      clearTimeout(step1);
-      clearTimeout(step2);
-    };
-  }, [showTip]);
-
-  const dismissTip = (permanently = false) => {
-    setShowTip(false);
-    if (permanently) {
-      localStorage.setItem('hideProductTip', 'true');
-    }
-  };
 
   if (error) {
     return (
@@ -340,16 +302,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           border: 1px solid #e5e7eb;
           padding: 12px 16px;
           border-radius: 12px;
-          transition: all 0.3s ease;
         }
-        
-        /* Highlight Animation for Vehicle Card */
-        .compact-model-card.highlight-active {
-          border-color: #2563eb;
-          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
-          background: #eff6ff;
-        }
-
         .model-left {
           display: flex;
           align-items: center;
@@ -413,19 +366,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           align-items: flex-end;
           padding-bottom: 16px;
           border-bottom: 1px solid #eaeaea;
-          transition: all 0.3s ease;
         }
-
-        /* Highlight Animation for Price Row */
-        .price-stock-row.highlight-active {
-          border-bottom-color: #10b981;
-          background: #ecfdf5;
-          border-radius: 8px;
-          padding: 8px;
-          margin: -8px;
-          margin-bottom: 8px;
-        }
-
         .price-box {
           display: flex;
           align-items: baseline;
@@ -534,144 +475,6 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .fitment-info strong { display: block; font-size: 15px; color: #111; margin-bottom: 4px; }
         .fitment-info span { display: block; font-size: 12px; color: #666; }
 
-        /* =========================================
-         * TIPS & GUIDELINE MODAL STYLES
-         * ========================================= */
-        .tips-overlay {
-          position: fixed;
-          bottom: 24px;
-          right: 24px;
-          z-index: 9999;
-          max-width: 380px;
-          width: calc(100% - 48px);
-          animation: slideUpFade 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        @keyframes slideUpFade {
-          from { opacity: 0; transform: translateY(40px) scale(0.95); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .tips-card {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(20px);
-          border: 2px solid #2563eb;
-          border-radius: 16px;
-          padding: 20px;
-          box-shadow: 0 20px 40px rgba(37, 99, 235, 0.2);
-          position: relative;
-          overflow: hidden;
-        }
-
-        /* Decorative background shape */
-        .tips-card::before {
-          content: '';
-          position: absolute;
-          top: -50px;
-          right: -50px;
-          width: 120px;
-          height: 120px;
-          background: #eff6ff;
-          border-radius: 50%;
-          z-index: 0;
-        }
-
-        .tips-close-btn {
-          position: absolute;
-          top: 12px;
-          right: 12px;
-          background: #fee2e2;
-          color: #ef4444;
-          border: none;
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          z-index: 10;
-          transition: all 0.2s;
-          font-weight: bold;
-        }
-        .tips-close-btn:hover {
-          background: #fca5a5;
-          transform: rotate(90deg);
-        }
-
-        .tips-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 12px;
-          position: relative;
-          z-index: 1;
-        }
-        .tips-icon {
-          font-size: 24px;
-          background: #fef3c7;
-          width: 44px;
-          height: 44px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 12px;
-        }
-        .tips-title {
-          font-size: 16px;
-          font-weight: 800;
-          color: #111;
-          margin: 0;
-        }
-
-        .tips-text {
-          font-size: 14px;
-          color: #4b5563;
-          line-height: 1.5;
-          margin-bottom: 16px;
-          position: relative;
-          z-index: 1;
-        }
-
-        .tips-list {
-          background: #f8fafc;
-          border-radius: 8px;
-          padding: 12px;
-          margin-bottom: 16px;
-          position: relative;
-          z-index: 1;
-        }
-        .tips-list-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 8px;
-          font-size: 13px;
-          color: #334155;
-          margin-bottom: 8px;
-        }
-        .tips-list-item:last-child { margin-bottom: 0; }
-        .tips-list-item span {
-          font-weight: 700;
-          color: #2563eb;
-        }
-
-        .tips-action-btn {
-          width: 100%;
-          padding: 12px;
-          background: #2563eb;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          font-weight: 700;
-          font-size: 14px;
-          cursor: pointer;
-          transition: background 0.2s;
-          position: relative;
-          z-index: 1;
-        }
-        .tips-action-btn:hover {
-          background: #1d4ed8;
-        }
-
         /* Mobile Adjustments */
         @media (max-width: 768px) {
           .product-page-wrapper { padding: 0 16px 60px; }
@@ -704,12 +507,6 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           .stock { padding-bottom: 0; }
           
           .fitment-grid { grid-template-columns: 1fr; }
-          
-          .tips-overlay {
-            bottom: 16px;
-            right: 16px;
-            width: calc(100% - 32px);
-          }
         }
       `}</style>
 
@@ -758,9 +555,9 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
               </div>
             </div>
 
-            {/* 2. Compact Vehicle Model Card (Highlighted during tip) */}
+            {/* 2. Compact Vehicle Model Card (Inside) */}
             {primaryFitment && primaryFitment.vehicles && (
-              <div className={`compact-model-card ${highlightStep === 1 ? 'highlight-active' : ''}`}>
+              <div className="compact-model-card">
                 <div className="model-left">
                   <div className="model-logo">
                     {primaryFitment.vehicles.manufacturers?.logo_url ? (
@@ -787,8 +584,8 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
               </div>
             )}
 
-            {/* 3. Price & Stock (Highlighted during tip) */}
-            <div className={`price-stock-row ${highlightStep === 2 ? 'highlight-active' : ''}`}>
+            {/* 3. Price & Stock */}
+            <div className="price-stock-row">
               <div className="price-box">
                 <span className="price">{formatSar(currentPrice)}</span>
                 {hasDiscount && <span className="old-price">{formatSar(product.price)}</span>}
@@ -863,43 +660,6 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           </div>
         )}
       </div>
-
-      {/* =========================================
-       * TIPS POPUP UI (With LocalStorage Logic)
-       * ========================================= */}
-      {showTip && (
-        <div className="tips-overlay">
-          <div className="tips-card">
-            <button className="tips-close-btn" onClick={() => dismissTip(true)} title="আর দেখাবেন না">
-              ✕
-            </button>
-            
-            <div className="tips-header">
-              <div className="tips-icon">💡</div>
-              <h3 className="tips-title">গাইডলাইন টিপস</h3>
-            </div>
-            
-            <p className="tips-text">
-              প্রোডাক্টটি কেনার আগে এটি কোন গাড়ির সাথে কম্প্যাটিবল, গাড়ির মডেল, কোম্পানি এবং কত সাল পর্যন্ত কাজ করবে—সবকিছু ভালোভাবে দেখে নিন।
-            </p>
-            
-            <div className="tips-list">
-              <div className="tips-list-item">
-                <span>🚗</span>
-                <div><strong>Compatible Vehicle:</strong> গাড়ির লোগো, নাম এবং বছর (Years) দেখুন।</div>
-              </div>
-              <div className="tips-list-item">
-                <span></span>
-                <div><strong>Price & Stock:</strong> দাম এবং স্টকে আছে কিনা তা নিচে দেখুন।</div>
-              </div>
-            </div>
-            
-            <button className="tips-action-btn" onClick={() => dismissTip(false)}>
-              বুঝেছি (এখন বন্ধ করুন)
-            </button>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
