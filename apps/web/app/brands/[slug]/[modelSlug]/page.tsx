@@ -1,451 +1,81 @@
-'use client';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import BrandModelClientView, {
+  type BrandDetail,
+  type BrandModelDetail,
+  type VehicleDetail,
+} from './ClientView';
+import { canonicalUrl, fetchPublicData } from '../../../../lib/public-seo';
 
-import Link from 'next/link';
-import { use, useEffect, useState } from 'react';
-import { apiFetch } from '../../../../../../packages/shared/src/api';
-import { PartCard, type PartCardData } from '../../../../components/PartCard';
-import { PageLoader } from '../../../../components/PageLoader';
+type PageProps = { params: Promise<{ slug: string; modelSlug: string }> };
 
-type Brand = {
-  id: string;
-  manufacturer_name: string;
-  slug: string;
-  logo_url: string | null;
-  sort_order: number;
-};
-type Vehicle = {
-  id: string;
-  slug: string;
-  car_brand_id?: string | null;
-  manufacturer_id?: string | null;
-  manufacturer_name: string;
-  manufacturer_logo?: string | null;
-  model_name: string;
-  generation?: string | null;
-  chassis_code?: string | null;
-  year_start?: number | null;
-  year_end?: number | null;
-  engine_code?: string | null;
-  engine_capacity?: string | number | null;
-  fuel_type?: string | null;
-  transmission?: string | null;
-  vehicle_type?: string | null;
-  cover_image_url?: string | null;
-  vehicle_images?: string[] | null;
-};
-type BrandDetail = { brand: Brand; vehicles: Vehicle[] };
-type VehicleDetail = { vehicle: Vehicle; parts: PartCardData[] };
+async function loadModelDetail(brandSlug: string, modelSlug: string): Promise<BrandModelDetail | null | undefined> {
+  const brandDetail = await fetchPublicData<BrandDetail>(
+    `/api/v1/car-brands/slug/${encodeURIComponent(brandSlug)}`,
+  );
+  if (brandDetail === null || brandDetail === undefined) return brandDetail;
 
-export default function BrandModelPage({
-  params,
-}: {
-  params: Promise<{ slug: string; modelSlug: string }>;
-}) {
-  const { slug, modelSlug } = use(params);
-  const [detail, setDetail] = useState<{
-    brand: Brand;
-    vehicle: Vehicle;
-    parts: PartCardData[];
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const model = brandDetail.vehicles.find((vehicle) => vehicle.slug === modelSlug);
+  if (!model) return null;
 
-  useEffect(() => {
-    let active = true;
-    async function load() {
-      if (!apiUrl) {
-        setError('Vehicle API is not configured.');
-        setLoading(false);
-        return;
-      }
-      try {
-        const brandDetail = await apiFetch<BrandDetail>(
-          apiUrl,
-          `/api/v1/car-brands/slug/${encodeURIComponent(slug)}`,
-        );
-        const model = brandDetail.vehicles.find((vehicle) => vehicle.slug === modelSlug);
-        if (!model) throw new Error('This model is not listed under the selected car brand.');
-        const vehicleDetail = await apiFetch<VehicleDetail>(
-          apiUrl,
-          `/api/v1/vehicles/slug/${encodeURIComponent(modelSlug)}`,
-        );
-        const detailManufacturerId =
-          vehicleDetail.vehicle.car_brand_id || vehicleDetail.vehicle.manufacturer_id;
-        if (
-          vehicleDetail.vehicle.id !== model.id ||
-          (detailManufacturerId && detailManufacturerId !== brandDetail.brand.id)
-        ) {
-          throw new Error('The selected model does not belong to this car brand.');
-        }
-        const completeVehicle: Vehicle = {
-          ...model,
-          ...vehicleDetail.vehicle,
-          manufacturer_name:
-            vehicleDetail.vehicle.manufacturer_name ||
-            model.manufacturer_name ||
-            brandDetail.brand.manufacturer_name,
-          manufacturer_logo:
-            vehicleDetail.vehicle.manufacturer_logo ||
-            model.manufacturer_logo ||
-            brandDetail.brand.logo_url,
-          car_brand_id:
-            detailManufacturerId || model.car_brand_id || brandDetail.brand.id,
-        };
-        if (active)
-          setDetail({
-            brand: brandDetail.brand,
-            vehicle: completeVehicle,
-            parts: vehicleDetail.parts,
-          });
-      } catch (cause) {
-        if (active)
-          setError(cause instanceof Error ? cause.message : 'Unable to load vehicle details.');
-      } finally {
-        if (active) setLoading(false);
-      }
-    }
-    void load();
-    return () => {
-      active = false;
-    };
-  }, [apiUrl, slug, modelSlug]);
+  const vehicleDetail = await fetchPublicData<VehicleDetail>(
+    `/api/v1/vehicles/slug/${encodeURIComponent(modelSlug)}`,
+  );
+  if (vehicleDetail === null || vehicleDetail === undefined) return vehicleDetail;
 
-  if (loading)
-    return (
-      <main className="page-shell">
-        <PageLoader label="Loading vehicle details" />
-      </main>
-    );
-  if (error || !detail)
-    return (
-      <main className="page-shell">
-        <div className="data-alert">{error || 'Vehicle not found.'}</div>
-        <Link className="button" href={`/brands/${encodeURIComponent(slug)}`}>
-          Back to {slug}
-        </Link>
-      </main>
-    );
+  const manufacturerId = vehicleDetail.vehicle.car_brand_id || vehicleDetail.vehicle.manufacturer_id;
+  if (
+    vehicleDetail.vehicle.id !== model.id ||
+    (manufacturerId && manufacturerId !== brandDetail.brand.id)
+  ) {
+    return null;
+  }
 
-  const { brand, vehicle, parts } = detail;
-  
-  const title = `${vehicle.manufacturer_name} ${vehicle.model_name}`.trim();
-  const manufacturerLogo = vehicle.manufacturer_logo || brand.logo_url;
-  const gallery = [vehicle.cover_image_url, ...(vehicle.vehicle_images ?? [])].filter(
-    Boolean,
-  ) as string[];
-  
-  const specs = [
-    { label: 'Vehicle type', value: vehicle.vehicle_type },
-    { label: 'Generation', value: vehicle.generation },
-    { label: 'Chassis', value: vehicle.chassis_code },
-    {
-      label: 'Year range',
-      value:
-        vehicle.year_start && vehicle.year_end
-          ? `${vehicle.year_start}–${vehicle.year_end}`
-          : vehicle.year_start || vehicle.year_end,
+  const vehicle: BrandModelDetail['vehicle'] = {
+    ...model,
+    ...vehicleDetail.vehicle,
+    manufacturer_name:
+      vehicleDetail.vehicle.manufacturer_name || model.manufacturer_name || brandDetail.brand.manufacturer_name,
+    manufacturer_logo:
+      vehicleDetail.vehicle.manufacturer_logo || model.manufacturer_logo || brandDetail.brand.logo_url,
+    car_brand_id: manufacturerId || model.car_brand_id || brandDetail.brand.id,
+  };
+
+  return { brand: brandDetail.brand, vehicle, parts: vehicleDetail.parts };
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug, modelSlug } = await params;
+  const detail = await loadModelDetail(slug, modelSlug);
+  const title = detail
+    ? `${detail.vehicle.manufacturer_name} ${detail.vehicle.model_name}`.trim()
+    : modelSlug.replace(/-/g, ' ');
+  const yearRange = detail?.vehicle.year_start && detail.vehicle.year_end
+    ? ` (${detail.vehicle.year_start}–${detail.vehicle.year_end})`
+    : '';
+  const description = detail
+    ? `Vehicle specifications and compatible parts for ${title}${yearRange} in the Al Waha Parts catalog, Al Jubail, Saudi Arabia.`
+    : `Vehicle specifications and compatible car parts for ${title} in the Al Waha Parts catalog.`;
+  const canonical = canonicalUrl(`/brands/${encodeURIComponent(detail?.brand.slug || slug)}/${encodeURIComponent(detail?.vehicle.slug || modelSlug)}`);
+
+  return {
+    title: `${title} Parts & Fitment`,
+    description,
+    alternates: { canonical },
+    ...(detail === null ? { robots: { index: false, follow: true } } : {}),
+    openGraph: {
+      title: `${title} Parts & Fitment | Al Waha Parts`,
+      description,
+      url: canonical,
+      ...(detail?.vehicle.cover_image_url ? { images: [{ url: detail.vehicle.cover_image_url, alt: title }] } : {}),
     },
-    { label: 'Engine code', value: vehicle.engine_code },
-    { label: 'Engine capacity', value: vehicle.engine_capacity },
-    { label: 'Fuel type', value: vehicle.fuel_type },
-    { label: 'Transmission', value: vehicle.transmission },
-  ].filter(
-    (spec): spec is { label: string; value: string | number } =>
-      spec.value !== null && spec.value !== undefined && String(spec.value).trim() !== '',
-  );
+    twitter: { card: 'summary_large_image', title: `${title} Parts & Fitment | Al Waha Parts`, description },
+  };
+}
 
-  return (
-    <main className="vehicle-detail-wrapper">
-      <style jsx>{`
-        .vehicle-detail-wrapper {
-          overflow-x: hidden;
-          font-family: system-ui, -apple-system, sans-serif;
-          color: #333;
-          background: #fafafa;
-        }
-
-        /* DYNAMIC FULL BLEED HERO SECTION - GAP REMOVED */
-        .full-bleed-hero {
-          position: relative;
-          width: 100vw;
-          left: 50%;
-          right: 50%;
-          margin-left: -50vw;
-          margin-right: -50vw;
-          background: #f0f0f0;
-          overflow: hidden; 
-          /* min-height এবং flex প্রোপার্টি সরিয়ে দেওয়া হয়েছে যাতে হেডারের নিচে কোনো গ্যাপ না থাকে */
-        }
-
-        .hero-bg-image {
-          width: 100%;
-          height: auto;
-          display: block; 
-          object-fit: contain;
-          z-index: 1;
-        }
-
-        .hero-overlay {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 40%);
-          z-index: 2;
-          pointer-events: none;
-        }
-
-        .hero-placeholder {
-          height: 400px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 24px;
-          color: #666;
-          background: #111;
-        }
-
-        /* Vehicle details card, displayed below the image */
-        .liquid-details-card {
-          position: relative;
-          padding: 16px 24px; 
-          width: min(1200px, calc(100% - 32px));
-          margin: 20px auto 0;
-          background: #fff;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          border-radius: 16px;
-          box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
-          box-sizing: border-box;
-        }
-
-        .vehicle-details-section {
-          width: 100%;
-        }
-
-        .card-content-wrapper {
-          max-width: 1200px;
-          margin: 0 auto;
-          display: flex;
-          flex-direction: column;
-          gap: 12px; 
-        }
-
-        .card-header-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 10px;
-        }
-
-        .brand-header {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 2px;
-        }
-        .brand-header img {
-          width: 22px; 
-          height: 22px;
-          object-fit: contain;
-          border-radius: 4px;
-          padding: 2px;
-          background: #fff;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        .brand-header strong {
-          font-size: 11px; 
-          color: #444;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          font-weight: 800;
-        }
-
-        .vehicle-title {
-          font-size: 20px; 
-          font-weight: 800;
-          margin: 0;
-          color: #000;
-          line-height: 1.15;
-        }
-
-        .specs-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-          gap: 8px 12px; 
-          padding-top: 10px; 
-          border-top: 1px solid rgba(0,0,0,0.08);
-        }
-        .spec-item {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-        .spec-label {
-          font-size: 9px; 
-          color: #666;
-          text-transform: uppercase;
-          font-weight: 700;
-          letter-spacing: 0.5px;
-        }
-        .spec-value {
-          font-size: 12px; 
-          font-weight: 700;
-          color: #111;
-          line-height: 1.2;
-        }
-
-        .liquid-btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: #111;
-          color: #fff;
-          padding: 10px 18px; 
-          border-radius: 8px;
-          font-weight: 600;
-          font-size: 12px; 
-          text-decoration: none;
-          transition: all 0.3s ease;
-          border: none;
-          white-space: nowrap;
-        }
-        .liquid-btn:hover {
-          background: #333;
-          transform: translateY(-1px);
-        }
-
-        /* PARTS SECTION */
-        .parts-section-wrapper {
-          max-width: 1300px;
-          margin: 0 auto;
-          padding: 60px 40px 80px 40px;
-        }
-
-        .parts-section h2 {
-          font-size: 28px;
-          font-weight: 800;
-          margin-bottom: 28px;
-          color: #111;
-          letter-spacing: -0.5px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .parts-section h2 span {
-          font-size: 14px;
-          background: #eaeaea;
-          padding: 4px 10px;
-          border-radius: 20px;
-          color: #555;
-        }
-
-        .catalog-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-          gap: 24px;
-        }
-        .empty-state {
-          padding: 50px 20px;
-          text-align: center;
-          background: #fff;
-          border-radius: 20px;
-          border: 1px dashed #ddd;
-          color: #666;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-          .liquid-details-card {
-            padding: 12px 16px; 
-            border-radius: 14px;
-          }
-          .card-header-row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
-          }
-          .vehicle-title { font-size: 18px; }
-          .specs-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 6px 10px;
-            padding-top: 8px;
-          }
-          .liquid-btn {
-            width: 100%;
-            padding: 8px 12px;
-            font-size: 11px;
-          }
-          .parts-section-wrapper {
-            padding: 40px 16px;
-          }
-          .parts-section h2 { font-size: 22px; margin-bottom: 20px; }
-        }
-      `}</style>
-
-      <section className="full-bleed-hero">
-        {gallery.length ? (
-          <>
-            <img className="hero-bg-image" src={gallery[0]} alt={title} />
-            <div className="hero-overlay"></div>
-          </>
-        ) : (
-          <div className="hero-placeholder">No Image Available</div>
-        )}
-
-      </section>
-
-      <section className="vehicle-details-section">
-        <div className="liquid-details-card">
-          <div className="card-content-wrapper">
-            
-            <div className="card-header-row">
-              <div>
-                <div className="brand-header">
-                  {manufacturerLogo && <img src={manufacturerLogo} alt={`${brand.manufacturer_name} logo`} />}
-                  <strong>{brand.manufacturer_name}</strong>
-                </div>
-                <h1 className="vehicle-title">{title}</h1>
-              </div>
-              
-              <Link className="liquid-btn" href={`/category?vehicle_id=${encodeURIComponent(vehicle.id)}`}>
-                Browse Parts
-              </Link>
-            </div>
-            
-            {specs.length > 0 && (
-              <div className="specs-grid">
-                {specs.map(({ label, value }) => (
-                  <div className="spec-item" key={label}>
-                    <span className="spec-label">{label}</span>
-                    <span className="spec-value">{value}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-          </div>
-        </div>
-      </section>
-
-      <section className="parts-section-wrapper">
-        <div className="parts-section">
-          <h2>
-            Compatible Parts <span>{parts.length} Items</span>
-          </h2>
-          {parts.length ? (
-            <div className="catalog-grid">
-              {parts.map((part) => (
-                <PartCard key={part.id} part={part} />
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <h3 style={{ marginBottom: '10px', color: '#333', fontSize: '18px' }}>No compatible products yet</h3>
-              <p style={{ fontSize: '14px' }}>Our parts desk can still help source the right item for this vehicle.</p>
-            </div>
-          )}
-        </div>
-      </section>
-    </main>
-  );
+export default async function BrandModelPage({ params }: PageProps) {
+  const { slug, modelSlug } = await params;
+  const detail = await loadModelDetail(slug, modelSlug);
+  if (detail === null) notFound();
+  return <BrandModelClientView key={`${slug}/${modelSlug}`} slug={slug} modelSlug={modelSlug} initialDetail={detail ?? null} />;
 }

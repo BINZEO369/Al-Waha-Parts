@@ -1,5 +1,17 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import styles from './MapPage.module.css';
+
+export const metadata: Metadata = {
+  title: 'Al Waha Parts Location in Al Jubail',
+  description: 'Find Al Waha Parts in Al Jubail, Saudi Arabia and open the location in Google Maps for directions.',
+  alternates: { canonical: '/map' },
+  openGraph: {
+    title: 'Al Waha Parts Location in Al Jubail',
+    description: 'Find the Al Waha Parts location in Al Jubail, Saudi Arabia.',
+    url: '/map',
+  },
+};
 
 const locationUrl = 'https://www.google.com/maps/place/WM2V%2BJ9R+Al+waha+Car+Scrap,+Al+Jubail+35428,+Saudi+Arabia/@26.9016216,49.6933767,15z/data=!4m6!3m5!1s0x3e35980b13f58833:0xbe75d9e1b7fe66d!8m2!3d26.9016216!4d49.6933767!16s%2Fg%2F11gcpd4vcx?utm_campaign=ml-ardl&g_ep=Eg1tbF8yMDI2MTAyN18wIJvbDyoASAJQAQ%3D%3D';
 const mapEmbedUrl = 'https://www.google.com/maps?q=26.9016216,49.6933767&z=18&output=embed';
@@ -18,7 +30,7 @@ export default function MapPage() {
     <main className={styles.page}>
       <section className={styles.intro}>
         <div>
-          <span className="section-kicker">Al Waha Parts / UAE</span>
+          <span className="section-kicker">Al Waha Parts / Saudi Arabia</span>
           <h1>Find our location.</h1>
           <p>Use the zoomed map below, then open the exact live Google Maps location for turn-by-turn directions.</p>
           <div className={styles.actions}>

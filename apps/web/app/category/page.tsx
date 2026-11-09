@@ -1,56 +1,52 @@
-'use client';
-
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { apiFetch } from '../../../../packages/shared/src/api';
-import { PageLoader } from '../../components/PageLoader';
+import type { Metadata } from 'next';
+import { canonicalUrl, fetchPublicData } from '../../lib/public-seo';
+
+export const dynamic = 'force-dynamic';
 
 type Category = {
   id: string;
   category_name: string;
   slug?: string | null;
+  description?: string | null;
   image_url?: string | null;
 };
 
-export default function CategoryPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+export const metadata: Metadata = {
+  title: 'Car Parts Catalog in Al Jubail',
+  description: 'Browse the Al Waha Parts catalog by automotive category and find parts for your vehicle in Al Jubail, Saudi Arabia.',
+  alternates: { canonical: '/category' },
+  openGraph: {
+    title: 'Car Parts Catalog in Al Jubail | Al Waha Parts',
+    description: 'Browse automotive categories and find car parts for your vehicle in Al Jubail, Saudi Arabia.',
+    url: canonicalUrl('/category'),
+  },
+};
 
-  useEffect(() => {
-    if (!apiUrl) {
-      setError('Catalog API is not configured.');
-      setLoading(false);
-      return;
-    }
-    apiFetch<Category[]>(apiUrl, '/api/v1/categories')
-      .then((items) => setCategories(Array.isArray(items) ? items : []))
-      .catch((cause: unknown) => setError(cause instanceof Error ? cause.message : 'Unable to load categories.'))
-      .finally(() => setLoading(false));
-  }, [apiUrl]);
+export default async function CategoryPage() {
+  const categories = await fetchPublicData<Category[]>('/api/v1/categories').catch(() => undefined);
+  const items = Array.isArray(categories) ? categories : [];
 
   return (
     <main className="page-shell category-directory-page">
       <section className="category-start-section category-directory-section" aria-labelledby="category-directory-title">
         <div className="category-start-heading">
-          <h1 id="category-directory-title">Start from a category</h1>
-          <span className="category-count">{categories.length} categories</span>
+          <h1 id="category-directory-title">Car parts by category</h1>
+          <span className="category-count">{items.length} categories</span>
         </div>
-        {loading && <PageLoader label="Loading categories" />}
-        {error && <div className="data-alert">{error}</div>}
-        {!loading && !error && categories.length === 0 && <div className="empty-state">No categories are available yet.</div>}
-        {!loading && !error && categories.length > 0 && (
+        {items.length > 0 ? (
           <div className="category-start-grid">
-            {categories.map((category) => (
-              <Link className="category-start-card" href={category.slug ? `/category/${category.slug}` : '/category'} key={category.id}>
+            {items.map((category) => (
+              <Link className="category-start-card" href={category.slug ? `/category/${encodeURIComponent(category.slug)}` : '/category'} key={category.id}>
                 <div className="category-start-image">
-                  {category.image_url ? <img src={category.image_url} alt="" /> : <span aria-hidden="true">⌁</span>}
+                  {category.image_url ? <img src={category.image_url} alt="" loading="lazy" /> : <span aria-hidden="true">⌁</span>}
                 </div>
                 <strong>{category.category_name.trim()}</strong>
               </Link>
             ))}
           </div>
+        ) : (
+          <div className="empty-state">Browse the catalog by category. Live categories will appear here when the catalog service is available.</div>
         )}
       </section>
     </main>

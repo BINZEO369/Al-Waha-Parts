@@ -1,254 +1,34 @@
-'use client';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import BrandClientView, { type BrandDetail } from './ClientView';
+import { canonicalUrl, cleanMetaText, fetchPublicData } from '../../../lib/public-seo';
 
-import Link from 'next/link';
-import { use, useEffect, useState } from 'react';
-import { apiFetch } from '../../../../../packages/shared/src/api';
-import { brandModelHref } from '../../../lib/vehicle-routes';
-import { BrandPageLoading } from '../../../components/BrandPageLoading';
+type PageProps = { params: Promise<{ slug: string }> };
 
-type Brand = {
-  id: string;
-  manufacturer_name: string;
-  slug: string;
-  logo_url: string;
-  sort_order: number;
-};
-type Vehicle = {
-  id: string;
-  slug?: string | null;
-  manufacturer_name: string;
-  model_name: string;
-  generation?: string | null;
-  chassis_code?: string | null;
-  year_start?: number | null;
-  year_end?: number | null;
-  vehicle_type?: string | null;
-  cover_image_url?: string | null;
-};
-type BrandDetail = { brand: Brand; vehicles: Vehicle[] };
+function brandPath(slug: string) {
+  return `/api/v1/car-brands/slug/${encodeURIComponent(slug)}`;
+}
 
-export default function BrandPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
-  const [detail, setDetail] = useState<BrandDetail | null>(null);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [retryCount, setRetryCount] = useState(0);
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const detail = await fetchPublicData<BrandDetail>(brandPath(slug));
+  const brandName = detail?.brand?.manufacturer_name || slug.replace(/-/g, ' ');
+  const canonical = canonicalUrl(`/brands/${encodeURIComponent(detail?.brand?.slug || slug)}`);
+  const description = `Browse ${brandName} vehicle models listed in the Al Waha Parts catalog for Al Jubail, Saudi Arabia.`;
 
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setError('');
-    setDetail(null);
+  return {
+    title: `${brandName} Models`,
+    description: cleanMetaText(description),
+    alternates: { canonical },
+    ...(detail === null ? { robots: { index: false, follow: true } } : {}),
+    openGraph: { title: `${brandName} Models | Al Waha Parts`, description, url: canonical },
+    twitter: { card: 'summary', title: `${brandName} Models | Al Waha Parts`, description },
+  };
+}
 
-    if (!apiUrl) {
-      setError('Vehicle API is not configured.');
-      setLoading(false);
-      return () => {
-        active = false;
-      };
-    }
-
-    apiFetch<BrandDetail>(apiUrl, `/api/v1/car-brands/slug/${encodeURIComponent(slug)}`)
-      .then((data) => {
-        if (!active) return;
-        if (!data?.brand || !Array.isArray(data.vehicles)) {
-          throw new Error('The brand API returned an unexpected response.');
-        }
-        setDetail(data);
-      })
-      .catch((cause: unknown) => {
-        if (active) {
-          setError(cause instanceof Error ? cause.message : 'Unable to load brand vehicles.');
-        }
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [apiUrl, slug, retryCount]);
-
-  if (loading)
-    return (
-      <main className="page-shell">
-        <BrandPageLoading variant="models" label="Loading brand vehicles..." />
-      </main>
-    );
-
-  if (error || !detail)
-    return (
-      <main className="page-shell">
-        <div className="data-alert" role="alert">
-          {error || 'Brand details are not available.'}
-        </div>
-        <button
-          type="button"
-          className="button"
-          onClick={() => {
-            setError('');
-            setLoading(true);
-            setRetryCount((current) => current + 1);
-          }}
-        >
-          Try again
-        </button>
-        <Link className="button" href="/brands">
-          Back to brands
-        </Link>
-      </main>
-    );
-
-  return (
-    <main className="page-shell car-brand-page">
-      <style jsx>{`
-        .car-brand-page .brand-hero {
-          display: grid;
-          grid-template-columns: 150px 1fr;
-          gap: 28px;
-          align-items: center;
-          padding: 28px;
-          margin-bottom: 42px;
-          border-top: 3px solid var(--red);
-          background: #fff;
-          box-shadow: 0 10px 28px rgba(0, 0, 0, 0.05);
-        }
-        .car-brand-page .brand-logo {
-          width: 120px;
-          height: 120px;
-          display: grid;
-          place-items: center;
-          border: 1px solid #f0c4c7;
-          border-radius: 50%;
-        }
-        .car-brand-page .brand-logo img {
-          width: 82px;
-          height: 82px;
-          object-fit: contain;
-        }
-        .car-brand-page h1 {
-          margin: 7px 0 8px;
-          font-family: 'Montserrat';
-          font-size: clamp(34px, 5vw, 58px);
-          line-height: 1;
-        }
-        .car-brand-page .brand-vehicles {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 18px;
-        }
-        .car-brand-page .brand-vehicle {
-          overflow: hidden;
-          border: 1px solid #f0c4c7;
-          background: #fff;
-          color: inherit;
-          text-decoration: none;
-          transition:
-            transform 0.2s ease,
-            box-shadow 0.2s ease;
-        }
-        .car-brand-page .brand-vehicle:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 9px 22px rgba(229, 35, 47, 0.12);
-        }
-        .car-brand-page .brand-vehicle img,
-        .car-brand-page .brand-vehicle-empty {
-          width: 100%;
-          height: 170px;
-          display: grid;
-          place-items: center;
-          object-fit: cover;
-          background: #f8f8f8;
-        }
-        .car-brand-page .brand-vehicle-copy {
-          display: grid;
-          gap: 5px;
-          padding: 15px;
-        }
-        .car-brand-page .brand-vehicle-copy strong {
-          font-size: 14px;
-        }
-        .car-brand-page .brand-vehicle-copy span {
-          color: #888;
-          font-size: 10px;
-        }
-        @media (max-width: 700px) {
-          .car-brand-page .brand-hero {
-            grid-template-columns: 1fr;
-            justify-items: center;
-            text-align: center;
-          }
-          .car-brand-page .brand-vehicles {
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-          }
-        }
-        @media (max-width: 430px) {
-          .car-brand-page .brand-vehicles {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
-      <Link className="back-link" href="/">
-        ← Home
-      </Link>
-      <section className="brand-hero">
-        <div className="brand-logo">
-          <img src={detail.brand.logo_url} alt={`${detail.brand.manufacturer_name} logo`} />
-        </div>
-        <div>
-          <span className="section-kicker">Official car brand</span>
-          <h1>{detail.brand.manufacturer_name}</h1>
-          <p>{detail.vehicles.length} models are listed under this brand.</p>
-        </div>
-      </section>
-      <section>
-        <div className="section-heading">
-          <div>
-            <span className="section-kicker">Vehicle models</span>
-            <h2>Models by {detail.brand.manufacturer_name}</h2>
-          </div>
-        </div>
-        {detail.vehicles.length ? (
-          <div className="brand-vehicles">
-            {detail.vehicles.map((vehicle) => (
-              <Link
-                className="brand-vehicle"
-                href={
-                  vehicle.slug
-                    ? brandModelHref(detail.brand.slug, vehicle.slug)
-                    : `/brands/${encodeURIComponent(detail.brand.slug)}`
-                }
-                key={vehicle.id}
-              >
-                {vehicle.cover_image_url ? (
-                  <img
-                    src={vehicle.cover_image_url}
-                    alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`}
-                  />
-                ) : (
-                  <div className="brand-vehicle-empty">No vehicle image</div>
-                )}
-                <div className="brand-vehicle-copy">
-                  <strong>
-                    {vehicle.manufacturer_name} {vehicle.model_name}
-                  </strong>
-                  <span>
-                    {vehicle.generation ||
-                      vehicle.chassis_code ||
-                      vehicle.vehicle_type ||
-                      'Vehicle fitment'}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state">No active vehicles are linked to this brand yet.</div>
-        )}
-      </section>
-    </main>
-  );
+export default async function BrandPage({ params }: PageProps) {
+  const { slug } = await params;
+  const detail = await fetchPublicData<BrandDetail>(brandPath(slug));
+  if (detail === null) notFound();
+  return <BrandClientView key={slug} slug={slug} initialDetail={detail ?? null} />;
 }

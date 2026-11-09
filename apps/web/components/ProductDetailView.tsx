@@ -29,7 +29,7 @@ type PartFitment = {
   vehicles?: VehicleFitment | null;
 };
 
-type Product = {
+export type Product = {
   id: string;
   slug?: string | null;
   part_name: string;
@@ -59,15 +59,21 @@ function formatCompatibleYears(fitment: PartFitment) {
   return 'Year not specified';
 }
 
-export function ProductDetailView({ slug }: { slug: string }) {
-  const [product, setProduct] = useState<Product | null>(null);
-  const [activeImage, setActiveImage] = useState('');
+export function ProductDetailView({ slug, initialProduct = null }: { slug: string; initialProduct?: Product | null }) {
+  const [product, setProduct] = useState<Product | null>(initialProduct);
+  const [activeImage, setActiveImage] = useState(initialProduct?.primary_image_url ?? initialProduct?.image_urls?.[0] ?? '');
   const [error, setError] = useState('');
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const router = useRouter();
   const { addItem } = useCart();
 
   useEffect(() => {
+    if (initialProduct) {
+      setProduct(initialProduct);
+      setActiveImage(initialProduct.primary_image_url ?? initialProduct.image_urls?.[0] ?? '');
+      setError('');
+      return;
+    }
     if (!apiUrl) {
       setError('Product API is not configured.');
       return;
@@ -80,7 +86,7 @@ export function ProductDetailView({ slug }: { slug: string }) {
       .catch((cause: unknown) =>
         setError(cause instanceof Error ? cause.message : 'Product not found.'),
       );
-  }, [apiUrl, slug]);
+  }, [apiUrl, slug, initialProduct]);
 
   if (error) {
     return (
@@ -675,6 +681,19 @@ export function ProductDetailView({ slug }: { slug: string }) {
         }
       `}</style>
 
+      <nav className="product-breadcrumb" aria-label="Breadcrumb">
+        <Link href="/">Home</Link>
+        <span aria-hidden="true">/</span>
+        {product.parts_categories?.slug && product.parts_categories.category_name ? (
+          <>
+            <Link href={`/category/${encodeURIComponent(product.parts_categories.slug)}`}>
+              {product.parts_categories.category_name}
+            </Link>
+            <span aria-hidden="true">/</span>
+          </>
+        ) : null}
+        <span aria-current="page">{product.part_name}</span>
+      </nav>
       <div className="product-reference-heading">
         <h1>{product.part_name}</h1>
         <span className="product-sku-badge">SKU {product.sku}</span>
