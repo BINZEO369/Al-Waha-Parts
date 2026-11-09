@@ -178,7 +178,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         }
 
         /* ---------------------------------
-         * GALLERY / IMAGE FIX (REAL SIZE)
+         * GALLERY / IMAGE FIX
          * --------------------------------- */
         .gallery { 
           display: flex; 
@@ -187,10 +187,11 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           width: 100%;
         }
         
+        /* Fixed Height Container */
         .main-image {
           width: 100%;
-          /* aspect-ratio সরিয়ে দেওয়া হয়েছে যাতে ছবি তার নিজস্ব সাইজে থাকে */
-          background: #ffffff; 
+          height: 450px; /* Fixed height for desktop */
+          background: #f8f9fa; 
           border-radius: 16px;
           border: 1px solid #eaeaea;
           overflow: hidden;
@@ -198,19 +199,19 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           align-items: center;
           justify-content: center;
           position: relative;
+          padding: 16px; /* Slight padding so image doesn't touch edges */
         }
         
         .main-image img {
           width: 100%;
-          height: auto; /* ছবি তার নিজস্ব উচ্চতা নেবে */
-          max-height: 600px; /* যাতে ছবি অনেক বড় হয়ে পেজ নষ্ট না করে */
-          object-fit: contain; /* ছবি কাটা পড়বে না */
+          height: 100%;
+          object-fit: contain; /* Image will scale to fit within the box without stretching */
           transition: transform 0.3s ease;
           display: block;
         }
         
         .main-image:hover img {
-          transform: scale(1.02);
+          transform: scale(1.03);
         }
 
         .thumbnails {
@@ -239,7 +240,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .thumb-btn img { 
           width: 100%; 
           height: 100%; 
-          object-fit: cover; /* থাম্বনেইলে সুন্দর দেখানোর জন্য */
+          object-fit: cover; 
           border-radius: 6px;
         }
 
@@ -414,8 +415,11 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           .title { font-size: 24px; }
           .price { font-size: 28px; }
           
-          .main-image img { 
-            max-height: 400px; /* মোবাইলে ছবি খুব বেশি লম্বা হবে না */
+          /* Fixed height for mobile image box */
+          .main-image { 
+            height: 320px; 
+            padding: 12px;
+            border-radius: 12px;
           }
           
           .thumb-btn {
