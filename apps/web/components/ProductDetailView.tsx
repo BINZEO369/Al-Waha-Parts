@@ -132,7 +132,6 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
       condition: product.condition,
     });
 
-    // Short visual feedback before redirecting
     setIsAdded(true);
     setTimeout(() => {
       router.push('/booking');
@@ -145,7 +144,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .product-page-wrapper {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 40px 20px 80px;
+          padding: 30px 20px 80px;
           font-family: system-ui, -apple-system, sans-serif;
           color: #333;
         }
@@ -157,7 +156,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           gap: 8px;
           font-size: 13px;
           color: #666;
-          margin-bottom: 30px;
+          margin-bottom: 24px;
           flex-wrap: wrap;
         }
         .breadcrumbs a { color: #666; text-decoration: none; transition: color 0.2s; }
@@ -168,7 +167,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .product-layout {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 40px;
+          gap: 32px;
         }
         @media (min-width: 900px) {
           .product-layout {
@@ -178,26 +177,40 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           }
         }
 
-        /* Gallery */
-        .gallery { display: flex; flex-direction: column; gap: 16px; }
+        /* ---------------------------------
+         * GALLERY / IMAGE FIX 
+         * --------------------------------- */
+        .gallery { 
+          display: flex; 
+          flex-direction: column; 
+          gap: 16px; 
+        }
+        
         .main-image {
           width: 100%;
-          aspect-ratio: 4 / 3;
-          background: #f8f9fa;
-          border-radius: 20px;
+          aspect-ratio: 4 / 3; /* Changed from 1/1 to 4/3 for a better, less bulky look */
+          background: #f8f9fa; /* Soft background */
+          border-radius: 16px;
           border: 1px solid #eaeaea;
           overflow: hidden;
           display: flex;
           align-items: center;
           justify-content: center;
           position: relative;
+          padding: 24px; /* Adds breathing room around the image */
         }
+        
         .main-image img {
           width: 100%;
           height: 100%;
-          object-fit: contain;
+          object-fit: contain; /* Ensures the whole image is visible without cropping */
           transition: transform 0.3s ease;
         }
+        
+        .main-image:hover img {
+          transform: scale(1.02);
+        }
+
         .thumbnails {
           display: flex;
           gap: 12px;
@@ -206,19 +219,22 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         }
         .thumbnails::-webkit-scrollbar { display: none; }
         .thumb-btn {
-          width: 76px;
-          height: 76px;
+          width: 72px;
+          height: 72px;
           flex-shrink: 0;
-          border-radius: 12px;
+          border-radius: 10px;
           border: 2px solid transparent;
           background: #f8f9fa;
           overflow: hidden;
           cursor: pointer;
           transition: all 0.2s;
-          padding: 0;
+          padding: 4px;
         }
-        .thumb-btn.active { border-color: #111; }
-        .thumb-btn img { width: 100%; height: 100%; object-fit: cover; }
+        .thumb-btn.active { 
+          border-color: #111; 
+          background: #fff;
+        }
+        .thumb-btn img { width: 100%; height: 100%; object-fit: contain; }
 
         /* Info Section */
         .info { display: flex; flex-direction: column; }
@@ -232,26 +248,26 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           text-transform: uppercase;
           letter-spacing: 0.5px;
           color: #2563eb;
-          margin-bottom: 12px;
+          margin-bottom: 8px;
         }
         
         .title {
-          font-size: 32px;
+          font-size: 28px;
           font-weight: 800;
           color: #111;
           line-height: 1.2;
           margin: 0 0 16px 0;
         }
-        @media (min-width: 768px) { .title { font-size: 38px; } }
+        @media (min-width: 768px) { .title { font-size: 36px; } }
 
         .meta-tags {
           display: flex;
           align-items: center;
-          gap: 16px;
+          gap: 12px;
           font-size: 13px;
           color: #666;
-          margin-bottom: 24px;
-          padding-bottom: 24px;
+          margin-bottom: 20px;
+          padding-bottom: 20px;
           border-bottom: 1px solid #eaeaea;
         }
         .meta-tags strong { color: #111; }
@@ -272,7 +288,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           margin-bottom: 12px;
         }
         .price {
-          font-size: 36px;
+          font-size: 32px;
           font-weight: 800;
           color: #111;
         }
@@ -387,10 +403,21 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
 
         /* Mobile Adjustments */
         @media (max-width: 768px) {
-          .product-page-wrapper { padding: 20px 16px 60px; }
-          .title { font-size: 26px; }
-          .price { font-size: 30px; }
-          .main-image { aspect-ratio: 1 / 1; }
+          .product-page-wrapper { padding: 16px 16px 60px; }
+          .title { font-size: 24px; }
+          .price { font-size: 28px; }
+          
+          /* Image adjustments for mobile */
+          .main-image { 
+            aspect-ratio: 4 / 3; 
+            padding: 16px; /* Less padding on mobile so image is slightly bigger */
+            border-radius: 12px;
+          }
+          .thumb-btn {
+            width: 60px;
+            height: 60px;
+          }
+          
           .fitment-grid { grid-template-columns: 1fr; }
         }
       `}</style>
