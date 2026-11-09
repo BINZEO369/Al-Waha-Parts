@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { useCart } from './CartProvider';
+import { OptimizedImage } from './OptimizedImage';
 
 export interface PartCardData {
   id: string;
@@ -295,7 +296,16 @@ export function PartCard({ part }: { part: PartCardData }) {
       <Link className="part-card-media" href={`/products/${part.slug ?? part.id}`} aria-label={`View ${part.part_name}`}>
         <span className="part-tag">{part.condition ?? 'New'}</span>
         {part.primary_image_url || part.image_urls?.[0] ? (
-          <img src={part.primary_image_url ?? part.image_urls?.[0]} alt={part.part_name} className="part-card-image" />
+          <OptimizedImage
+            src={part.primary_image_url ?? part.image_urls?.[0] ?? ''}
+            alt={part.part_name}
+            className="part-card-image"
+            fill
+            sizes="(max-width: 767px) 50vw, (max-width: 1200px) 33vw, 280px"
+            loading="lazy"
+            fetchPriority="low"
+            quality={75}
+          />
         ) : (
           <div className="part-glyph">AWP</div>
         )}

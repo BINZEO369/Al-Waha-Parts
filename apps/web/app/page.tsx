@@ -30,9 +30,9 @@ export default async function HomePage() {
   const [banners, carBrands, popularCategories, parts, vehicles] = await Promise.all([
     fetchPublicData<Banner[]>('/api/v1/banners').catch(() => undefined),
     fetchPublicData<CarBrand[]>('/api/v1/car-brands').catch(() => undefined),
-    fetchPublicData<Category[]>('/api/v1/popular-categories?limit=200').catch(() => undefined),
-    fetchPublicData<Part[]>('/api/v1/parts?limit=200&featured_only=true').catch(() => undefined),
-    fetchPublicData<Vehicle[]>('/api/v1/homepage-selected-vehicles?limit=200').catch(() => undefined),
+    fetchPublicData<Category[]>('/api/v1/popular-categories?limit=6').catch(() => undefined),
+    fetchPublicData<Part[]>('/api/v1/parts?limit=12&featured_only=true').catch(() => undefined),
+    fetchPublicData<Vehicle[]>('/api/v1/homepage-selected-vehicles?limit=18').catch(() => undefined),
   ]);
 
   const loaded = [banners, carBrands, popularCategories, parts, vehicles].every(Array.isArray);

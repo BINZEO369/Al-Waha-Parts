@@ -6,6 +6,7 @@ import { apiFetch } from '../../../packages/shared/src/api';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { brandModelHref, brandSlugFromName } from '../lib/vehicle-routes';
 import { PageLoader } from '../components/PageLoader';
+import { OptimizedImage } from '../components/OptimizedImage';
 
 /* ==================================================================
  *  TYPES
@@ -104,6 +105,17 @@ function randomVehicles(items: Vehicle[], limit = HOME_VEHICLE_LIMIT) {
   return shuffled.slice(0, limit);
 }
 
+function optimizedHeroImageSource(source: string | null | undefined) {
+  if (!source) return '';
+  const localHero = source.replace(/^\/+/, '').match(/^hero\/(img[1-4])\.png$/);
+  return localHero ? `/hero/${localHero[1]}.webp` : source;
+}
+
+function mobileHeroImageSource(source: string) {
+  const localHero = source.match(/^\/hero\/(img[1-4])\.webp$/);
+  return localHero ? `/hero/${localHero[1]}-mobile.webp` : undefined;
+}
+
 /* ==================================================================
  *  ICONS
  * ================================================================== */
@@ -162,7 +174,11 @@ function HeroCarousel({ initialBanners }: { initialBanners: Banner[] }) {
   const banner = banners[active];
   if (!banner) return null;
 
-  const hasImage = Boolean(banner.image_url || banner.mobile_image_url);
+  const imageSource = optimizedHeroImageSource(banner.image_url || banner.mobile_image_url);
+  const mobileImageSource = banner.mobile_image_url
+    ? optimizedHeroImageSource(banner.mobile_image_url)
+    : mobileHeroImageSource(imageSource);
+  const hasImage = Boolean(imageSource);
 
   return (
     <section className="hero-carousel-root" aria-label="Featured parts banners">
@@ -288,7 +304,21 @@ function HeroCarousel({ initialBanners }: { initialBanners: Banner[] }) {
       <div className="hero-carousel-slide" key={banner.id}>
         {hasImage ? (
           <div className="hero-carousel-media">
-            <img src={banner.image_url || banner.mobile_image_url || ''} alt="" aria-hidden="true" />
+            <picture>
+              {mobileImageSource && (
+                <source media="(max-width: 600px)" srcSet={mobileImageSource} />
+              )}
+              <img
+                src={imageSource}
+                alt=""
+                aria-hidden="true"
+                width={2048}
+                height={768}
+                loading={active === 0 ? 'eager' : 'lazy'}
+                fetchPriority={active === 0 ? 'high' : 'auto'}
+                decoding="async"
+              />
+            </picture>
           </div>
         ) : (
           <div className="hero-carousel-media" style={{ background: '#222' }} aria-hidden="true" />
@@ -870,10 +900,14 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
 
             <div className="showcase-visual">
               {category.image_url ? (
-                <img
+                <OptimizedImage
                   src={category.image_url}
                   alt={category.category_name}
+                  width={620}
+                  height={420}
+                  sizes="(max-width: 520px) 100vw, 48vw"
                   loading="lazy"
+                  quality={75}
                 />
               ) : (
                 <div className="empty">Image coming soon</div>
@@ -1093,11 +1127,14 @@ function HomepageCarSpotlight() {
       </div>
 
       <div className="home-spotlight-art">
-        <img
-          src="/performance-car-showcase.png"
+        <OptimizedImage
+          src="/performance-car-showcase.webp"
           alt="A close-up of a white performance car with a red taillight"
+          width={736}
+          height={736}
+          sizes="(max-width: 640px) 85vw, (max-width: 900px) 48vw, 45vw"
           loading="lazy"
-          decoding="async"
+          quality={75}
         />
       </div>
     </section>
@@ -1305,11 +1342,14 @@ function ReverseCarSpotlight() {
       `}</style>
 
       <div className="reverse-spotlight-art">
-        <img
-          src="/images/img4.png"
+        <OptimizedImage
+          src="/images/img4.webp"
           alt="Precision automotive components showcase"
+          width={736}
+          height={1104}
+          sizes="(max-width: 640px) 42vw, 45vw"
           loading="lazy"
-          decoding="async"
+          quality={75}
         />
       </div>
 
@@ -1657,9 +1697,9 @@ export default function Home({ initialData }: { initialData: HomeInitialData }) 
       .catch(() => setCarBrands([]));
 
     Promise.all([
-      apiFetch<Category[]>(apiUrl, '/api/v1/popular-categories?limit=200'),
-      apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=200&featured_only=true'),
-      apiFetch<Vehicle[]>(apiUrl, '/api/v1/homepage-selected-vehicles?limit=200'),
+      apiFetch<Category[]>(apiUrl, '/api/v1/popular-categories?limit=6'),
+      apiFetch<Part[]>(apiUrl, '/api/v1/parts?limit=12&featured_only=true'),
+      apiFetch<Vehicle[]>(apiUrl, '/api/v1/homepage-selected-vehicles?limit=18'),
     ])
       .then(([nextPopularCategories, nextParts, nextVehicles]) => {
         setPopularCategories(nextPopularCategories);
@@ -1713,7 +1753,7 @@ export default function Home({ initialData }: { initialData: HomeInitialData }) 
       {/* 3. FULL-WIDTH IMAGE SHOWCASE №1 — img1.png */}
       <FullWidthImageShowcase
         sectionId="fullwidth-showcase-one"
-        imageSrc="/images/img1.png"
+        imageSrc="/images/img1.webp"
         imageAlt="Performance automotive showcase"
         title={
           <>
@@ -1732,7 +1772,7 @@ export default function Home({ initialData }: { initialData: HomeInitialData }) 
       {/* 6. FULL-WIDTH IMAGE SHOWCASE №2 — img3.png */}
       <FullWidthImageShowcase
         sectionId="fullwidth-showcase-two"
-        imageSrc="/images/img3.png"
+        imageSrc="/images/img3.webp"
         imageAlt="Performance braking and drivetrain parts showcase"
         title={
           <>
@@ -1769,8 +1809,8 @@ export default function Home({ initialData }: { initialData: HomeInitialData }) 
                 key={vehicle.id}
               >
                 <div className="vehicle-home-card-image">
-                  {vehicle.cover_image_url ? (
-                    <img src={vehicle.cover_image_url} alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`} loading="lazy" decoding="async" />
+                  {vehicle.cover_image_url && !/(^|\/)logo\.png(?:[?#].*)?$/i.test(vehicle.cover_image_url) ? (
+                    <OptimizedImage src={vehicle.cover_image_url} alt={`${vehicle.manufacturer_name} ${vehicle.model_name}`} fill sizes="(max-width: 480px) 50vw, 400px" loading="lazy" fetchPriority="low" quality={70} />
                   ) : (
                     <span className="database-image-empty">No vehicle image</span>
                   )}
@@ -1818,7 +1858,7 @@ export default function Home({ initialData }: { initialData: HomeInitialData }) 
                     {part.condition || 'Available'}
                   </span>
                   {part.primary_image_url ? (
-                    <img src={part.primary_image_url} alt={part.part_name} />
+                    <OptimizedImage src={part.primary_image_url} alt={part.part_name} width={400} height={300} sizes="(max-width: 600px) 50vw, (max-width: 1000px) 33vw, 300px" loading="lazy" fetchPriority="low" quality={75} />
                   ) : (
                     <span className="database-image-empty">
                       No product image

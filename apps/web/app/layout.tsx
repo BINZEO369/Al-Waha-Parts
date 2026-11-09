@@ -6,7 +6,13 @@ import { LanguageProvider } from '../components/LanguageProvider';
 import { CookieConsentManager } from '../components/CookieConsentManager';
 import { SiteInteractionGuards } from '../components/SiteInteractionGuards';
 import { AnalyticsTracker } from '../components/AnalyticsTracker';
-const globalStyles = String.raw`@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+const globalStyles = String.raw`@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/montserrat-latin.woff2') format('woff2');
+}
 
 :root {
   --red: #e5232f;
@@ -1108,6 +1114,9 @@ const websiteSchema = siteUrl ? { '@context': 'https://schema.org', '@type': 'We
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en-SA">
+      <head>
+        <link rel="preload" href="/fonts/montserrat-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+      </head>
       <body>
         <style>{globalStyles}</style>
         {websiteSchema ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema).replace(/</g, '\\u003c') }} /> : null}

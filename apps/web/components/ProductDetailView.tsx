@@ -7,6 +7,7 @@ import { apiFetch } from '../../../packages/shared/src/api';
 import { formatSar } from '../../../packages/shared/src/currency';
 import { useCart } from './CartProvider';
 import { PageLoader } from './PageLoader';
+import { OptimizedImage } from './OptimizedImage';
 
 type VehicleFitment = {
   id: string;
@@ -710,7 +711,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         <div className="product-reference-media">
           <div className="product-image">
             {activeImage ? (
-              <img src={activeImage} alt={product.part_name} />
+              <OptimizedImage src={activeImage} alt={product.part_name} width={1200} height={900} sizes="(max-width: 800px) 100vw, 50vw" loading="eager" fetchPriority="high" quality={80} />
             ) : (
               <span className="part-glyph">AWP</span>
             )}
@@ -725,7 +726,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
                   key={image}
                   onClick={() => setActiveImage(image)}
                 >
-                  <img src={image} alt="" />
+                  <OptimizedImage src={image} alt="" width={72} height={72} sizes="72px" loading="lazy" quality={70} />
                 </button>
               ))}
             </div>
