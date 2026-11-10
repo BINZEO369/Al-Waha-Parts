@@ -12,6 +12,7 @@ const links: Array<[string, string, string, string]> = [
   ['/vehicles', 'Models', '03', 'Fitment library'],
   ['/categories', 'Categories', '04', 'Catalog structure'],
   ['/bookings', 'Bookings', '05', 'Customer requests'],
+  ['/messages', 'Messages', '05A', 'Customer inbox'],
   ['/analytics', 'Analytics', '06', 'Consented visits'],
   ['/admins', 'Admin access', '07', 'Team permissions'],
   ['/settings', 'Settings', '08', 'System health'],

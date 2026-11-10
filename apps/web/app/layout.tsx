@@ -386,6 +386,31 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
 .contact-grid > div { padding: 28px; border: 1px solid var(--line); background: #fff; }
 .contact-grid h2 { margin: 14px 0 8px; font-size: 22px; }
 .contact-grid p { color: #777; font-size: 13px; line-height: 1.7; }
+.customer-message-box { max-width: 860px; margin-top: 26px; padding: 30px; border: 1px solid #f0d6d8; border-top: 4px solid var(--red); background: linear-gradient(180deg, #fffafa, #fff); box-shadow: 0 16px 40px rgba(28,28,28,.06); }
+.customer-message-intro h2 { margin: 7px 0 9px; font-family: 'Montserrat'; font-size: 26px; letter-spacing: -.05em; }
+.customer-message-intro p { max-width: 640px; margin: 0; color: #777; font-size: 12px; line-height: 1.7; }
+.customer-message-promise { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; margin-top: 20px; color: #6f4a4d; font-size: 10px; }
+.customer-message-promise span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--red); color: #fff; font: 10px 'Montserrat'; }
+.customer-message-promise b { margin-right: 7px; font-size: 10px; }
+.customer-message-form { display: grid; gap: 15px; margin-top: 24px; padding-top: 22px; border-top: 1px solid #f0d6d8; }
+.customer-message-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.customer-message-form label { display: grid; gap: 7px; color: var(--ink); font-size: 11px; font-weight: 700; }
+.customer-message-form label span { color: #999; font-weight: 400; }
+.customer-message-form input, .customer-message-form textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 3px; outline: 0; background: #fff; color: var(--ink); font-size: 12px; resize: vertical; }
+.customer-message-form input { min-height: 44px; }
+.customer-message-form input:focus, .customer-message-form textarea:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(229,35,47,.11); }
+.customer-message-form .button { justify-self: start; }
+.customer-message-thread { display: grid; gap: 10px; max-height: 420px; overflow: auto; margin-top: 22px; padding: 15px; border: 1px solid var(--line); background: #fff; }
+.customer-message-thread-head { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 9px; border-bottom: 1px solid var(--line); font-size: 12px; }
+.customer-message-thread-head small { color: #999; font-size: 10px; }
+.customer-message-bubble { max-width: 80%; padding: 12px 14px; background: #f7f7f7; }
+.customer-message-bubble.admin { justify-self: start; border-left: 3px solid var(--red); background: #fff5f5; }
+.customer-message-bubble.customer { justify-self: end; border-right: 3px solid #777; }
+.customer-message-bubble span, .customer-message-bubble time { display: block; color: #888; font-size: 9px; }
+.customer-message-bubble p { margin: 6px 0; color: var(--ink); font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
+.customer-message-error, .customer-message-success { margin: 0; padding: 12px 14px; font-size: 11px; line-height: 1.55; }
+.customer-message-error { border-left: 3px solid var(--red); background: #fff1f2; color: #8d4b53; }
+.customer-message-success { border-left: 3px solid #2d8b5d; background: #effaf4; color: #236b49; }
 .cart-panel { display: grid; gap: 14px; padding: 22px; border: 1px solid #f0d6d8; background: linear-gradient(180deg, #fffafa, #fff); }
 .cart-panel-heading, .cart-total { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .cart-panel-heading h3 { margin: 2px 0 0; font-size: 18px; }
@@ -478,6 +503,9 @@ label { display: grid; gap: 7px; color: #777; font-size: 10px; font-weight: 600;
   .search-field { min-width: 0; margin-top: 22px; }
   .catalog-grid { grid-template-columns: 1fr 1fr; }
   .form-grid, .contact-grid { grid-template-columns: 1fr; }
+  .customer-message-box { padding: 22px 16px; }
+  .customer-message-form-grid { grid-template-columns: 1fr; }
+  .customer-message-bubble { max-width: 92%; }
   .booking-form-heading { display: block; }
   .booking-form-heading p { margin-top: 12px; }
   .page-shell { padding: 50px 18px 75px; }

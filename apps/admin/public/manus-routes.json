@@ -7,6 +7,7 @@
     { "path": "/categories", "title": "Categories" },
     { "path": "/banners", "title": "Hero banners" },
     { "path": "/bookings", "title": "Bookings" },
+    { "path": "/messages", "title": "Customer messages" },
     { "path": "/analytics", "title": "Analytics & journeys" },
     { "path": "/admins", "title": "Admins" },
     { "path": "/settings", "title": "Settings" },

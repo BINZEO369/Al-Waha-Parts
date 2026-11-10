@@ -27,6 +27,7 @@ const publicBuckets = new Map<string, RateBucket>();
 const bookingBuckets = new Map<string, RateBucket>();
 const trackingBuckets = new Map<string, RateBucket>();
 const aiBuckets = new Map<string, RateBucket>();
+const messageBuckets = new Map<string, RateBucket>();
 const checkRate = (
   buckets: Map<string, RateBucket>,
   key: string,
@@ -45,17 +46,19 @@ const checkRate = (
 };
 app.addHook('onRequest', async (request, reply) => {
   if (!request.url.startsWith('/api/v1')) return;
-  const isBooking = request.method === 'POST' && request.url.split('?')[0] === '/api/v1/bookings';
-  const isTracking =
-    request.method === 'GET' && request.url.split('?')[0] === '/api/v1/bookings/track';
-  const isAnalytics =
-    request.method === 'POST' && request.url.split('?')[0] === '/api/v1/analytics/events';
+  const path = request.url.split('?')[0] ?? request.url;
+  const isBooking = request.method === 'POST' && path === '/api/v1/bookings';
+  const isTracking = request.method === 'GET' && path === '/api/v1/bookings/track';
+  const isAnalytics = request.method === 'POST' && path === '/api/v1/analytics/events';
+  const isCustomerMessage = path.startsWith('/api/v1/messages');
   const retryAfter = isBooking
     ? checkRate(bookingBuckets, request.ip, 5, 10 * 60 * 1000)
     : isTracking
       ? checkRate(trackingBuckets, request.ip, 20, 10 * 60 * 1000)
       : isAnalytics
         ? checkRate(trackingBuckets, request.ip, 120, 10 * 60 * 1000)
+        : isCustomerMessage
+          ? checkRate(messageBuckets, request.ip, 30, 10 * 60 * 1000)
       : checkRate(publicBuckets, request.ip, 120, 60 * 1000);
   if (retryAfter !== null) {
     reply.header('Retry-After', String(retryAfter));
@@ -863,6 +866,117 @@ app.get(
     return { data: { ...safeBooking, items: items ?? [] } };
   },
 );
+
+const messageText = (value: unknown, maxLength: number) =>
+  typeof value === 'string' ? value.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, maxLength) : '';
+const messageTokenHash = (token: string) => createHash('sha256').update(token).digest('hex');
+const messageEmail = (value: unknown) => {
+  const email = messageText(value, 254).toLowerCase();
+  return email && /^\S+@\S+\.\S+$/.test(email) ? email : '';
+};
+const publicMessage = (row: Record<string, unknown>) => ({
+  id: row.id,
+  thread_id: row.thread_id,
+  sender_type: row.sender_type,
+  customer_name: row.customer_name,
+  subject: row.subject,
+  message: row.message,
+  status: row.status,
+  created_at: row.created_at,
+});
+
+app.post(
+  '/api/v1/messages',
+  async (
+    request: FastifyRequest<{ Body: { customer_name?: string; customer_email?: string; customer_phone?: string; subject?: string; message?: string } }>,
+    reply,
+  ) => {
+    const body = request.body ?? {};
+    const customerName = messageText(body.customer_name, 160);
+    const customerEmail = messageEmail(body.customer_email);
+    const customerPhone = messageText(body.customer_phone, 40);
+    const subject = messageText(body.subject, 160) || 'Customer message';
+    const message = messageText(body.message, 4000);
+    if (customerName.length < 2 || message.length < 1) return jsonError(reply, 400, 'Your name and message are required.');
+    if (body.customer_email && !customerEmail) return jsonError(reply, 400, 'Please enter a valid email address.');
+    const accessToken = randomUUID();
+    const threadId = randomUUID();
+    const { data, error } = await getSupabaseAdmin().from('customer_messages').insert({
+      thread_id: threadId,
+      access_token_hash: messageTokenHash(accessToken),
+      sender_type: 'customer',
+      customer_name: customerName,
+      customer_email: customerEmail || null,
+      customer_phone: customerPhone || null,
+      subject,
+      message,
+      status: 'new',
+    }).select('id,thread_id,sender_type,customer_name,subject,message,status,created_at').single();
+    if (error || !data) return jsonError(reply, 400, 'Your message could not be sent. Please try again.');
+    return reply.code(201).send({ data: { thread_id: threadId, access_token: accessToken, message: publicMessage(data as Record<string, unknown>) } });
+  },
+);
+
+app.get(
+  '/api/v1/messages/thread',
+  async (request: FastifyRequest<{ Querystring: { thread_id?: string; access_token?: string } }>, reply) => {
+    const threadId = messageText(request.query.thread_id, 80);
+    const accessToken = messageText(request.query.access_token, 80);
+    if (!/^[0-9a-f-]{36}$/i.test(threadId) || !accessToken) return jsonError(reply, 400, 'A valid message thread is required.');
+    const { data, error } = await getSupabaseAdmin().from('customer_messages').select('id,thread_id,sender_type,customer_name,subject,message,status,created_at').eq('thread_id', threadId).eq('access_token_hash', messageTokenHash(accessToken)).order('created_at', { ascending: true }).limit(100);
+    if (error || !data?.length) return jsonError(reply, 404, 'Message thread not found.');
+    await getSupabaseAdmin().from('customer_messages').update({ status: 'read', read_at: new Date().toISOString() }).eq('thread_id', threadId).eq('sender_type', 'admin').eq('status', 'replied');
+    return { data: data.map((row) => publicMessage(row as Record<string, unknown>)) };
+  },
+);
+
+app.post(
+  '/api/v1/messages/thread/reply',
+  async (request: FastifyRequest<{ Body: { thread_id?: string; access_token?: string; message?: string } }>, reply) => {
+    const body = request.body ?? {};
+    const threadId = messageText(body.thread_id, 80);
+    const accessToken = messageText(body.access_token, 80);
+    const message = messageText(body.message, 4000);
+    if (!/^[0-9a-f-]{36}$/i.test(threadId) || !accessToken || !message) return jsonError(reply, 400, 'Your message is required.');
+    const supabase = getSupabaseAdmin();
+    const { data: thread, error: threadError } = await supabase.from('customer_messages').select('id,customer_name,customer_email,customer_phone,subject').eq('thread_id', threadId).eq('access_token_hash', messageTokenHash(accessToken)).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    if (threadError || !thread) return jsonError(reply, 404, 'Message thread not found.');
+    const { data, error } = await supabase.from('customer_messages').insert({ thread_id: threadId, access_token_hash: messageTokenHash(accessToken), sender_type: 'customer', customer_name: thread.customer_name, customer_email: thread.customer_email, customer_phone: thread.customer_phone, subject: thread.subject, message, status: 'new', reply_to_id: thread.id }).select('id,thread_id,sender_type,customer_name,subject,message,status,created_at').single();
+    if (error || !data) return jsonError(reply, 400, 'Your reply could not be sent.');
+    return reply.code(201).send({ data: publicMessage(data as Record<string, unknown>) });
+  },
+);
+
+app.get('/api/v1/admin/messages', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Querystring: { status?: string } }>, reply) => {
+  const allowedStatuses = ['new', 'read', 'replied', 'closed'];
+  const status = allowedStatuses.includes(request.query.status ?? '') ? request.query.status : null;
+  let query = getSupabaseAdmin().from('customer_messages').select('id,thread_id,sender_type,admin_id,customer_name,customer_email,customer_phone,subject,message,status,reply_to_id,read_at,created_at').order('created_at', { ascending: false }).limit(500);
+  if (status) query = query.eq('status', status);
+  const { data, error } = await query;
+  if (error) return jsonError(reply, 500, 'Customer messages could not be loaded.');
+  return { data: data ?? [] };
+});
+
+app.post('/api/v1/admin/messages/:threadId/reply', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { threadId: string }; Body: { message?: string } }>, reply) => {
+  const message = messageText(request.body?.message, 4000);
+  if (!/^[0-9a-f-]{36}$/i.test(request.params.threadId) || !message) return jsonError(reply, 400, 'A reply message is required.');
+  const supabase = getSupabaseAdmin();
+  const { data: thread, error: threadError } = await supabase.from('customer_messages').select('id,access_token_hash,customer_name,customer_email,customer_phone,subject').eq('thread_id', request.params.threadId).order('created_at', { ascending: false }).limit(1).maybeSingle();
+  if (threadError || !thread) return jsonError(reply, 404, 'Customer message thread not found.');
+  const admin = (request as FastifyRequest & { admin?: { id: string } }).admin;
+  const { data, error } = await supabase.from('customer_messages').insert({ thread_id: request.params.threadId, access_token_hash: thread.access_token_hash, sender_type: 'admin', admin_id: admin?.id ?? null, customer_name: thread.customer_name, customer_email: thread.customer_email, customer_phone: thread.customer_phone, subject: thread.subject, message, status: 'replied', reply_to_id: thread.id }).select('id,thread_id,sender_type,customer_name,subject,message,status,created_at').single();
+  if (error || !data) return jsonError(reply, 400, 'Admin reply could not be sent.');
+  await supabase.from('customer_messages').update({ status: 'replied' }).eq('thread_id', request.params.threadId).eq('sender_type', 'customer').neq('status', 'closed');
+  return reply.code(201).send({ data });
+});
+
+app.patch('/api/v1/admin/messages/:threadId/status', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { threadId: string }; Body: { status?: string } }>, reply) => {
+  const status = request.body?.status;
+  if (!['new', 'read', 'replied', 'closed'].includes(status ?? '')) return jsonError(reply, 400, 'Invalid message status.');
+  const { error } = await getSupabaseAdmin().from('customer_messages').update({ status, read_at: status === 'read' ? new Date().toISOString() : null }).eq('thread_id', request.params.threadId);
+  if (error) return jsonError(reply, 400, 'Message status could not be updated.');
+  return { data: { thread_id: request.params.threadId, status } };
+});
 
 app.get('/api/v1/admin/dashboard', { preHandler: requireAdmin as any }, async (_request, reply) => {
   const supabase = getSupabaseAdmin();
