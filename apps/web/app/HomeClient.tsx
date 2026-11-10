@@ -1377,6 +1377,7 @@ type FullWidthImageShowcaseProps = {
   title: ReactNode;
   subtitle: string;
   sectionId: string;
+  priority?: boolean;
 };
 
 function FullWidthImageShowcase({
@@ -1385,6 +1386,7 @@ function FullWidthImageShowcase({
   title,
   subtitle,
   sectionId,
+  priority = false,
 }: FullWidthImageShowcaseProps) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
@@ -1446,7 +1448,7 @@ function FullWidthImageShowcase({
   return (
     <section
       ref={sectionRef}
-      className={`fullwidth-showcase${visible ? ' is-visible' : ''}`}
+      className={`fullwidth-showcase${visible ? ' is-visible' : ''}${priority ? ' is-priority' : ''}`}
       aria-labelledby={sectionId}
     >
       <style jsx>{`
@@ -1502,6 +1504,12 @@ function FullWidthImageShowcase({
         .fullwidth-showcase.is-visible .fullwidth-showcase-media img {
           opacity: 1;
           animation: showcase-image-in 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .fullwidth-showcase.is-priority .fullwidth-showcase-media img {
+          opacity: 1;
+          animation: none;
+          transition: none;
         }
 
         @keyframes showcase-image-in {
@@ -1642,7 +1650,10 @@ function FullWidthImageShowcase({
           ref={imageRef}
           src={imageSrc}
           alt={imageAlt}
-          loading="lazy"
+          width={priority ? 736 : undefined}
+          height={priority ? 1308 : undefined}
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'low'}
           decoding="async"
         />
       </div>
@@ -1753,6 +1764,7 @@ export default function Home({ initialData }: { initialData: HomeInitialData }) 
       {/* 3. FULL-WIDTH IMAGE SHOWCASE №1 — img1.png */}
       <FullWidthImageShowcase
         sectionId="fullwidth-showcase-one"
+        priority
         imageSrc="/images/img1.webp"
         imageAlt="Performance automotive showcase"
         title={
