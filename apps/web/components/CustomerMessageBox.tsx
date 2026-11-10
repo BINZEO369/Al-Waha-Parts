@@ -144,11 +144,11 @@ export function CustomerMessageBox() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap');
 
-        /* গ্লোবাল সেটআপ */
+        /* গ্লোবাল সেটআপ - লিকুইড ব্যাকগ্রাউন্ড */
         .aw-message-page { 
           height: 100vh; 
           width: 100%;
-          background: #ffffff; 
+          background: radial-gradient(circle at top left, #ffffff, #f0f0f0); /* স্মুথ গ্রেডিয়েন্ট */
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
           display: flex;
           justify-content: center;
@@ -161,19 +161,22 @@ export function CustomerMessageBox() {
           height: 100%;
           display: flex; 
           flex-direction: column; 
-          background: #ffffff;
-          border-left: 1px solid #f0f0f0;
-          border-right: 1px solid #f0f0f0;
+          background: rgba(255, 255, 255, 0.6);
+          backdrop-filter: blur(20px); /* গ্লাস ইফেক্ট */
+          border-left: 1px solid rgba(0, 0, 0, 0.05);
+          border-right: 1px solid rgba(0, 0, 0, 0.05);
+          box-shadow: 0 0 40px rgba(0, 0, 0, 0.03);
         }
 
-        /* হেডার */
+        /* হেডার - ফ্লোটিং গ্লাস */
         .aw-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
           padding: 16px 24px;
-          border-bottom: 1px solid #f0f0f0;
-          background: #ffffff;
+          background: rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(12px);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.04);
           flex-shrink: 0; 
           z-index: 10;
         }
@@ -185,15 +188,16 @@ export function CustomerMessageBox() {
         }
 
         .aw-avatar {
-          width: 40px;
-          height: 40px;
-          background: #0a0a0a;
+          width: 42px;
+          height: 42px;
+          background: linear-gradient(135deg, #111, #333); /* লিকুইড কালো */
           color: #fff;
           border-radius: 50%;
           display: grid;
           place-items: center;
           font-weight: 700;
           font-size: 13px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .aw-header-info h2 {
@@ -218,6 +222,7 @@ export function CustomerMessageBox() {
           background: #22c55e;
           border-radius: 50%;
           display: inline-block;
+          box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
         }
 
         .aw-header-right {
@@ -227,17 +232,17 @@ export function CustomerMessageBox() {
         }
 
         .aw-btn-copy {
-          background: #f4f4f5;
-          border: none;
-          padding: 8px 12px;
-          border-radius: 6px;
+          background: rgba(0,0,0,0.04);
+          border: 1px solid rgba(0,0,0,0.05);
+          padding: 8px 14px;
+          border-radius: 20px;
           font-size: 11px;
           color: #3f3f46;
           cursor: pointer;
           font-family: 'DM Mono', monospace;
-          transition: all 0.2s;
+          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-        .aw-btn-copy:hover { background: #e4e4e7; color: #111; }
+        .aw-btn-copy:hover { background: #111; color: #fff; border-color: #111; }
 
         .aw-close-btn {
           background: transparent;
@@ -248,6 +253,7 @@ export function CustomerMessageBox() {
           display: grid;
           place-items: center;
           padding: 4px;
+          transition: color 0.2s;
         }
         .aw-close-btn:hover { color: #111; }
 
@@ -259,20 +265,28 @@ export function CustomerMessageBox() {
           display: flex;
           flex-direction: column;
           gap: 20px;
-          background: #fafafa;
+          scrollbar-width: thin;
         }
+        .aw-chat-scroll::-webkit-scrollbar { width: 4px; }
+        .aw-chat-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
 
-        /* ইনিশিয়াল ফর্ম */
+        /* ইনিশিয়াল ফর্ম - ফ্লোটিং গ্লাস */
         .aw-initial-form-container {
           max-width: 480px;
           margin: 40px auto;
           width: 100%;
-          background: #fff;
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(16px);
           padding: 32px;
-          border-radius: 16px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-          border: 1px solid #f0f0f0;
-          animation: fadeIn 0.4s ease;
+          border-radius: 24px;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,1);
+          border: 1px solid rgba(0,0,0,0.04);
+          animation: liquidEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes liquidEntrance {
+          0% { opacity: 0; transform: translateY(20px) scale(0.96); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .aw-intro-text {
@@ -307,13 +321,13 @@ export function CustomerMessageBox() {
 
         .aw-form-group input {
           width: 100%;
-          padding: 10px 14px;
-          border: 1px solid #e4e4e7;
-          border-radius: 8px;
+          padding: 12px 16px;
+          border: 1px solid rgba(0,0,0,0.1);
+          border-radius: 12px;
           font-size: 14px;
           color: #111;
-          background: #fafafa;
-          transition: all 0.2s ease;
+          background: rgba(255,255,255,0.5);
+          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
           outline: none !important; 
           font-family: inherit;
         }
@@ -321,20 +335,20 @@ export function CustomerMessageBox() {
         .aw-form-group input:focus {
           background: #fff;
           border-color: #111;
-          box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+          box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
-        /* চ্যাট বাবলস */
+        /* চ্যাট বাবলস - লিকুইড স্টাইল */
         .aw-chat-row {
           display: flex;
           align-items: flex-end;
           gap: 10px;
           max-width: 80%;
-          animation: messageSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+          animation: messageSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         @keyframes messageSlideUp {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translateY(15px) scale(0.98); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .aw-chat-row.customer { align-self: flex-end; flex-direction: row-reverse; }
@@ -350,59 +364,71 @@ export function CustomerMessageBox() {
           font-weight: 700;
           flex-shrink: 0;
         }
-        .aw-chat-row.admin .aw-chat-avatar { background: #e4e4e7; color: #111; }
-        .aw-chat-row.customer .aw-chat-avatar { background: #0a0a0a; color: #fff; }
+        .aw-chat-row.admin .aw-chat-avatar { background: #e4e4e7; color: #111; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .aw-chat-row.customer .aw-chat-avatar { background: linear-gradient(135deg, #111, #333); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 
-        .aw-chat-bubble {
-          padding: 12px 16px;
-          border-radius: 18px;
+        /* অ্যাডমিন বাবল - ফ্রস্টেড গ্লাস */
+        .aw-chat-row.admin .aw-chat-bubble {
+          padding: 14px 18px;
           font-size: 14px;
           line-height: 1.5;
           position: relative;
-          box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .aw-chat-row.admin .aw-chat-bubble {
-          background: #ffffff;
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(10px);
           color: #111;
-          border-bottom-left-radius: 4px;
-          border: 1px solid #e4e4e7;
+          border-radius: 20px 20px 20px 4px;
+          border: 1px solid rgba(255, 255, 255, 1);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.04);
         }
+
+        /* কাস্টমার বাবল - লিকুইড ব্ল্যাক */
         .aw-chat-row.customer .aw-chat-bubble {
-          background: #0a0a0a;
+          padding: 14px 18px;
+          font-size: 14px;
+          line-height: 1.5;
+          position: relative;
+          background: linear-gradient(135deg, #1a1a1a, #000000);
           color: #fff;
-          border-bottom-right-radius: 4px;
+          border-radius: 20px 20px 4px 20px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.05);
         }
         
         .aw-chat-bubble time {
           display: block;
           font-size: 10px;
           margin-top: 6px;
-          opacity: 0.6;
+          opacity: 0.5;
           text-align: right;
+          font-family: 'DM Mono', monospace;
         }
 
-        /* টাইপিং ইন্ডিকেটর */
+        /* টাইপিং ইন্ডিকেটর - লিকুইড ডট */
         .aw-typing { 
           display: flex; 
-          gap: 4px; 
+          gap: 5px; 
           padding: 14px 18px; 
-          background: #ffffff; 
-          border: 1px solid #e4e4e7; 
-          border-radius: 18px; 
+          background: rgba(255, 255, 255, 0.9); 
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 1); 
+          border-radius: 20px 20px 20px 4px; 
           width: fit-content; 
-          border-bottom-left-radius: 4px; 
-          box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.04);
         }
         .aw-typing span { 
           width: 6px; 
           height: 6px; 
-          background: #a1a1aa; 
+          background: #111; 
           border-radius: 50%; 
-          animation: bounce 1.4s infinite both; 
+          animation: liquidBounce 1.4s infinite ease-in-out both; 
+          opacity: 0.4;
         }
         .aw-typing span:nth-child(2) { animation-delay: 0.2s; }
         .aw-typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        @keyframes liquidBounce { 
+          0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; } 
+          40% { transform: scale(1.1); opacity: 1; background: #000; } 
+        }
 
         /* কুইক রিপ্লাই */
         .aw-quick-replies {
@@ -412,71 +438,77 @@ export function CustomerMessageBox() {
           margin-top: 10px;
         }
         .aw-quick-replies button {
-          padding: 6px 14px;
-          border: 1px solid #e4e4e7;
-          background: #ffffff;
+          padding: 8px 16px;
+          border: 1px solid rgba(0,0,0,0.08);
+          background: rgba(255, 255, 255, 0.6);
+          backdrop-filter: blur(5px);
           border-radius: 20px;
           font-size: 12px;
           color: #3f3f46;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
         .aw-quick-replies button:hover {
-          background: #0a0a0a;
+          background: #111;
           color: #fff;
-          border-color: #0a0a0a;
+          border-color: #111;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 15px rgba(0,0,0,0.15);
         }
 
-        /* কম্পোজ বক্স */
+        /* -----------------------------
+           কম্পোজ বক্স (লিকুইড ব্ল্যাক পিল)
+           ----------------------------- */
         .aw-composer-area {
           flex-shrink: 0; 
           padding: 16px 24px 20px;
-          background: #ffffff;
-          border-top: 1px solid #f0f0f0;
+          background: transparent;
         }
 
         .aw-compose-box {
           display: flex;
           align-items: flex-end;
           gap: 12px;
-          background: #f4f4f5;
-          padding: 10px 16px;
-          border-radius: 24px;
-          border: 1px solid transparent;
-          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+          background: linear-gradient(135deg, #111, #000);
+          padding: 12px 16px;
+          border-radius: 30px;
+          border: 1px solid rgba(255,255,255,0.1);
+          transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+          box-shadow: 0 15px 35px rgba(0,0,0,0.2);
         }
         
         .aw-compose-box:focus-within {
-          background: #ffffff;
-          border-color: #111; 
-          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+          box-shadow: 0 20px 45px rgba(0,0,0,0.3), 0 0 0 3px rgba(0,0,0,0.1);
+          transform: translateY(-2px);
         }
 
         .aw-compose-icon {
           background: transparent;
           border: none;
-          color: #71717a;
+          color: #888;
           cursor: pointer;
           padding: 8px 0;
           display: grid;
           place-items: center;
           outline: none !important;
+          transition: color 0.2s;
         }
-        .aw-compose-icon:hover { color: #111; }
+        .aw-compose-icon:hover { color: #fff; }
 
         .aw-compose-input {
           flex: 1;
           border: none;
           background: transparent;
           font-family: inherit;
-          font-size: 14px;
-          color: #111;
+          font-size: 15px;
+          color: #fff;
           resize: none;
           outline: none !important; 
           box-shadow: none !important; 
           min-height: 24px;
           max-height: 150px;
-          padding: 6px 0;
+          padding: 8px 0;
           line-height: 1.5;
           scrollbar-width: none; 
         }
@@ -485,33 +517,36 @@ export function CustomerMessageBox() {
           box-shadow: none !important;
         }
         .aw-compose-input::-webkit-scrollbar { display: none; } 
-        .aw-compose-input::placeholder { color: #a1a1aa; }
+        .aw-compose-input::placeholder { color: #666; }
 
+        /* সেন্ড বাটন - সাদা লিকুইড */
         .aw-send-btn {
-          background: #0a0a0a;
-          color: #fff;
+          background: #ffffff;
+          color: #000;
           border: none;
           border-radius: 50%;
-          width: 36px;
-          height: 36px;
+          width: 38px;
+          height: 38px;
           display: grid;
           place-items: center;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
           flex-shrink: 0;
           outline: none !important;
+          box-shadow: 0 4px 12px rgba(255,255,255,0.1);
         }
         .aw-send-btn:hover:not(:disabled) {
-          background: #27272a;
-          transform: scale(1.05);
+          transform: scale(1.1) rotate(-10deg);
+          box-shadow: 0 8px 20px rgba(255,255,255,0.2);
         }
-        .aw-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .aw-send-btn:disabled { opacity: 0.3; cursor: not-allowed; background: #444; color: #888; box-shadow: none; }
 
         .aw-footer-note {
           text-align: center;
           font-size: 11px;
-          color: #a1a1aa;
+          color: #999;
           margin-top: 12px;
+          font-family: 'DM Mono', monospace;
         }
 
         /* মেসেজ ফিডব্যাক */
@@ -520,41 +555,39 @@ export function CustomerMessageBox() {
         .aw-msg-feedback.success { color: #16a34a; }
 
         /* -----------------------------
-           মোবাইল রেসপন্সিভ (আরও ছোট করা হয়েছে)
+           মোবাইল রেসপন্সিভ (আরও ছোট এবং অপ্টিমাইজড)
            ----------------------------- */
         @media (max-width: 768px) { 
           .aw-message-shell { border-left: none; border-right: none; }
-          .aw-header { padding: 10px 16px; } /* হেডার প্যাডিং কমানো */
+          .aw-header { padding: 10px 16px; } 
           .aw-btn-copy { display: none; } 
           
-          /* স্ক্রল এরিয়া প্যাডিং এবং গ্যাপ আরও কমানো হয়েছে */
           .aw-chat-scroll { 
             padding: 12px 10px; 
             gap: 8px; 
           }
           
-          .aw-composer-area { padding: 10px 12px; }
-          .aw-initial-form-container { margin: 10px auto; padding: 20px 12px; box-shadow: none; border: none; background: transparent;}
+          .aw-composer-area { padding: 10px 12px 16px; }
+          .aw-initial-form-container { margin: 10px auto; padding: 20px 12px; box-shadow: none; border: none; background: transparent; backdrop-filter: none;}
           .aw-form-grid { grid-template-columns: 1fr; gap: 10px; }
 
-          /* চ্যাট রো ছোট করা */
           .aw-chat-row { 
-            max-width: 92%; /* আরও চওড়া করা হয়েছে */
+            max-width: 92%; 
             gap: 6px; 
           }
           
-          /* অ্যাভাটার ছোট করা */
           .aw-chat-avatar {
             width: 20px;
             height: 20px;
             font-size: 7px;
           }
 
-          /* মেসেজ বাবলের ফন্ট এবং প্যাডিং আরও ছোট করা */
-          .aw-chat-bubble {
+          /* মোবাইলে বাবল আরও ছোট */
+          .aw-chat-row.admin .aw-chat-bubble,
+          .aw-chat-row.customer .aw-chat-bubble {
             font-size: 12px; 
             padding: 8px 12px; 
-            border-radius: 14px;
+            border-radius: 16px;
             line-height: 1.35;
           }
           .aw-chat-bubble time {
@@ -562,7 +595,6 @@ export function CustomerMessageBox() {
             margin-top: 3px;
           }
 
-          /* টাইপিং ইন্ডিকেটর ছোট করা */
           .aw-typing {
             padding: 8px 12px;
           }
@@ -571,10 +603,19 @@ export function CustomerMessageBox() {
             height: 4px;
           }
           
-          /* কুইক রিপ্লাই বাটন ছোট করা */
           .aw-quick-replies button {
-            padding: 4px 10px;
+            padding: 5px 12px;
             font-size: 10px;
+          }
+
+          /* মোবাইলে কম্পোজ বক্স আরও সুন্দর */
+          .aw-compose-box {
+            padding: 8px 12px;
+            border-radius: 24px;
+          }
+          .aw-send-btn {
+            width: 32px;
+            height: 32px;
           }
         }
       `}</style>
@@ -587,8 +628,7 @@ export function CustomerMessageBox() {
             <div className="aw-avatar">AW</div>
             <div className="aw-header-info">
               <h2>Al Waha Parts</h2>
-              {/* এখানে লেখাটি পরিবর্তন করা হয়েছে */}
-              <p><span className="aw-status-dot"></span> Usually replies in 5 minutes</p>
+              <p><span className="aw-status-dot"></span> Usually replies in 20 minutes</p>
             </div>
           </div>
           <div className="aw-header-right">
@@ -692,7 +732,7 @@ export function CustomerMessageBox() {
                 {loading ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="aw-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                 ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 )}
               </button>
             </div>
