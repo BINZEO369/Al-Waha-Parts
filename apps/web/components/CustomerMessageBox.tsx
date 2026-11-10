@@ -39,7 +39,9 @@ export function CustomerMessageBox() {
     if (!current) return;
     setThread(current);
     void loadThread(current);
-    const timer = window.setInterval(() => void loadThread(current), 20000);
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void loadThread(current);
+    }, 3000);
     return () => window.clearInterval(timer);
   }, [loadThread]);
 
@@ -68,7 +70,7 @@ export function CustomerMessageBox() {
 
   return <section className="customer-message-box" aria-labelledby="customer-message-title">
     <div className="customer-message-intro"><span className="eyebrow">Message the parts desk</span><h2 id="customer-message-title">Need help finding the right part?</h2><p>Send us a message with your vehicle or part details. Our team can reply directly here. Each private thread is kept for three days, then automatically removed.</p><div className="customer-message-promise"><span>01</span><b>Tell us what you need</b><span>02</span><b>We check fitment</b><span>03</span><b>Reply in your thread</b></div></div>
-    {messages.length > 0 && <div className="customer-message-thread" aria-live="polite"><div className="customer-message-thread-head"><strong>Your conversation</strong><small>Replies refresh automatically</small></div>{messages.map((item) => <article className={`customer-message-bubble ${item.sender_type}`} key={item.id}><span>{item.sender_type === 'admin' ? 'Al Waha Parts' : 'You'}</span><p>{item.message}</p><time>{new Date(item.created_at).toLocaleString()}</time></article>)}</div>}
+    {messages.length > 0 && <div className="customer-message-thread" aria-live="polite"><div className="customer-message-thread-head"><strong>Your conversation</strong><small>Live refresh · every 3 seconds</small></div>{messages.map((item) => <article className={`customer-message-bubble ${item.sender_type}`} key={item.id}><span>{item.sender_type === 'admin' ? 'Al Waha Parts' : 'You'}</span><p>{item.message}</p><time>{new Date(item.created_at).toLocaleString()}</time></article>)}</div>}
     <form className="customer-message-form" onSubmit={submit}><div className="customer-message-form-grid">{!thread && <><label>Name<input value={name} onChange={(event) => setName(event.target.value)} required maxLength={160} placeholder="Your name" /></label><label>Email <span>(optional)</span><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} placeholder="you@example.com" /></label><label>Phone <span>(optional)</span><input value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={40} placeholder="Phone number" /></label><label>Subject<input value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={160} placeholder="What can we help with?" /></label></>}</div><label>Message<textarea value={message} onChange={(event) => setMessage(event.target.value)} required maxLength={4000} rows={5} placeholder="Tell us the part name, SKU, car make/model/year, or your question…" /></label>{error && <p className="customer-message-error" role="alert">{error}</p>}{sent && !error && <p className="customer-message-success" role="status">Message sent. Keep this browser to receive replies in this conversation.</p>}<button className="button" type="submit" disabled={loading}>{loading ? 'Sending…' : thread ? 'Send reply' : 'Send message'}</button></form>
   </section>;
 }
