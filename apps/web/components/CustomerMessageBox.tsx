@@ -332,10 +332,10 @@ export function CustomerMessageBox() {
 
         /* অটো-এক্সপ্যান্ডিং টেক্সটএরিয়া স্টাইল */
         .aw-form-group textarea {
-          resize: none; /* রিসাইজ হ্যান্ডেল বাদ দেওয়া হলো */
-          overflow-y: hidden; /* স্ক্রলবার লুকানো হলো */
-          min-height: 100px; /* মিনিমাম উচ্চতা */
-          max-height: 200px; /* সর্বোচ্চ উচ্চতা, এরপর স্ক্রল হবে */
+          resize: none; 
+          overflow-y: hidden; 
+          min-height: 100px; 
+          max-height: 200px; 
           line-height: 1.5;
         }
 
@@ -411,7 +411,7 @@ export function CustomerMessageBox() {
         .aw-form-note {
           font-size: 12px;
           color: #a1a1aa;
-          max-width: 200px;
+          max-width: 250px;
           line-height: 1.4;
         }
 
@@ -533,7 +533,7 @@ export function CustomerMessageBox() {
         <div className="aw-message-right">
           
           <div className="aw-right-header">
-            <h2>{thread ? 'Message Thread' : 'Input Details'}</h2>
+            <h2>{thread ? 'Chat with us' : 'Send us a Message'}</h2>
             <button className="aw-close-btn" type="button" aria-label="Close" onClick={() => { /* Close logic if needed */ }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
@@ -594,16 +594,16 @@ export function CustomerMessageBox() {
 
             {/* মেসেজ লেখার জায়গা (Auto-expanding) */}
             <div className="aw-form-group" style={{ flex: thread ? 'none' : 1 }}>
-              <label htmlFor="aw-message">{thread ? 'Write a reply...' : 'What would you like to discuss?'}</label>
+              <label htmlFor="aw-message">{thread ? 'Write a reply...' : 'Write your message...'}</label>
               <textarea 
                 id="aw-message"
-                ref={textareaRef} /* এখানে রেফ যুক্ত করা হয়েছে */
+                ref={textareaRef} 
                 value={draft} 
                 onChange={(event) => setDraft(event.target.value)} 
                 required 
                 maxLength={4000} 
-                rows={1} /* শুরুতে ১ লাইন হবে, লেখা বাড়লে বাড়বে */
-                placeholder={thread ? 'Type your reply here...' : 'Share your goals and questions for the session...'} 
+                rows={1} 
+                placeholder={thread ? 'Type your reply here...' : 'How can we help you with your car?'} 
               />
             </div>
 
@@ -612,13 +612,13 @@ export function CustomerMessageBox() {
 
             {/* ফুটার বাটন */}
             <div className="aw-form-footer">
-              <span className="aw-form-note">24 hours free cancellation. By proceeding, you agree to our Terms of Service and Privacy Policy.</span>
+              <span className="aw-form-note">We usually reply within one business day.</span>
               <div className="aw-actions">
                 <button type="button" className="aw-btn-reset" onClick={() => { setDraft(''); setName(''); setEmail(''); setPhone(''); setSubject('Parts enquiry'); }}>
-                  Reset
+                  Clear
                 </button>
                 <button type="submit" className="aw-btn-submit" disabled={loading}>
-                  {loading ? 'Sending...' : (thread ? 'Send Reply' : 'Schedule Now')}
+                  {loading ? 'Sending...' : (thread ? 'Send Reply' : 'Send Message')}
                 </button>
               </div>
             </div>
