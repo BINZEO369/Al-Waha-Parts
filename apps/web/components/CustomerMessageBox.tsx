@@ -3,7 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 
 const threadStorageKey = 'alwaha-customer-message-thread-v1';
-const quickReplies = ['Fitment help', 'Stock & price', 'Booking help'];
+const quickReplies = ['Fitment help', 'Stock & price', 'Booking help', 'Track Order'];
 
 type Message = {
   id: string;
@@ -292,20 +292,20 @@ export function CustomerMessageBox() {
 
         .aw-message-empty { display: flex; align-items: center; gap: 8px; color: #999; font-size: 12px; margin: auto; }
         
-        /* কুইক রিপ্লাই */
-        .aw-message-quick { display: flex; gap: 10px; overflow-x: auto; margin: 0 0 16px; padding: 4px 0; }
+        /* কুইক রিপ্লাই (শর্টকাট) */
+        .aw-message-quick { display: flex; gap: 10px; overflow-x: auto; margin: 0 0 12px; padding: 4px 0; scrollbar-width: none; }
+        .aw-message-quick::-webkit-scrollbar { display: none; }
         .aw-message-quick button { 
           flex: 0 0 auto; 
           padding: 8px 16px; 
           border-radius: 20px; 
           border: 1px solid #e5e5e5; 
-          color: #555; 
-          background: #fff; 
-          font-size: 11px; 
+          color: #444; 
+          background: #f8f8f8; 
+          font-size: 12px; 
           font-weight: 500;
           cursor: pointer;
           transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-          box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
         .aw-message-quick button:hover { border-color: #111; color: #fff; background: #111; box-shadow: 0 6px 15px rgba(0,0,0,0.1); transform: translateY(-2px); }
         
@@ -317,15 +317,15 @@ export function CustomerMessageBox() {
           display: grid; 
           grid-template-columns: 1fr 1fr; 
           gap: 16px; 
-          margin-bottom: 20px; 
+          margin-bottom: 24px; 
         }
         .aw-message-field { 
           display: flex; 
           flex-direction: column;
           gap: 8px; 
-          background: #fdfdff;
+          background: #fafafa;
           padding: 14px 18px;
-          border-radius: 18px;
+          border-radius: 16px;
           border: 1px solid #eaeaea;
           transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
           position: relative;
@@ -354,38 +354,38 @@ export function CustomerMessageBox() {
         .aw-message-field input { width: 100%; border: 0; outline: 0; color: #111; background: transparent; font: inherit; font-size: 14px; font-weight: 500; }
         .aw-message-field input::placeholder { font-weight: 400; color: #bbb; }
         
-        /* মেইন কম্পোজ বক্স (ছবির মতো) */
+        /* মেইন কম্পোজ বক্স (কালো এবং উন্নত ডিজাইন) */
         .aw-message-compose-wrapper {
-          background: #f4f4f4;
+          background: #0a0a0a; /* একদম কালো */
           border-radius: 24px;
-          padding: 12px 16px;
+          padding: 10px 14px;
           display: flex;
           align-items: flex-end;
-          gap: 12px;
+          gap: 10px;
           transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-          border: 1px solid transparent;
+          border: 1px solid #222;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
         .aw-message-compose-wrapper:focus-within {
-          background: #fff;
-          border-color: #ddd;
-          box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+          border-color: #444;
+          box-shadow: 0 15px 40px rgba(0,0,0,0.25);
         }
         
         .aw-message-icon-btn {
           display: grid;
           place-items: center;
-          width: 32px;
-          height: 32px;
+          width: 36px;
+          height: 36px;
           border: none;
           background: transparent;
-          color: #777;
+          color: #888; /* ডার্ক বক্সের জন্য হালকা ধূসর আইকন */
           font-size: 20px;
           cursor: pointer;
           border-radius: 50%;
           transition: all 0.2s ease;
-          flex: 0 0 32px;
+          flex: 0 0 36px;
         }
-        .aw-message-icon-btn:hover { background: #eaeaea; color: #111; }
+        .aw-message-icon-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
         
         .aw-message-compose textarea { 
           flex: 1;
@@ -394,17 +394,17 @@ export function CustomerMessageBox() {
           background: transparent;
           font: inherit;
           font-size: 14px;
-          color: #111;
+          color: #fff; /* সাদা টেক্সট */
           min-height: 24px; 
           max-height: 120px; 
           resize: none; 
           line-height: 1.5; 
-          padding: 6px 0;
+          padding: 8px 0;
           scrollbar-width: none;
         }
-        .aw-message-compose textarea::placeholder { color: #999; }
+        .aw-message-compose textarea::placeholder { color: #666; } /* গাঢ় ধূসর প্লেসহোল্ডার */
         
-        /* সেন্ড বাটন */
+        /* সেন্ড বাটন (সাদা) */
         .aw-message-send { 
           display: grid; 
           place-items: center; 
@@ -413,15 +413,15 @@ export function CustomerMessageBox() {
           flex: 0 0 40px; 
           border: 0; 
           border-radius: 50%; 
-          color: #fff; 
-          background: #111; 
+          color: #111; /* কালো আইকন */
+          background: #ffffff; /* সাদা বাটন */
           font-size: 18px; 
           cursor: pointer;
           transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+          box-shadow: 0 4px 15px rgba(255,255,255,0.1);
           margin-left: auto;
         }
-        .aw-message-send:hover:not(:disabled) { background: #333; transform: scale(1.08) translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .aw-message-send:hover:not(:disabled) { background: #e0e0e0; transform: scale(1.08) translateY(-2px); }
         .aw-message-send:active:not(:disabled) { transform: scale(0.95); }
         .aw-message-send:disabled { cursor: not-allowed; opacity: .4; box-shadow: none; }
         
@@ -492,7 +492,7 @@ export function CustomerMessageBox() {
         {thread && (
           <div className="aw-message-quick" aria-label="Quick replies">
             {quickReplies.map((item) => (
-              <button key={item} type="button" onClick={() => setDraft(item === 'Fitment help' ? 'Please help me find the right part for my car.' : item === 'Stock & price' ? 'Please check stock and price for this part.' : 'I need help with a booking.')}>
+              <button key={item} type="button" onClick={() => setDraft(item === 'Fitment help' ? 'Please help me find the right part for my car.' : item === 'Stock & price' ? 'Please check stock and price for this part.' : item === 'Booking help' ? 'I need help with a booking.' : 'Can you help me track my order?')}>
                 {item}
               </button>
             ))}
@@ -521,13 +521,13 @@ export function CustomerMessageBox() {
             </div>
           )}
           
-          {/* কম্পোজ বক্স (ছবির মতো মডার্ন ডিজাইন) */}
+          {/* কালো কম্পোজ বক্স */}
           <div className="aw-message-compose-wrapper">
             <button type="button" className="aw-message-icon-btn" aria-label="Add attachment">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
             <button type="button" className="aw-message-icon-btn" aria-label="Voice message">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
             </button>
             
             <textarea 
