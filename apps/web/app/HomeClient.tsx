@@ -108,6 +108,8 @@ function randomVehicles(items: Vehicle[], limit = HOME_VEHICLE_LIMIT) {
 
 function optimizedHeroImageSource(source: string | null | undefined) {
   if (!source) return '';
+  const optimizedMobileHero = source.replace(/^\/+/, '').match(/^hero\/img4-mobile\.webp$/);
+  if (optimizedMobileHero) return '/hero/img4-mobile-optimized.webp';
   const localHero = source.replace(/^\/+/, '').match(/^hero\/(img[1-4])\.png$/);
   return localHero ? `/hero/${localHero[1]}.webp` : source;
 }
@@ -182,9 +184,8 @@ function HeroCarousel({ initialBanners }: { initialBanners: Banner[] }) {
   if (!banner) return null;
 
   const imageSource = optimizedHeroImageSource(banner.image_url || banner.mobile_image_url);
-  const mobileImageSource = banner.mobile_image_url
-    ? optimizedHeroImageSource(banner.mobile_image_url)
-    : mobileHeroImageSource(imageSource);
+  const mobileImageCandidate = banner.mobile_image_url || mobileHeroImageSource(imageSource);
+  const mobileImageSource = optimizedHeroImageSource(mobileImageCandidate);
   const hasImage = Boolean(imageSource);
 
   return (
@@ -313,16 +314,15 @@ function HeroCarousel({ initialBanners }: { initialBanners: Banner[] }) {
           <div className="hero-carousel-media">
             <picture>
               {mobileImageSource && mobileImageSource !== imageSource && (
-                <source media="(min-width: 601px)" srcSet={imageSource} />
+                <source media="(max-width: 600px)" srcSet={mobileImageSource} />
               )}
-              <OptimizedImage
-                src={mobileImageSource || imageSource}
+              <img
+                src={imageSource}
                 alt=""
                 aria-hidden="true"
-                fill
-                sizes="100vw"
+                width={2048}
+                height={768}
                 loading={active === 0 ? 'eager' : 'lazy'}
-                priority={active === 0}
                 fetchPriority={active === 0 ? 'high' : 'auto'}
                 decoding="async"
               />
@@ -1743,9 +1743,11 @@ export default function Home({ initialData }: { initialData: HomeInitialData }) 
       setHomeSelectedVehicles([]);
       return;
     }
-    const preferredVehicles = preferredBrand
-      ? vehicles.filter((vehicle) => vehicle.manufacturer_name.trim().toLowerCase() === preferredBrand.trim().toLowerCase())
-      : [];
+    if (!preferredBrand) {
+      setHomeSelectedVehicles(vehicles.slice(0, HOME_VEHICLE_LIMIT));
+      return;
+    }
+    const preferredVehicles = vehicles.filter((vehicle) => vehicle.manufacturer_name.trim().toLowerCase() === preferredBrand.trim().toLowerCase());
     setHomeSelectedVehicles(randomVehicles(preferredVehicles.length ? preferredVehicles : vehicles));
   }, [preferredBrand, vehicles]);
 
