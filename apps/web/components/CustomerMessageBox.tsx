@@ -25,6 +25,7 @@ export function CustomerMessageBox() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const loadThread = useCallback(async (current: ThreadState) => {
     if (!apiUrl) return;
@@ -54,6 +55,15 @@ export function CustomerMessageBox() {
     return () => window.clearInterval(timer);
   }, [loadThread]);
 
+  async function copyThreadId() {
+    if (!thread) return;
+    try {
+      await navigator.clipboard.writeText(thread.thread_id);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch { setError('Copy failed. Please select the conversation ID manually.'); }
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     setError('');
@@ -62,7 +72,7 @@ export function CustomerMessageBox() {
     setLoading(true);
     try {
       const endpoint = thread ? `${apiUrl}/api/v1/messages/thread/reply` : `${apiUrl}/api/v1/messages`;
-      const body = thread ? { ...thread, message } : { customer_name: name || 'Guest', customer_email: email, customer_phone: phone, subject, message };
+      const body = thread ? { ...thread, message } : { customer_name: name, customer_email: email, customer_phone: phone, subject, message };
       const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const payload = await response.json() as { data?: { thread_id?: string; access_token?: string; message?: Message }; error?: { message?: string } };
       if (response.status === 404 && thread) {
@@ -86,105 +96,100 @@ export function CustomerMessageBox() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4 font-sans">
-      <section className="w-full max-w-md bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col h-[600px] border border-gray-100">
-        
-        {/* Chat Thread Area */}
-        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 scrollbar-hide">
-          
-          {/* Initial Bot Greeting (Static) */}
-          <div className="flex flex-col gap-1 items-start">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] text-gray-400">AI</div>
-              <span className="text-sm font-medium text-gray-400">Derez AI</span>
-            </div>
-            <p className="text-gray-800 text-[15px] leading-relaxed max-w-[85%]">
-              Hey, I'm Derez AI. What do you want me to help you with?
-            </p>
+    <section className="aw-messenger-container" aria-labelledby="customer-message-title">
+      
+      {/* Minimal Header */}
+      <header className="aw-messenger-header">
+        <div className="aw-avatar">🤖</div>
+        <div className="aw-header-info">
+          <strong>Al Waha Parts</strong>
+          <span>Usually replies within one business day</span>
+        </div>
+        {thread ? (
+          <button className="aw-thread-id" type="button" onClick={() => void copyThreadId()} title="Copy private thread ID">
+            <small>{copied ? 'Copied' : 'Chat ID'}</small>
+            <b>{shortThreadId(thread.thread_id)}</b>
+          </button>
+        ) : (
+          <span className="aw-secure-badge">Private chat</span>
+        )}
+      </header>
+
+      {/* Main Chat Area */}
+      <div className="aw-messenger-body">
+        {!thread && (
+          <div className="aw-welcome">
+            <div className="aw-welcome-icon">👋</div>
+            <h2 id="customer-message-title">Hey, I'm Al Waha AI.<br/>What do you want me to help you with?</h2>
+            <p>Tell our parts desk who you are and what you need. Your private conversation ID will be created automatically.</p>
           </div>
+        )}
 
-          {/* Render Messages */}
-          {messages.map((item) => (
-            <div key={item.id} className={`flex flex-col gap-1 ${item.sender_type === 'customer' ? 'items-end' : 'items-start'}`}>
-              
-              {item.sender_type === 'admin' && (
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] text-gray-400">AI</div>
-                  <span className="text-sm font-medium text-gray-400">Derez AI</span>
+        {messages.length > 0 && (
+          <div className="aw-chat-thread" aria-live="polite">
+            {messages.map((item) => (
+              <article className={`aw-message-row ${item.sender_type}`} key={item.id}>
+                {item.sender_type === 'admin' && <div className="aw-msg-avatar">AW</div>}
+                <div className="aw-msg-content">
+                  <p>{item.message}</p>
+                  <time>{new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</time>
                 </div>
-              )}
+              </article>
+            ))}
+          </div>
+        )}
 
-              {item.sender_type === 'customer' ? (
-                <div className="relative bg-[#1a1a1a] text-white text-[15px] px-5 py-3.5 rounded-2xl rounded-tr-sm max-w-[85%] shadow-sm">
-                  {item.message}
-                  {/* Tail effect from the image */}
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-[#1a1a1a] rounded-full border-2 border-white"></div>
-                </div>
-              ) : (
-                <p className="text-gray-800 text-[15px] leading-relaxed max-w-[85%] pl-8">
-                  {item.message}
-                </p>
-              )}
-            </div>
-          ))}
+        {/* Quick Replies */}
+        {thread && (
+          <div className="aw-quick-replies">
+            <button type="button" onClick={() => setMessage('Please help me find the right part for my car.')}>Fitment help</button>
+            <button type="button" onClick={() => setMessage('Please check stock and price for this part.')}>Stock & price</button>
+            <button type="button" onClick={() => setMessage('I need help with a booking.')}>Booking help</button>
+          </div>
+        )}
 
-          {/* Loading/Typing Indicator */}
-          {loading && (
-            <div className="flex flex-col gap-1 items-start">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] text-gray-400">AI</div>
-                <span className="text-sm font-medium text-gray-400">Derez AI</span>
-              </div>
-              <div className="flex items-center gap-1.5 pl-8 pt-1">
-                <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-              </div>
+        {/* Input Form */}
+        <form className="aw-input-form" onSubmit={submit}>
+          
+          {/* Initial Details Form (Only shows if thread is null) */}
+          {!thread && (
+            <div className="aw-initial-fields">
+              <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={160} placeholder="Your name" />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={254} placeholder="Email (optional)" />
+              <input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={40} placeholder="Phone number (optional)" />
+              <input value={subject} onChange={(e) => setSubject(e.target.value)} maxLength={160} placeholder="Subject" />
             </div>
           )}
-          
-          {/* Error Message */}
-          {error && <p className="text-red-500 text-sm text-center bg-red-50 py-2 rounded-lg">{error}</p>}
-        </div>
 
-        {/* Input Area (Matching the image) */}
-        <div className="p-4 bg-white">
-          <form onSubmit={submit} className="bg-[#f4f4f4] rounded-[1.5rem] p-3 flex flex-col gap-2">
-            <input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Reply...."
-              className="w-full bg-transparent outline-none px-2 text-[15px] text-gray-800 placeholder-gray-400"
-              required
+          <div className="aw-input-wrapper">
+            <textarea 
+              value={message} 
+              onChange={(event) => setMessage(event.target.value)} 
+              required 
+              maxLength={4000} 
+              rows={1} 
+              placeholder="Reply...." 
+              className="aw-textarea"
             />
-            
-            <div className="flex justify-between items-center px-1 mt-1">
-              <div className="flex gap-4 text-gray-500">
-                <button type="button" className="hover:text-gray-800 transition-colors">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                </button>
-                <button type="button" className="hover:text-gray-800 transition-colors">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
-                </button>
+            <div className="aw-input-actions">
+              <div className="aw-icons-left">
+                <button type="button" className="aw-icon-btn">+</button>
+                <button type="button" className="aw-icon-btn">🎤</button>
               </div>
-              
-              <button 
-                type="submit" 
-                disabled={loading || !message.trim()} 
-                className="bg-[#2a2a2a] text-white rounded-xl w-9 h-9 flex items-center justify-center disabled:opacity-50 transition-all hover:bg-black"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+              <button className="aw-send-btn" type="submit" disabled={loading}>
+                {loading ? '...' : '↑'}
               </button>
             </div>
-          </form>
+          </div>
+
+          {error && <p className="aw-error-text" role="alert">{error}</p>}
+          {sent && !error && <p className="aw-success-text" role="status">Message sent.</p>}
           
-          <p className="text-center text-[11px] text-gray-400 mt-3 font-medium">
-            Derez may make mistakes. Verify info
-          </p>
-        </div>
-        
-      </section>
-    </div>
+          <div className="aw-footer-info">
+            <small>Derez may make mistakes. Verify info.</small>
+          </div>
+        </form>
+      </div>
+    </section>
   );
 }
