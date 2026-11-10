@@ -3,31 +3,54 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 
 const threadStorageKey = 'alwaha-customer-message-thread-v1';
-type Message = { id: string; sender_type: 'customer' | 'admin'; customer_name: string; subject: string; message: string; status: string; created_at: string };
-type ThreadState = { thread_id: string; access_token: string };
+const quickReplies = ['Fitment help', 'Stock & price', 'Booking help'];
 
-function readThread(): ThreadState | null {
-  try { const raw = window.localStorage.getItem(threadStorageKey); return raw ? JSON.parse(raw) as ThreadState : null; } catch { return null; }
+type Message = {
+  id: string;
+  sender_type: 'customer' | 'admin';
+  customer_name: string;
+  subject: string;
+  message: string;
+  status: string;
+  created_at: string;
+};
+type Thread = { thread_id: string; access_token: string };
+
+function readThread(): Thread | null {
+  try {
+    const value = window.localStorage.getItem(threadStorageKey);
+    return value ? (JSON.parse(value) as Thread) : null;
+  } catch {
+    return null;
+  }
 }
-function saveThread(thread: ThreadState) { try { window.localStorage.setItem(threadStorageKey, JSON.stringify(thread)); } catch { /* storage is optional */ } }
-function clearThread() { try { window.localStorage.removeItem(threadStorageKey); } catch { /* storage is optional */ } }
-function shortThreadId(value: string) { return `AW-${value.slice(0, 8).toUpperCase()}`; }
+
+function saveThread(value: Thread) {
+  try { window.localStorage.setItem(threadStorageKey, JSON.stringify(value)); } catch { /* optional storage */ }
+}
+
+function clearThread() {
+  try { window.localStorage.removeItem(threadStorageKey); } catch { /* optional storage */ }
+}
+
+function time(value: string) {
+  return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
 
 export function CustomerMessageBox() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
-  const [thread, setThread] = useState<ThreadState | null>(null);
+  const [thread, setThread] = useState<Thread | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [subject, setSubject] = useState('Parts enquiry');
-  const [message, setMessage] = useState('');
+  const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
-  const [copied, setCopied] = useState(false);
 
-  const loadThread = useCallback(async (current: ThreadState) => {
+  const loadThread = useCallback(async (current: Thread) => {
     if (!apiUrl) return;
     try {
       const response = await fetch(`${apiUrl}/api/v1/messages/thread?thread_id=${encodeURIComponent(current.thread_id)}&access_token=${encodeURIComponent(current.access_token)}`, { cache: 'no-store' });
@@ -35,13 +58,15 @@ export function CustomerMessageBox() {
         clearThread();
         setThread(null);
         setMessages([]);
-        setError('This conversation has expired. You can start a new message below.');
+        setError('This conversation has expired. Start a new message below.');
         return;
       }
       if (!response.ok) return;
       const payload = await response.json() as { data?: Message[] };
       setMessages(payload.data ?? []);
-    } catch { /* do not interrupt message writing when polling fails */ }
+    } catch {
+      // Keep the composer usable if a background refresh fails.
+    }
   }, [apiUrl]);
 
   useEffect(() => {
@@ -55,142 +80,109 @@ export function CustomerMessageBox() {
     return () => window.clearInterval(timer);
   }, [loadThread]);
 
-  async function copyThreadId() {
-    if (!thread) return;
-    try {
-      await navigator.clipboard.writeText(thread.thread_id);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch { setError('Copy failed. Please select the conversation ID manually.'); }
-  }
-
-  async function submit(event: FormEvent) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!draft.trim()) return;
     setError('');
     setSent(false);
-    if (!apiUrl) { setError('Messaging is temporarily unavailable. Please try again shortly.'); return; }
+    if (!apiUrl) {
+      setError('Messaging is temporarily unavailable. Please try again shortly.');
+      return;
+    }
     setLoading(true);
     try {
       const endpoint = thread ? `${apiUrl}/api/v1/messages/thread/reply` : `${apiUrl}/api/v1/messages`;
-      const body = thread ? { ...thread, message } : { customer_name: name, customer_email: email, customer_phone: phone, subject, message };
+      const body = thread
+        ? { ...thread, message: draft.trim() }
+        : { customer_name: name.trim(), customer_email: email.trim(), customer_phone: phone.trim(), subject: subject.trim(), message: draft.trim() };
       const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const payload = await response.json() as { data?: { thread_id?: string; access_token?: string; message?: Message }; error?: { message?: string } };
       if (response.status === 404 && thread) {
         clearThread();
         setThread(null);
         setMessages([]);
-        setError('This conversation has expired. Please send your message again to start a new thread.');
+        setError('This conversation has expired. Please send your message again.');
         return;
       }
       if (!response.ok || !payload.data) throw new Error(payload.error?.message ?? 'Your message could not be sent.');
       if (!thread && payload.data.thread_id && payload.data.access_token) {
-        const nextThread = { thread_id: payload.data.thread_id, access_token: payload.data.access_token };
-        saveThread(nextThread);
-        setThread(nextThread);
+        const next = { thread_id: payload.data.thread_id, access_token: payload.data.access_token };
+        saveThread(next);
+        setThread(next);
       }
       if (payload.data.message) setMessages((current) => [...current, payload.data!.message!]);
-      setMessage('');
+      setDraft('');
       setSent(true);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Your message could not be sent.'); }
-    finally { setLoading(false); }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Your message could not be sent.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <section className="aw-messenger-container" aria-labelledby="customer-message-title">
-      
-      {/* Minimal Header */}
-      <header className="aw-messenger-header">
-        <div className="aw-avatar">🤖</div>
-        <div className="aw-header-info">
-          <strong>Al Waha Parts</strong>
-          <span>Usually replies within one business day</span>
-        </div>
-        {thread ? (
-          <button className="aw-thread-id" type="button" onClick={() => void copyThreadId()} title="Copy private thread ID">
-            <small>{copied ? 'Copied' : 'Chat ID'}</small>
-            <b>{shortThreadId(thread.thread_id)}</b>
-          </button>
-        ) : (
-          <span className="aw-secure-badge">Private chat</span>
-        )}
-      </header>
+    <section className="aw-message-page" aria-labelledby="aw-message-title">
+      <style>{`
+        .aw-message-page { min-height: calc(100vh - 125px); color: #111; background: #fff; }
+        .aw-message-shell { width: min(760px, 100%); min-height: calc(100vh - 125px); margin: 0 auto; padding: 34px 24px 26px; display: flex; flex-direction: column; }
+        .aw-message-profile { display: flex; align-items: center; gap: 12px; padding-bottom: 22px; border-bottom: 1px solid #ededed; }
+        .aw-message-avatar, .aw-message-row-avatar { display: grid; place-items: center; border-radius: 50%; color: #fff; background: #111; font-weight: 800; }
+        .aw-message-avatar { width: 40px; height: 40px; flex: 0 0 40px; font-size: 10px; letter-spacing: -.04em; }
+        .aw-message-profile-copy { display: grid; gap: 4px; min-width: 0; }
+        .aw-message-profile-copy strong { font-size: 14px; letter-spacing: -.03em; }
+        .aw-message-profile-copy span { color: #888; font-size: 10px; }
+        .aw-message-status { display: inline-flex; align-items: center; gap: 6px; }
+        .aw-message-status:before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #111; }
+        .aw-message-id { margin-left: auto; padding: 0; border: 0; color: #777; background: transparent; font: 9px 'DM Mono', monospace; cursor: pointer; }
+        .aw-message-id:hover { color: #111; text-decoration: underline; text-underline-offset: 4px; }
+        .aw-message-intro { padding: 64px 0 48px; }
+        .aw-message-intro h1 { max-width: 650px; margin: 0; color: #111; font-size: clamp(35px, 6vw, 58px); font-weight: 500; line-height: 1.04; letter-spacing: -.075em; }
+        .aw-message-intro p { max-width: 500px; margin: 18px 0 0; color: #777; font-size: 12px; line-height: 1.75; }
+        .aw-message-thread { flex: 1; display: grid; align-content: start; gap: 20px; min-height: 250px; padding: 0 0 30px; }
+        .aw-message-row { display: flex; align-items: flex-end; gap: 9px; max-width: 620px; }
+        .aw-message-row.customer { justify-self: end; flex-direction: row-reverse; }
+        .aw-message-row.admin { justify-self: start; }
+        .aw-message-row-avatar { width: 24px; height: 24px; flex: 0 0 24px; font-size: 7px; }
+        .aw-message-row.customer .aw-message-row-avatar { color: #111; background: #e8e8e8; }
+        .aw-message-bubble { padding: 0; color: #222; background: transparent; font-size: 13px; line-height: 1.7; }
+        .aw-message-row.customer .aw-message-bubble { max-width: min(480px, 78vw); padding: 13px 16px; border-radius: 16px 16px 3px 16px; color: #fff; background: #111; }
+        .aw-message-bubble p { margin: 0; white-space: pre-wrap; }
+        .aw-message-bubble time { display: block; margin-top: 5px; color: #999; font: 8px 'DM Mono', monospace; }
+        .aw-message-row.customer .aw-message-bubble time { color: #aaa; }
+        .aw-message-empty { display: flex; align-items: center; gap: 7px; color: #999; font-size: 11px; }
+        .aw-message-empty i { width: 7px; height: 7px; border-radius: 50%; background: #111; opacity: .22; }
+        .aw-message-empty i:nth-child(2) { opacity: .48; }
+        .aw-message-empty i:nth-child(3) { opacity: .75; }
+        .aw-message-quick { display: flex; gap: 18px; overflow-x: auto; margin: 0 0 15px; padding-bottom: 3px; }
+        .aw-message-quick button { flex: 0 0 auto; padding: 0 0 4px; border: 0; border-bottom: 1px solid transparent; color: #888; background: transparent; font-size: 10px; cursor: pointer; }
+        .aw-message-quick button:hover { border-bottom-color: #111; color: #111; }
+        .aw-message-form { padding-top: 16px; border-top: 1px solid #ededed; }
+        .aw-message-details { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 17px; }
+        .aw-message-field { display: grid; gap: 5px; }
+        .aw-message-field label { color: #999; font: 8px 'DM Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+        .aw-message-field input, .aw-message-compose textarea { width: 100%; border: 0; outline: 0; color: #111; background: transparent; font: inherit; font-size: 11px; }
+        .aw-message-field input { padding: 7px 0; border-bottom: 1px solid #cfcfcf; }
+        .aw-message-field input:focus { border-bottom-color: #111; }
+        .aw-message-compose { display: flex; align-items: end; gap: 15px; padding: 10px 0; border-bottom: 1px solid #cfcfcf; }
+        .aw-message-compose:focus-within { border-bottom-color: #111; }
+        .aw-message-compose textarea { min-height: 42px; max-height: 120px; resize: vertical; line-height: 1.5; }
+        .aw-message-send { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border: 0; border-radius: 50%; color: #fff; background: #111; font-size: 20px; line-height: 1; cursor: pointer; }
+        .aw-message-send:hover { background: #333; }
+        .aw-message-send:disabled { cursor: wait; opacity: .45; }
+        .aw-message-note, .aw-message-error, .aw-message-success { margin: 10px 0 0; font-size: 10px; }
+        .aw-message-note { color: #aaa; text-align: center; }
+        .aw-message-error { color: #111; }
+        .aw-message-success { color: #555; }
+        @media (max-width: 620px) { .aw-message-shell { padding: 24px 16px 20px; } .aw-message-id { max-width: 95px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .aw-message-intro { padding: 48px 0 35px; } .aw-message-intro h1 { font-size: 38px; } .aw-message-details { grid-template-columns: 1fr 1fr; gap: 10px 14px; } .aw-message-row { max-width: 94%; } .aw-message-row.customer .aw-message-bubble { max-width: 82vw; } }
+      `}</style>
 
-      {/* Main Chat Area */}
-      <div className="aw-messenger-body">
-        {!thread && (
-          <div className="aw-welcome">
-            <div className="aw-welcome-icon">👋</div>
-            <h2 id="customer-message-title">Hey, I'm Al Waha AI.<br/>What do you want me to help you with?</h2>
-            <p>Tell our parts desk who you are and what you need. Your private conversation ID will be created automatically.</p>
-          </div>
-        )}
-
-        {messages.length > 0 && (
-          <div className="aw-chat-thread" aria-live="polite">
-            {messages.map((item) => (
-              <article className={`aw-message-row ${item.sender_type}`} key={item.id}>
-                {item.sender_type === 'admin' && <div className="aw-msg-avatar">AW</div>}
-                <div className="aw-msg-content">
-                  <p>{item.message}</p>
-                  <time>{new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</time>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-
-        {/* Quick Replies */}
-        {thread && (
-          <div className="aw-quick-replies">
-            <button type="button" onClick={() => setMessage('Please help me find the right part for my car.')}>Fitment help</button>
-            <button type="button" onClick={() => setMessage('Please check stock and price for this part.')}>Stock & price</button>
-            <button type="button" onClick={() => setMessage('I need help with a booking.')}>Booking help</button>
-          </div>
-        )}
-
-        {/* Input Form */}
-        <form className="aw-input-form" onSubmit={submit}>
-          
-          {/* Initial Details Form (Only shows if thread is null) */}
-          {!thread && (
-            <div className="aw-initial-fields">
-              <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={160} placeholder="Your name" />
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={254} placeholder="Email (optional)" />
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={40} placeholder="Phone number (optional)" />
-              <input value={subject} onChange={(e) => setSubject(e.target.value)} maxLength={160} placeholder="Subject" />
-            </div>
-          )}
-
-          <div className="aw-input-wrapper">
-            <textarea 
-              value={message} 
-              onChange={(event) => setMessage(event.target.value)} 
-              required 
-              maxLength={4000} 
-              rows={1} 
-              placeholder="Reply...." 
-              className="aw-textarea"
-            />
-            <div className="aw-input-actions">
-              <div className="aw-icons-left">
-                <button type="button" className="aw-icon-btn">+</button>
-                <button type="button" className="aw-icon-btn">🎤</button>
-              </div>
-              <button className="aw-send-btn" type="submit" disabled={loading}>
-                {loading ? '...' : '↑'}
-              </button>
-            </div>
-          </div>
-
-          {error && <p className="aw-error-text" role="alert">{error}</p>}
-          {sent && !error && <p className="aw-success-text" role="status">Message sent.</p>}
-          
-          <div className="aw-footer-info">
-            <small>Derez may make mistakes. Verify info.</small>
-          </div>
-        </form>
+      <div className="aw-message-shell">
+        <header className="aw-message-profile"><span className="aw-message-avatar">AW</span><div className="aw-message-profile-copy"><strong>Al Waha Parts</strong><span className="aw-message-status">Parts desk · usually replies within one business day</span></div>{thread && <button className="aw-message-id" type="button" title="Your private conversation ID" onClick={() => navigator.clipboard?.writeText(thread.thread_id)}>AW-{thread.thread_id.slice(0, 8).toUpperCase()}</button>}</header>
+        {!thread && <section className="aw-message-intro"><h1 id="aw-message-title">How can we help with your car?</h1><p>Tell us the vehicle brand, model and year, then describe the part you need. Our parts desk will reply in this private conversation.</p></section>}
+        <section className="aw-message-thread" aria-live="polite">{messages.length ? messages.map((item) => <article className={`aw-message-row ${item.sender_type}`} key={item.id}><span className="aw-message-row-avatar">{item.sender_type === 'admin' ? 'AW' : 'YOU'}</span><div className="aw-message-bubble"><p>{item.message}</p><time>{time(item.created_at)}</time></div></article>) : <div className="aw-message-empty"><i /><i /><i /><span>{thread ? 'Your reply will appear here.' : 'Start a conversation with our parts desk below.'}</span></div>}</section>
+        {thread && <div className="aw-message-quick" aria-label="Quick replies">{quickReplies.map((item) => <button key={item} type="button" onClick={() => setDraft(item === 'Fitment help' ? 'Please help me find the right part for my car.' : item === 'Stock & price' ? 'Please check stock and price for this part.' : 'I need help with a booking.')}>{item}</button>)}</div>}
+        <form className="aw-message-form" onSubmit={submit}>{!thread && <div className="aw-message-details"><div className="aw-message-field"><label htmlFor="aw-name">Name</label><input id="aw-name" value={name} onChange={(event) => setName(event.target.value)} required maxLength={160} placeholder="Your name" /></div><div className="aw-message-field"><label htmlFor="aw-email">Email</label><input id="aw-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} placeholder="Optional" /></div><div className="aw-message-field"><label htmlFor="aw-phone">Phone</label><input id="aw-phone" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={40} placeholder="Optional" /></div><div className="aw-message-field"><label htmlFor="aw-subject">Subject</label><input id="aw-subject" value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={160} placeholder="Parts enquiry" /></div></div>}<div className="aw-message-compose"><textarea value={draft} onChange={(event) => setDraft(event.target.value)} required maxLength={4000} rows={1} placeholder={thread ? 'Write a reply…' : 'Write your message…'} /><button className="aw-message-send" type="submit" disabled={loading} aria-label="Send message">{loading ? '…' : '↑'}</button></div>{error && <p className="aw-message-error" role="alert">{error}</p>}{sent && !error && <p className="aw-message-success" role="status">Message sent. We will reply here.</p>}<p className="aw-message-note">Please verify vehicle and part details before ordering.</p></form>
       </div>
     </section>
   );
 }
-//
