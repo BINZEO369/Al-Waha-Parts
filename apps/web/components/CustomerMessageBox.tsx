@@ -50,11 +50,9 @@ export function CustomerMessageBox() {
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
 
-  // অটো-রিসাইজিং এবং স্ক্রল করার জন্য রেফ
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // লেখা পরিবর্তন হলে টেক্সটএরিয়ার উচ্চতা অটোমেটিক বাড়বে
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -62,7 +60,6 @@ export function CustomerMessageBox() {
     }
   }, [draft]);
 
-  // নতুন মেসেজ আসলে অটোমেটিক নিচে স্ক্রল হবে
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -139,7 +136,6 @@ export function CustomerMessageBox() {
     }
   }
 
-  // শেষ মেসেজটি যদি কাস্টমারের হয়, তার মানে অ্যাডমিনের রিপ্লাই এখনো আসেনি
   const lastMessage = messages[messages.length - 1];
   const isWaitingForAdmin = lastMessage && lastMessage.sender_type === 'customer';
 
@@ -171,7 +167,7 @@ export function CustomerMessageBox() {
         }
 
         /* -----------------------------
-           হেডার (উপরে ফিক্সড)
+           হেডার 
            ----------------------------- */
         .aw-header {
           display: flex;
@@ -258,7 +254,7 @@ export function CustomerMessageBox() {
         .aw-close-btn:hover { color: #111; }
 
         /* -----------------------------
-           মেসেজ এরিয়া (স্ক্রল হবে)
+           মেসেজ এরিয়া 
            ----------------------------- */
         .aw-chat-scroll {
           flex: 1;
@@ -322,7 +318,7 @@ export function CustomerMessageBox() {
           color: #111;
           background: #fafafa;
           transition: all 0.2s ease;
-          outline: none !important; /* ব্রাউজারের ডিফল্ট লাল/নীল আউটলাইন রিমুভ */
+          outline: none !important; 
           font-family: inherit;
         }
 
@@ -389,7 +385,7 @@ export function CustomerMessageBox() {
           text-align: right;
         }
 
-        /* টাইপিং ইন্ডিকেটর (নতুন) */
+        /* টাইপিং ইন্ডিকেটর */
         .aw-typing { 
           display: flex; 
           gap: 4px; 
@@ -436,7 +432,7 @@ export function CustomerMessageBox() {
         }
 
         /* -----------------------------
-           কম্পোজ বক্স (নিচে ফিক্সড)
+           কম্পোজ বক্স 
            ----------------------------- */
         .aw-composer-area {
           flex-shrink: 0; 
@@ -445,7 +441,6 @@ export function CustomerMessageBox() {
           border-top: 1px solid #f0f0f0;
         }
 
-        /* সুন্দর এবং স্মুথ ইনপুট বক্স */
         .aw-compose-box {
           display: flex;
           align-items: flex-end;
@@ -457,7 +452,6 @@ export function CustomerMessageBox() {
           transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         
-        /* ক্লিক করলে লাল বা নীল বর্ডারের বদলে কালো বর্ডার আসবে */
         .aw-compose-box:focus-within {
           background: #ffffff;
           border-color: #111; 
@@ -484,8 +478,8 @@ export function CustomerMessageBox() {
           font-size: 14px;
           color: #111;
           resize: none;
-          outline: none !important; /* লাল বর্ডার রিমুভ */
-          box-shadow: none !important; /* লাল শ্যাডো রিমুভ */
+          outline: none !important; 
+          box-shadow: none !important; 
           min-height: 24px;
           max-height: 150px;
           padding: 6px 0;
@@ -493,7 +487,7 @@ export function CustomerMessageBox() {
           scrollbar-width: none; 
         }
         .aw-compose-input:invalid {
-          outline: none !important; /* রিকোয়ার্ড ফিল্ডের লাল আউটলাইন বন্ধ করতে */
+          outline: none !important; 
           box-shadow: none !important;
         }
         .aw-compose-input::-webkit-scrollbar { display: none; } 
@@ -532,17 +526,63 @@ export function CustomerMessageBox() {
         .aw-msg-feedback.success { color: #16a34a; }
 
         /* -----------------------------
-           মোবাইল রেসপন্সিভ 
+           মোবাইল রেসপন্সিভ (আপডেট করা হয়েছে)
            ----------------------------- */
         @media (max-width: 768px) { 
           .aw-message-shell { border-left: none; border-right: none; }
           .aw-header { padding: 12px 16px; }
           .aw-btn-copy { display: none; } 
-          .aw-chat-scroll { padding: 16px; }
-          .aw-initial-form-container { margin: 20px auto; padding: 24px; box-shadow: none; border: none; background: transparent;}
-          .aw-form-grid { grid-template-columns: 1fr; gap: 12px; }
+          
+          /* স্ক্রল এরিয়া প্যাডিং এবং গ্যাপ কমানো হয়েছে */
+          .aw-chat-scroll { 
+            padding: 16px 12px; 
+            gap: 12px; 
+          }
+          
+          /* ইনপুট এরিয়ার প্যাডিং */
           .aw-composer-area { padding: 12px 16px; }
-          .aw-chat-row { max-width: 90%; }
+          .aw-initial-form-container { margin: 20px auto; padding: 24px 16px; box-shadow: none; border: none; background: transparent;}
+          .aw-form-grid { grid-template-columns: 1fr; gap: 12px; }
+
+          /* চ্যাট রো (মেসেজ বাবল) ছোট করা হয়েছে */
+          .aw-chat-row { 
+            max-width: 88%; /* একটু চওড়া করা হয়েছে যাতে লেখা বেশি ধরে */
+            gap: 8px; 
+          }
+          
+          /* অ্যাভাটার ছোট করা হয়েছে */
+          .aw-chat-avatar {
+            width: 24px;
+            height: 24px;
+            font-size: 8px;
+          }
+
+          /* মেসেজ বাবলের ফন্ট এবং প্যাডিং ছোট করা হয়েছে */
+          .aw-chat-bubble {
+            font-size: 13px; /* 14px থেকে 13px */
+            padding: 10px 14px; /* 12px 16px থেকে 10px 14px */
+            border-radius: 16px;
+            line-height: 1.4;
+          }
+          .aw-chat-bubble time {
+            font-size: 9px;
+            margin-top: 4px;
+          }
+
+          /* টাইপিং ইন্ডিকেটর ছোট করা হয়েছে */
+          .aw-typing {
+            padding: 10px 14px;
+          }
+          .aw-typing span {
+            width: 5px;
+            height: 5px;
+          }
+          
+          /* কুইক রিপ্লাই বাটন ছোট করা হয়েছে */
+          .aw-quick-replies button {
+            padding: 5px 12px;
+            font-size: 11px;
+          }
         }
       `}</style>
 
@@ -622,7 +662,7 @@ export function CustomerMessageBox() {
              </div>
           )}
 
-          {/* টাইপিং ইন্ডিকেটর (যখন মেসেজ পাঠানো হচ্ছে অথবা অ্যাডমিনের রিপ্লাইয়ের অপেক্ষায় আছে) */}
+          {/* টাইপিং ইন্ডিকেটর */}
           {(loading || isWaitingForAdmin) && (
             <div className="aw-chat-row admin">
               <div className="aw-chat-avatar">AW</div>
@@ -671,4 +711,3 @@ export function CustomerMessageBox() {
     </section>
   );
 }
-//
