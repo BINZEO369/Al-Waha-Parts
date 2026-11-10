@@ -10,6 +10,7 @@ function readThread(): ThreadState | null {
   try { const raw = window.localStorage.getItem(threadStorageKey); return raw ? JSON.parse(raw) as ThreadState : null; } catch { return null; }
 }
 function saveThread(thread: ThreadState) { try { window.localStorage.setItem(threadStorageKey, JSON.stringify(thread)); } catch { /* storage is optional */ } }
+function clearThread() { try { window.localStorage.removeItem(threadStorageKey); } catch { /* storage is optional */ } }
 
 export function CustomerMessageBox() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
@@ -28,6 +29,13 @@ export function CustomerMessageBox() {
     if (!apiUrl) return;
     try {
       const response = await fetch(`${apiUrl}/api/v1/messages/thread?thread_id=${encodeURIComponent(current.thread_id)}&access_token=${encodeURIComponent(current.access_token)}`, { cache: 'no-store' });
+      if (response.status === 404) {
+        clearThread();
+        setThread(null);
+        setMessages([]);
+        setError('This conversation has expired. You can start a new message below.');
+        return;
+      }
       if (!response.ok) return;
       const payload = await response.json() as { data?: Message[] };
       setMessages(payload.data ?? []);
@@ -55,6 +63,13 @@ export function CustomerMessageBox() {
       const body = thread ? { ...thread, message } : { customer_name: name, customer_email: email, customer_phone: phone, subject, message };
       const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const payload = await response.json() as { data?: { thread_id?: string; access_token?: string; message?: Message }; error?: { message?: string } };
+      if (response.status === 404 && thread) {
+        clearThread();
+        setThread(null);
+        setMessages([]);
+        setError('This conversation has expired. Please send your message again to start a new thread.');
+        return;
+      }
       if (!response.ok || !payload.data) throw new Error(payload.error?.message ?? 'Your message could not be sent.');
       if (!thread && payload.data.thread_id && payload.data.access_token) {
         const nextThread = { thread_id: payload.data.thread_id, access_token: payload.data.access_token };
