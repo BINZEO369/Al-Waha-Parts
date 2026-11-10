@@ -139,6 +139,10 @@ export function CustomerMessageBox() {
     }
   }
 
+  // শেষ মেসেজটি যদি কাস্টমারের হয়, তার মানে অ্যাডমিনের রিপ্লাই এখনো আসেনি
+  const lastMessage = messages[messages.length - 1];
+  const isWaitingForAdmin = lastMessage && lastMessage.sender_type === 'customer';
+
   return (
     <section className="aw-message-page" aria-labelledby="aw-message-title">
       <style>{`
@@ -176,7 +180,7 @@ export function CustomerMessageBox() {
           padding: 16px 24px;
           border-bottom: 1px solid #f0f0f0;
           background: #ffffff;
-          flex-shrink: 0; /* হেডার স্ক্রল হবে না */
+          flex-shrink: 0; 
           z-index: 10;
         }
 
@@ -266,7 +270,7 @@ export function CustomerMessageBox() {
           background: #fafafa;
         }
 
-        /* ইনিশিয়াল ফর্ম (যখন কোনো চ্যাট থাকে না) */
+        /* ইনিশিয়াল ফর্ম */
         .aw-initial-form-container {
           max-width: 480px;
           margin: 40px auto;
@@ -318,7 +322,7 @@ export function CustomerMessageBox() {
           color: #111;
           background: #fafafa;
           transition: all 0.2s ease;
-          outline: none;
+          outline: none !important; /* ব্রাউজারের ডিফল্ট লাল/নীল আউটলাইন রিমুভ */
           font-family: inherit;
         }
 
@@ -385,9 +389,25 @@ export function CustomerMessageBox() {
           text-align: right;
         }
 
-        /* টাইপিং ইন্ডিকেটর */
-        .aw-typing { display: flex; gap: 4px; padding: 14px 18px; background: #fff; border: 1px solid #e4e4e7; border-radius: 18px; width: fit-content; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
-        .aw-typing span { width: 6px; height: 6px; background: #a1a1aa; border-radius: 50%; animation: bounce 1.4s infinite both; }
+        /* টাইপিং ইন্ডিকেটর (নতুন) */
+        .aw-typing { 
+          display: flex; 
+          gap: 4px; 
+          padding: 14px 18px; 
+          background: #ffffff; 
+          border: 1px solid #e4e4e7; 
+          border-radius: 18px; 
+          width: fit-content; 
+          border-bottom-left-radius: 4px; 
+          box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .aw-typing span { 
+          width: 6px; 
+          height: 6px; 
+          background: #a1a1aa; 
+          border-radius: 50%; 
+          animation: bounce 1.4s infinite both; 
+        }
         .aw-typing span:nth-child(2) { animation-delay: 0.2s; }
         .aw-typing span:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
@@ -419,12 +439,13 @@ export function CustomerMessageBox() {
            কম্পোজ বক্স (নিচে ফিক্সড)
            ----------------------------- */
         .aw-composer-area {
-          flex-shrink: 0; /* কম্পোজ বক্স স্ক্রল হবে না, নিচে থাকবে */
+          flex-shrink: 0; 
           padding: 16px 24px 20px;
           background: #ffffff;
           border-top: 1px solid #f0f0f0;
         }
 
+        /* সুন্দর এবং স্মুথ ইনপুট বক্স */
         .aw-compose-box {
           display: flex;
           align-items: flex-end;
@@ -433,12 +454,14 @@ export function CustomerMessageBox() {
           padding: 10px 16px;
           border-radius: 24px;
           border: 1px solid transparent;
-          transition: all 0.2s ease;
+          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
+        
+        /* ক্লিক করলে লাল বা নীল বর্ডারের বদলে কালো বর্ডার আসবে */
         .aw-compose-box:focus-within {
           background: #ffffff;
-          border-color: #d4d4d8;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+          border-color: #111; 
+          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
         .aw-compose-icon {
@@ -449,6 +472,7 @@ export function CustomerMessageBox() {
           padding: 8px 0;
           display: grid;
           place-items: center;
+          outline: none !important;
         }
         .aw-compose-icon:hover { color: #111; }
 
@@ -460,14 +484,19 @@ export function CustomerMessageBox() {
           font-size: 14px;
           color: #111;
           resize: none;
-          outline: none;
+          outline: none !important; /* লাল বর্ডার রিমুভ */
+          box-shadow: none !important; /* লাল শ্যাডো রিমুভ */
           min-height: 24px;
           max-height: 150px;
           padding: 6px 0;
           line-height: 1.5;
-          scrollbar-width: none; /* ফায়ারফক্স */
+          scrollbar-width: none; 
         }
-        .aw-compose-input::-webkit-scrollbar { display: none; } /* ক্রোম */
+        .aw-compose-input:invalid {
+          outline: none !important; /* রিকোয়ার্ড ফিল্ডের লাল আউটলাইন বন্ধ করতে */
+          box-shadow: none !important;
+        }
+        .aw-compose-input::-webkit-scrollbar { display: none; } 
         .aw-compose-input::placeholder { color: #a1a1aa; }
 
         .aw-send-btn {
@@ -482,6 +511,7 @@ export function CustomerMessageBox() {
           cursor: pointer;
           transition: all 0.2s ease;
           flex-shrink: 0;
+          outline: none !important;
         }
         .aw-send-btn:hover:not(:disabled) {
           background: #27272a;
@@ -507,7 +537,7 @@ export function CustomerMessageBox() {
         @media (max-width: 768px) { 
           .aw-message-shell { border-left: none; border-right: none; }
           .aw-header { padding: 12px 16px; }
-          .aw-btn-copy { display: none; } /* মোবাইলে স্পেস বাঁচাতে */
+          .aw-btn-copy { display: none; } 
           .aw-chat-scroll { padding: 16px; }
           .aw-initial-form-container { margin: 20px auto; padding: 24px; box-shadow: none; border: none; background: transparent;}
           .aw-form-grid { grid-template-columns: 1fr; gap: 12px; }
@@ -539,10 +569,9 @@ export function CustomerMessageBox() {
           </div>
         </header>
 
-        {/* মেসেজ এরিয়া (স্ক্রল হবে) */}
+        {/* মেসেজ এরিয়া */}
         <div className="aw-chat-scroll" ref={scrollRef}>
           
-          {/* প্রথমবার হলে ফর্ম দেখাবে */}
           {!thread && (
             <div className="aw-initial-form-container">
               <div className="aw-intro-text">
@@ -570,7 +599,7 @@ export function CustomerMessageBox() {
             </div>
           )}
 
-          {/* চ্যাট থ্রেড (যদি মেসেজ থাকে) */}
+          {/* চ্যাট থ্রেড */}
           {thread && messages.map((item) => (
             <div className={`aw-chat-row ${item.sender_type}`} key={item.id}>
               <div className="aw-chat-avatar">
@@ -583,7 +612,6 @@ export function CustomerMessageBox() {
             </div>
           ))}
 
-          {/* কুইক রিপ্লাই (যদি চ্যাট থাকে) */}
           {thread && (
              <div className="aw-quick-replies">
                {quickReplies.map((item) => (
@@ -594,8 +622,8 @@ export function CustomerMessageBox() {
              </div>
           )}
 
-          {/* টাইপিং ইন্ডিকেটর */}
-          {loading && (
+          {/* টাইপিং ইন্ডিকেটর (যখন মেসেজ পাঠানো হচ্ছে অথবা অ্যাডমিনের রিপ্লাইয়ের অপেক্ষায় আছে) */}
+          {(loading || isWaitingForAdmin) && (
             <div className="aw-chat-row admin">
               <div className="aw-chat-avatar">AW</div>
               <div className="aw-typing"><span></span><span></span><span></span></div>
@@ -603,7 +631,7 @@ export function CustomerMessageBox() {
           )}
         </div>
 
-        {/* কম্পোজ বক্স (নিচে ফিক্সড) */}
+        {/* কম্পোজ বক্স */}
         <footer className="aw-composer-area">
           <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column' }}>
             
@@ -628,7 +656,7 @@ export function CustomerMessageBox() {
               
               <button className="aw-send-btn" type="submit" disabled={loading || !draft.trim()}>
                 {loading ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="aw-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                 ) : (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 )}
