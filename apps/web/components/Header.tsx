@@ -12,7 +12,7 @@ const navItems = [
   { label: 'Car Brands', href: '/brands' },
   { label: 'Track Booking', href: '/booking/track' },
   { label: 'Policies', href: '/policies' },
-  { label: 'Message us', href: '/contact' },
+  { label: 'Message us', href: '/messages' },
 ];
 
 function CartIcon() {

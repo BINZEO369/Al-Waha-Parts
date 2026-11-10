@@ -1,6 +1,6 @@
 'use client';
 
-import { CustomerMessageBox } from '../../components/CustomerMessageBox';
+import Link from 'next/link';
 
 export default function ContactPage() {
   return (
@@ -12,16 +12,13 @@ export default function ContactPage() {
       <section className="page-intro">
         <p className="eyebrow">Contact / Al Waha Parts</p>
         <h1>Bring us the tricky one.</h1>
-        <p>
-          Send a message to the parts desk for fitment help, product questions, stock checks or a
-          customer complaint. We will reply directly in your message thread.
-        </p>
+        <p>For direct fitment help, stock checks or product questions, use our dedicated message center.</p>
+        <Link className="button" href="/messages">Open message center</Link>
       </section>
       <div className="contact-grid">
         <div><span className="eyebrow">Parts desk</span><h2>0533866922</h2><p>Mon–Sat · 08:00–18:00</p></div>
         <div><span className="eyebrow">Email</span><h2>hello.alwaha@proton.me</h2><p>We usually reply within one business day.</p></div>
       </div>
-      <CustomerMessageBox />
     </main>
   );
 }
