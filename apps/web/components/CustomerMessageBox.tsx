@@ -166,9 +166,7 @@ export function CustomerMessageBox() {
           border-right: 1px solid #f0f0f0;
         }
 
-        /* -----------------------------
-           হেডার 
-           ----------------------------- */
+        /* হেডার */
         .aw-header {
           display: flex;
           align-items: center;
@@ -253,9 +251,7 @@ export function CustomerMessageBox() {
         }
         .aw-close-btn:hover { color: #111; }
 
-        /* -----------------------------
-           মেসেজ এরিয়া 
-           ----------------------------- */
+        /* মেসেজ এরিয়া */
         .aw-chat-scroll {
           flex: 1;
           overflow-y: auto;
@@ -431,9 +427,7 @@ export function CustomerMessageBox() {
           border-color: #0a0a0a;
         }
 
-        /* -----------------------------
-           কম্পোজ বক্স 
-           ----------------------------- */
+        /* কম্পোজ বক্স */
         .aw-composer-area {
           flex-shrink: 0; 
           padding: 16px 24px 20px;
@@ -526,62 +520,61 @@ export function CustomerMessageBox() {
         .aw-msg-feedback.success { color: #16a34a; }
 
         /* -----------------------------
-           মোবাইল রেসপন্সিভ (আপডেট করা হয়েছে)
+           মোবাইল রেসপন্সিভ (আরও ছোট করা হয়েছে)
            ----------------------------- */
         @media (max-width: 768px) { 
           .aw-message-shell { border-left: none; border-right: none; }
-          .aw-header { padding: 12px 16px; }
+          .aw-header { padding: 10px 16px; } /* হেডার প্যাডিং কমানো */
           .aw-btn-copy { display: none; } 
           
-          /* স্ক্রল এরিয়া প্যাডিং এবং গ্যাপ কমানো হয়েছে */
+          /* স্ক্রল এরিয়া প্যাডিং এবং গ্যাপ আরও কমানো হয়েছে */
           .aw-chat-scroll { 
-            padding: 16px 12px; 
-            gap: 12px; 
-          }
-          
-          /* ইনপুট এরিয়ার প্যাডিং */
-          .aw-composer-area { padding: 12px 16px; }
-          .aw-initial-form-container { margin: 20px auto; padding: 24px 16px; box-shadow: none; border: none; background: transparent;}
-          .aw-form-grid { grid-template-columns: 1fr; gap: 12px; }
-
-          /* চ্যাট রো (মেসেজ বাবল) ছোট করা হয়েছে */
-          .aw-chat-row { 
-            max-width: 88%; /* একটু চওড়া করা হয়েছে যাতে লেখা বেশি ধরে */
+            padding: 12px 10px; 
             gap: 8px; 
           }
           
-          /* অ্যাভাটার ছোট করা হয়েছে */
-          .aw-chat-avatar {
-            width: 24px;
-            height: 24px;
-            font-size: 8px;
-          }
+          .aw-composer-area { padding: 10px 12px; }
+          .aw-initial-form-container { margin: 10px auto; padding: 20px 12px; box-shadow: none; border: none; background: transparent;}
+          .aw-form-grid { grid-template-columns: 1fr; gap: 10px; }
 
-          /* মেসেজ বাবলের ফন্ট এবং প্যাডিং ছোট করা হয়েছে */
-          .aw-chat-bubble {
-            font-size: 13px; /* 14px থেকে 13px */
-            padding: 10px 14px; /* 12px 16px থেকে 10px 14px */
-            border-radius: 16px;
-            line-height: 1.4;
-          }
-          .aw-chat-bubble time {
-            font-size: 9px;
-            margin-top: 4px;
-          }
-
-          /* টাইপিং ইন্ডিকেটর ছোট করা হয়েছে */
-          .aw-typing {
-            padding: 10px 14px;
-          }
-          .aw-typing span {
-            width: 5px;
-            height: 5px;
+          /* চ্যাট রো ছোট করা */
+          .aw-chat-row { 
+            max-width: 92%; /* আরও চওড়া করা হয়েছে */
+            gap: 6px; 
           }
           
-          /* কুইক রিপ্লাই বাটন ছোট করা হয়েছে */
+          /* অ্যাভাটার ছোট করা */
+          .aw-chat-avatar {
+            width: 20px;
+            height: 20px;
+            font-size: 7px;
+          }
+
+          /* মেসেজ বাবলের ফন্ট এবং প্যাডিং আরও ছোট করা */
+          .aw-chat-bubble {
+            font-size: 12px; 
+            padding: 8px 12px; 
+            border-radius: 14px;
+            line-height: 1.35;
+          }
+          .aw-chat-bubble time {
+            font-size: 8px;
+            margin-top: 3px;
+          }
+
+          /* টাইপিং ইন্ডিকেটর ছোট করা */
+          .aw-typing {
+            padding: 8px 12px;
+          }
+          .aw-typing span {
+            width: 4px;
+            height: 4px;
+          }
+          
+          /* কুইক রিপ্লাই বাটন ছোট করা */
           .aw-quick-replies button {
-            padding: 5px 12px;
-            font-size: 11px;
+            padding: 4px 10px;
+            font-size: 10px;
           }
         }
       `}</style>
@@ -594,7 +587,8 @@ export function CustomerMessageBox() {
             <div className="aw-avatar">AW</div>
             <div className="aw-header-info">
               <h2>Al Waha Parts</h2>
-              <p><span className="aw-status-dot"></span> Usually replies in 1 day</p>
+              {/* এখানে লেখাটি পরিবর্তন করা হয়েছে */}
+              <p><span className="aw-status-dot"></span> Usually replies in 5 minutes</p>
             </div>
           </div>
           <div className="aw-header-right">
