@@ -11,8 +11,10 @@ type ApiHealth = {
 import { getConfig } from './env.js';
 import { getSupabaseAdmin } from './supabase.js';
 import {
+  analyzeAnalyticsSnapshot,
   sanitizeProductAiInput,
   suggestProductMetadata,
+  type AnalyticsAiSnapshot,
   type ProductAiInput,
 } from './ai.js';
 
@@ -1178,10 +1180,13 @@ app.get(
   ) => {
     const requestedDays = Number(request.query.days);
     const days = [7, 30, 90].includes(requestedDays) ? requestedDays : 30;
-    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+    const now = Date.now();
+    const windowMs = days * 24 * 60 * 60 * 1000;
+    const since = new Date(now - windowMs).toISOString();
+    const previousSince = new Date(now - 2 * windowMs).toISOString();
     const activeSince = new Date(Date.now() - 30 * 60 * 1000).toISOString();
     const supabase = getSupabaseAdmin();
-    const [sessionsCount, pageViewsCount, activeCount, uniqueVisitorsCount, returningVisitorsCount, sampledSessions, sampledEvents, sampledVisitors] =
+    const [sessionsCount, pageViewsCount, previousSessionsCount, previousPageViewsCount, activeCount, uniqueVisitorsCount, returningVisitorsCount, sampledSessions, sampledEvents, sampledVisitors, hourlyActivity] =
       await Promise.all([
         supabase.from('analytics_sessions').select('id', { count: 'exact', head: true }).gte('started_at', since),
         supabase
@@ -1189,6 +1194,13 @@ app.get(
           .select('id', { count: 'exact', head: true })
           .eq('event_name', 'page_view')
           .gte('created_at', since),
+        supabase.from('analytics_sessions').select('id', { count: 'exact', head: true }).gte('started_at', previousSince).lt('started_at', since),
+        supabase
+          .from('analytics_events')
+          .select('id', { count: 'exact', head: true })
+          .eq('event_name', 'page_view')
+          .gte('created_at', previousSince)
+          .lt('created_at', since),
         supabase
           .from('analytics_sessions')
           .select('id', { count: 'exact', head: true })
@@ -1220,8 +1232,9 @@ app.get(
           .gte('last_seen_at', since)
           .order('last_seen_at', { ascending: false })
           .limit(100),
+        supabase.rpc('admin_analytics_hourly', { p_hours: 24 }),
       ]);
-    const queryError = sessionsCount.error ?? pageViewsCount.error ?? activeCount.error ?? uniqueVisitorsCount.error ?? returningVisitorsCount.error ?? sampledSessions.error ?? sampledEvents.error ?? sampledVisitors.error;
+    const queryError = sessionsCount.error ?? pageViewsCount.error ?? previousSessionsCount.error ?? previousPageViewsCount.error ?? activeCount.error ?? uniqueVisitorsCount.error ?? returningVisitorsCount.error ?? sampledSessions.error ?? sampledEvents.error ?? sampledVisitors.error ?? hourlyActivity.error;
     if (queryError) return jsonError(reply, 500, 'Analytics could not be loaded.');
 
     const pageCounts = new Map<string, number>();
@@ -1263,11 +1276,19 @@ app.get(
         totals: {
           sessions: sessionsCount.count ?? 0,
           page_views: pageViewsCount.count ?? 0,
+          previous_sessions: previousSessionsCount.count ?? 0,
+          previous_page_views: previousPageViewsCount.count ?? 0,
           active_last_30m: activeCount.count ?? 0,
           unique_visitors: uniqueVisitorsCount.count ?? 0,
           returning_visitors: returningVisitorsCount.count ?? 0,
         },
         sample_sizes: { sessions: sessionRows.length, events: eventRows.length },
+        hourly_activity: (hourlyActivity.data ?? []).map((row: { hour_start: string; page_views: number; page_exits: number; sessions: number }) => ({
+          hour_start: row.hour_start,
+          page_views: Number(row.page_views) || 0,
+          page_exits: Number(row.page_exits) || 0,
+          sessions: Number(row.sessions) || 0,
+        })),
         top_pages: topPages,
         countries,
         locations,
@@ -1323,6 +1344,111 @@ app.get(
         })),
       },
     };
+  },
+);
+
+app.post(
+  '/api/v1/admin/analytics/insights',
+  { preHandler: requireAdmin as any },
+  async (request: FastifyRequest<{ Body: { days?: number } }>, reply) => {
+    const admin = (request as FastifyRequest & { admin?: { id: string } }).admin;
+    if (!admin) return jsonError(reply, 403, 'Active admin access required');
+    const supabase = getSupabaseAdmin();
+    const { data: rateData, error: rateError } = await supabase.rpc('consume_admin_ai_rate_limit', {
+      p_admin_id: admin.id,
+      p_action: 'analytics_insights',
+      p_limit: 8,
+      p_window_seconds: 3600,
+    });
+    const rate = Array.isArray(rateData) ? rateData[0] : rateData;
+    if (rateError || !rate) {
+      request.log.error({ err: rateError }, 'Could not verify analytics AI rate limit');
+      return jsonError(reply, 503, 'Analytics AI is temporarily unavailable. Please try again shortly.');
+    }
+    if (!rate.allowed) {
+      const retryAfter = Math.max(1, Number(rate.retry_after_seconds) || 3600);
+      reply.header('Retry-After', String(retryAfter));
+      return reply.code(429).send({ error: { message: `Analytics AI limit reached. Try again in ${retryAfter} seconds.` } });
+    }
+    const requestedDays = Number(request.body?.days);
+    const days = [7, 30, 90].includes(requestedDays) ? requestedDays : 30;
+    const now = Date.now();
+    const windowMs = days * 24 * 60 * 60 * 1000;
+    const since = new Date(now - windowMs).toISOString();
+    const previousSince = new Date(now - 2 * windowMs).toISOString();
+    const activeSince = new Date(now - 30 * 60 * 1000).toISOString();
+    const [sessionsCount, pageViewsCount, previousSessionsCount, previousPageViewsCount, activeCount, uniqueVisitorsCount, sampledSessions, sampledEvents, hourlyActivity] = await Promise.all([
+      supabase.from('analytics_sessions').select('id', { count: 'exact', head: true }).gte('started_at', since),
+      supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('event_name', 'page_view').gte('created_at', since),
+      supabase.from('analytics_sessions').select('id', { count: 'exact', head: true }).gte('started_at', previousSince).lt('started_at', since),
+      supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('event_name', 'page_view').gte('created_at', previousSince).lt('created_at', since),
+      supabase.from('analytics_sessions').select('id', { count: 'exact', head: true }).gte('last_seen_at', activeSince),
+      supabase.from('analytics_visitors').select('visitor_hash', { count: 'exact', head: true }).gte('last_seen_at', since),
+      supabase.from('analytics_sessions').select('acquisition_source,device_type,landing_path,exit_path,started_at,last_seen_at').gte('started_at', since).order('started_at', { ascending: false }).limit(5000),
+      supabase.from('analytics_events').select('event_name,page_path,duration_ms,created_at').gte('created_at', since).order('created_at', { ascending: false }).limit(5000),
+      supabase.rpc('admin_analytics_hourly', { p_hours: 24 }),
+    ]);
+    const queryError = sessionsCount.error ?? pageViewsCount.error ?? previousSessionsCount.error ?? previousPageViewsCount.error ?? activeCount.error ?? uniqueVisitorsCount.error ?? sampledSessions.error ?? sampledEvents.error ?? hourlyActivity.error;
+    if (queryError) return jsonError(reply, 500, 'Analytics insight data could not be prepared.');
+
+    const sessions = sampledSessions.data ?? [];
+    const events = sampledEvents.data ?? [];
+    const group = (values: Array<string | null | undefined>, maximum = 10) => {
+      const counts = new Map<string, number>();
+      for (const value of values) {
+        const label = value?.trim() || 'Unknown';
+        counts.set(label, (counts.get(label) ?? 0) + 1);
+      }
+      return [...counts.entries()].map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count).slice(0, maximum);
+    };
+    const pageCounts = new Map<string, number>();
+    for (const event of events) {
+      if (event.event_name === 'page_view') pageCounts.set(event.page_path, (pageCounts.get(event.page_path) ?? 0) + 1);
+    }
+    const durations = sessions
+      .map((session) => Math.max(0, new Date(session.last_seen_at).getTime() - new Date(session.started_at).getTime()) / 1000)
+      .filter(Number.isFinite);
+    const snapshot: AnalyticsAiSnapshot = {
+      period_days: days,
+      generated_at: new Date().toISOString(),
+      totals: {
+        sessions: sessionsCount.count ?? 0,
+        page_views: pageViewsCount.count ?? 0,
+        active_sessions: activeCount.count ?? 0,
+        unique_visitors: uniqueVisitorsCount.count ?? 0,
+        previous_sessions: previousSessionsCount.count ?? 0,
+        previous_page_views: previousPageViewsCount.count ?? 0,
+      },
+      sampled_rows: { sessions: sessions.length, events: events.length },
+      hourly_activity: (hourlyActivity.data ?? []).map((row: { hour_start: string; sessions: number; page_views: number; page_exits: number }) => ({
+        hour: row.hour_start,
+        sessions: Number(row.sessions) || 0,
+        page_views: Number(row.page_views) || 0,
+        page_exits: Number(row.page_exits) || 0,
+      })),
+      top_pages: [...pageCounts.entries()].map(([path, views]) => ({ path, views })).sort((a, b) => b.views - a.views).slice(0, 10),
+      landing_pages: group(sessions.map((session) => session.landing_path), 8).map((row) => ({ path: row.label, count: row.count })),
+      exit_pages: group(sessions.map((session) => session.exit_path), 8).filter((row) => row.label !== 'Unknown').map((row) => ({ path: row.label, count: row.count })),
+      acquisition_sources: group(sessions.map((session) => session.acquisition_source)),
+      devices: group(sessions.map((session) => session.device_type)),
+      average_session_seconds: durations.length ? Math.round(durations.reduce((sum, value) => sum + value, 0) / durations.length) : null,
+    };
+    try {
+      const insight = await analyzeAnalyticsSnapshot(config.geminiApiKey, config.geminiModel, snapshot);
+      const { error: auditError } = await supabase.from('admin_ai_runs').insert({
+        admin_id: admin.id,
+        action: 'analytics_insights',
+        status: 'preview',
+        input_data: snapshot,
+        output_data: insight,
+      });
+      if (auditError) request.log.warn({ err: auditError }, 'Could not write analytics AI audit log');
+      return { data: { insight, generated_at: snapshot.generated_at, period_days: days, sampled_rows: snapshot.sampled_rows } };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'AI analytics request failed';
+      await supabase.from('admin_ai_runs').insert({ admin_id: admin.id, action: 'analytics_insights', status: 'failed', input_data: snapshot, error_message: message });
+      return jsonError(reply, message.startsWith('AI is not configured') ? 503 : 502, message);
+    }
   },
 );
 
