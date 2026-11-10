@@ -1171,44 +1171,6 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
 .messenger-quick-replies::-webkit-scrollbar { display: none; }
 .messenger-quick-replies button { flex: none; padding: 8px 11px; border: 1px solid #e4d8ca; border-radius: 999px; color: #74675d; background: #fffdf9; font-size: 10px; white-space: nowrap; cursor: pointer; }
 @media (max-width: 650px) { .messages-page { min-height: calc(100vh - 58px); padding: 10px 8px 32px; } .customer-messenger { border-radius: 22px; } .customer-messenger-header { min-height: 68px; padding: 11px 12px; } .messenger-avatar { width: 38px; height: 38px; } .messenger-header-copy strong { font-size: 13px; } .messenger-header-copy span { font-size: 9px; } .messenger-thread-id { max-width: 106px; padding: 7px 8px; } .customer-messenger-body { min-height: calc(100vh - 150px); padding: 14px 10px 12px; } .messenger-welcome h2 { font-size: 22px; } .customer-message-form-grid { grid-template-columns: 1fr; } .customer-message-bubble { max-width: 88%; } .messenger-compose-footer { align-items: center; flex-direction: row; } }
-/* Reference chat mockup: one calm phone-like surface, no dashboard chrome. */
-body:has(.messages-page) .site-chrome, body:has(.messages-page) .store-footer { display: none; }
-body:has(.messages-page) { background: #f5f1e8; }
-.messages-page { min-height: 100dvh; padding: 24px 14px; background: radial-gradient(circle at 10% 90%, #dcecdf 0, transparent 38%), #f5f1e8; }
-.customer-messenger { position: relative; width: min(360px, calc(100vw - 28px)); height: min(760px, calc(100dvh - 48px)); min-height: 600px; border: 7px solid #172023; border-radius: 38px; background: #f8f4ea; box-shadow: 0 24px 45px rgba(34,48,43,.25); }
-.customer-messenger::before { content: ''; position: absolute; top: -1px; left: 50%; z-index: 4; width: 92px; height: 21px; transform: translateX(-50%); border-radius: 0 0 15px 15px; background: #172023; }
-.customer-messenger-header { position: relative; z-index: 2; min-height: 108px; align-items: flex-end; padding: 36px 14px 13px; border: 0; border-radius: 30px 30px 0 0; background: #f8f4ea; }
-.messenger-avatar { width: 31px; height: 31px; font-size: 9px; box-shadow: none; }
-.messenger-header-copy { gap: 2px; }
-.messenger-header-copy strong { font-size: 12px; }
-.messenger-header-copy span { font-size: 8px; }
-.messenger-thread-id, .messenger-secure-badge { max-width: 78px; padding: 6px 7px; font-size: 8px; }
-.messenger-thread-id small { font-size: 7px; }
-.messenger-thread-id b { font-size: 8px; }
-.customer-messenger-body { min-height: 0; height: calc(100% - 108px); padding: 7px 10px 11px; border-radius: 0 0 30px 30px; background: #f8f4ea; }
-.messenger-welcome { margin: 0 auto 7px; padding: 9px 8px 7px; }
-.messenger-welcome-icon { width: 29px; height: 29px; margin-bottom: 6px; font-size: 11px; }
-.messenger-welcome h2 { margin-bottom: 4px; font-size: 17px; }
-.messenger-welcome p { font-size: 9px; line-height: 1.45; }
-.customer-message-thread { min-height: 0; max-height: none; margin: 0 0 7px; padding: 5px 2px 8px; }
-.customer-message-bubble { max-width: 82%; gap: 5px; }
-.messenger-bubble-avatar { width: 19px; height: 19px; font-size: 6px; }
-.customer-message-bubble > div:last-child { padding: 8px 10px; border-radius: 12px 12px 12px 4px; }
-.customer-message-bubble.customer > div:last-child { border-radius: 12px 12px 4px 12px; }
-.customer-message-bubble span { margin-bottom: 2px; font-size: 7px; }
-.customer-message-bubble p { font-size: 9px; line-height: 1.4; }
-.customer-message-bubble time { margin-top: 3px; font-size: 6px; }
-.messenger-quick-replies { gap: 4px; margin-bottom: 6px; }
-.messenger-quick-replies button { padding: 5px 7px; border-color: #e0d8ca; font-size: 7px; }
-.customer-message-form { padding: 7px; border: 0; border-radius: 17px; background: #fffdf8; box-shadow: 0 2px 8px rgba(86,62,44,.08); }
-.customer-message-form-grid { gap: 5px; margin-bottom: 6px; }
-.customer-message-form label { gap: 3px; font-size: 7px; }
-.customer-message-form input { min-height: 27px; padding: 0 7px; border-radius: 8px; font-size: 9px; }
-.customer-message-form textarea { min-height: 32px; max-height: 54px; padding: 8px 9px; border-radius: 12px; font-size: 9px; }
-.messenger-compose-footer { gap: 5px; margin-top: 5px; }
-.messenger-compose-footer small { max-width: 62%; font-size: 6px; }
-.messenger-compose-footer .button { min-width: 70px; min-height: 28px; padding: 0 10px; border-radius: 14px; font-size: 8px; }
-@media (min-width: 651px) { .messages-page { padding: 34px; } }
 `;
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.al-waha.shop';
