@@ -290,3 +290,19 @@
 .messenger-compose-footer small { color:#9a8789; font-size:9px; }
 .customer-message-success { margin:10px 0 0; padding:10px 12px; border-radius:8px; color:#26704d; background:#edf8f1; font-size:11px; }
 @media (max-width:650px) { .customer-messenger-header, .customer-messenger-body { padding:14px; } .messenger-secure-badge { display:none; } .messenger-header-copy span { font-size:9px; } .messenger-thread-id { padding:6px 7px; } .customer-message-form-grid { grid-template-columns:1fr; } .customer-message-bubble { max-width:92%; } .messenger-compose-footer { align-items:flex-start; flex-direction:column; } .messenger-compose-footer .button { width:100%; } }
+.messages-page { min-height:calc(100vh - 74px); display:grid; place-items:center; padding:54px 20px 86px; background:radial-gradient(circle at 12% 12%, #fff1f3 0, transparent 33%), radial-gradient(circle at 88% 82%, #ffe2e6 0, transparent 31%), #fffafa; }
+.messages-page .customer-messenger { width:min(920px,100%); margin:0; border:0; border-radius:24px; box-shadow:0 28px 80px rgba(137,27,39,.17); }
+.messages-page .customer-messenger-header { min-height:82px; padding:18px 24px; background:linear-gradient(115deg,#8f0e1c 0%,#df2636 48%,#ff6370 100%); }
+.messages-page .customer-messenger-body { min-height:570px; padding:30px; background:linear-gradient(145deg,#fff8f9 0%,#fff 52%,#fff1f3 100%); }
+.messages-page .messenger-avatar { width:48px; height:48px; background:linear-gradient(145deg,#fff,#ffb7bd); color:#a40f1f; box-shadow:0 8px 20px rgba(91,8,19,.2); }
+.messages-page .messenger-header-copy strong { font-size:16px; letter-spacing:-.03em; }
+.messages-page .messenger-secure-badge { padding:9px 13px; border-radius:999px; background:rgba(255,255,255,.16); }
+.messages-page .messenger-welcome { padding:28px 20px 15px; }
+.messages-page .messenger-welcome-icon { width:52px; height:52px; background:linear-gradient(145deg,#f34c5a,#a30e1d); box-shadow:0 12px 24px rgba(195,24,42,.25); }
+.messages-page .messenger-welcome h2 { font-size:28px; }
+.messages-page .messenger-welcome p { max-width:470px; margin-inline:auto; color:#8c6c70; }
+.messages-page .customer-message-form { border:1px solid rgba(232,188,193,.7); border-radius:18px; box-shadow:0 10px 28px rgba(120,26,35,.06); }
+.messages-page .customer-message-form input, .messages-page .customer-message-form textarea { border-color:#f0d9dc; background:#fff; }
+.messages-page .customer-message-form .button { min-height:44px; padding-inline:24px; border-radius:999px; background:linear-gradient(100deg,#b91424,#ed3b4a); }
+.messages-page .customer-message-form .button:hover { background:linear-gradient(100deg,#94101d,#d92738); }
+@media (max-width:650px) { .messages-page { min-height:calc(100vh - 58px); padding:20px 10px 46px; } .messages-page .customer-messenger { border-radius:18px; } .messages-page .customer-messenger-header { min-height:72px; padding:13px 15px; } .messages-page .customer-messenger-body { min-height:calc(100vh - 180px); padding:18px 12px; } .messages-page .messenger-welcome { padding:24px 10px 14px; } .messages-page .messenger-welcome h2 { font-size:23px; } }
