@@ -24,8 +24,9 @@ export function CustomerMessageBox() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [sent, setSent] = useState(false);
-  const [copied, setCopied] = useState(false);
+  
+  // ডিজাইনের জন্য বাটন স্টেট
+  const [isFocused, setIsFocused] = useState(false);
 
   const loadThread = useCallback(async (current: ThreadState) => {
     if (!apiUrl) return;
@@ -55,26 +56,21 @@ export function CustomerMessageBox() {
     return () => window.clearInterval(timer);
   }, [loadThread]);
 
-  async function copyThreadId() {
-    if (!thread) return;
-    try {
-      await navigator.clipboard.writeText(thread.thread_id);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch { setError('Copy failed. Please select the conversation ID manually.'); }
-  }
-
   async function submit(event: FormEvent) {
     event.preventDefault();
     setError('');
-    setSent(false);
     if (!apiUrl) { setError('Messaging is temporarily unavailable. Please try again shortly.'); return; }
+    if (!message.trim()) return;
+    
     setLoading(true);
     try {
       const endpoint = thread ? `${apiUrl}/api/v1/messages/thread/reply` : `${apiUrl}/api/v1/messages`;
-      const body = thread ? { ...thread, message } : { customer_name: name, customer_email: email, customer_phone: phone, subject, message };
+      // যদি ইউজার নাম/ইমেইল না দেয়, তবে ডিফল্ট ভ্যালু পাঠাবে (ছবির মত সিম্পল রাখার জন্য)
+      const body = thread ? { ...thread, message } : { customer_name: name || 'Guest User', customer_email: email || 'guest@example.com', customer_phone: phone, subject: subject || 'General Inquiry', message };
+      
       const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const payload = await response.json() as { data?: { thread_id?: string; access_token?: string; message?: Message }; error?: { message?: string } };
+      
       if (response.status === 404 && thread) {
         clearThread();
         setThread(null);
@@ -83,29 +79,135 @@ export function CustomerMessageBox() {
         return;
       }
       if (!response.ok || !payload.data) throw new Error(payload.error?.message ?? 'Your message could not be sent.');
+      
       if (!thread && payload.data.thread_id && payload.data.access_token) {
         const nextThread = { thread_id: payload.data.thread_id, access_token: payload.data.access_token };
         saveThread(nextThread);
         setThread(nextThread);
       }
       if (payload.data.message) setMessages((current) => [...current, payload.data!.message!]);
+      
       setMessage('');
-      setSent(true);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Your message could not be sent.'); }
-    finally { setLoading(false); }
+    } catch (cause) { 
+      setError(cause instanceof Error ? cause.message : 'Your message could not be sent.'); 
+    } finally { 
+      setLoading(false); 
+    }
   }
 
-  return <section className="customer-messenger" aria-labelledby="customer-message-title">
-    <header className="customer-messenger-header">
-      <div className="messenger-avatar">AW</div>
-      <div className="messenger-header-copy"><strong>Al Waha Parts</strong><span><i /> Usually replies within one business day</span></div>
-      {thread ? <button className="messenger-thread-id" type="button" onClick={() => void copyThreadId()} title="Copy private thread ID"><small>{copied ? 'Copied' : 'Chat ID'}</small><b>{shortThreadId(thread.thread_id)}</b></button> : <span className="messenger-secure-badge">Private chat</span>}
-    </header>
-    <div className="customer-messenger-body">
-      {!thread && <div className="messenger-welcome"><span className="messenger-welcome-icon">✦</span><h2 id="customer-message-title">Start a conversation</h2><p>Tell our parts desk who you are and what you need. Your private conversation ID will be created automatically and saved in this browser.</p></div>}
-      {messages.length > 0 && <div className="customer-message-thread" aria-live="polite">{messages.map((item) => <article className={`customer-message-bubble ${item.sender_type}`} key={item.id}><div className="messenger-bubble-avatar">{item.sender_type === 'admin' ? 'AW' : (name || item.customer_name || 'You').slice(0, 1).toUpperCase()}</div><div><span>{item.sender_type === 'admin' ? 'Al Waha Parts' : 'You'}</span><p>{item.message}</p><time>{new Date(item.created_at).toLocaleString()}</time></div></article>)}</div>}
-      {thread && <div className="messenger-quick-replies"><button type="button" onClick={() => setMessage('Please help me find the right part for my car.')}>Fitment help</button><button type="button" onClick={() => setMessage('Please check stock and price for this part.')}>Stock & price</button><button type="button" onClick={() => setMessage('I need help with a booking.')}>Booking help</button></div>}
-      <form className="customer-message-form" onSubmit={submit}><div className="customer-message-form-grid">{!thread && <><label>Name<input value={name} onChange={(event) => setName(event.target.value)} required maxLength={160} placeholder="Your name" /></label><label>Email <span>(optional)</span><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} placeholder="you@example.com" /></label><label>Phone <span>(optional)</span><input value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={40} placeholder="Phone number" /></label><label>Subject<input value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={160} placeholder="What can we help with?" /></label></>}</div><label className="messenger-message-label">Message<textarea value={message} onChange={(event) => setMessage(event.target.value)} required maxLength={4000} rows={5} placeholder="Write a message…" /></label>{error && <p className="customer-message-error" role="alert">{error}</p>}{sent && !error && <p className="customer-message-success" role="status">Message sent. Your private thread will refresh automatically.</p>}<div className="messenger-compose-footer"><small><i /> Secure chat · live refresh every 3 seconds</small><button className="button" type="submit" disabled={loading}>{loading ? 'Sending…' : thread ? 'Send reply' : 'Start chat'}</button></div></form>
+  return (
+    <div className="flex flex-col w-full max-w-2xl mx-auto bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden min-h-[600px] font-sans">
+      
+      {/* হেডার (ছবির মতো সিম্পল) */}
+      <div className="flex items-center px-6 py-5 border-b border-gray-50">
+        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3 text-gray-500">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="16" r="2"/><path d="M12 11V7"/><path d="M8 7h8"/></svg>
+        </div>
+        <span className="text-gray-500 font-medium text-sm">Derez AI</span>
+        {thread && (
+          <span className="ml-auto text-xs text-gray-400 font-medium">
+            {shortThreadId(thread.thread_id)}
+          </span>
+        )}
+      </div>
+
+      {/* চ্যাট এরিয়া */}
+      <div className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
+        {/* সিস্টেমের প্রথম মেসেজ (যদি কোনো মেসেজ না থাকে) */}
+        {messages.length === 0 && (
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-gray-50 flex-shrink-0 flex items-center justify-center text-gray-400">
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="16" r="2"/><path d="M12 11V7"/><path d="M8 7h8"/></svg>
+            </div>
+            <div className="text-gray-800 text-[15px] leading-relaxed pt-1">
+              Hey, I'm Derez AI. What do you want me to help you with?
+            </div>
+          </div>
+        )}
+
+        {/* ডাইনামিক মেসেজ লিস্ট */}
+        {messages.map((item) => (
+          <div key={item.id} className={`flex ${item.sender_type === 'customer' ? 'justify-end' : 'justify-start'} items-start gap-3`}>
+            {item.sender_type === 'admin' && (
+              <div className="w-8 h-8 rounded-full bg-gray-50 flex-shrink-0 flex items-center justify-center text-gray-400">
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="16" r="2"/><path d="M12 11V7"/><path d="M8 7h8"/></svg>
+              </div>
+            )}
+            <div className={`max-w-[85%] px-5 py-3.5 rounded-2xl text-[15px] leading-relaxed ${
+              item.sender_type === 'customer' 
+                ? 'bg-[#1A1A1A] text-white rounded-tr-sm' 
+                : 'bg-transparent text-gray-800 pt-1'
+            }`}>
+              {item.message}
+            </div>
+          </div>
+        ))}
+        
+        {/* লোডিং ইন্ডিকেটর */}
+        {loading && (
+          <div className="flex items-start gap-3">
+             <div className="w-8 h-8 rounded-full bg-gray-50 flex-shrink-0 flex items-center justify-center text-gray-400">
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="16" r="2"/><path d="M12 11V7"/><path d="M8 7h8"/></svg>
+              </div>
+            <div className="flex items-center gap-1 pt-3">
+              <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+              <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+              <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+            </div>
+          </div>
+        )}
+
+        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+      </div>
+
+      {/* ইনপুট এরিয়া (ছবির মতো হুবহু ডিজাইন) */}
+      <div className="p-6 pt-2 bg-white">
+        <form onSubmit={submit} className={`bg-[#F7F7F8] rounded-2xl p-2 transition-all ${isFocused ? 'ring-1 ring-gray-300' : ''}`}>
+          
+          {/* ইনপুট ফিল্ড */}
+          <textarea 
+            value={message} 
+            onChange={(event) => setMessage(event.target.value)} 
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            required 
+            maxLength={4000} 
+            rows={1} 
+            placeholder="Reply...." 
+            className="w-full bg-transparent resize-none outline-none text-[15px] text-gray-800 placeholder-gray-400 px-3 py-2 min-h-[44px] max-h-32"
+            onInput={(e) => {
+              const target = e.target as HTMLTextAreaElement;
+              target.style.height = 'auto';
+              target.style.height = `${target.scrollHeight}px`;
+            }}
+          />
+
+          {/* বাটন এবং আইকন */}
+          <div className="flex items-center justify-between mt-1 px-1">
+            <div className="flex items-center gap-3 text-gray-400">
+              <button type="button" className="p-1.5 hover:text-gray-600 transition-colors" title="Attach">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+              <button type="button" className="p-1.5 hover:text-gray-600 transition-colors" title="Voice">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+              </button>
+            </div>
+            
+            <button 
+              type="submit" 
+              disabled={loading || !message.trim()}
+              className="bg-[#2C2C2C] text-white p-2 rounded-xl hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+            </button>
+          </div>
+        </form>
+        
+        {/* ফুটার টেক্সট */}
+        <p className="text-center text-[12px] text-gray-400 mt-4">
+          Derez may make mistakes. Verify info
+        </p>
+      </div>
     </div>
-  </section>;
+  );
 }
