@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { adminFetch } from '../lib/auth';
 import { ImageKitUploadField } from './ImageKitUploadField';
+import { InventoryProductWizard } from './InventoryProductWizard';
 
 type ProductRecord = Record<string, unknown> & { id: string };
 type ManufacturerOption = {
@@ -132,7 +133,7 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, '');
 }
 
-export function InventoryProductForm({
+function ExistingInventoryProductEditor({
   row,
   onClose,
   onSaved,
@@ -899,4 +900,13 @@ export function InventoryProductForm({
       </form>
     </div>
   );
+}
+
+export function InventoryProductForm(props: {
+  row: ProductRecord | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  if (!props.row) return <InventoryProductWizard onClose={props.onClose} onSaved={props.onSaved} />;
+  return <ExistingInventoryProductEditor row={props.row} onClose={props.onClose} onSaved={props.onSaved} />;
 }
