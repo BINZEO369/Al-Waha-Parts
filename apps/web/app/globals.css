@@ -241,3 +241,52 @@
   .finder-selected-details h2 { font-size: 18px; }
   .finder-vehicle-specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Red Messenger-style customer chat */
+.customer-messenger { overflow: hidden; max-width: 900px; margin-top: 28px; border: 1px solid #eadfe0; border-radius: 18px; background: #fff; box-shadow: 0 18px 50px rgba(82, 24, 30, .10); }
+.customer-messenger-header { display:flex; align-items:center; gap:12px; padding:16px 20px; color:#fff; background:linear-gradient(135deg, #d91f2b, #a91421); }
+.messenger-avatar, .messenger-bubble-avatar { display:grid; place-items:center; flex:0 0 auto; border-radius:50%; color:#fff; background:linear-gradient(135deg, #f65a63, #9f1120); font-weight:800; letter-spacing:-.06em; }
+.messenger-avatar { width:42px; height:42px; border:2px solid rgba(255,255,255,.7); font-size:11px; }
+.messenger-header-copy { min-width:0; display:grid; gap:4px; flex:1; }
+.messenger-header-copy strong { font-size:14px; }
+.messenger-header-copy span { overflow:hidden; color:rgba(255,255,255,.8); font-size:10px; text-overflow:ellipsis; white-space:nowrap; }
+.messenger-header-copy i, .messenger-compose-footer i { display:inline-block; width:7px; height:7px; margin-right:5px; border-radius:50%; background:#72ed9a; box-shadow:0 0 0 3px rgba(114,237,154,.18); }
+.messenger-secure-badge, .messenger-thread-id { flex:none; padding:8px 10px; border:1px solid rgba(255,255,255,.28); border-radius:9px; color:#fff; background:rgba(255,255,255,.12); }
+.messenger-secure-badge { font:9px 'DM Mono'; text-transform:uppercase; }
+.messenger-thread-id { display:grid; gap:2px; text-align:right; cursor:pointer; }
+.messenger-thread-id small { color:rgba(255,255,255,.72); font-size:8px; }
+.messenger-thread-id b { font:10px 'DM Mono'; }
+.customer-messenger-body { padding:24px; background:#fff8f8; }
+.messenger-welcome { max-width:550px; margin:0 auto 20px; padding:25px 20px 8px; text-align:center; }
+.messenger-welcome-icon { display:grid; place-items:center; width:44px; height:44px; margin:0 auto 12px; border-radius:50%; color:#fff; background:var(--red); box-shadow:0 8px 20px rgba(229,35,47,.2); }
+.messenger-welcome h2 { margin:0 0 8px; color:#2b2022; font-size:22px; letter-spacing:-.05em; }
+.messenger-welcome p { margin:0; color:#807274; font-size:12px; line-height:1.65; }
+.messenger-thread-banner { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding:10px 12px; border:1px solid #f0d4d6; border-radius:10px; background:#fff; }
+.messenger-thread-banner span { color:#9d7377; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+.messenger-thread-banner strong { overflow:hidden; flex:1; color:#532126; font:10px 'DM Mono'; text-overflow:ellipsis; }
+.messenger-thread-banner button { border:0; color:var(--red); background:transparent; font-size:10px; font-weight:800; cursor:pointer; }
+.customer-message-thread { display:grid; gap:12px; max-height:460px; margin-bottom:18px; padding:4px 2px 10px; overflow:auto; }
+.customer-message-bubble { display:flex; align-items:flex-end; gap:8px; max-width:78%; }
+.customer-message-bubble.customer { justify-self:end; flex-direction:row-reverse; }
+.customer-message-bubble.admin { justify-self:start; }
+.messenger-bubble-avatar { width:28px; height:28px; font-size:8px; }
+.customer-message-bubble.customer .messenger-bubble-avatar { background:#827477; }
+.customer-message-bubble > div:last-child { padding:10px 13px; border-radius:16px 16px 16px 4px; background:#fff; box-shadow:0 2px 7px rgba(89,35,39,.07); }
+.customer-message-bubble.customer > div:last-child { border-radius:16px 16px 4px 16px; color:#fff; background:var(--red); }
+.customer-message-bubble span { display:block; margin-bottom:4px; color:#a45c63; font-size:9px; font-weight:800; }
+.customer-message-bubble.customer span { color:rgba(255,255,255,.78); }
+.customer-message-bubble p { margin:0; font-size:12px; line-height:1.55; white-space:pre-wrap; }
+.customer-message-bubble time { display:block; margin-top:5px; color:#aa9698; font:8px 'DM Mono'; }
+.customer-message-bubble.customer time { color:rgba(255,255,255,.68); }
+.customer-message-form { padding:16px; border:1px solid #eedcdd; border-radius:14px; background:#fff; }
+.customer-message-form-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; margin-bottom:12px; }
+.customer-message-form label { display:grid; gap:6px; color:#624b4e; font-size:10px; font-weight:800; }
+.customer-message-form label span { color:#a89496; font-weight:500; }
+.customer-message-form input, .customer-message-form textarea { width:100%; border:1px solid #eadcdd; border-radius:9px; outline:0; background:#fffafa; color:#34282a; font-size:12px; }
+.customer-message-form input { min-height:42px; padding:0 12px; }
+.customer-message-form textarea { min-height:84px; padding:11px 12px; resize:vertical; }
+.customer-message-form input:focus, .customer-message-form textarea:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(229,35,47,.10); }
+.messenger-compose-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px; }
+.messenger-compose-footer small { color:#9a8789; font-size:9px; }
+.customer-message-success { margin:10px 0 0; padding:10px 12px; border-radius:8px; color:#26704d; background:#edf8f1; font-size:11px; }
+@media (max-width:650px) { .customer-messenger-header, .customer-messenger-body { padding:14px; } .messenger-secure-badge { display:none; } .messenger-header-copy span { font-size:9px; } .messenger-thread-id { padding:6px 7px; } .customer-message-form-grid { grid-template-columns:1fr; } .customer-message-bubble { max-width:92%; } .messenger-compose-footer { align-items:flex-start; flex-direction:column; } .messenger-compose-footer .button { width:100%; } }
