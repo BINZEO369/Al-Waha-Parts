@@ -123,7 +123,10 @@ export function CustomerMessageBox() {
   return (
     <section className="aw-message-page" aria-labelledby="aw-message-title">
       <style>{`
-        .aw-message-page { min-height: calc(100vh - 125px); color: #111; background: #fff; }
+        /* ফন্ট ইমপোর্ট */
+        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap');
+
+        .aw-message-page { min-height: calc(100vh - 125px); color: #111; background: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         .aw-message-shell { width: min(760px, 100%); min-height: calc(100vh - 125px); margin: 0 auto; padding: 34px 24px 26px; display: flex; flex-direction: column; }
         .aw-message-profile { display: flex; align-items: center; gap: 12px; padding-bottom: 22px; border-bottom: 1px solid #ededed; }
         .aw-message-avatar, .aw-message-row-avatar { display: grid; place-items: center; border-radius: 50%; color: #fff; background: #111; font-weight: 800; }
@@ -135,9 +138,11 @@ export function CustomerMessageBox() {
         .aw-message-status:before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #111; }
         .aw-message-id { margin-left: auto; padding: 0; border: 0; color: #777; background: transparent; font: 9px 'DM Mono', monospace; cursor: pointer; }
         .aw-message-id:hover { color: #111; text-decoration: underline; text-underline-offset: 4px; }
+        
         .aw-message-intro { padding: 64px 0 48px; }
         .aw-message-intro h1 { max-width: 650px; margin: 0; color: #111; font-size: clamp(35px, 6vw, 58px); font-weight: 500; line-height: 1.04; letter-spacing: -.075em; }
         .aw-message-intro p { max-width: 500px; margin: 18px 0 0; color: #777; font-size: 12px; line-height: 1.75; }
+        
         .aw-message-thread { flex: 1; display: grid; align-content: start; gap: 20px; min-height: 250px; padding: 0 0 30px; }
         .aw-message-row { display: flex; align-items: flex-end; gap: 9px; max-width: 620px; }
         .aw-message-row.customer { justify-self: end; flex-direction: row-reverse; }
@@ -149,6 +154,14 @@ export function CustomerMessageBox() {
         .aw-message-bubble p { margin: 0; white-space: pre-wrap; }
         .aw-message-bubble time { display: block; margin-top: 5px; color: #999; font: 8px 'DM Mono', monospace; }
         .aw-message-row.customer .aw-message-bubble time { color: #aaa; }
+        
+        /* টাইপিং ইন্ডিকেটর অ্যানিমেশন */
+        .aw-message-typing { display: flex; align-items: center; gap: 5px; padding: 14px 18px; background: #f4f4f4; border-radius: 16px 16px 16px 3px; width: fit-content; margin-top: 5px; }
+        .aw-message-typing span { width: 6px; height: 6px; background: #888; border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both; }
+        .aw-message-typing span:nth-child(1) { animation-delay: -0.32s; }
+        .aw-message-typing span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+
         .aw-message-empty { display: flex; align-items: center; gap: 7px; color: #999; font-size: 11px; }
         .aw-message-empty i { width: 7px; height: 7px; border-radius: 50%; background: #111; opacity: .22; }
         .aw-message-empty i:nth-child(2) { opacity: .48; }
@@ -156,6 +169,7 @@ export function CustomerMessageBox() {
         .aw-message-quick { display: flex; gap: 18px; overflow-x: auto; margin: 0 0 15px; padding-bottom: 3px; }
         .aw-message-quick button { flex: 0 0 auto; padding: 0 0 4px; border: 0; border-bottom: 1px solid transparent; color: #888; background: transparent; font-size: 10px; cursor: pointer; }
         .aw-message-quick button:hover { border-bottom-color: #111; color: #111; }
+        
         .aw-message-form { padding-top: 16px; border-top: 1px solid #ededed; }
         .aw-message-details { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 17px; }
         .aw-message-field { display: grid; gap: 5px; }
@@ -173,15 +187,108 @@ export function CustomerMessageBox() {
         .aw-message-note { color: #aaa; text-align: center; }
         .aw-message-error { color: #111; }
         .aw-message-success { color: #555; }
-        @media (max-width: 620px) { .aw-message-shell { padding: 24px 16px 20px; } .aw-message-id { max-width: 95px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .aw-message-intro { padding: 48px 0 35px; } .aw-message-intro h1 { font-size: 38px; } .aw-message-details { grid-template-columns: 1fr 1fr; gap: 10px 14px; } .aw-message-row { max-width: 94%; } .aw-message-row.customer .aw-message-bubble { max-width: 82vw; } }
+        
+        @media (max-width: 620px) { 
+          .aw-message-shell { padding: 24px 16px 20px; } 
+          .aw-message-id { max-width: 95px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } 
+          .aw-message-intro { padding: 48px 0 35px; } 
+          .aw-message-intro h1 { font-size: 38px; } 
+          .aw-message-details { grid-template-columns: 1fr 1fr; gap: 10px 14px; } 
+          .aw-message-row { max-width: 94%; } 
+          .aw-message-row.customer .aw-message-bubble { max-width: 82vw; } 
+        }
       `}</style>
 
       <div className="aw-message-shell">
-        <header className="aw-message-profile"><span className="aw-message-avatar">AW</span><div className="aw-message-profile-copy"><strong>Al Waha Parts</strong><span className="aw-message-status">Parts desk · usually replies within one business day</span></div>{thread && <button className="aw-message-id" type="button" title="Your private conversation ID" onClick={() => navigator.clipboard?.writeText(thread.thread_id)}>AW-{thread.thread_id.slice(0, 8).toUpperCase()}</button>}</header>
-        {!thread && <section className="aw-message-intro"><h1 id="aw-message-title">How can we help with your car?</h1><p>Tell us the vehicle brand, model and year, then describe the part you need. Our parts desk will reply in this private conversation.</p></section>}
-        <section className="aw-message-thread" aria-live="polite">{messages.length ? messages.map((item) => <article className={`aw-message-row ${item.sender_type}`} key={item.id}><span className="aw-message-row-avatar">{item.sender_type === 'admin' ? 'AW' : 'YOU'}</span><div className="aw-message-bubble"><p>{item.message}</p><time>{time(item.created_at)}</time></div></article>) : <div className="aw-message-empty"><i /><i /><i /><span>{thread ? 'Your reply will appear here.' : 'Start a conversation with our parts desk below.'}</span></div>}</section>
-        {thread && <div className="aw-message-quick" aria-label="Quick replies">{quickReplies.map((item) => <button key={item} type="button" onClick={() => setDraft(item === 'Fitment help' ? 'Please help me find the right part for my car.' : item === 'Stock & price' ? 'Please check stock and price for this part.' : 'I need help with a booking.')}>{item}</button>)}</div>}
-        <form className="aw-message-form" onSubmit={submit}>{!thread && <div className="aw-message-details"><div className="aw-message-field"><label htmlFor="aw-name">Name</label><input id="aw-name" value={name} onChange={(event) => setName(event.target.value)} required maxLength={160} placeholder="Your name" /></div><div className="aw-message-field"><label htmlFor="aw-email">Email</label><input id="aw-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} placeholder="Optional" /></div><div className="aw-message-field"><label htmlFor="aw-phone">Phone</label><input id="aw-phone" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={40} placeholder="Optional" /></div><div className="aw-message-field"><label htmlFor="aw-subject">Subject</label><input id="aw-subject" value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={160} placeholder="Parts enquiry" /></div></div>}<div className="aw-message-compose"><textarea value={draft} onChange={(event) => setDraft(event.target.value)} required maxLength={4000} rows={1} placeholder={thread ? 'Write a reply…' : 'Write your message…'} /><button className="aw-message-send" type="submit" disabled={loading} aria-label="Send message">{loading ? '…' : '↑'}</button></div>{error && <p className="aw-message-error" role="alert">{error}</p>}{sent && !error && <p className="aw-message-success" role="status">Message sent. We will reply here.</p>}<p className="aw-message-note">Please verify vehicle and part details before ordering.</p></form>
+        <header className="aw-message-profile">
+          <span className="aw-message-avatar">AW</span>
+          <div className="aw-message-profile-copy">
+            <strong>Al Waha Parts</strong>
+            <span className="aw-message-status">Parts desk · usually replies within one business day</span>
+          </div>
+          {thread && (
+            <button className="aw-message-id" type="button" title="Your private conversation ID" onClick={() => navigator.clipboard?.writeText(thread.thread_id)}>
+              AW-{thread.thread_id.slice(0, 8).toUpperCase()}
+            </button>
+          )}
+        </header>
+
+        {!thread && (
+          <section className="aw-message-intro">
+            <h1 id="aw-message-title">How can we help with your car?</h1>
+            <p>Tell us the vehicle brand, model and year, then describe the part you need. Our parts desk will reply in this private conversation.</p>
+          </section>
+        )}
+
+        <section className="aw-message-thread" aria-live="polite">
+          {messages.length ? (
+            messages.map((item) => (
+              <article className={`aw-message-row ${item.sender_type}`} key={item.id}>
+                <span className="aw-message-row-avatar">{item.sender_type === 'admin' ? 'AW' : 'YOU'}</span>
+                <div className="aw-message-bubble">
+                  <p>{item.message}</p>
+                  <time>{time(item.created_at)}</time>
+                </div>
+              </article>
+            ))
+          ) : (
+            !loading && <div className="aw-message-empty"><i /><i /><i /><span>{thread ? 'Your reply will appear here.' : 'Start a conversation with our parts desk below.'}</span></div>
+          )}
+
+          {/* টাইপিং ইন্ডিকেটর (লোড হওয়ার সময়) */}
+          {loading && (
+            <div className="aw-message-row admin">
+              <span className="aw-message-row-avatar">AW</span>
+              <div className="aw-message-typing">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {thread && (
+          <div className="aw-message-quick" aria-label="Quick replies">
+            {quickReplies.map((item) => (
+              <button key={item} type="button" onClick={() => setDraft(item === 'Fitment help' ? 'Please help me find the right part for my car.' : item === 'Stock & price' ? 'Please check stock and price for this part.' : 'I need help with a booking.')}>
+                {item}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <form className="aw-message-form" onSubmit={submit}>
+          {!thread && (
+            <div className="aw-message-details">
+              <div className="aw-message-field">
+                <label htmlFor="aw-name">Name</label>
+                <input id="aw-name" value={name} onChange={(event) => setName(event.target.value)} required maxLength={160} placeholder="Your name" />
+              </div>
+              <div className="aw-message-field">
+                <label htmlFor="aw-email">Email</label>
+                <input id="aw-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} placeholder="Optional" />
+              </div>
+              <div className="aw-message-field">
+                <label htmlFor="aw-phone">Phone</label>
+                <input id="aw-phone" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={40} placeholder="Optional" />
+              </div>
+              <div className="aw-message-field">
+                <label htmlFor="aw-subject">Subject</label>
+                <input id="aw-subject" value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={160} placeholder="Parts enquiry" />
+              </div>
+            </div>
+          )}
+          
+          <div className="aw-message-compose">
+            <textarea value={draft} onChange={(event) => setDraft(event.target.value)} required maxLength={4000} rows={1} placeholder={thread ? 'Write a reply…' : 'Write your message…'} />
+            <button className="aw-message-send" type="submit" disabled={loading} aria-label="Send message">
+              {loading ? '…' : '↑'}
+            </button>
+          </div>
+          
+          {error && <p className="aw-message-error" role="alert">{error}</p>}
+          {sent && !error && <p className="aw-message-success" role="status">Message sent. We will reply here.</p>}
+          <p className="aw-message-note">Please verify vehicle and part details before ordering.</p>
+        </form>
       </div>
     </section>
   );
