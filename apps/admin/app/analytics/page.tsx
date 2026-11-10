@@ -162,6 +162,7 @@ export default function AnalyticsPage() {
   const [aiError, setAiError] = useState('');
   const inFlight = useRef(false);
   const requestSequence = useRef(0);
+  const aiRequestSequence = useRef(0);
 
   const load = useCallback(async (silent = false) => {
     if (silent && inFlight.current) return;
@@ -187,8 +188,10 @@ export default function AnalyticsPage() {
 
   useEffect(() => { void load(false); }, [load]);
   useEffect(() => {
+    aiRequestSequence.current += 1;
     setAiData(null);
     setAiError('');
+    setAiLoading(false);
   }, [days]);
   useEffect(() => {
     if (!autoRefresh) return;
@@ -202,18 +205,21 @@ export default function AnalyticsPage() {
   }, [autoRefresh, load]);
 
   async function generateAiInsights() {
+    const requestId = ++aiRequestSequence.current;
+    const requestedDays = days;
     setAiLoading(true);
     setAiError('');
     try {
       const result = await adminFetch<AnalyticsInsights>('/api/v1/admin/analytics/insights', {
         method: 'POST',
-        body: JSON.stringify({ days }),
+        body: JSON.stringify({ days: requestedDays }),
       });
-      setAiData(result);
+      if (requestId === aiRequestSequence.current) setAiData(result);
     } catch (cause) {
-      setAiError(cause instanceof Error ? cause.message : 'AI analytics insights could not be generated.');
+      if (requestId === aiRequestSequence.current)
+        setAiError(cause instanceof Error ? cause.message : 'AI analytics insights could not be generated.');
     } finally {
-      setAiLoading(false);
+      if (requestId === aiRequestSequence.current) setAiLoading(false);
     }
   }
 
