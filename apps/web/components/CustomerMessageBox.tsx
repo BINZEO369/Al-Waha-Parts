@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 const threadStorageKey = 'alwaha-customer-message-thread-v1';
 const quickReplies = ['Fitment help', 'Stock & price', 'Booking help', 'Track Order'];
@@ -49,6 +49,17 @@ export function CustomerMessageBox() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+
+  // অটো-রিসাইজিং এর জন্য রেফ
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // লেখা পরিবর্তন হলে টেক্সটএরিয়ার উচ্চতা অটোমেটিক বাড়বে
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [draft]);
 
   const loadThread = useCallback(async (current: Thread) => {
     if (!apiUrl) return;
@@ -129,25 +140,25 @@ export function CustomerMessageBox() {
         .aw-message-page { 
           min-height: 100vh; 
           color: #111; 
-          background: #fafafa; 
+          background: #f4f4f5; 
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
           display: flex;
-          align-items: flex-start; /* উপরে থেকে শুরু হবে */
+          align-items: center; 
           justify-content: center;
           padding: 40px 20px;
         }
         
-        /* ফ্লোটিং কন্টেইনার */
+        /* স্প্লিট কন্টেইনার */
         .aw-message-shell { 
-          width: min(760px, 100%); 
+          width: 100%; 
+          max-width: 960px; 
           background: #ffffff;
-          border-radius: 28px;
-          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.06), 0 4px 20px rgba(0,0,0,0.03); 
-          margin: 0 auto; 
-          padding: 32px 28px; 
-          display: flex; 
-          flex-direction: column; 
-          border: 1px solid #f0f0f0;
+          border-radius: 20px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08); 
+          display: grid; 
+          grid-template-columns: 340px 1fr; 
+          overflow: hidden;
+          border: 1px solid #eaeaea;
           animation: shellEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -156,435 +167,466 @@ export function CustomerMessageBox() {
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* হেডার */
-        .aw-message-profile { 
-          display: flex; 
-          align-items: center; 
-          gap: 14px; 
-          padding-bottom: 20px; 
-          border-bottom: 1px solid #f5f5f5; 
-        }
-        .aw-message-avatar, .aw-message-row-avatar { 
-          display: grid; 
-          place-items: center; 
-          border-radius: 50%; 
-          color: #fff; 
-          background: linear-gradient(135deg, #111, #333); 
-          font-weight: 700; 
-          box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-        }
-        .aw-message-avatar { width: 44px; height: 44px; flex: 0 0 44px; font-size: 11px; }
-        .aw-message-profile-copy { display: grid; gap: 3px; min-width: 0; }
-        .aw-message-profile-copy strong { font-size: 15px; letter-spacing: -.02em; font-weight: 600; color: #111; }
-        .aw-message-profile-copy span { color: #888; font-size: 11px; }
-        .aw-message-status { display: inline-flex; align-items: center; gap: 6px; }
-        .aw-message-status:before { 
-          content: ''; 
-          width: 7px; 
-          height: 7px; 
-          border-radius: 50%; 
-          background: #111; 
-          box-shadow: 0 0 0 3px rgba(0,0,0,0.08); 
-          animation: statusPulse 2s infinite;
-        }
-        @keyframes statusPulse {
-          0% { box-shadow: 0 0 0 0 rgba(0,0,0,0.2); }
-          70% { box-shadow: 0 0 0 6px rgba(0,0,0,0); }
-          100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
-        }
-        
-        .aw-message-id { 
-          margin-left: auto; 
-          padding: 8px 14px; 
-          border-radius: 20px;
-          border: 1px solid #e5e5e5;
-          color: #666; 
-          background: #fafafa; 
-          font: 10px 'DM Mono', monospace; 
-          cursor: pointer;
-          transition: all 0.25s ease;
-        }
-        .aw-message-id:hover { color: #fff; border-color: #111; background: #111; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: translateY(-1px); }
-        
-        /* ইন্ট্রো */
-        .aw-message-intro { padding: 30px 0 20px; animation: fadeIn 0.8s ease-out 0.2s both; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .aw-message-intro h1 { 
-          max-width: 650px; 
-          margin: 0; 
-          color: #111; 
-          font-size: clamp(28px, 5vw, 40px); 
-          font-weight: 600; 
-          line-height: 1.15; 
-          letter-spacing: -.04em; 
-        }
-        .aw-message-intro p { max-width: 500px; margin: 12px 0 0; color: #777; font-size: 13px; line-height: 1.6; }
-        
-        /* চ্যাট থ্রেড */
-        .aw-message-thread { 
-          display: flex; 
+        /* -----------------------------
+           বাম দিকের কালো প্যানেল 
+           ----------------------------- */
+        .aw-message-left {
+          background: #0a0a0a; 
+          color: #fff;
+          padding: 40px 32px;
+          display: flex;
           flex-direction: column;
-          gap: 20px; 
-          padding: 10px 0 20px; 
-        }
-        
-        /* থ্রেড খালি থাকলে জায়গা কম নিবে */
-        .aw-message-thread:empty { padding: 0; display: none; }
-
-        .aw-message-row { 
-          display: flex; 
-          align-items: flex-end; 
-          gap: 12px; 
-          max-width: 80%; 
-          animation: messageSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-        @keyframes messageSlideUp {
-          from { opacity: 0; transform: translateY(15px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        .aw-message-row.customer { align-self: flex-end; flex-direction: row-reverse; }
-        .aw-message-row.admin { align-self: flex-start; }
-        
-        .aw-message-row-avatar { width: 28px; height: 28px; flex: 0 0 28px; font-size: 8px; }
-        .aw-message-row.customer .aw-message-row-avatar { color: #111; background: #f0f0f0; box-shadow: none; }
-        
-        /* মেসেজ বাবল */
-        .aw-message-bubble { padding: 0; color: #222; background: transparent; font-size: 14px; line-height: 1.6; }
-        .aw-message-row.admin .aw-message-bubble {
-          padding: 14px 20px; 
-          border-radius: 24px 24px 24px 4px; 
-          background: #f8f8f8; 
-          border: 1px solid #f0f0f0;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-        }
-        .aw-message-row.customer .aw-message-bubble { 
-          padding: 14px 20px; 
-          border-radius: 24px 24px 4px 24px; 
-          color: #fff; 
-          background: #111; 
-          box-shadow: 0 8px 25px rgba(0,0,0,0.15); 
-        }
-        .aw-message-bubble p { margin: 0; white-space: pre-wrap; }
-        .aw-message-bubble time { display: block; margin-top: 6px; color: #999; font: 9px 'DM Mono', monospace; }
-        .aw-message-row.customer .aw-message-bubble time { color: rgba(255,255,255,0.6); text-align: right; }
-        
-        /* টাইপিং ইন্ডিকেটর */
-        .aw-message-typing { 
-          display: flex; 
-          align-items: center; 
-          gap: 6px; 
-          padding: 16px 22px; 
-          background: #f8f8f8; 
-          border: 1px solid #f0f0f0;
-          border-radius: 24px 24px 24px 4px; 
-          width: fit-content; 
-        }
-        .aw-message-typing span { width: 7px; height: 7px; background: #111; border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both; opacity: 0.3; }
-        .aw-message-typing span:nth-child(1) { animation-delay: -0.32s; }
-        .aw-message-typing span:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes typingBounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
-
-        .aw-message-empty { display: none; /* খালি স্টেট লুকানো হলো যাতে ফর্ম নিচে না চলে যায় */ }
-        
-        /* কুইক রিপ্লাই (শর্টকাট) */
-        .aw-message-quick { display: flex; gap: 10px; overflow-x: auto; margin: 0 0 16px; padding: 4px 0; scrollbar-width: none; }
-        .aw-message-quick::-webkit-scrollbar { display: none; }
-        .aw-message-quick button { 
-          flex: 0 0 auto; 
-          padding: 8px 16px; 
-          border-radius: 20px; 
-          border: 1px solid #e5e5e5; 
-          color: #444; 
-          background: #f8f8f8; 
-          font-size: 12px; 
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-        .aw-message-quick button:hover { border-color: #111; color: #fff; background: #111; box-shadow: 0 6px 15px rgba(0,0,0,0.1); transform: translateY(-2px); }
-        
-        /* ফর্ম সেকশন */
-        .aw-message-form { padding-top: 10px; }
-        
-        /* ডিটেইলস ফিল্ড (আরো প্রফেশনাল এবং আইকনযুক্ত) */
-        .aw-message-details { 
-          display: grid; 
-          grid-template-columns: 1fr 1fr; 
-          gap: 14px; 
-          margin-bottom: 20px; 
-          background: #fafafa;
-          padding: 20px;
-          border-radius: 20px;
-          border: 1px dashed #ddd;
-        }
-        
-        .aw-message-field { 
-          display: flex; 
-          align-items: center;
-          gap: 12px; 
-          background: #ffffff;
-          padding: 12px 16px;
-          border-radius: 12px;
-          border: 1px solid #e5e5e5;
-          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
           position: relative;
         }
-        
-        .aw-message-field:focus-within { 
-          border-color: #111; 
-          box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-          transform: translateY(-1px);
-        }
-        
-        .aw-field-icon {
-          color: #888;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        
-        .aw-field-content {
-          display: flex;
-          flex-direction: column;
-          flex: 1;
+
+        .aw-message-avatar {
+          width: 40px;
+          height: 40px;
+          background: #ffffff;
+          color: #111;
+          border-radius: 50%;
+          display: grid;
+          place-items: center;
+          font-weight: 800;
+          font-size: 12px;
+          margin-bottom: 32px;
         }
 
-        .aw-message-field label { color: #999; font: 9px 'DM Mono', monospace; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 2px; }
-        .aw-message-field input { width: 100%; border: 0; outline: 0; color: #111; background: transparent; font: inherit; font-size: 14px; font-weight: 500; }
-        .aw-message-field input::placeholder { font-weight: 400; color: #bbb; font-size: 13px; }
+        .aw-left-label {
+          color: #a1a1aa;
+          font-size: 13px;
+          margin-bottom: 6px;
+          display: block;
+        }
+
+        .aw-left-title {
+          font-size: 22px;
+          font-weight: 500;
+          line-height: 1.3;
+          margin: 0 0 32px 0;
+          letter-spacing: -.02em;
+        }
+
+        .aw-left-info {
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+        }
+
+        .aw-info-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          color: #d4d4d8;
+          font-size: 13px;
+        }
+        .aw-info-item svg { color: #71717a; flex-shrink: 0; }
+
+        .aw-left-bottom {
+          margin-top: auto;
+          padding-top: 30px;
+        }
+
+        .aw-btn-white {
+          width: 100%;
+          padding: 12px;
+          background: #ffffff;
+          color: #111;
+          border: none;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+        }
+        .aw-btn-white:hover { background: #e4e4e7; }
+
+
+        /* -----------------------------
+           ডান দিকের সাদা প্যানেল 
+           ----------------------------- */
+        .aw-message-right {
+          background: #ffffff;
+          padding: 32px 40px;
+          display: flex;
+          flex-direction: column;
+          max-height: 85vh; 
+          overflow-y: auto;
+        }
+
+        .aw-right-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 24px;
+        }
+
+        .aw-right-header h2 {
+          font-size: 18px;
+          font-weight: 600;
+          margin: 0;
+          color: #111;
+        }
+
+        .aw-close-btn {
+          background: transparent;
+          border: none;
+          color: #888;
+          cursor: pointer;
+          font-size: 20px;
+          display: grid;
+          place-items: center;
+        }
+        .aw-close-btn:hover { color: #111; }
+
+        /* ফর্ম গ্রিড */
+        .aw-form-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+          margin-bottom: 16px;
+        }
+
+        .aw-form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-bottom: 16px;
+        }
         
-        /* মেইন কম্পোজ বক্স (কালো এবং উন্নত ডিজাইন) */
-        .aw-message-compose-wrapper {
-          background: #0a0a0a; 
-          border-radius: 24px;
-          padding: 10px 14px;
+        .aw-form-grid .aw-form-group {
+          margin-bottom: 0;
+        }
+
+        .aw-form-group label {
+          font-size: 13px;
+          font-weight: 500;
+          color: #3f3f46;
+        }
+
+        .aw-form-group input, .aw-form-group textarea {
+          width: 100%;
+          padding: 12px 14px;
+          border: 1px solid #e4e4e7;
+          border-radius: 8px;
+          font-size: 14px;
+          color: #111;
+          background: #ffffff;
+          transition: all 0.2s ease;
+          outline: none;
+          font-family: inherit;
+        }
+
+        .aw-form-group input:focus, .aw-form-group textarea:focus {
+          border-color: #111;
+          box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+        }
+
+        .aw-form-group input::placeholder, .aw-form-group textarea::placeholder {
+          color: #a1a1aa;
+        }
+
+        /* অটো-এক্সপ্যান্ডিং টেক্সটএরিয়া স্টাইল */
+        .aw-form-group textarea {
+          resize: none; /* রিসাইজ হ্যান্ডেল বাদ দেওয়া হলো */
+          overflow-y: hidden; /* স্ক্রলবার লুকানো হলো */
+          min-height: 100px; /* মিনিমাম উচ্চতা */
+          max-height: 200px; /* সর্বোচ্চ উচ্চতা, এরপর স্ক্রল হবে */
+          line-height: 1.5;
+        }
+
+        /* চ্যাট থ্রেড */
+        .aw-chat-thread {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          padding: 10px 0;
+          margin-bottom: 16px;
+        }
+
+        .aw-chat-row {
           display: flex;
           align-items: flex-end;
           gap: 10px;
-          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-          border: 1px solid #222;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+          max-width: 85%;
         }
-        .aw-message-compose-wrapper:focus-within {
-          border-color: #444;
-          box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-        }
-        
-        .aw-message-icon-btn {
-          display: grid;
-          place-items: center;
-          width: 36px;
-          height: 36px;
-          border: none;
-          background: transparent;
-          color: #888; 
-          font-size: 20px;
-          cursor: pointer;
-          border-radius: 50%;
-          transition: all 0.2s ease;
-          flex: 0 0 36px;
-        }
-        .aw-message-icon-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        
-        .aw-message-compose textarea { 
-          flex: 1;
-          border: none;
-          outline: none;
-          background: transparent;
-          font: inherit;
+        .aw-chat-row.customer { align-self: flex-end; flex-direction: row-reverse; }
+        .aw-chat-row.admin { align-self: flex-start; }
+
+        .aw-chat-bubble {
+          padding: 12px 16px;
+          border-radius: 16px;
           font-size: 14px;
-          color: #fff; 
-          min-height: 24px; 
-          max-height: 120px; 
-          resize: none; 
-          line-height: 1.5; 
-          padding: 8px 0;
-          scrollbar-width: none;
+          line-height: 1.5;
         }
-        .aw-message-compose textarea::placeholder { color: #666; }
-        
-        /* সেন্ড বাটন (সাদা) */
-        .aw-message-send { 
-          display: grid; 
-          place-items: center; 
-          width: 40px; 
-          height: 40px; 
-          flex: 0 0 40px; 
-          border: 0; 
-          border-radius: 50%; 
-          color: #111; 
-          background: #ffffff; 
-          font-size: 18px; 
+        .aw-chat-row.admin .aw-chat-bubble {
+          background: #f4f4f5;
+          color: #111;
+          border-bottom-left-radius: 4px;
+        }
+        .aw-chat-row.customer .aw-chat-bubble {
+          background: #0a0a0a;
+          color: #fff;
+          border-bottom-right-radius: 4px;
+        }
+
+        /* কুইক রিপ্লাই */
+        .aw-quick-replies {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-bottom: 16px;
+        }
+        .aw-quick-replies button {
+          padding: 6px 12px;
+          border: 1px solid #e4e4e7;
+          background: #fafafa;
+          border-radius: 20px;
+          font-size: 12px;
+          color: #3f3f46;
           cursor: pointer;
-          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-          box-shadow: 0 4px 15px rgba(255,255,255,0.1);
-          margin-left: auto;
+          transition: all 0.2s;
         }
-        .aw-message-send:hover:not(:disabled) { background: #e0e0e0; transform: scale(1.08) translateY(-2px); }
-        .aw-message-send:active:not(:disabled) { transform: scale(0.95); }
-        .aw-message-send:disabled { cursor: not-allowed; opacity: .4; box-shadow: none; }
-        
-        /* স্টেটাস টেক্সট */
-        .aw-message-note, .aw-message-error, .aw-message-success { margin: 16px 0 0; font-size: 11px; text-align: center; transition: all 0.3s ease; }
-        .aw-message-note { color: #999; }
-        .aw-message-error { color: #111; font-weight: 600; background: #f0f0f0; padding: 8px; border-radius: 8px; }
-        .aw-message-success { color: #555; background: #f8f8f8; padding: 8px; border-radius: 8px; }
-        
-        /* মোবাইল রেসপন্সিভ */
-        @media (max-width: 768px) { 
-          .aw-message-page { padding: 10px; align-items: flex-start; }
-          .aw-message-shell { border-radius: 20px; padding: 20px 16px; } 
-          .aw-message-id { display: none; } 
-          .aw-message-intro { padding: 20px 0 15px; } 
-          .aw-message-intro h1 { font-size: 28px; } 
-          
-          /* মোবাইলে ১ কলাম হবে (নিচে নিচে) */
-          .aw-message-details { 
+        .aw-quick-replies button:hover {
+          background: #111;
+          color: #fff;
+          border-color: #111;
+        }
+
+        /* ফুটার */
+        .aw-form-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 24px;
+          padding-top: 20px;
+          border-top: 1px solid #f4f4f5;
+        }
+
+        .aw-form-note {
+          font-size: 12px;
+          color: #a1a1aa;
+          max-width: 200px;
+          line-height: 1.4;
+        }
+
+        .aw-actions {
+          display: flex;
+          gap: 12px;
+        }
+
+        .aw-btn-reset {
+          padding: 10px 20px;
+          background: #ffffff;
+          color: #3f3f46;
+          border: 1px solid #e4e4e7;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .aw-btn-reset:hover { background: #f4f4f5; }
+
+        .aw-btn-submit {
+          padding: 10px 20px;
+          background: #0a0a0a;
+          color: #ffffff;
+          border: none;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .aw-btn-submit:hover:not(:disabled) { background: #27272a; }
+        .aw-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* টাইপিং ইন্ডিকেটর */
+        .aw-typing { display: flex; gap: 4px; padding: 12px 16px; background: #f4f4f5; border-radius: 16px; width: fit-content; border-bottom-left-radius: 4px;}
+        .aw-typing span { width: 6px; height: 6px; background: #a1a1aa; border-radius: 50%; animation: bounce 1.4s infinite both; }
+        .aw-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .aw-typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+        /* মেসেজ সেন্ড এরর/সাকসেস */
+        .aw-msg-feedback { font-size: 13px; margin-top: 12px; padding: 10px; border-radius: 8px; text-align: center;}
+        .aw-msg-feedback.error { color: #991b1b; background: #fef2f2; }
+        .aw-msg-feedback.success { color: #166534; background: #f0fdf4; }
+
+
+        /* -----------------------------
+           মোবাইল রেসপন্সিভ 
+           ----------------------------- */
+        @media (max-width: 860px) { 
+          .aw-message-page { padding: 0; align-items: flex-start; background: #fff;}
+          .aw-message-shell { 
             grid-template-columns: 1fr; 
-            gap: 10px; 
-            padding: 15px;
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+            min-height: 100vh;
           } 
-          .aw-message-row { max-width: 90%; } 
-          .aw-message-row.customer .aw-message-bubble { max-width: 85vw; } 
-          .aw-message-compose-wrapper { padding: 8px 10px; gap: 8px; }
-          .aw-message-icon-btn { width: 32px; height: 32px; flex: 0 0 32px; }
-          .aw-message-send { width: 36px; height: 36px; flex: 0 0 36px; }
+          .aw-message-left { padding: 32px 24px; border-radius: 0; } 
+          .aw-message-avatar { margin-bottom: 20px; }
+          .aw-left-title { font-size: 20px; margin-bottom: 20px; }
+          .aw-left-info { display: none; } 
+          .aw-left-bottom { padding-top: 10px; }
+          
+          .aw-message-right { padding: 24px; max-height: none; } 
+          .aw-form-grid { grid-template-columns: 1fr; } 
+          .aw-form-footer { flex-direction: column; align-items: stretch; gap: 16px; text-align: center; }
+          .aw-form-note { max-width: 100%; margin: 0 auto; }
+          .aw-actions { justify-content: space-between; }
+          .aw-btn-reset, .aw-btn-submit { flex: 1; justify-content: center; }
         }
       `}</style>
 
       <div className="aw-message-shell">
-        <header className="aw-message-profile">
-          <span className="aw-message-avatar">AW</span>
-          <div className="aw-message-profile-copy">
-            <strong>Al Waha Parts</strong>
-            <span className="aw-message-status">Parts desk · usually replies within one business day</span>
+        
+        {/* বাম দিকের কালো প্যানেল */}
+        <div className="aw-message-left">
+          <div>
+            <span className="aw-message-avatar">AW</span>
+            <span className="aw-left-label">Al Waha Parts</span>
+            <h1 className="aw-left-title">How can we help with your car?</h1>
           </div>
-          {thread && (
-            <button className="aw-message-id" type="button" title="Your private conversation ID" onClick={() => navigator.clipboard?.writeText(thread.thread_id)}>
-              ID: AW-{thread.thread_id.slice(0, 8).toUpperCase()}
+
+          <div className="aw-left-info">
+            <div className="aw-info-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <span>Usually replies within 1 business day</span>
+            </div>
+            <div className="aw-info-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span>Private & secure messaging</span>
+            </div>
+            <div className="aw-info-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <span>Parts Desk Team</span>
+            </div>
+          </div>
+
+          <div className="aw-left-bottom">
+            {thread ? (
+              <button className="aw-btn-white" onClick={() => navigator.clipboard?.writeText(thread.thread_id)}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy Chat ID (AW-{thread.thread_id.slice(0, 4)})
+              </button>
+            ) : (
+              <div className="aw-info-item" style={{ color: '#71717a', fontSize: '12px' }}>
+                Fill out the form to start.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ডান দিকের সাদা প্যানেল */}
+        <div className="aw-message-right">
+          
+          <div className="aw-right-header">
+            <h2>{thread ? 'Message Thread' : 'Input Details'}</h2>
+            <button className="aw-close-btn" type="button" aria-label="Close" onClick={() => { /* Close logic if needed */ }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
-          )}
-        </header>
+          </div>
 
-        {!thread && (
-          <section className="aw-message-intro">
-            <h1 id="aw-message-title">How can we help with your car?</h1>
-            <p>Tell us the vehicle brand, model and year, then describe the part you need. Our parts desk will reply in this private conversation.</p>
-          </section>
-        )}
-
-        {/* চ্যাট থ্রেড (মেসেজ থাকলে দেখাবে, না থাকলে খালি জায়গা নিবে না) */}
-        {(messages.length > 0 || loading) && (
-          <section className="aw-message-thread" aria-live="polite">
-            {messages.map((item) => (
-              <article className={`aw-message-row ${item.sender_type}`} key={item.id}>
-                <span className="aw-message-row-avatar">{item.sender_type === 'admin' ? 'AW' : 'YOU'}</span>
-                <div className="aw-message-bubble">
-                  <p>{item.message}</p>
-                  <time>{time(item.created_at)}</time>
+          <form className="aw-message-form" onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+            
+            {/* প্রথমবার হলে ফর্ম দেখাবে */}
+            {!thread && (
+              <div className="aw-form-grid">
+                <div className="aw-form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label htmlFor="aw-name">Full name</label>
+                  <input id="aw-name" value={name} onChange={(e) => setName(e.target.value)} required maxLength={160} placeholder="Your name..." />
                 </div>
-              </article>
-            ))}
-
-            {loading && (
-              <div className="aw-message-row admin">
-                <span className="aw-message-row-avatar">AW</span>
-                <div className="aw-message-typing">
-                  <span></span><span></span><span></span>
+                <div className="aw-form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label htmlFor="aw-email">Email Address</label>
+                  <input id="aw-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={254} placeholder="you@example.com" />
+                </div>
+                <div className="aw-form-group">
+                  <label htmlFor="aw-phone">Phone (Optional)</label>
+                  <input id="aw-phone" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={40} placeholder="+1 (555) 000-0000" />
+                </div>
+                <div className="aw-form-group">
+                  <label htmlFor="aw-subject">Subject</label>
+                  <input id="aw-subject" value={subject} onChange={(e) => setSubject(e.target.value)} maxLength={160} placeholder="Parts enquiry" />
                 </div>
               </div>
             )}
-          </section>
-        )}
 
-        {thread && (
-          <div className="aw-message-quick" aria-label="Quick replies">
-            {quickReplies.map((item) => (
-              <button key={item} type="button" onClick={() => setDraft(item === 'Fitment help' ? 'Please help me find the right part for my car.' : item === 'Stock & price' ? 'Please check stock and price for this part.' : item === 'Booking help' ? 'I need help with a booking.' : 'Can you help me track my order?')}>
-                {item}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <form className="aw-message-form" onSubmit={submit}>
-          {/* প্রথমবার চ্যাট ওপেন করলে এই ইনপুটগুলো উপরে দেখাবে */}
-          {!thread && (
-            <div className="aw-message-details">
-              <div className="aw-message-field">
-                <span className="aw-field-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </span>
-                <div className="aw-field-content">
-                  <label htmlFor="aw-name">Name</label>
-                  <input id="aw-name" value={name} onChange={(event) => setName(event.target.value)} required maxLength={160} placeholder="Your full name" />
-                </div>
+            {/* চ্যাট থ্রেড */}
+            {thread && messages.length > 0 && (
+              <div className="aw-chat-thread">
+                {messages.map((item) => (
+                  <div className={`aw-chat-row ${item.sender_type}`} key={item.id}>
+                    <div className="aw-chat-bubble">
+                      {item.message}
+                    </div>
+                  </div>
+                ))}
+                {loading && (
+                  <div className="aw-chat-row admin">
+                    <div className="aw-typing"><span></span><span></span><span></span></div>
+                  </div>
+                )}
               </div>
-              
-              <div className="aw-message-field">
-                <span className="aw-field-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                </span>
-                <div className="aw-field-content">
-                  <label htmlFor="aw-email">Email</label>
-                  <input id="aw-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} placeholder="Optional" />
-                </div>
-              </div>
+            )}
 
-              <div className="aw-message-field">
-                <span className="aw-field-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                </span>
-                <div className="aw-field-content">
-                  <label htmlFor="aw-phone">Phone</label>
-                  <input id="aw-phone" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={40} placeholder="Optional" />
-                </div>
+            {/* কুইক রিপ্লাই */}
+            {thread && (
+              <div className="aw-quick-replies">
+                {quickReplies.map((item) => (
+                  <button key={item} type="button" onClick={() => setDraft(item === 'Fitment help' ? 'Please help me find the right part for my car.' : item === 'Stock & price' ? 'Please check stock and price for this part.' : item === 'Booking help' ? 'I need help with a booking.' : 'Can you help me track my order?')}>
+                    {item}
+                  </button>
+                ))}
               </div>
+            )}
 
-              <div className="aw-message-field">
-                <span className="aw-field-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
-                </span>
-                <div className="aw-field-content">
-                  <label htmlFor="aw-subject">Subject</label>
-                  <input id="aw-subject" value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={160} placeholder="Parts enquiry" />
-                </div>
+            {/* মেসেজ লেখার জায়গা (Auto-expanding) */}
+            <div className="aw-form-group" style={{ flex: thread ? 'none' : 1 }}>
+              <label htmlFor="aw-message">{thread ? 'Write a reply...' : 'What would you like to discuss?'}</label>
+              <textarea 
+                id="aw-message"
+                ref={textareaRef} /* এখানে রেফ যুক্ত করা হয়েছে */
+                value={draft} 
+                onChange={(event) => setDraft(event.target.value)} 
+                required 
+                maxLength={4000} 
+                rows={1} /* শুরুতে ১ লাইন হবে, লেখা বাড়লে বাড়বে */
+                placeholder={thread ? 'Type your reply here...' : 'Share your goals and questions for the session...'} 
+              />
+            </div>
+
+            {error && <p className="aw-msg-feedback error">{error}</p>}
+            {sent && !error && <p className="aw-msg-feedback success">Message sent. We will reply here.</p>}
+
+            {/* ফুটার বাটন */}
+            <div className="aw-form-footer">
+              <span className="aw-form-note">24 hours free cancellation. By proceeding, you agree to our Terms of Service and Privacy Policy.</span>
+              <div className="aw-actions">
+                <button type="button" className="aw-btn-reset" onClick={() => { setDraft(''); setName(''); setEmail(''); setPhone(''); setSubject('Parts enquiry'); }}>
+                  Reset
+                </button>
+                <button type="submit" className="aw-btn-submit" disabled={loading}>
+                  {loading ? 'Sending...' : (thread ? 'Send Reply' : 'Schedule Now')}
+                </button>
               </div>
             </div>
-          )}
-          
-          {/* কালো কম্পোজ বক্স */}
-          <div className="aw-message-compose-wrapper">
-            <button type="button" className="aw-message-icon-btn" aria-label="Add attachment">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            </button>
-            <button type="button" className="aw-message-icon-btn" aria-label="Voice message">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
-            </button>
-            
-            <textarea 
-              value={draft} 
-              onChange={(event) => setDraft(event.target.value)} 
-              required 
-              maxLength={4000} 
-              rows={1} 
-              placeholder={thread ? 'Reply....' : 'Write your message...'} 
-            />
-            
-            <button className="aw-message-send" type="submit" disabled={loading} aria-label="Send message">
-              {loading ? '...' : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
-              )}
-            </button>
-          </div>
-          
-          {error && <p className="aw-message-error" role="alert">{error}</p>}
-          {sent && !error && <p className="aw-message-success" role="status">Message sent. We will reply here.</p>}
-          <p className="aw-message-note">Al Waha Parts may make mistakes. Verify info</p>
-        </form>
+
+          </form>
+        </div>
+
       </div>
     </section>
   );
 }
-//
