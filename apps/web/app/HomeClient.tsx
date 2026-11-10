@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { apiFetch } from '../../../packages/shared/src/api';
 import { formatSar } from '../../../packages/shared/src/currency';
@@ -1646,12 +1647,13 @@ function FullWidthImageShowcase({
       `}</style>
 
       <div className="fullwidth-showcase-media">
-        <img
+        <Image
           ref={imageRef}
           src={imageSrc}
           alt={imageAlt}
-          width={priority ? 736 : undefined}
-          height={priority ? 1308 : undefined}
+          fill
+          sizes="100vw"
+          priority={priority}
           loading={priority ? 'eager' : 'lazy'}
           fetchPriority={priority ? 'high' : 'low'}
           decoding="async"

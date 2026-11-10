@@ -25,6 +25,7 @@ function absoluteImageUrl(image: string) {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await fetchPublicData<Product>(productPath(slug));
+  if (!product) notFound();
   const name = product?.part_name || slug.replace(/-/g, ' ');
   const description = product ? descriptionFor(product) : `Product details and vehicle fitment for ${name} from Al Waha Parts.`;
   const canonicalSlug = product?.slug || product?.id || slug;
@@ -35,7 +36,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: name,
     description,
     alternates: { canonical },
-    ...(product === null ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       type: 'website',
       title: `${name} | Al Waha Parts`,
@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
   const product = await fetchPublicData<Product>(productPath(slug));
-  if (product === null) notFound();
+  if (!product) notFound();
 
   if (product?.slug && product.slug !== slug) {
     permanentRedirect(`/products/${encodeURIComponent(product.slug)}`);

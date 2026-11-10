@@ -260,6 +260,7 @@ export function Footer() {
           alt="Build with Binzeo"
           width={2172}
           height={724}
+          sizes="100vw"
           priority={false}
         />
       </div>

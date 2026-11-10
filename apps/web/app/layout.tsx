@@ -1097,7 +1097,7 @@ html[dir='rtl'] input, html[dir='rtl'] select, html[dir='rtl'] textarea { text-a
 }
 `;
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://al-waha-parts.vercel.app';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.al-waha.shop';
 
 export const metadata: Metadata = {
   title: { default: 'Al Waha Parts | Car Parts in Al Jubail, Saudi Arabia', template: '%s | Al Waha Parts' },

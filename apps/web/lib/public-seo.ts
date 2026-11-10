@@ -24,7 +24,7 @@ export function fetchPublicData<T>(path: string): Promise<T | null | undefined> 
 }
 
 export function getSiteOrigin(): string {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL || 'https://al-waha-parts.vercel.app';
+  const configured = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.al-waha.shop';
   try {
     return new URL(configured).origin;
   } catch {
