@@ -1104,6 +1104,7 @@ export const metadata: Metadata = {
   description: 'Buy quality car parts in Al Jubail, Saudi Arabia. Find brakes, suspension, filters, wheels and replacement parts with vehicle fitment support.',
   applicationName: 'Al Waha Parts', authors: [{ name: 'Al Waha Parts' }], creator: 'Al Waha Parts', publisher: 'Al Waha Parts',
   ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
+  icons: { icon: '/favicon.png' },
   openGraph: { type: 'website', locale: 'en_SA', siteName: 'Al Waha Parts', title: 'Al Waha Parts | Car Parts in Al Jubail, Saudi Arabia', description: 'Shop car parts and replacement parts in Al Jubail, Saudi Arabia with live catalog and vehicle fitment support.', ...(siteUrl ? { images: [{ url: '/logo.png', width: 1254, height: 1254, alt: 'Al Waha Parts' }] } : {}) },
   ...(siteUrl ? { twitter: { card: 'summary' as const, title: 'Al Waha Parts | Car Parts in Al Jubail, Saudi Arabia', description: 'Quality automotive parts and vehicle fitment support in Al Jubail, Saudi Arabia.', images: ['/logo.png'] } } : {}),
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },

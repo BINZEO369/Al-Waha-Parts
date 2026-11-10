@@ -161,11 +161,17 @@ function HeroCarousel({ initialBanners }: { initialBanners: Banner[] }) {
 
   useEffect(() => {
     if (banners.length < 2) return;
-    const timer = window.setInterval(
-      () => setActive((current) => (current + 1) % banners.length),
-      6000,
-    );
-    return () => window.clearInterval(timer);
+    let interval: number | undefined;
+    const initialDelay = window.setTimeout(() => {
+      interval = window.setInterval(
+        () => setActive((current) => (current + 1) % banners.length),
+        6000,
+      );
+    }, 12000);
+    return () => {
+      window.clearTimeout(initialDelay);
+      if (interval !== undefined) window.clearInterval(interval);
+    };
   }, [banners.length]);
 
   if (loading) return null;
@@ -306,16 +312,17 @@ function HeroCarousel({ initialBanners }: { initialBanners: Banner[] }) {
         {hasImage ? (
           <div className="hero-carousel-media">
             <picture>
-              {mobileImageSource && (
-                <source media="(max-width: 600px)" srcSet={mobileImageSource} />
+              {mobileImageSource && mobileImageSource !== imageSource && (
+                <source media="(min-width: 601px)" srcSet={imageSource} />
               )}
-              <img
-                src={imageSource}
+              <OptimizedImage
+                src={mobileImageSource || imageSource}
                 alt=""
                 aria-hidden="true"
-                width={2048}
-                height={768}
+                fill
+                sizes="100vw"
                 loading={active === 0 ? 'eager' : 'lazy'}
+                priority={active === 0}
                 fetchPriority={active === 0 ? 'high' : 'auto'}
                 decoding="async"
               />
