@@ -901,7 +901,7 @@ export function CustomerMessageBox() {
                 value={draft} 
                 onChange={(event) => setDraft(event.target.value)} 
                 onKeyDown={(event) => {
-                  if (event.key === 'Enter' && !event.shiftKey) {
+                  if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
                     event.preventDefault();
                     event.currentTarget.form?.requestSubmit();
                   }
@@ -909,7 +909,7 @@ export function CustomerMessageBox() {
                 required 
                 maxLength={4000} 
                 rows={1} 
-                placeholder="Write your message..." 
+                placeholder="Write your message... (Enter for a new line)"
               />
               
               <button className="aw-send-btn" type="submit" disabled={loading || !draft.trim()}>
@@ -921,7 +921,7 @@ export function CustomerMessageBox() {
               </button>
             </div>
             
-            <p className="aw-footer-note">Al Waha Parts may make mistakes. Verify info.</p>
+            <p className="aw-footer-note">Enter = new line · Ctrl/⌘ + Enter = send · Al Waha Parts may make mistakes.</p>
           </form>
         </footer>
 
