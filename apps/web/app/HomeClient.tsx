@@ -707,7 +707,9 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           max-width: 620px;
           max-height: 420px;
           height: auto;
+          aspect-ratio: 1 / 1;
           object-fit: contain;
+          object-position: center;
           transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -911,9 +913,9 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
                 <OptimizedImage
                   src={category.image_url}
                   alt={category.category_name}
-                  width={620}
-                  height={420}
-                  sizes="(max-width: 520px) 100vw, 48vw"
+                  width={384}
+                  height={384}
+                  sizes="(max-width: 768px) 42vw, 46vw"
                   loading="lazy"
                   quality={75}
                 />
@@ -1518,6 +1520,7 @@ function FullWidthImageShowcase({
           opacity: 1;
           animation: none;
           transition: none;
+          object-position: center 68%;
         }
 
         @keyframes showcase-image-in {
