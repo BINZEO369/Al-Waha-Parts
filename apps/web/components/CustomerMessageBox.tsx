@@ -49,6 +49,7 @@ export function CustomerMessageBox() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+  const invalidThread = useRef(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -67,14 +68,16 @@ export function CustomerMessageBox() {
   }, [messages, loading]);
 
   const loadThread = useCallback(async (current: Thread) => {
-    if (!apiUrl) return;
+    if (!apiUrl || invalidThread.current) return;
     try {
       const response = await fetch(`${apiUrl}/api/v1/messages/thread?thread_id=${encodeURIComponent(current.thread_id)}&access_token=${encodeURIComponent(current.access_token)}`, { cache: 'no-store' });
       if (response.status === 404) {
+        invalidThread.current = true;
         clearThread();
         setThread(null);
         setMessages([]);
-        setError('This conversation has expired. Start a new message below.');
+        setSent(false);
+        setError('This conversation has expired or is no longer available. Start a new message below.');
         return;
       }
       if (!response.ok) return;
@@ -86,15 +89,16 @@ export function CustomerMessageBox() {
   }, [apiUrl]);
 
   useEffect(() => {
-    const current = readThread();
+    const current = thread ?? readThread();
     if (!current) return;
+    invalidThread.current = false;
     setThread(current);
     void loadThread(current);
     const timer = window.setInterval(() => {
       if (document.visibilityState === 'visible') void loadThread(current);
     }, 3000);
     return () => window.clearInterval(timer);
-  }, [loadThread]);
+  }, [loadThread, thread?.thread_id]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -105,8 +109,19 @@ export function CustomerMessageBox() {
       setError('Messaging is temporarily unavailable. Please try again shortly.');
       return;
     }
+    if (!thread) {
+      if (name.trim().length < 2) {
+        setError('Please enter your name before sending.');
+        return;
+      }
+      if (email.trim() && !/^\S+@\S+\.\S+$/.test(email.trim())) {
+        setError('Please enter a valid email address.');
+        return;
+      }
+    }
     setLoading(true);
     try {
+      if (!thread) invalidThread.current = false;
       const endpoint = thread ? `${apiUrl}/api/v1/messages/thread/reply` : `${apiUrl}/api/v1/messages`;
       const body = thread
         ? { ...thread, message: draft.trim() }
@@ -114,9 +129,11 @@ export function CustomerMessageBox() {
       const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const payload = await response.json() as { data?: { thread_id?: string; access_token?: string; message?: Message }; error?: { message?: string } };
       if (response.status === 404 && thread) {
+        invalidThread.current = true;
         clearThread();
         setThread(null);
         setMessages([]);
+        setSent(false);
         setError('This conversation has expired. Please send your message again.');
         return;
       }
@@ -637,7 +654,7 @@ export function CustomerMessageBox() {
                 ID: AW-{thread.thread_id.slice(0, 6).toUpperCase()}
               </button>
             )}
-            <button className="aw-close-btn" type="button" aria-label="Close">
+            <button className="aw-close-btn" type="button" aria-label="Close message center" onClick={() => window.history.back()}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
           </div>
@@ -745,4 +762,3 @@ export function CustomerMessageBox() {
     </section>
   );
 }
-

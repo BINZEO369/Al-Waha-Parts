@@ -13,8 +13,10 @@ import { getSupabaseAdmin } from './supabase.js';
 import {
   analyzeAnalyticsSnapshot,
   sanitizeProductAiInput,
+  suggestCustomerMessageReply,
   suggestProductMetadata,
   type AnalyticsAiSnapshot,
+  type CustomerMessageAiTurn,
   type ProductAiInput,
 } from './ai.js';
 
@@ -234,6 +236,52 @@ app.post(
         input_data: input,
         error_message: message,
       });
+      return jsonError(reply, message.startsWith('AI is not configured') ? 503 : 502, message);
+    }
+  },
+);
+
+app.post(
+  '/api/v1/admin/ai/suggest-message-reply',
+  { preHandler: requireAdmin as any },
+  async (
+    request: FastifyRequest<{ Body: { thread_id?: string } }>,
+    reply,
+  ) => {
+    const admin = (request as FastifyRequest & { admin?: { id: string } }).admin;
+    if (!admin) return jsonError(reply, 403, 'Active admin access required');
+    const retryAfter = checkRate(aiBuckets, `message-reply:${admin.id}`, 12, 60 * 60 * 1000);
+    if (retryAfter !== null) {
+      reply.header('Retry-After', String(retryAfter));
+      return reply.code(429).send({ error: { message: `AI reply limit reached. Try again in ${retryAfter} seconds.` } });
+    }
+    const threadId = typeof request.body?.thread_id === 'string' ? request.body.thread_id.trim() : '';
+    if (!/^[0-9a-f-]{36}$/i.test(threadId)) return jsonError(reply, 400, 'A valid customer thread is required.');
+    const supabase = getSupabaseAdmin();
+    const { data: rows, error: readError } = await supabase
+      .from('customer_messages')
+      .select('sender_type,message,created_at')
+      .eq('thread_id', threadId)
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: true })
+      .limit(10);
+    if (readError) return jsonError(reply, 500, 'The customer conversation could not be loaded.');
+    if (!rows?.length) return jsonError(reply, 404, 'Customer thread not found or expired.');
+    try {
+      const turns = rows.map((row) => ({ sender_type: row.sender_type, message: row.message })) as CustomerMessageAiTurn[];
+      const suggestion = await suggestCustomerMessageReply(config.geminiApiKey, config.geminiModel, turns);
+      const { data: run, error: auditError } = await supabase.from('admin_ai_runs').insert({
+        admin_id: admin.id,
+        action: 'suggest_message_reply',
+        status: 'preview',
+        input_data: { thread_id: threadId, turn_count: turns.length },
+        output_data: suggestion,
+      }).select('id').single();
+      if (auditError) request.log.warn({ err: auditError }, 'Could not write message AI audit log');
+      return { data: { run_id: run?.id ?? null, ...suggestion, requires_review: true } };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'AI reply draft failed';
+      await supabase.from('admin_ai_runs').insert({ admin_id: admin.id, action: 'suggest_message_reply', status: 'failed', input_data: { thread_id: threadId }, error_message: message });
       return jsonError(reply, message.startsWith('AI is not configured') ? 503 : 502, message);
     }
   },

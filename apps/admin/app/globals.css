@@ -3231,3 +3231,7 @@ select:focus-visible {
 .messages-reply textarea { min-height:58px; border-radius:12px; background:#fffafa; }
 .messages-reply .primary-button { min-height:44px; border-radius:22px; }
 @media (max-width:680px) { .messages-page .page-heading { margin-bottom:20px; } .messages-toolbar { align-items:stretch; flex-wrap:wrap; } .messages-toolbar > div { width:100%; } .messages-layout { border-radius:12px; } .message-thread-card { min-height:82px; padding:12px; } .messages-inbox { max-height:290px; } .messages-conversation { min-height:620px; } .messages-conversation-head { padding:16px; } .messages-actions { display:flex; } .messages-actions button { flex:1; } .admin-message-bubble { max-width:91%; } }
+
+.messages-reply-actions { display:flex; align-items:stretch; gap:8px; }
+.messages-reply-actions .secondary-button, .messages-reply-actions .primary-button { white-space:nowrap; }
+@media (max-width:680px) { .messages-reply-actions { justify-content:stretch; } .messages-reply-actions > * { flex:1; } }
