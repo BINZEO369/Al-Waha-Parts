@@ -965,7 +965,10 @@ export default function Home({ initialData }: { initialData: HomeInitialData }) 
       {error && (
         <div className="store-section data-alert home-data-alert">{error}</div>
       )}
-      {/* 6. FULL-WIDTH IMAGE SHOWCASE №2 — img3.png */}
+      {/* CAR BRAND LOGOS */}
+      <CarBrandStrip brands={carBrands} />
+
+      {/* SECOND BANNER — unchanged, now after the brand logos */}
       <FullWidthImageShowcase
         sectionId="fullwidth-showcase-two"
         imageSrc="/images/img3.webp"
@@ -977,9 +980,6 @@ export default function Home({ initialData }: { initialData: HomeInitialData }) 
         }
         subtitle="Premium brake systems, discs, pads and drivetrain upgrades — delivered with the precision, fitment and durability your vehicle deserves."
       />
-
-      {/* CAR BRAND LOGOS */}
-      <CarBrandStrip brands={carBrands} />
 
       {/* POPULAR VEHICLES */}
       {!loading && homeSelectedVehicles.length > 0 && (
