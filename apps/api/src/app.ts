@@ -1024,25 +1024,38 @@ app.post(
     let assistantReply = '';
     let needsAdmin = false;
     let escalationReason: string | null = null;
+    let verifiedContext = '';
     if (sensitive) {
       assistantReply = 'I’m keeping this conversation for a team member because it involves a sensitive payment or complaint matter. Please do not send card numbers, CVV, OTPs, passwords, or bank login details here. Our team will reply securely.';
       needsAdmin = true;
       escalationReason = 'Sensitive payment, complaint, dispute, or account-security topic.';
     } else if (/(track|tracking|order status|booking|awb|awp-|অর্ডার|ট্র্যাক|حالة الطلب|تتبع)/i.test(latestText)) {
-      const bookingNumber = latestText.match(/AWP-\d{8,}-[A-Z0-9]{4,}/i)?.[0]?.toUpperCase();
+      const bookingId = latestText.match(/AWP-\d{8,}-[A-Z0-9]{4,}|[0-9a-f]{8}-[0-9a-f-]{27,}/i)?.[0]?.toUpperCase();
       const phone = messageText(thread.customer_phone, 40) || latestText.match(/(?:\+?\d[\d\s().-]{7,}\d)/)?.[0]?.replace(/[\s().-]/g, '');
-      if (bookingNumber && phone) {
-        const { data: booking } = await supabase.from('bookings').select('booking_number,booking_status,created_at,delivery_method,customer_city').eq('booking_number', bookingNumber).eq('customer_phone', phone).maybeSingle();
-        assistantReply = booking
-          ? `Your booking ${booking.booking_number} is currently ${String(booking.booking_status || 'being reviewed').replace(/_/g, ' ')}. Delivery method: ${booking.delivery_method || 'not specified'}${booking.customer_city ? ` · City: ${booking.customer_city}` : ''}. A team member can confirm the next update if needed.`
-          : 'I could not find a booking matching those details. Please check the AWP booking number and phone number, or send your question and our team will help.';
+      if (bookingId && phone) {
+        let bookingQuery = supabase.from('bookings').select('id,booking_number,booking_status,created_at,total_amount,currency,delivery_method,customer_city').eq('customer_phone', phone);
+        bookingQuery = /^[0-9a-f-]{36}$/i.test(bookingId) ? bookingQuery.eq('id', bookingId) : bookingQuery.eq('booking_number', bookingId);
+        const { data: booking } = await bookingQuery.maybeSingle();
+        if (booking) {
+          const { data: items } = await supabase.from('booking_items').select('part_name_snapshot,sku_snapshot,quantity,line_total').eq('booking_id', booking.id).limit(50);
+          verifiedContext = JSON.stringify({ booking_id: booking.booking_number, status: booking.booking_status, total_amount: booking.total_amount, currency: booking.currency, delivery_method: booking.delivery_method, city: booking.customer_city, items: items ?? [] });
+        } else assistantReply = 'I could not find a booking matching that Booking ID and phone number. Please check both details and try again.';
       } else {
-        assistantReply = 'I can help check an order. Please send your AWP booking number and the phone number used for the booking. Do not send payment or card details.';
+        assistantReply = 'I can check your order. Please send the Booking ID and the phone number used for that booking. Do not send payment or card details.';
       }
-    } else {
+    } else if (/(available|availability|stock|price|cost|part|product|sku|oem|দাম|স্টক|পণ্য|পার্ট)/i.test(latestText)) {
+      const ignored = new Set(['please', 'check', 'have', 'help', 'with', 'the', 'this', 'available', 'availability', 'stock', 'price', 'part', 'product']);
+      const terms = [...new Set((latestText.toLowerCase().match(/[a-z0-9][a-z0-9-]{2,}/g) ?? []).filter((term) => !ignored.has(term)))].slice(0, 5);
+      if (terms.length) {
+        const filters = terms.flatMap((term) => [`part_name.ilike.%${term}%`, `sku.ilike.%${term}%`]).join(',');
+        const { data: products } = await supabase.from('parts').select('part_name,sku,sale_price,price,currency,stock_quantity').or(filters).eq('status', 'active').limit(12);
+        verifiedContext = JSON.stringify({ products: (products ?? []).map((product) => ({ name: product.part_name, sku: product.sku, price: product.sale_price ?? product.price, currency: product.currency ?? 'SAR', stock: product.stock_quantity })) });
+      }
+    }
+    if (!assistantReply) {
       try {
         const turns = rows.map((row) => ({ sender_type: row.sender_type, message: row.message })) as CustomerAssistantTurn[];
-        assistantReply = (await generateCustomerAssistantReply(config.geminiApiKey, config.geminiModel, turns)).reply;
+        assistantReply = (await generateCustomerAssistantReply(config.geminiApiKey, config.geminiModel, turns, verifiedContext)).reply;
       } catch {
         assistantReply = 'Thanks for your message. I could not safely complete this request automatically, so I have left it for our parts team to review. They will reply in this conversation.';
         needsAdmin = true;

@@ -3,7 +3,7 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 const threadStorageKey = 'alwaha-customer-message-thread-v1';
-const quickReplies = ['Fitment help', 'Stock & price', 'Booking help', 'Track Order'];
+const quickReplies = ['Fitment help', 'Stock & price', 'Booking help', 'Order tracking'];
 
 type Message = {
   id: string;
@@ -729,7 +729,7 @@ export function CustomerMessageBox() {
           {thread && (
              <div className="aw-quick-replies">
                {quickReplies.map((item) => (
-                 <button key={item} type="button" onClick={() => setDraft(item === 'Fitment help' ? 'Please help me find the right part for my car.' : item === 'Stock & price' ? 'Please check stock and price for this part.' : item === 'Booking help' ? 'I need help with a booking.' : 'Can you help me track my order?')}>
+                 <button key={item} type="button" onClick={() => setDraft(item === 'Fitment help' ? 'Please help me find the right part for my car.' : item === 'Stock & price' ? 'Please check stock and price for this part.' : item === 'Booking help' ? 'I need help with a booking.' : 'I want to check my order. I will provide my Booking ID and phone number.') }>
                    {item}
                  </button>
                ))}
