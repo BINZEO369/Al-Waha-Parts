@@ -759,20 +759,20 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           }
 
           .showcase-container {
-            gap: 54px;
-            padding: 0 16px;
+            gap: 40px;
+            padding: 0 18px;
           }
 
           .showcase-row {
-            flex-direction: row;
-            align-items: center;
-            gap: 14px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 16px;
           }
 
           .showcase-text {
-            flex: 1 1 58%;
+            flex: 0 0 auto;
             max-width: none;
-            order: -1;
+            order: 0;
             min-width: 0;
           }
 
@@ -821,47 +821,34 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
           }
 
           .showcase-visual {
-            flex: 1 1 42%;
-            min-height: 170px;
-            -webkit-mask-image: linear-gradient(
-              to bottom,
-              transparent 0%,
-              rgba(0, 0, 0, 0.2) 8%,
-              rgba(0, 0, 0, 0.9) 18%,
-              #000 26%,
-              #000 74%,
-              rgba(0, 0, 0, 0.9) 82%,
-              rgba(0, 0, 0, 0.2) 92%,
-              transparent 100%
-            );
-            mask-image: linear-gradient(
-              to bottom,
-              transparent 0%,
-              rgba(0, 0, 0, 0.2) 8%,
-              rgba(0, 0, 0, 0.9) 18%,
-              #000 26%,
-              #000 74%,
-              rgba(0, 0, 0, 0.9) 82%,
-              rgba(0, 0, 0, 0.2) 92%,
-              transparent 100%
-            );
+            order: -1;
+            flex: 0 0 auto;
+            width: 100%;
+            min-height: 0;
+            aspect-ratio: 4 / 3;
+            overflow: hidden;
+            border-radius: 14px;
+            background: #f5f5f5;
+            -webkit-mask-image: none;
+            mask-image: none;
           }
 
           .showcase-visual img {
-            max-height: 170px;
+            width: 100%;
+            max-width: none;
+            max-height: none;
+            height: 100%;
+            aspect-ratio: auto;
+            object-fit: contain;
           }
 
           .showcase-visual .empty {
-            height: 140px;
-            font-size: 9px;
+            height: 100%;
+            font-size: 10px;
           }
         }
 
         @media (max-width: 380px) {
-          .showcase-row {
-            gap: 10px;
-          }
-
           .showcase-text h2 {
             font-size: 18px;
           }
@@ -871,13 +858,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
             -webkit-line-clamp: 2;
           }
 
-          .showcase-visual {
-            min-height: 140px;
-          }
-
-          .showcase-visual img {
-            max-height: 140px;
-          }
         }
       `}</style>
 
@@ -925,451 +905,6 @@ function CategoryShowcase({ categories }: { categories: Category[] }) {
             </div>
           </div>
         ))}
-      </div>
-    </section>
-  );
-}
-
-/* ==================================================================
- *  HOMEPAGE CAR SPOTLIGHT — text LEFT · image RIGHT (edge-to-edge)
- *  Image touches the RIGHT screen edge.
- *  Only top/bottom fade is kept — no horizontal fade (original image).
- * ================================================================== */
-
-function HomepageCarSpotlight() {
-  return (
-    <section className="home-spotlight" aria-labelledby="home-spotlight-title">
-      <style jsx>{`
-        .home-spotlight {
-          position: relative;
-          width: 100%;
-          display: grid;
-          grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.25fr);
-          align-items: center;
-          gap: clamp(20px, 3vw, 48px);
-          padding-top: 70px;
-          padding-bottom: 70px;
-          padding-left: max(24px, calc((100vw - 1280px) / 2 + 24px));
-          padding-right: 0;
-          background: #ffffff;
-          overflow: hidden;
-        }
-
-        .home-spotlight-copy {
-          position: relative;
-          z-index: 1;
-          max-width: 520px;
-        }
-
-        .home-spotlight-eyebrow {
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 22px;
-          color: var(--red);
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-        }
-
-        .home-spotlight-eyebrow::before {
-          width: 32px;
-          height: 1.5px;
-          background: var(--red);
-          content: '';
-        }
-
-        .home-spotlight-copy h2 {
-          margin: 0 0 22px;
-          color: var(--ink);
-          font-family: 'Montserrat', sans-serif;
-          font-size: clamp(34px, 4.5vw, 60px);
-          font-weight: 800;
-          line-height: 1.02;
-          letter-spacing: -0.06em;
-        }
-
-        .home-spotlight-copy p {
-          max-width: 440px;
-          margin: 0;
-          color: #6a6a6a;
-          font-size: 14px;
-          line-height: 1.8;
-        }
-
-        /* Image container — only vertical (top/bottom) fade.
-           No horizontal fade → original image horizontally. */
-        .home-spotlight-art {
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          min-height: 480px;
-          width: 100%;
-          -webkit-mask-image: linear-gradient(
-            to bottom,
-            transparent 0%,
-            #000 12%,
-            #000 88%,
-            transparent 100%
-          );
-          mask-image: linear-gradient(
-            to bottom,
-            transparent 0%,
-            #000 12%,
-            #000 88%,
-            transparent 100%
-          );
-        }
-
-        .home-spotlight-art img {
-          display: block;
-          width: 100%;
-          max-width: 860px;
-          max-height: 560px;
-          height: auto;
-          object-fit: contain;
-          object-position: right center;
-          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .home-spotlight:hover .home-spotlight-art img {
-          transform: translateY(-6px) scale(1.015);
-        }
-
-        @media (max-width: 900px) {
-          .home-spotlight {
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-            gap: 20px;
-            padding-top: 54px;
-            padding-bottom: 54px;
-            padding-left: 24px;
-          }
-
-          .home-spotlight-art {
-            min-height: 340px;
-          }
-
-          .home-spotlight-art img {
-            max-height: 400px;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .home-spotlight {
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-            gap: 12px;
-            padding-top: 38px;
-            padding-bottom: 38px;
-            padding-left: 16px;
-          }
-
-          .home-spotlight-eyebrow {
-            font-size: 8px;
-            letter-spacing: 0.14em;
-            margin-bottom: 10px;
-            gap: 6px;
-          }
-
-          .home-spotlight-eyebrow::before {
-            width: 16px;
-            height: 1px;
-          }
-
-          .home-spotlight-copy h2 {
-            font-size: clamp(22px, 5.4vw, 32px);
-            line-height: 1.06;
-            margin-bottom: 12px;
-            letter-spacing: -0.045em;
-          }
-
-          .home-spotlight-copy p {
-            font-size: 11px;
-            line-height: 1.6;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          }
-
-          .home-spotlight-art {
-            min-height: 220px;
-          }
-
-          .home-spotlight-art img {
-            max-height: 240px;
-          }
-        }
-
-        @media (max-width: 400px) {
-          .home-spotlight {
-            gap: 8px;
-            padding-left: 12px;
-          }
-
-          .home-spotlight-copy h2 {
-            font-size: 20px;
-          }
-
-          .home-spotlight-copy p {
-            font-size: 10px;
-            -webkit-line-clamp: 2;
-          }
-
-          .home-spotlight-art {
-            min-height: 170px;
-          }
-
-          .home-spotlight-art img {
-            max-height: 180px;
-          }
-        }
-      `}</style>
-
-      <div className="home-spotlight-copy">
-        <span className="home-spotlight-eyebrow">Built for the way you drive</span>
-        <h2 id="home-spotlight-title">Better parts. Better journeys.</h2>
-        <p>
-          Find trusted car parts for the vehicles you love. Explore leading brands and get the right
-          fit for every journey ahead.
-        </p>
-      </div>
-
-      <div className="home-spotlight-art">
-        <OptimizedImage
-          src="/performance-car-showcase.webp"
-          alt="A close-up of a white performance car with a red taillight"
-          width={736}
-          height={736}
-          sizes="(max-width: 640px) 85vw, (max-width: 900px) 48vw, 45vw"
-          loading="lazy"
-          quality={75}
-        />
-      </div>
-    </section>
-  );
-}
-
-/* ==================================================================
- *  REVERSE CAR SPOTLIGHT — image LEFT · text RIGHT (edge-to-edge)
- *  · Image touches the LEFT screen edge.
- *  · Only top/bottom fade — no horizontal fade (original image).
- * ================================================================== */
-
-function ReverseCarSpotlight() {
-  return (
-    <section className="reverse-spotlight" aria-labelledby="reverse-spotlight-title">
-      <style jsx>{`
-        .reverse-spotlight {
-          position: relative;
-          width: 100%;
-          display: grid;
-          grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr);
-          align-items: center;
-          gap: clamp(20px, 3vw, 48px);
-          padding-top: 70px;
-          padding-bottom: 70px;
-          padding-left: 0; /* ← image starts at the very left screen edge */
-          padding-right: max(24px, calc((100vw - 1280px) / 2 + 24px));
-          background: #ffffff;
-          overflow: hidden;
-        }
-
-        .reverse-spotlight-copy {
-          position: relative;
-          z-index: 1;
-          max-width: 520px;
-        }
-
-        .reverse-spotlight-eyebrow {
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 22px;
-          color: var(--red);
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-        }
-
-        .reverse-spotlight-eyebrow::before {
-          width: 32px;
-          height: 1.5px;
-          background: var(--red);
-          content: '';
-        }
-
-        .reverse-spotlight-copy h2 {
-          margin: 0 0 22px;
-          color: var(--ink);
-          font-family: 'Montserrat', sans-serif;
-          font-size: clamp(34px, 4.5vw, 60px);
-          font-weight: 800;
-          line-height: 1.02;
-          letter-spacing: -0.06em;
-        }
-
-        .reverse-spotlight-copy p {
-          max-width: 440px;
-          margin: 0;
-          color: #6a6a6a;
-          font-size: 14px;
-          line-height: 1.8;
-        }
-
-        /* Image container — only vertical (top/bottom) fade.
-           No horizontal fade → original image horizontally. */
-        .reverse-spotlight-art {
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: flex-start;
-          min-height: 480px;
-          width: 100%;
-          -webkit-mask-image: linear-gradient(
-            to bottom,
-            transparent 0%,
-            #000 12%,
-            #000 88%,
-            transparent 100%
-          );
-          mask-image: linear-gradient(
-            to bottom,
-            transparent 0%,
-            #000 12%,
-            #000 88%,
-            transparent 100%
-          );
-        }
-
-        .reverse-spotlight-art img {
-          display: block;
-          width: 100%;
-          max-width: 860px;
-          max-height: 560px;
-          height: auto;
-          object-fit: contain;
-          object-position: left center;
-          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .reverse-spotlight:hover .reverse-spotlight-art img {
-          transform: translateY(-6px) scale(1.015);
-        }
-
-        @media (max-width: 900px) {
-          .reverse-spotlight {
-            grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-            gap: 20px;
-            padding-top: 54px;
-            padding-bottom: 54px;
-            padding-left: 0;
-            padding-right: 24px;
-          }
-
-          .reverse-spotlight-art {
-            min-height: 340px;
-          }
-
-          .reverse-spotlight-art img {
-            max-height: 400px;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .reverse-spotlight {
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-            gap: 12px;
-            padding-top: 38px;
-            padding-bottom: 38px;
-            padding-left: 0;
-            padding-right: 16px;
-          }
-
-          .reverse-spotlight-eyebrow {
-            font-size: 8px;
-            letter-spacing: 0.14em;
-            margin-bottom: 10px;
-            gap: 6px;
-          }
-
-          .reverse-spotlight-eyebrow::before {
-            width: 16px;
-            height: 1px;
-          }
-
-          .reverse-spotlight-copy h2 {
-            font-size: clamp(22px, 5.4vw, 32px);
-            line-height: 1.06;
-            margin-bottom: 12px;
-            letter-spacing: -0.045em;
-          }
-
-          .reverse-spotlight-copy p {
-            font-size: 11px;
-            line-height: 1.6;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          }
-
-          .reverse-spotlight-art {
-            min-height: 220px;
-          }
-
-          .reverse-spotlight-art img {
-            max-height: 240px;
-          }
-        }
-
-        @media (max-width: 400px) {
-          .reverse-spotlight {
-            gap: 8px;
-            padding-left: 0;
-            padding-right: 12px;
-          }
-
-          .reverse-spotlight-copy h2 {
-            font-size: 20px;
-          }
-
-          .reverse-spotlight-copy p {
-            font-size: 10px;
-            -webkit-line-clamp: 2;
-          }
-
-          .reverse-spotlight-art {
-            min-height: 170px;
-          }
-
-          .reverse-spotlight-art img {
-            max-height: 180px;
-          }
-        }
-      `}</style>
-
-      <div className="reverse-spotlight-art">
-        <OptimizedImage
-          src="/images/img4.webp"
-          alt="Precision automotive components showcase"
-          width={736}
-          height={1104}
-          sizes="(max-width: 640px) 42vw, 45vw"
-          loading="lazy"
-          quality={75}
-        />
-      </div>
-
-      <div className="reverse-spotlight-copy">
-        <span className="reverse-spotlight-eyebrow">Verified quality, guaranteed</span>
-        <h2 id="reverse-spotlight-title">Parts that fit. Performance that lasts.</h2>
-        <p>
-          From routine maintenance to full performance builds — every component in our catalog is
-          inspected, tested and backed by fitment guarantees you can trust.
-        </p>
       </div>
     </section>
   );
@@ -1776,26 +1311,6 @@ export default function Home({ initialData }: { initialData: HomeInitialData }) 
       {error && (
         <div className="store-section data-alert home-data-alert">{error}</div>
       )}
-      {/* 3. FULL-WIDTH IMAGE SHOWCASE №1 — img1.png */}
-      <FullWidthImageShowcase
-        sectionId="fullwidth-showcase-one"
-        priority
-        imageSrc="/images/img1-banner.webp"
-        imageAlt="Performance automotive showcase"
-        title={
-          <>
-            Every part. <em>Every drive.</em> Perfected.
-          </>
-        }
-        subtitle="From daily drivers to weekend builds — discover OEM-grade components and performance upgrades crafted for the road ahead."
-      />
-
-      {/* 4. HOMEPAGE CAR SPOTLIGHT (text left · image right → touches RIGHT screen edge) */}
-      <HomepageCarSpotlight />
-
-      {/* 5. REVERSE CAR SPOTLIGHT (image left · text right → touches LEFT screen edge) — img4 */}
-      <ReverseCarSpotlight />
-
       {/* 6. FULL-WIDTH IMAGE SHOWCASE №2 — img3.png */}
       <FullWidthImageShowcase
         sectionId="fullwidth-showcase-two"
