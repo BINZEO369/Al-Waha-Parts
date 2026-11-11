@@ -1661,6 +1661,7 @@ function FullWidthImageShowcase({
           fill
           sizes="100vw"
           priority={priority}
+          unoptimized={priority}
           loading={priority ? 'eager' : 'lazy'}
           fetchPriority={priority ? 'high' : 'low'}
           decoding="async"
