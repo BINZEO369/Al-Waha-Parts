@@ -1520,7 +1520,7 @@ function FullWidthImageShowcase({
           opacity: 1;
           animation: none;
           transition: none;
-          object-position: center 68%;
+          object-position: center;
         }
 
         @keyframes showcase-image-in {
@@ -1780,7 +1780,7 @@ export default function Home({ initialData }: { initialData: HomeInitialData }) 
       <FullWidthImageShowcase
         sectionId="fullwidth-showcase-one"
         priority
-        imageSrc="/images/img1.webp"
+        imageSrc="/images/img1-banner.webp"
         imageAlt="Performance automotive showcase"
         title={
           <>
