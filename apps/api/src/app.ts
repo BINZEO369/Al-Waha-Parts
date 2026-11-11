@@ -899,14 +899,13 @@ app.get(
     let bookingQuery = supabase
       .from('bookings')
       .select(
-        'id,booking_number,booking_status,created_at,total_amount,currency,delivery_method,customer_city',
-      )
-      .eq('customer_phone', phone);
+        'id,booking_number,booking_status,created_at,total_amount,currency,delivery_method,customer_city,customer_phone',
+      );
     bookingQuery = /^[0-9a-f-]{36}$/i.test(bookingId)
       ? bookingQuery.eq('id', bookingId)
       : bookingQuery.eq('booking_number', bookingId);
     const { data: booking, error: bookingError } = await bookingQuery.maybeSingle();
-    if (bookingError || !booking)
+    if (bookingError || !booking || !phonesMatch(booking.customer_phone, phone))
       return jsonError(reply, 404, 'No booking matched that ID and phone number.');
     const { data: items, error: itemsError } = await supabase
       .from('booking_items')
@@ -914,7 +913,7 @@ app.get(
       .eq('booking_id', booking.id)
       .limit(50);
     if (itemsError) return jsonError(reply, 500, 'Booking items could not be loaded.');
-    const { id: _bookingId, ...safeBooking } = booking;
+    const { id: _bookingId, customer_phone: _customerPhone, ...safeBooking } = booking;
     return { data: { ...safeBooking, items: items ?? [] } };
   },
 );
@@ -925,6 +924,22 @@ const messageTokenHash = (token: string) => createHash('sha256').update(token).d
 const messageEmail = (value: unknown) => {
   const email = messageText(value, 254).toLowerCase();
   return email && /^\S+@\S+\.\S+$/.test(email) ? email : '';
+};
+const phoneCandidates = (value: unknown) => {
+  const digits = messageText(value, 40).replace(/\D/g, '');
+  if (!digits) return new Set<string>();
+  const candidates = new Set([digits, digits.replace(/^00/, '')]);
+  if (digits.startsWith('966')) {
+    candidates.add(digits.slice(3));
+    candidates.add(`0${digits.slice(3)}`);
+  }
+  if (digits.startsWith('0')) candidates.add(`966${digits.slice(1)}`);
+  return candidates;
+};
+const phonesMatch = (left: unknown, right: unknown) => {
+  const leftCandidates = phoneCandidates(left);
+  const rightCandidates = phoneCandidates(right);
+  return [...leftCandidates].some((candidate) => rightCandidates.has(candidate));
 };
 const publicMessage = (row: Record<string, unknown>) => ({
   id: row.id,
@@ -1035,23 +1050,29 @@ app.post(
       const bookingId = latestText.match(/AWP-\d{8,}-[A-Z0-9]{4,}|[0-9a-f]{8}-[0-9a-f-]{27,}/i)?.[0]?.toUpperCase();
       const phone = messageText(thread.customer_phone, 40) || latestText.match(/(?:\+?\d[\d\s().-]{7,}\d)/)?.[0]?.replace(/[\s().-]/g, '');
       if (bookingId && phone) {
-        let bookingQuery = supabase.from('bookings').select('id,booking_number,booking_status,created_at,total_amount,currency,delivery_method,customer_city').eq('customer_phone', phone);
+        let bookingQuery = supabase.from('bookings').select('id,booking_number,booking_status,created_at,total_amount,currency,delivery_method,customer_city,customer_phone');
         bookingQuery = /^[0-9a-f-]{36}$/i.test(bookingId) ? bookingQuery.eq('id', bookingId) : bookingQuery.eq('booking_number', bookingId);
         const { data: booking } = await bookingQuery.maybeSingle();
-        if (booking) {
+        if (booking && phonesMatch(booking.customer_phone, phone)) {
           const { data: items } = await supabase.from('booking_items').select('part_name_snapshot,sku_snapshot,quantity,line_total').eq('booking_id', booking.id).limit(50);
           verifiedContext = JSON.stringify({ booking_id: booking.booking_number, status: booking.booking_status, total_amount: booking.total_amount, currency: booking.currency, delivery_method: booking.delivery_method, city: booking.customer_city, items: items ?? [] });
         } else assistantReply = 'I could not find a booking matching that Booking ID and phone number. Please check both details and try again.';
       } else {
         assistantReply = 'I can check your order. Please send the Booking ID and the phone number used for that booking. Do not send payment or card details.';
       }
-    } else if (/(available|availability|stock|price|cost|part|product|sku|oem|দাম|স্টক|পণ্য|পার্ট)/i.test(latestText)) {
-      const ignored = new Set(['please', 'check', 'have', 'help', 'with', 'the', 'this', 'available', 'availability', 'stock', 'price', 'part', 'product']);
-      const terms = [...new Set((latestText.toLowerCase().match(/[a-z0-9][a-z0-9-]{2,}/g) ?? []).filter((term) => !ignored.has(term)))].slice(0, 5);
-      if (terms.length) {
-        const filters = terms.flatMap((term) => [`part_name.ilike.%${term}%`, `sku.ilike.%${term}%`]).join(',');
-        const { data: products } = await supabase.from('parts').select('part_name,sku,sale_price,price,currency,stock_quantity').or(filters).eq('status', 'active').limit(12);
-        verifiedContext = JSON.stringify({ products: (products ?? []).map((product) => ({ name: product.part_name, sku: product.sku, price: product.sale_price ?? product.price, currency: product.currency ?? 'SAR', stock: product.stock_quantity })) });
+    } else if (/(available|availability|stock|price|cost|part|product|sku|oem|number|দাম|স্টক|পণ্য|পার্ট|নম্বর|سعر|قطعة)/i.test(latestText)) {
+      const ignored = new Set(['please', 'check', 'have', 'help', 'with', 'the', 'this', 'available', 'availability', 'stock', 'price', 'part', 'product', 'number']);
+      const terms = [...new Set((latestText.toLocaleLowerCase().match(/[\p{L}\p{N}][\p{L}\p{N}-]{2,}/gu) ?? []).filter((term) => !ignored.has(term)))].slice(0, 6);
+      const filters = terms.flatMap((term) => [`part_name.ilike.%${term}%`, `sku.ilike.%${term}%`, `oem_number.ilike.%${term}%`, `part_number.ilike.%${term}%`]).join(',');
+      const { data: products } = filters
+        ? await supabase.from('parts').select('part_name,sku,oem_number,part_number,sale_price,price,currency,stock_quantity').or(filters).eq('status', 'active').limit(12)
+        : { data: [] };
+      if (products?.length) {
+        verifiedContext = JSON.stringify({ products: products.map((product) => ({ name: product.part_name, sku: product.sku, oem_number: product.oem_number, part_number: product.part_number, price: product.sale_price ?? product.price, currency: product.currency ?? 'SAR', stock: product.stock_quantity })) });
+      } else {
+        assistantReply = 'I could not find an exact product match in the live catalog yet. Please send the SKU, OEM/part number, vehicle make and model, or a clear product photo. I have also asked a human parts specialist to check it for you.';
+        needsAdmin = true;
+        escalationReason = 'No live catalog product match for customer request.';
       }
     }
     if (!assistantReply) {
