@@ -1100,26 +1100,6 @@ export default function Home({ initialData }: { initialData: HomeInitialData }) 
           </section>
         )}
 
-      {/* 11. SERVICE STRIP */}
-      <section className="store-section service-strip">
-        <div>
-          <strong>Database-first catalog</strong>
-          <span>Only published records appear</span>
-        </div>
-        <div>
-          <strong>Fitment support</strong>
-          <span>Use the vehicle finder</span>
-        </div>
-        <div>
-          <strong>Booking desk</strong>
-          <span>Booking goes to the parts desk</span>
-        </div>
-        <div>
-          <strong>Live availability</strong>
-          <span>Stock comes from the catalog</span>
-        </div>
-      </section>
-
     </main>
   );
 }
