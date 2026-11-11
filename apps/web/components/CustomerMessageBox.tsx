@@ -7,11 +7,13 @@ const quickReplies = ['Fitment help', 'Stock & price', 'Booking help', 'Track Or
 
 type Message = {
   id: string;
-  sender_type: 'customer' | 'admin';
+  sender_type: 'customer' | 'admin' | 'assistant';
   customer_name: string;
   subject: string;
   message: string;
   status: string;
+  handled_by_ai?: boolean;
+  needs_admin?: boolean;
   created_at: string;
 };
 type Thread = { thread_id: string; access_token: string };
@@ -138,12 +140,21 @@ export function CustomerMessageBox() {
         return;
       }
       if (!response.ok || !payload.data) throw new Error(payload.error?.message ?? 'Your message could not be sent.');
+      const nextThread = thread ?? (payload.data.thread_id && payload.data.access_token ? { thread_id: payload.data.thread_id, access_token: payload.data.access_token } : null);
       if (!thread && payload.data.thread_id && payload.data.access_token) {
-        const next = { thread_id: payload.data.thread_id, access_token: payload.data.access_token };
-        saveThread(next);
-        setThread(next);
+        saveThread(nextThread!);
+        setThread(nextThread);
       }
       if (payload.data.message) setMessages((current) => [...current, payload.data!.message!]);
+      if (nextThread) {
+        try {
+          const assistantResponse = await fetch(`${apiUrl}/api/v1/messages/assistant`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nextThread) });
+          const assistantPayload = await assistantResponse.json() as { data?: { message?: Message } };
+          if (assistantPayload.data?.message) setMessages((current) => [...current, assistantPayload.data!.message!]);
+        } catch {
+          // The customer message is already saved; the three-second refresh remains available.
+        }
+      }
       setDraft('');
       setSent(true);
     } catch (cause) {
@@ -370,6 +381,7 @@ export function CustomerMessageBox() {
 
         .aw-chat-row.customer { align-self: flex-end; flex-direction: row-reverse; }
         .aw-chat-row.admin { align-self: flex-start; }
+        .aw-chat-row.assistant { align-self: flex-start; }
 
         .aw-chat-avatar {
           width: 28px;
@@ -383,6 +395,7 @@ export function CustomerMessageBox() {
         }
         .aw-chat-row.admin .aw-chat-avatar { background: #e4e4e7; color: #111; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .aw-chat-row.customer .aw-chat-avatar { background: linear-gradient(135deg, #111, #333); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .aw-chat-row.assistant .aw-chat-avatar { background: #dbeafe; color: #1d4ed8; box-shadow: 0 2px 8px rgba(29,78,216,0.12); }
 
         /* অ্যাডমিন বাবল - ফ্রস্টেড গ্লাস */
         .aw-chat-row.admin .aw-chat-bubble {
@@ -396,6 +409,16 @@ export function CustomerMessageBox() {
           border-radius: 20px 20px 20px 4px;
           border: 1px solid rgba(255, 255, 255, 1);
           box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        }
+
+        .aw-chat-row.assistant .aw-chat-bubble {
+          padding: 14px 18px;
+          font-size: 14px;
+          line-height: 1.5;
+          background: #eff6ff;
+          color: #172554;
+          border-radius: 20px 20px 20px 4px;
+          border: 1px solid #dbeafe;
         }
 
         /* কাস্টমার বাবল - লিকুইড ব্ল্যাক */
@@ -694,7 +717,7 @@ export function CustomerMessageBox() {
           {thread && messages.map((item) => (
             <div className={`aw-chat-row ${item.sender_type}`} key={item.id}>
               <div className="aw-chat-avatar">
-                {item.sender_type === 'admin' ? 'AW' : 'YOU'}
+                {item.sender_type === 'assistant' ? 'AI' : item.sender_type === 'admin' ? 'AW' : 'YOU'}
               </div>
               <div className="aw-chat-bubble">
                 {item.message}

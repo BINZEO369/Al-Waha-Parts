@@ -12,10 +12,12 @@ import { getConfig } from './env.js';
 import { getSupabaseAdmin } from './supabase.js';
 import {
   analyzeAnalyticsSnapshot,
+  generateCustomerAssistantReply,
   sanitizeProductAiInput,
   suggestCustomerMessageReply,
   suggestProductMetadata,
   type AnalyticsAiSnapshot,
+  type CustomerAssistantTurn,
   type CustomerMessageAiTurn,
   type ProductAiInput,
 } from './ai.js';
@@ -930,6 +932,8 @@ const publicMessage = (row: Record<string, unknown>) => ({
   subject: row.subject,
   message: row.message,
   status: row.status,
+  handled_by_ai: row.handled_by_ai === true,
+  needs_admin: row.needs_admin === true,
   created_at: row.created_at,
 });
 
@@ -995,10 +999,83 @@ app.post(
   },
 );
 
+app.post(
+  '/api/v1/messages/assistant',
+  async (request: FastifyRequest<{ Body: { thread_id?: string; access_token?: string } }>, reply) => {
+    const threadId = messageText(request.body?.thread_id, 80);
+    const accessToken = messageText(request.body?.access_token, 80);
+    if (!/^[0-9a-f-]{36}$/i.test(threadId) || !accessToken) return jsonError(reply, 400, 'A valid message thread is required.');
+    const supabase = getSupabaseAdmin();
+    const { data: rows, error } = await supabase
+      .from('customer_messages')
+      .select('id,thread_id,access_token_hash,sender_type,customer_name,customer_email,customer_phone,subject,message,status,expires_at,created_at')
+      .eq('thread_id', threadId)
+      .eq('access_token_hash', messageTokenHash(accessToken))
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: true })
+      .limit(20);
+    if (error || !rows?.length) return jsonError(reply, 404, 'Message thread not found.');
+    const newest = rows[rows.length - 1] as Record<string, unknown>;
+    if (newest.sender_type !== 'customer') return { data: null };
+    const thread = rows[0] as Record<string, unknown>;
+    const latestCustomer = [...rows].reverse().find((row) => row.sender_type === 'customer') as Record<string, unknown>;
+    const latestText = messageText(latestCustomer.message, 4000);
+    const sensitive = /(card number|credit card|debit card|cvv|cvc|otp|one[- ]time password|bank login|password|payment|refund|chargeback|fraud|complaint|lawsuit|legal|شكوى|استرداد|دفع|بطاقة|كلمة المرور|شكایت|پرداخت|পেমেন্ট|অভিযোগ|রিফান্ড)/i.test(latestText);
+    let assistantReply = '';
+    let needsAdmin = false;
+    let escalationReason: string | null = null;
+    if (sensitive) {
+      assistantReply = 'I’m keeping this conversation for a team member because it involves a sensitive payment or complaint matter. Please do not send card numbers, CVV, OTPs, passwords, or bank login details here. Our team will reply securely.';
+      needsAdmin = true;
+      escalationReason = 'Sensitive payment, complaint, dispute, or account-security topic.';
+    } else if (/(track|tracking|order status|booking|awb|awp-|অর্ডার|ট্র্যাক|حالة الطلب|تتبع)/i.test(latestText)) {
+      const bookingNumber = latestText.match(/AWP-\d{8,}-[A-Z0-9]{4,}/i)?.[0]?.toUpperCase();
+      const phone = messageText(thread.customer_phone, 40) || latestText.match(/(?:\+?\d[\d\s().-]{7,}\d)/)?.[0]?.replace(/[\s().-]/g, '');
+      if (bookingNumber && phone) {
+        const { data: booking } = await supabase.from('bookings').select('booking_number,booking_status,created_at,delivery_method,customer_city').eq('booking_number', bookingNumber).eq('customer_phone', phone).maybeSingle();
+        assistantReply = booking
+          ? `Your booking ${booking.booking_number} is currently ${String(booking.booking_status || 'being reviewed').replace(/_/g, ' ')}. Delivery method: ${booking.delivery_method || 'not specified'}${booking.customer_city ? ` · City: ${booking.customer_city}` : ''}. A team member can confirm the next update if needed.`
+          : 'I could not find a booking matching those details. Please check the AWP booking number and phone number, or send your question and our team will help.';
+      } else {
+        assistantReply = 'I can help check an order. Please send your AWP booking number and the phone number used for the booking. Do not send payment or card details.';
+      }
+    } else {
+      try {
+        const turns = rows.map((row) => ({ sender_type: row.sender_type, message: row.message })) as CustomerAssistantTurn[];
+        assistantReply = (await generateCustomerAssistantReply(config.geminiApiKey, config.geminiModel, turns)).reply;
+      } catch {
+        assistantReply = 'Thanks for your message. I could not safely complete this request automatically, so I have left it for our parts team to review. They will reply in this conversation.';
+        needsAdmin = true;
+        escalationReason = 'AI assistant unavailable or unable to produce a safe answer.';
+      }
+    }
+    const { data: assistantMessage, error: insertError } = await supabase.from('customer_messages').insert({
+      thread_id: threadId,
+      access_token_hash: thread.access_token_hash,
+      sender_type: 'assistant',
+      admin_id: null,
+      customer_name: thread.customer_name,
+      customer_email: thread.customer_email,
+      customer_phone: thread.customer_phone,
+      subject: thread.subject,
+      message: assistantReply,
+      status: needsAdmin ? 'new' : 'replied',
+      handled_by_ai: true,
+      needs_admin: needsAdmin,
+      escalation_reason: escalationReason,
+      reply_to_id: latestCustomer.id,
+      expires_at: thread.expires_at,
+    }).select('id,thread_id,sender_type,customer_name,subject,message,status,handled_by_ai,needs_admin,created_at').single();
+    if (insertError || !assistantMessage) return jsonError(reply, 500, 'The assistant reply could not be saved.');
+    await supabase.from('customer_messages').update({ status: needsAdmin ? 'new' : 'replied' }).eq('thread_id', threadId).eq('sender_type', 'customer').eq('status', 'new');
+    return { data: { message: publicMessage(assistantMessage as Record<string, unknown>), needs_admin: needsAdmin, escalation_reason: escalationReason } };
+  },
+);
+
 app.get('/api/v1/admin/messages', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Querystring: { status?: string } }>, reply) => {
   const allowedStatuses = ['new', 'read', 'replied', 'closed'];
   const status = allowedStatuses.includes(request.query.status ?? '') ? request.query.status : null;
-  let query = getSupabaseAdmin().from('customer_messages').select('id,thread_id,sender_type,admin_id,customer_name,customer_email,customer_phone,subject,message,status,reply_to_id,read_at,created_at').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }).limit(500);
+  let query = getSupabaseAdmin().from('customer_messages').select('id,thread_id,sender_type,admin_id,customer_name,customer_email,customer_phone,subject,message,status,reply_to_id,read_at,handled_by_ai,needs_admin,escalation_reason,created_at').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }).limit(500);
   if (status) query = query.eq('status', status);
   const { data, error } = await query;
   if (error) return jsonError(reply, 500, 'Customer messages could not be loaded.');
