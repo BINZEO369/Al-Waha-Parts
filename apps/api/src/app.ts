@@ -896,14 +896,16 @@ app.get(
     if (bookingId.length > 80 || phone.length > 40)
       return jsonError(reply, 400, 'Please check the booking ID and phone number.');
     const supabase = getSupabaseAdmin();
-    const { data: booking, error: bookingError } = await supabase
+    let bookingQuery = supabase
       .from('bookings')
       .select(
         'id,booking_number,booking_status,created_at,total_amount,currency,delivery_method,customer_city',
       )
-      .eq('booking_number', bookingId)
-      .eq('customer_phone', phone)
-      .maybeSingle();
+      .eq('customer_phone', phone);
+    bookingQuery = /^[0-9a-f-]{36}$/i.test(bookingId)
+      ? bookingQuery.eq('id', bookingId)
+      : bookingQuery.eq('booking_number', bookingId);
+    const { data: booking, error: bookingError } = await bookingQuery.maybeSingle();
     if (bookingError || !booking)
       return jsonError(reply, 404, 'No booking matched that ID and phone number.');
     const { data: items, error: itemsError } = await supabase

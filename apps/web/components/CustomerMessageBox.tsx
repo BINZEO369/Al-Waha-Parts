@@ -17,6 +17,7 @@ type Message = {
   created_at: string;
 };
 type Thread = { thread_id: string; access_token: string };
+type TrackingResult = { booking_number: string; booking_status: string; created_at: string; total_amount: number; currency: string; delivery_method: string | null; customer_city: string | null; items: Array<{ part_name_snapshot: string; sku_snapshot: string; vehicle_name_snapshot?: string | null; quantity: number; line_total: number }> };
 
 function readThread(): Thread | null {
   try {
@@ -51,10 +52,36 @@ export function CustomerMessageBox() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+  const [orderId, setOrderId] = useState('');
+  const [orderPhone, setOrderPhone] = useState('');
+  const [tracking, setTracking] = useState<TrackingResult | null>(null);
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [trackingError, setTrackingError] = useState('');
   const invalidThread = useRef(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  async function checkOrder(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setTrackingError('');
+    setTracking(null);
+    if (!apiUrl || !orderId.trim() || !orderPhone.trim()) {
+      setTrackingError('Enter both the Order / Booking ID and the phone number used for the order.');
+      return;
+    }
+    setTrackingLoading(true);
+    try {
+      const response = await fetch(`${apiUrl}/api/v1/bookings/track?booking_id=${encodeURIComponent(orderId.trim())}&phone=${encodeURIComponent(orderPhone.trim())}`, { cache: 'no-store' });
+      const payload = await response.json() as { data?: TrackingResult; error?: { message?: string } };
+      if (!response.ok || !payload.data) throw new Error(payload.error?.message ?? 'No order matched those details.');
+      setTracking(payload.data);
+    } catch (cause) {
+      setTrackingError(cause instanceof Error ? cause.message : 'No order matched those details.');
+    } finally {
+      setTrackingLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -588,6 +615,16 @@ export function CustomerMessageBox() {
           margin-top: 12px;
           font-family: 'DM Mono', monospace;
         }
+        .aw-order-track { margin: 8px auto 18px; width: min(480px, 100%); padding: 16px; border: 1px solid #e5e7eb; border-radius: 18px; background: rgba(255,255,255,0.82); }
+        .aw-order-track h4 { margin: 0 0 4px; font-size: 14px; color: #111; }
+        .aw-order-track p { margin: 0 0 10px; font-size: 11px; color: #6b7280; }
+        .aw-order-track-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; }
+        .aw-order-track input { min-width: 0; padding: 10px 11px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 12px; }
+        .aw-order-track button { border: 0; border-radius: 10px; padding: 0 13px; background: #111; color: #fff; font-size: 12px; font-weight: 600; }
+        .aw-order-track-error { color: #dc2626; font-size: 11px; margin: 8px 0 0; }
+        .aw-order-track-result { margin-top: 12px; padding-top: 10px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #1f2937; }
+        .aw-order-track-result strong { color: #111; }
+        .aw-order-track-items { margin: 6px 0 0; padding-left: 18px; }
 
         /* মেসেজ ফিডব্যাক */
         .aw-msg-feedback { font-size: 12px; margin: 0 0 12px 0; text-align: center; }
@@ -610,6 +647,8 @@ export function CustomerMessageBox() {
           .aw-composer-area { padding: 10px 12px 16px; }
           .aw-initial-form-container { margin: 10px auto; padding: 20px 12px; box-shadow: none; border: none; background: transparent; backdrop-filter: none;}
           .aw-form-grid { grid-template-columns: 1fr; gap: 10px; }
+          .aw-order-track-grid { grid-template-columns: 1fr; }
+          .aw-order-track button { min-height: 36px; }
 
           .aw-chat-row { 
             max-width: 92%; 
@@ -685,6 +724,17 @@ export function CustomerMessageBox() {
 
         {/* মেসেজ এরিয়া */}
         <div className="aw-chat-scroll" ref={scrollRef}>
+          <section className="aw-order-track" aria-labelledby="aw-order-track-title">
+            <h4 id="aw-order-track-title">Track your order</h4>
+            <p>Paste your Order / Booking ID and the phone number used at checkout.</p>
+            <form onSubmit={checkOrder} className="aw-order-track-grid">
+              <input value={orderId} onChange={(event) => setOrderId(event.target.value)} placeholder="Order / Booking ID" aria-label="Order or Booking ID" />
+              <input value={orderPhone} onChange={(event) => setOrderPhone(event.target.value)} placeholder="Phone number" aria-label="Phone number used for order" />
+              <button type="submit" disabled={trackingLoading}>{trackingLoading ? 'Checking…' : 'Check order'}</button>
+            </form>
+            {trackingError && <p className="aw-order-track-error" role="alert">{trackingError}</p>}
+            {tracking && <div className="aw-order-track-result" role="status"><div><strong>{tracking.booking_number}</strong> · {tracking.booking_status.replace(/_/g, ' ')}</div><div>Total: <strong>{tracking.total_amount} {tracking.currency}</strong> · {tracking.delivery_method || 'Delivery method not specified'}</div>{tracking.items.length > 0 && <ul className="aw-order-track-items">{tracking.items.map((item, index) => <li key={`${item.sku_snapshot}-${index}`}>{item.part_name_snapshot} × {item.quantity} — {item.line_total} {tracking.currency}</li>)}</ul>}</div>}
+          </section>
           
           {!thread && (
             <div className="aw-initial-form-container">
