@@ -3,7 +3,7 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 const threadStorageKey = 'alwaha-customer-message-thread-v1';
-const quickReplies = ['Fitment help', 'Stock & price', 'Booking help', 'Order tracking'];
+const quickReplies = ['Fitment help', 'Stock & price', 'Book a part', 'Order tracking'];
 
 type Message = {
   id: string;
@@ -18,6 +18,7 @@ type Message = {
 };
 type Thread = { thread_id: string; access_token: string };
 type TrackingResult = { booking_number: string; booking_status: string; created_at: string; total_amount: number; currency: string; delivery_method: string | null; customer_city: string | null; items: Array<{ part_name_snapshot: string; sku_snapshot: string; vehicle_name_snapshot?: string | null; quantity: number; line_total: number }> };
+type BookingResult = { booking_number?: string; booking_status?: string; total_amount?: number; currency?: string };
 
 function readThread(): Thread | null {
   try {
@@ -57,6 +58,14 @@ export function CustomerMessageBox() {
   const [tracking, setTracking] = useState<TrackingResult | null>(null);
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [trackingError, setTrackingError] = useState('');
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingPartNumber, setBookingPartNumber] = useState('');
+  const [bookingDelivery, setBookingDelivery] = useState<'pickup' | 'delivery'>('pickup');
+  const [bookingAddress, setBookingAddress] = useState('');
+  const [bookingCity, setBookingCity] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingError, setBookingError] = useState('');
+  const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
   const invalidThread = useRef(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -80,6 +89,47 @@ export function CustomerMessageBox() {
       setTrackingError(cause instanceof Error ? cause.message : 'No order matched those details.');
     } finally {
       setTrackingLoading(false);
+    }
+  }
+
+  async function submitBooking(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBookingError('');
+    setBookingResult(null);
+    if (!apiUrl || !name.trim() || !phone.trim() || !bookingPartNumber.trim()) {
+      setBookingError('Please enter your name, phone number and the part number or OEM number.');
+      return;
+    }
+    if (bookingDelivery === 'delivery' && !bookingAddress.trim()) {
+      setBookingError('Please enter a delivery address, or choose pickup.');
+      return;
+    }
+    setBookingLoading(true);
+    try {
+      const response = await fetch(`${apiUrl}/api/v1/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: name.trim(),
+          customer_phone: phone.trim(),
+          customer_email: email.trim() || undefined,
+          part_number: bookingPartNumber.trim(),
+          customer_note: 'Booking requested from the Al Waha Parts Messenger Box.',
+          delivery_method: bookingDelivery,
+          shipping_address: bookingDelivery === 'delivery' ? bookingAddress.trim() : undefined,
+          customer_city: bookingCity.trim() || undefined,
+          payment_method: 'cash_on_delivery',
+        }),
+      });
+      const payload = await response.json() as { data?: BookingResult; error?: { message?: string } };
+      if (!response.ok || !payload.data) throw new Error(payload.error?.message ?? 'The booking could not be created.');
+      setBookingResult(payload.data);
+      setBookingPartNumber('');
+      setBookingAddress('');
+    } catch (cause) {
+      setBookingError(cause instanceof Error ? cause.message : 'The booking could not be created.');
+    } finally {
+      setBookingLoading(false);
     }
   }
 
@@ -461,6 +511,7 @@ export function CustomerMessageBox() {
           border: 1px solid rgba(255,255,255,0.05);
         }
         
+        .aw-chat-bubble { white-space: pre-wrap; overflow-wrap: anywhere; }
         .aw-chat-bubble time {
           display: block;
           font-size: 10px;
@@ -616,11 +667,23 @@ export function CustomerMessageBox() {
           font-family: 'DM Mono', monospace;
         }
         .aw-order-track { margin: 8px auto 18px; width: min(480px, 100%); padding: 16px; border: 1px solid #e5e7eb; border-radius: 18px; background: rgba(255,255,255,0.82); }
+        .aw-booking-panel { margin: 8px auto 18px; width: min(520px, 100%); padding: 18px; border: 1px solid #e5e7eb; border-radius: 18px; background: rgba(255,255,255,0.92); }
+        .aw-booking-panel h4 { margin: 0 0 4px; font-size: 15px; color: #111; }
+        .aw-booking-panel p { margin: 0 0 12px; color: #6b7280; font-size: 11px; line-height: 1.5; }
+        .aw-booking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+        .aw-booking-grid label { display: grid; gap: 4px; color: #374151; font-size: 11px; font-weight: 600; }
+        .aw-booking-grid label.full { grid-column: 1 / -1; }
+        .aw-booking-grid input, .aw-booking-grid select { width: 100%; min-width: 0; padding: 10px 11px; border: 1px solid #d1d5db; border-radius: 10px; background: #fff; color: #111; font-size: 12px; }
+        .aw-booking-grid button { grid-column: 1 / -1; min-height: 38px; border: 0; border-radius: 10px; background: #111; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .aw-booking-grid button:disabled { opacity: .55; cursor: wait; }
+        .aw-booking-error { margin: 9px 0 0 !important; color: #dc2626 !important; }
+        .aw-booking-success { margin: 9px 0 0 !important; color: #15803d !important; }
         .aw-order-track h4 { margin: 0 0 4px; font-size: 14px; color: #111; }
         .aw-order-track p { margin: 0 0 10px; font-size: 11px; color: #6b7280; }
         .aw-order-track-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; }
         .aw-order-track input { min-width: 0; padding: 10px 11px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 12px; }
         .aw-order-track button { border: 0; border-radius: 10px; padding: 0 13px; background: #111; color: #fff; font-size: 12px; font-weight: 600; }
+        .aw-order-track-book { margin-top: 10px; padding: 0; border: 0 !important; color: #111 !important; background: transparent !important; font-size: 11px !important; text-decoration: underline; cursor: pointer; }
         .aw-order-track-error { color: #dc2626; font-size: 11px; margin: 8px 0 0; }
         .aw-order-track-result { margin-top: 12px; padding-top: 10px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #1f2937; }
         .aw-order-track-result strong { color: #111; }
@@ -647,7 +710,8 @@ export function CustomerMessageBox() {
           .aw-composer-area { padding: 10px 12px 16px; }
           .aw-initial-form-container { margin: 10px auto; padding: 20px 12px; box-shadow: none; border: none; background: transparent; backdrop-filter: none;}
           .aw-form-grid { grid-template-columns: 1fr; gap: 10px; }
-          .aw-order-track-grid { grid-template-columns: 1fr; }
+          .aw-order-track-grid, .aw-booking-grid { grid-template-columns: 1fr; }
+          .aw-booking-grid label.full, .aw-booking-grid button { grid-column: auto; }
           .aw-order-track button { min-height: 36px; }
 
           .aw-chat-row { 
@@ -732,9 +796,27 @@ export function CustomerMessageBox() {
               <input value={orderPhone} onChange={(event) => setOrderPhone(event.target.value)} placeholder="Phone number" aria-label="Phone number used for order" />
               <button type="submit" disabled={trackingLoading}>{trackingLoading ? 'Checking…' : 'Check order'}</button>
             </form>
+            <button type="button" className="aw-order-track-book" onClick={() => setBookingOpen(true)}>Need to place a new booking? Open the booking form</button>
             {trackingError && <p className="aw-order-track-error" role="alert">{trackingError}</p>}
             {tracking && <div className="aw-order-track-result" role="status"><div><strong>{tracking.booking_number}</strong> · {tracking.booking_status.replace(/_/g, ' ')}</div><div>Total: <strong>{tracking.total_amount} {tracking.currency}</strong> · {tracking.delivery_method || 'Delivery method not specified'}</div>{tracking.items.length > 0 && <ul className="aw-order-track-items">{tracking.items.map((item, index) => <li key={`${item.sku_snapshot}-${index}`}>{item.part_name_snapshot} × {item.quantity} — {item.line_total} {tracking.currency}</li>)}</ul>}</div>}
           </section>
+
+          {bookingOpen && <section className="aw-booking-panel" aria-labelledby="aw-booking-title">
+            <h4 id="aw-booking-title">Book a part with the parts desk</h4>
+            <p>Use a SKU, OEM number or exact part number. If you do not know it, send a message first and I will help identify it from your vehicle details or photo.</p>
+            <form className="aw-booking-grid" onSubmit={submitBooking}>
+              <label className="full">Part / OEM number<input required value={bookingPartNumber} onChange={(event) => setBookingPartNumber(event.target.value)} placeholder="e.g. OEM or SKU" /></label>
+              <label>Name<input required value={name} onChange={(event) => setName(event.target.value)} placeholder="Your name" /></label>
+              <label>Phone<input required value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+966..." inputMode="tel" /></label>
+              <label>Email (optional)<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></label>
+              <label>City (optional)<input value={bookingCity} onChange={(event) => setBookingCity(event.target.value)} placeholder="Al Jubail" /></label>
+              <label>Request type<select value={bookingDelivery} onChange={(event) => setBookingDelivery(event.target.value as 'pickup' | 'delivery')}><option value="pickup">Pickup</option><option value="delivery">Delivery</option></select></label>
+              {bookingDelivery === 'delivery' && <label className="full">Delivery address<input required value={bookingAddress} onChange={(event) => setBookingAddress(event.target.value)} placeholder="Full delivery address" /></label>}
+              <button type="submit" disabled={bookingLoading}>{bookingLoading ? 'Creating booking…' : 'Create booking request'}</button>
+            </form>
+            {bookingError && <p className="aw-booking-error" role="alert">{bookingError}</p>}
+            {bookingResult && <p className="aw-booking-success" role="status">Booking request created: <strong>{bookingResult.booking_number}</strong>. Save this ID to track your order.</p>}
+          </section>}
           
           {!thread && (
             <div className="aw-initial-form-container">
@@ -778,8 +860,14 @@ export function CustomerMessageBox() {
 
           {thread && (
              <div className="aw-quick-replies">
-               {quickReplies.map((item) => (
-                 <button key={item} type="button" onClick={() => setDraft(item === 'Fitment help' ? 'Please help me find the right part for my car.' : item === 'Stock & price' ? 'Please check stock and price for this part.' : item === 'Booking help' ? 'I need help with a booking.' : 'I want to check my order. I will provide my Booking ID and phone number.') }>
+                 {quickReplies.map((item) => (
+                 <button key={item} type="button" onClick={() => {
+                   if (item === 'Book a part') {
+                     setBookingOpen(true);
+                     return;
+                   }
+                   setDraft(item === 'Fitment help' ? 'Please help me find the right part for my car.' : item === 'Stock & price' ? 'Please check stock and price for this part.' : 'I want to check my order. I will provide my Booking ID and phone number.');
+                 }}>
                    {item}
                  </button>
                ))}
@@ -812,6 +900,12 @@ export function CustomerMessageBox() {
                 ref={textareaRef}
                 value={draft} 
                 onChange={(event) => setDraft(event.target.value)} 
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    event.currentTarget.form?.requestSubmit();
+                  }
+                }}
                 required 
                 maxLength={4000} 
                 rows={1} 
