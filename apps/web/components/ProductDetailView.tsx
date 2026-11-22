@@ -463,6 +463,10 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .other-fitments { grid-column: 1 / -1; margin-top: 12px; padding-top: 18px; border-top: 1px solid #eaeaea; }
         .fitment-heading { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 10px; }
         .other-fitments h2 { font-size: 22px; font-weight: 800; margin: 0; }
+        .fitment-tips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+        .fitment-tip { padding: 11px 13px; border: 1px solid #ead8d9; border-left: 3px solid #b91c1c; border-radius: 10px; background: #fffafa; }
+        .fitment-tip strong { display: block; color: #7f1d1d; font-size: 11px; margin-bottom: 3px; }
+        .fitment-tip span { display: block; color: #656b73; font-size: 11px; line-height: 1.45; }
         .fitment-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -530,6 +534,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           .stock { padding-bottom: 0; }
           
           .fitment-heading { align-items: flex-start; }
+          .fitment-tips { grid-template-columns: 1fr; }
           .fitment-grid { grid-template-columns: 1fr; }
         }
       `}</style>
@@ -641,6 +646,16 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           <div className="other-fitments">
             <div className="fitment-heading">
               <h2>Compatible vehicles <span style={{ color: '#b91c1c', fontSize: 13 }}>({fitments.length})</span></h2>
+            </div>
+            <div className="fitment-tips">
+              <div className="fitment-tip">
+                <strong>Open model details</strong>
+                <span>Select a model name to open its vehicle details page.</span>
+              </div>
+              <div className="fitment-tip">
+                <strong>One product, multiple fitments</strong>
+                <span>The same product may support multiple companies, models and years. Each row is a fitment for this product.</span>
+              </div>
             </div>
             {fitmentGroups.map((group) => <div key={group.name} className="fitment-group">
               <h3 className="fitment-group-heading">
