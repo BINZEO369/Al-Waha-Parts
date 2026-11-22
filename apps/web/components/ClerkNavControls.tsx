@@ -1,6 +1,6 @@
 'use client';
 
-import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { Show, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 
 function SignedOutLinks() {
@@ -23,15 +23,15 @@ export function ClerkNavControls({ enabled }: { enabled: boolean }) {
 
   return (
     <div className="auth-nav-controls">
-      <SignedOut>
+      <Show when="signed-out">
         <SignedOutLinks />
-      </SignedOut>
-      <SignedIn>
+      </Show>
+      <Show when="signed-in">
         <div className="auth-user-control">
           <span>My account</span>
           <UserButton />
         </div>
-      </SignedIn>
+      </Show>
     </div>
   );
 }
