@@ -1,7 +1,7 @@
+import { SignUp } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { CustomerSignUpForm } from '../../../components/CustomerSignUpForm';
 
 export const metadata: Metadata = {
   title: 'Create account',
@@ -22,24 +22,26 @@ export default function SignUpPage() {
       {clerkConfigured ? (
         <div className="auth-clerk-panel">
           <Suspense fallback={<p className="auth-loading">Loading secure sign-up…</p>}>
-            <CustomerSignUpForm />
+            <SignUp
+              appearance={{
+                variables: { colorPrimary: '#e5232f', borderRadius: '8px', fontFamily: 'Montserrat, sans-serif' },
+              }}
+            />
           </Suspense>
         </div>
       ) : (
-        <>
-          <div className="auth-setup-notice" role="status">
-            <h2>Account setup is pending</h2>
-            <p>
-              Add <code>NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</code> and the server-only{' '}
-              <code>CLERK_SECRET_KEY</code> to the storefront environment, then redeploy to enable
-              customer account creation.
-            </p>
-          </div>
-          <p className="auth-page-switch">
-            Already have an account? <Link href="/sign-in">Sign in</Link>
+        <div className="auth-setup-notice" role="status">
+          <h2>Account setup is pending</h2>
+          <p>
+            Add <code>NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</code> and the server-only{' '}
+            <code>CLERK_SECRET_KEY</code> to the storefront environment, then redeploy to enable
+            customer account creation.
           </p>
-        </>
+        </div>
       )}
+      <p className="auth-page-switch">
+        Already have an account? <Link href="/sign-in">Sign in</Link>
+      </p>
     </main>
   );
 }

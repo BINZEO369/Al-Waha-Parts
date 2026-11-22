@@ -21,11 +21,7 @@ After adding or changing environment values, rebuild/redeploy the storefront. Th
 
 ## Clerk Dashboard
 
-Enable the sign-in methods customers should use in the selected Clerk application. Add the storefront's production origin and any preview/local origins to the allowed domains/origins required by those sign-in methods. The site routes are `/sign-in` and `/sign-up`; the storefront's custom sign-up verifies email with a one-time code and sends completed registrations to `/account`.
-
-For the storefront's custom registration form, enable email/password sign-up, email verification by code, and the **First and last name** user-model fields in the Clerk instance settings. Do not require customers to create or join an organization. The form collects a customer's personal first and last name, then verifies their email before creating the active session. The name fields setting is required for Clerk to accept and store the submitted names.
-
-Signed-in customers can open `/account` for a summary of their name, primary email, and account age, then use Clerk's profile/security controls to edit account details and sign-in settings.
+Enable the sign-in methods customers should use in the selected Clerk application. Add the storefront's production origin and any preview/local origins to the allowed domains/origins required by those sign-in methods. The site routes are `/sign-in` and `/sign-up`; successful direct sign-in and sign-up flows fall back to `/` unless a redirect is already present.
 
 ## Scope
 
