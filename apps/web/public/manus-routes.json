@@ -1,6 +1,7 @@
 {
   "routes": [
     { "path": "/", "title": "Home" },
+    { "path": "/account/:account*", "title": "Customer account" },
     { "path": "/booking", "title": "Booking Request" },
     { "path": "/booking/track", "title": "Track Booking" },
     { "path": "/brands", "title": "Car Brands" },

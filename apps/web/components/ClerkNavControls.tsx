@@ -28,7 +28,7 @@ export function ClerkNavControls({ enabled }: { enabled: boolean }) {
       </Show>
       <Show when="signed-in">
         <div className="auth-user-control">
-          <span>My account</span>
+          <Link href="/account">My account</Link>
           <UserButton />
         </div>
       </Show>
