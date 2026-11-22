@@ -460,23 +460,9 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .spec-row strong { color: #111; text-align: right; font-weight: 600; }
 
         /* All compatible vehicles */
-        .other-fitments {
-          grid-column: 1 / -1;
-          margin-top: 20px;
-          padding-top: 40px;
-          border-top: 1px solid #eaeaea;
-        }
-        .fitment-clarity { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; padding: 16px; border: 1px solid #f0c4c8; border-left: 4px solid #dc2626; border-radius: 14px; background: #fff8f8; }
-        .fitment-clarity-mark { display: grid; place-items: center; width: 28px; height: 28px; flex: none; border-radius: 50%; background: #dc2626; color: #fff; font-size: 14px; font-weight: 900; }
-        .fitment-clarity strong { display: block; color: #7f1d1d; font-size: 14px; }
-        .fitment-clarity span { display: block; margin-top: 4px; color: #6b4b4d; font-size: 12px; line-height: 1.55; }
-        .fitment-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; margin-bottom: 13px; }
+        .other-fitments { grid-column: 1 / -1; margin-top: 20px; padding-top: 28px; border-top: 1px solid #eaeaea; }
+        .fitment-heading { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 13px; }
         .other-fitments h2 { font-size: 22px; font-weight: 800; margin: 0; }
-        .fitment-heading p { max-width: 520px; margin: 0; color: #6b7280; font-size: 12px; line-height: 1.55; text-align: right; }
-        .fitment-guide { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; padding: 14px; border: 1px solid #f2d2d5; border-radius: 14px; background: #fff8f8; }
-        .fitment-guide div { display: grid; gap: 4px; }
-        .fitment-guide strong { color: #991b1b; font-size: 11px; }
-        .fitment-guide span { color: #656b73; font-size: 11px; line-height: 1.45; }
         .fitment-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -543,10 +529,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           }
           .stock { padding-bottom: 0; }
           
-          .fitment-clarity { padding: 13px; }
-          .fitment-heading { display: block; }
-          .fitment-heading p { margin-top: 8px; text-align: left; }
-          .fitment-guide { grid-template-columns: 1fr; }
+          .fitment-heading { align-items: flex-start; }
           .fitment-grid { grid-template-columns: 1fr; }
         }
       `}</style>
@@ -640,7 +623,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
             {/* Description */}
             <div className="description">
               <h3>Product Details</h3>
-              <p>{product.description ?? 'Verified automotive replacement part. Our parts desk confirms fitment before booking.'}</p>
+              <p>{product.description ?? 'Verified automotive replacement part.'}</p>
             </div>
 
             {/* Specs */}
@@ -656,18 +639,8 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         {/* All Fitments */}
         {fitments.length > 0 && (
           <div className="other-fitments">
-            <div className="fitment-clarity">
-              <div className="fitment-clarity-mark">1</div>
-              <div><strong>This page shows one product only.</strong><span>The vehicle names below are not extra products. They are the supported cars for this same {product.part_name}.</span></div>
-            </div>
             <div className="fitment-heading">
-              <h2>Where this product fits <span style={{ color: '#b91c1c', fontSize: 13 }}>({fitments.length} vehicle {fitments.length === 1 ? 'option' : 'options'})</span></h2>
-              <p>Select the vehicle row that matches your car. Confirm make, exact model and year before booking.</p>
-            </div>
-            <div className="fitment-guide" aria-label="How to check vehicle compatibility">
-              <div><strong>1. Match the make</strong><span>Confirm the manufacturer logo and name are the same as your car.</span></div>
-              <div><strong>2. Match the model</strong><span>Check the exact model, generation or chassis code where shown.</span></div>
-              <div><strong>3. Match the year</strong><span>Your vehicle year must be inside the listed compatible years.</span></div>
+              <h2>Compatible vehicles <span style={{ color: '#b91c1c', fontSize: 13 }}>({fitments.length})</span></h2>
             </div>
             {fitmentGroups.map((group) => <div key={group.name} className="fitment-group">
               <h3 className="fitment-group-heading">
