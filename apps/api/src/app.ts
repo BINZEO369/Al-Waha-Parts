@@ -2229,6 +2229,21 @@ const editableModelFields = [
   'gallery_images', 'status', 'is_featured', 'sort_order', 'seo_title',
   'seo_description',
 ] as const;
+function normalizeModelSlug(value: unknown, modelName: unknown, generation?: unknown) {
+  const source = String(value ?? '').trim() || `${String(modelName ?? '').trim()} ${String(generation ?? '').trim()}`.trim();
+  return source
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 180);
+}
+function modelWriteError(message: string) {
+  if (message.includes('car_models_manufacturer_slug_key') || message.includes('car_models_slug_key'))
+    return 'This manufacturer already has a model with the same slug. Use a unique model slug (for example, corolla-2024).';
+  return message;
+}
 
 type PageResult<T> = { data: T[] | null; error: { message: string } | null };
 async function fetchAllPages<T>(
@@ -2290,13 +2305,18 @@ app.get('/api/v1/admin/vehicles', { preHandler: requireAdmin as any }, async (_r
 app.post('/api/v1/admin/vehicles', { preHandler: requireAdmin as any }, async (request, reply) => {
   const body = pickFields((request.body ?? {}) as Record<string, unknown>, editableModelFields);
   if (!body.manufacturer_id || !body.model_name) return jsonError(reply, 400, 'manufacturer_id and model_name are required');
+  body.slug = normalizeModelSlug(body.slug, body.model_name, body.generation);
+  if (!body.slug) return jsonError(reply, 400, 'model_name or slug is required');
   const { data, error } = await getSupabaseAdmin().from('car_models').insert(body).select('*,manufacturers(id,manufacturer_name,slug,logo_url)').single();
-  if (error) return jsonError(reply, 400, error.message);
+  if (error) return jsonError(reply, 400, modelWriteError(error.message));
   return reply.code(201).send({ data });
 });
 app.patch('/api/v1/admin/vehicles/:id', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string }; Body: Record<string, unknown> }>, reply) => {
-  const { data, error } = await getSupabaseAdmin().from('car_models').update(pickFields(request.body ?? {}, editableModelFields)).eq('id', request.params.id).select('*,manufacturers(id,manufacturer_name,slug,logo_url)').single();
-  if (error) return jsonError(reply, 400, error.message);
+  const body = pickFields(request.body ?? {}, editableModelFields);
+  if (body.slug !== undefined || body.model_name !== undefined || body.generation !== undefined)
+    body.slug = normalizeModelSlug(body.slug, body.model_name, body.generation);
+  const { data, error } = await getSupabaseAdmin().from('car_models').update(body).eq('id', request.params.id).select('*,manufacturers(id,manufacturer_name,slug,logo_url)').single();
+  if (error) return jsonError(reply, 400, modelWriteError(error.message));
   return { data };
 });
 app.delete('/api/v1/admin/vehicles/:id', { preHandler: requireAdmin as any }, async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
