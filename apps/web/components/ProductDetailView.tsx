@@ -115,6 +115,14 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
   const images = [...new Set([product.primary_image_url, ...(product.image_urls ?? [])].filter(Boolean))] as string[];
   const rawFitments = product.part_model_fitments;
   const fitments = (Array.isArray(rawFitments) ? rawFitments : rawFitments ? [rawFitments] : []).filter((fitment) => Boolean(fitment.vehicles));
+  const fitmentGroups = fitments.reduce<Array<{ name: string; logoUrl?: string | null; items: PartFitment[] }>>((groups, fitment) => {
+    const vehicle = fitment.vehicles!;
+    const name = vehicle.manufacturers?.manufacturer_name ?? 'Other manufacturer';
+    const existing = groups.find((group) => group.name === name);
+    if (existing) existing.items.push(fitment);
+    else groups.push({ name, logoUrl: vehicle.manufacturers?.logo_url, items: [fitment] });
+    return groups;
+  }, []);
   
   const currentPrice = product.sale_price ?? product.price;
   const hasDiscount = product.sale_price && product.sale_price < product.price;
@@ -458,7 +466,11 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           padding-top: 40px;
           border-top: 1px solid #eaeaea;
         }
-        .fitment-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; margin-bottom: 16px; }
+        .fitment-clarity { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; padding: 16px; border: 1px solid #f0c4c8; border-left: 4px solid #dc2626; border-radius: 14px; background: #fff8f8; }
+        .fitment-clarity-mark { display: grid; place-items: center; width: 28px; height: 28px; flex: none; border-radius: 50%; background: #dc2626; color: #fff; font-size: 14px; font-weight: 900; }
+        .fitment-clarity strong { display: block; color: #7f1d1d; font-size: 14px; }
+        .fitment-clarity span { display: block; margin-top: 4px; color: #6b4b4d; font-size: 12px; line-height: 1.55; }
+        .fitment-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; margin-bottom: 13px; }
         .other-fitments h2 { font-size: 22px; font-weight: 800; margin: 0; }
         .fitment-heading p { max-width: 520px; margin: 0; color: #6b7280; font-size: 12px; line-height: 1.55; text-align: right; }
         .fitment-guide { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; padding: 14px; border: 1px solid #f2d2d5; border-radius: 14px; background: #fff8f8; }
@@ -470,6 +482,10 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
           gap: 16px;
         }
+        .fitment-group + .fitment-group { margin-top: 22px; }
+        .fitment-group-heading { display: flex; align-items: center; gap: 9px; margin: 0 0 9px; color: #3f444b; font-size: 13px; }
+        .fitment-group-heading img { width: 30px; height: 24px; object-fit: contain; padding: 2px 4px; border: 1px solid #eee; border-radius: 6px; background: #fff; }
+        .fitment-group-heading span { color: #8a9098; font-size: 10px; font-weight: 600; }
         .fitment-card {
           border: 1px solid #eaeaea;
           border-radius: 12px;
@@ -494,6 +510,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         }
         .fitment-card-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .fitment-info { min-width: 0; }
+        .fitment-card-label { display: inline-block; margin-bottom: 5px; color: #b91c1c; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
         .fitment-info strong { display: block; font-size: 15px; color: #111; margin-bottom: 5px; }
         .fitment-info a { color: inherit; text-decoration: none; }
         .fitment-info a:hover { color: #b91c1c; text-decoration: underline; }
@@ -526,6 +543,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           }
           .stock { padding-bottom: 0; }
           
+          .fitment-clarity { padding: 13px; }
           .fitment-heading { display: block; }
           .fitment-heading p { margin-top: 8px; text-align: left; }
           .fitment-guide { grid-template-columns: 1fr; }
@@ -638,17 +656,26 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         {/* All Fitments */}
         {fitments.length > 0 && (
           <div className="other-fitments">
+            <div className="fitment-clarity">
+              <div className="fitment-clarity-mark">1</div>
+              <div><strong>This page shows one product only.</strong><span>The vehicle names below are not extra products. They are the supported cars for this same {product.part_name}.</span></div>
+            </div>
             <div className="fitment-heading">
-              <h2>Compatible vehicles</h2>
-              <p>Check the make, model and year below against your vehicle before booking. A matching brand alone is not enough.</p>
+              <h2>Where this product fits <span style={{ color: '#b91c1c', fontSize: 13 }}>({fitments.length} vehicle {fitments.length === 1 ? 'option' : 'options'})</span></h2>
+              <p>Select the vehicle row that matches your car. Confirm make, exact model and year before booking.</p>
             </div>
             <div className="fitment-guide" aria-label="How to check vehicle compatibility">
               <div><strong>1. Match the make</strong><span>Confirm the manufacturer logo and name are the same as your car.</span></div>
               <div><strong>2. Match the model</strong><span>Check the exact model, generation or chassis code where shown.</span></div>
               <div><strong>3. Match the year</strong><span>Your vehicle year must be inside the listed compatible years.</span></div>
             </div>
-            <div className="fitment-grid">
-              {fitments.map((fitment) => {
+            {fitmentGroups.map((group) => <div key={group.name} className="fitment-group">
+              <h3 className="fitment-group-heading">
+                {group.logoUrl && <img src={group.logoUrl} alt={`${group.name} logo`} />}
+                {group.name}<span>{group.items.length} supported {group.items.length === 1 ? 'model' : 'models'}</span>
+              </h3>
+              <div className="fitment-grid">
+              {group.items.map((fitment) => {
                 const vehicle = fitment.vehicles!;
                 const brandName = vehicle.manufacturers?.manufacturer_name ?? 'Vehicle';
                 const logoUrl = vehicle.manufacturers?.logo_url;
@@ -661,6 +688,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
                       {logoUrl ? <img src={logoUrl} alt={brandName} /> : <span style={{ fontSize: 12, fontWeight: 'bold' }}>{brandName.slice(0, 2)}</span>}
                     </div>
                     <div className="fitment-info">
+                      <span className="fitment-card-label">Supported vehicle</span>
                       <strong>{modelHref ? <Link href={modelHref}>{brandName} {vehicle.model_name}</Link> : `${brandName} ${vehicle.model_name}`}</strong>
                       <span>
                         {vehicle.generation ? `Generation: ${vehicle.generation}` : 'Generation: Not specified'}
@@ -673,7 +701,8 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
                   </div>
                 );
               })}
-            </div>
+              </div>
+            </div>)}
           </div>
         )}
       </div>
