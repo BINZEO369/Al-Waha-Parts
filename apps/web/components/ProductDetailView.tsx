@@ -66,6 +66,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
   const [activeImage, setActiveImage] = useState(initialProduct?.primary_image_url ?? initialProduct?.image_urls?.[0] ?? '');
   const [error, setError] = useState('');
   const [isAdded, setIsAdded] = useState(false);
+  const [activeTip, setActiveTip] = useState<0 | 1 | null>(null);
   
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const router = useRouter();
@@ -91,6 +92,21 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         setError(cause instanceof Error ? cause.message : 'Product not found.'),
       );
   }, [apiUrl, slug, initialProduct]);
+
+  useEffect(() => {
+    setActiveTip(null);
+    const startTimer = window.setTimeout(() => setActiveTip(0), 350);
+    return () => window.clearTimeout(startTimer);
+  }, [slug]);
+
+  useEffect(() => {
+    if (activeTip === null) return;
+    const dismissTimer = window.setTimeout(
+      () => setActiveTip(activeTip === 0 ? 1 : null),
+      activeTip === 0 ? 3000 : 5000,
+    );
+    return () => window.clearTimeout(dismissTimer);
+  }, [activeTip]);
 
   if (error) {
     return (
@@ -463,10 +479,13 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
         .other-fitments { grid-column: 1 / -1; margin-top: 12px; padding-top: 18px; border-top: 1px solid #eaeaea; }
         .fitment-heading { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 10px; }
         .other-fitments h2 { font-size: 22px; font-weight: 800; margin: 0; }
-        .fitment-tips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
-        .fitment-tip { padding: 11px 13px; border: 1px solid #ead8d9; border-left: 3px solid #b91c1c; border-radius: 10px; background: #fffafa; }
-        .fitment-tip strong { display: block; color: #7f1d1d; font-size: 11px; margin-bottom: 3px; }
-        .fitment-tip span { display: block; color: #656b73; font-size: 11px; line-height: 1.45; }
+        .fitment-tip-popup { position: fixed; right: 22px; bottom: 22px; z-index: 30; display: flex; align-items: flex-start; gap: 12px; width: min(360px, calc(100vw - 32px)); padding: 13px 14px; border: 1px solid #ead8d9; border-left: 3px solid #b91c1c; border-radius: 12px; background: #fffafa; box-shadow: 0 12px 34px rgba(53, 22, 24, .16); animation: fitment-tip-in .25s ease-out both; }
+        .fitment-tip-copy { min-width: 0; }
+        .fitment-tip-copy strong { display: block; color: #7f1d1d; font-size: 12px; margin-bottom: 3px; }
+        .fitment-tip-copy span { display: block; color: #656b73; font-size: 11px; line-height: 1.45; }
+        .fitment-tip-close { flex: none; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; color: #7f1d1d; background: #f5dddd; font-size: 17px; line-height: 20px; cursor: pointer; }
+        .fitment-tip-close:hover { background: #ecc7c9; }
+        @keyframes fitment-tip-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .fitment-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -534,8 +553,8 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           .stock { padding-bottom: 0; }
           
           .fitment-heading { align-items: flex-start; }
-          .fitment-tips { grid-template-columns: 1fr; }
           .fitment-grid { grid-template-columns: 1fr; }
+          .fitment-tip-popup { right: 16px; bottom: 16px; }
         }
       `}</style>
 
@@ -647,16 +666,6 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
             <div className="fitment-heading">
               <h2>Compatible vehicles <span style={{ color: '#b91c1c', fontSize: 13 }}>({fitments.length})</span></h2>
             </div>
-            <div className="fitment-tips">
-              <div className="fitment-tip">
-                <strong>Open model details</strong>
-                <span>Select a model name to open its vehicle details page.</span>
-              </div>
-              <div className="fitment-tip">
-                <strong>One product, multiple fitments</strong>
-                <span>The same product may support multiple companies, models and years. Each row is a fitment for this product.</span>
-              </div>
-            </div>
             {fitmentGroups.map((group) => <div key={group.name} className="fitment-group">
               <h3 className="fitment-group-heading">
                 {group.logoUrl && <img src={group.logoUrl} alt={`${group.name} logo`} />}
@@ -694,6 +703,31 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           </div>
         )}
       </div>
+      {fitments.length > 0 && activeTip !== null && (
+        <div className="fitment-tip-popup" role="status" aria-live="polite">
+          <div className="fitment-tip-copy">
+            {activeTip === 0 ? (
+              <>
+                <strong>Open model details</strong>
+                <span>Select a model name to open its vehicle details page.</span>
+              </>
+            ) : (
+              <>
+                <strong>One product, multiple fitments</strong>
+                <span>The same product may support multiple companies, models and years. Each row is a fitment for this product.</span>
+              </>
+            )}
+          </div>
+          <button
+            className="fitment-tip-close"
+            type="button"
+            aria-label="Close tip"
+            onClick={() => setActiveTip(activeTip === 0 ? 1 : null)}
+          >
+            ×
+          </button>
+        </div>
+      )}
     </main>
   );
 }
