@@ -338,7 +338,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           box-shadow: 0 8px 30px rgba(0,0,0,0.04);
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: 12px;
         }
 
         /* Brand & Title */
@@ -448,38 +448,38 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
 
         .specs {
           border-top: 1px solid #eaeaea;
-          padding-top: 16px;
+          padding-top: 10px;
         }
         .spec-row {
           display: flex;
           justify-content: space-between;
-          padding: 8px 0;
+          padding: 5px 0;
           font-size: 14px;
         }
         .spec-row span { color: #666; }
         .spec-row strong { color: #111; text-align: right; font-weight: 600; }
 
         /* All compatible vehicles */
-        .other-fitments { grid-column: 1 / -1; margin-top: 20px; padding-top: 28px; border-top: 1px solid #eaeaea; }
-        .fitment-heading { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 13px; }
+        .other-fitments { grid-column: 1 / -1; margin-top: 12px; padding-top: 18px; border-top: 1px solid #eaeaea; }
+        .fitment-heading { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 10px; }
         .other-fitments h2 { font-size: 22px; font-weight: 800; margin: 0; }
         .fitment-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
           gap: 16px;
         }
-        .fitment-group + .fitment-group { margin-top: 22px; }
+        .fitment-group + .fitment-group { margin-top: 14px; }
         .fitment-group-heading { display: flex; align-items: center; gap: 9px; margin: 0 0 9px; color: #3f444b; font-size: 13px; }
         .fitment-group-heading img { width: 30px; height: 24px; object-fit: contain; padding: 2px 4px; border: 1px solid #eee; border-radius: 6px; background: #fff; }
         .fitment-group-heading span { color: #8a9098; font-size: 10px; font-weight: 600; }
         .fitment-card {
           border: 1px solid #eaeaea;
           border-radius: 12px;
-          padding: 16px;
+          padding: 12px;
           background: #fff;
           display: grid;
           grid-template-columns: auto minmax(0, 1fr);
-          gap: 16px;
+          gap: 12px;
           transition: border-color .2s ease, box-shadow .2s ease;
         }
         .fitment-card:hover { border-color: #e7a4a9; box-shadow: 0 8px 22px rgba(185, 28, 28, .08); }
@@ -519,7 +519,7 @@ export function ProductDetailView({ slug, initialProduct = null }: { slug: strin
           
           .unified-main-card {
             padding: 16px;
-            gap: 16px;
+            gap: 10px;
           }
           
           .price-stock-row {
