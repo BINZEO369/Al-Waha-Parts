@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense, type ReactNode } from 'react';
+import { ClerkProvider } from '@clerk/nextjs';
+import './clerk-auth.css';
 import { Header, Footer } from '../components/Header';
 import { CartProvider } from '../components/CartProvider';
 import { LanguageProvider } from '../components/LanguageProvider';
@@ -1187,8 +1189,13 @@ export const metadata: Metadata = {
 };
 
 const websiteSchema = siteUrl ? { '@context': 'https://schema.org', '@type': 'WebSite', '@id': `${siteUrl}/#website`, name: 'Al Waha Parts', url: siteUrl, description: 'Car parts and vehicle fitment support in Al Jubail, Saudi Arabia.', publisher: { '@type': 'Organization', name: 'Al Waha Parts' }, inLanguage: 'en-SA' } : null;
-
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const clerkAuthEnabled = Boolean(clerkPublishableKey && process.env.CLERK_SECRET_KEY);
+  function MaybeClerkProvider({ children: nestedChildren }: { children: ReactNode }) {
+    if (!clerkAuthEnabled || !clerkPublishableKey) return <>{nestedChildren}</>;
+    return <ClerkProvider publishableKey={clerkPublishableKey}>{nestedChildren}</ClerkProvider>;
+  }
   return (
     <html lang="en-SA">
       <head>
@@ -1197,18 +1204,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <style>{globalStyles}</style>
         {websiteSchema ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema).replace(/</g, '\\u003c') }} /> : null}
+      <MaybeClerkProvider>
       <Suspense fallback={null}>
         <SiteInteractionGuards />
       </Suspense>
       <LanguageProvider>
         <CartProvider>
-          <Header />
+          <Header clerkAuthEnabled={clerkAuthEnabled} />
           {children}
           <Footer />
         </CartProvider>
         <CookieConsentManager />
         <AnalyticsTracker />
       </LanguageProvider>
+      </MaybeClerkProvider>
       </body>
     </html>
   );

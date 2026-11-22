@@ -154,3 +154,27 @@ Project structure: `apps/admin/components/InventoryProductWizard.tsx` owns the c
 # Near-real-time analytics and AI insights
 
 Keep the existing Admin Analytics page, active-admin API authorization and consent-based tables. The Admin UI polls exact headline totals every 30 seconds only while visible, shows last-update/live status, and allows pause/resume, manual refresh, and existing 7/30/90-day selection. Add a 24-hour hourly activity chart from one database aggregate RPC and compare current totals with the preceding equal-length window. Add a deliberate “Generate AI insights” action, never tied to polling. The central API uses the already-configured Gemini key/model, active-admin auth, and a conservative per-admin rate limit; it queries server-side, reduces data to bounded aggregate counts and sanitized page paths, and sends no IPs, visitor/session identifiers, raw user-agent, or event rows to the model. Return a validated summary, signals, prioritized recommendations, and caveats; preserve uncertainty and make no unsupported attribution/conversion claims. The SQL function remains invoker-security, callable only by service_role, read-only, and bounded to the most recent 24 hours. No analytics history is deleted or altered.
+
+
+# Customer storefront Clerk authentication addendum
+
+## Implementation
+- Add Clerk authentication only to `apps/web`, using the official `@clerk/nextjs` SDK, `ClerkProvider`, and `clerkMiddleware()` compatible with this Next.js 15 App Router application.
+- Add dedicated `/sign-in` and `/sign-up` catch-all pages using Clerk's prebuilt components. Change the existing `/login` alias to redirect to `/sign-in` and keep the route manifest synchronized.
+- Add responsive customer navigation controls: signed-out visitors can reach sign-in/sign-up, while signed-in customers can access their Clerk user menu. Do not gate existing catalog, browsing, booking, or public routes without an explicit requirement.
+- Render a clear configuration-needed state when Clerk keys are not yet configured, so an unset environment does not break the storefront build or page rendering.
+- Document the Clerk environment variable names, expected routes/redirects, and development/production key placement without writing or printing any secret values; the user supplies the actual values.
+- Keep customer identity in Clerk. Do not migrate customer auth into Supabase, modify the Fastify admin-token verifier, or change the separate admin app's Supabase sign-in.
+- Update the public privacy policy to disclose that customer sign-in/account data is processed by Clerk and link to Clerk's privacy notice.
+
+## Project structure
+- `apps/web/app/layout.tsx`: conditional Clerk provider around customer storefront UI.
+- `apps/web/middleware.ts`: session-aware Clerk middleware with no broad route protection.
+- `apps/web/app/sign-in/[[...sign-in]]/page.tsx` and `apps/web/app/sign-up/[[...sign-up]]/page.tsx`: Clerk account screens.
+- `apps/web/components/ClerkNavControls.tsx` and `apps/web/components/Header.tsx`: responsive customer auth actions and profile menu.
+- `apps/web/app/login/page.tsx` and `apps/web/public/manus-routes.json`: sign-in alias and route discovery.
+- `apps/web/app/policies/privacy-policy/page.tsx`: third-party authentication disclosure.
+- `docs/clerk-auth-setup.md`: safe environment-variable configuration instructions.
+
+## Design
+Reuse the current storefront's compact Montserrat typography, Al Waha red accent, white surfaces, and responsive navigation. Clerk account screens remain visually consistent with the existing storefront without changing the independent admin sign-in experience.

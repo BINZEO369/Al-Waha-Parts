@@ -9,6 +9,9 @@
     { "path": "/category", "title": "Categories" },
     { "path": "/category/:slug", "title": "Category Details" },
     { "path": "/contact", "title": "Contact" },
+    { "path": "/login", "title": "Sign in" },
+    { "path": "/map", "title": "Our Location" },
+    { "path": "/messages", "title": "Messages" },
     { "path": "/policies", "title": "All Policies" },
     { "path": "/policies/customer-complaints-suggestions", "title": "Customer Complaints & Suggestions Policy" },
     { "path": "/policies/copyright-disclaimer", "title": "Copyright Disclaimer" },
@@ -19,7 +22,8 @@
     { "path": "/policies/terms-and-conditions", "title": "Terms & Conditions" },
     { "path": "/policies/trademark-disclaimer", "title": "Trademark Disclaimer" },
     { "path": "/policies/warranty-policy", "title": "Warranty Policy" },
-    { "path": "/login", "title": "Login" },
-    { "path": "/map", "title": "Our Location" }
+    { "path": "/products/:slug", "title": "Product Details" },
+    { "path": "/sign-in/:path*", "title": "Sign in" },
+    { "path": "/sign-up/:path*", "title": "Create account" }
   ]
 }

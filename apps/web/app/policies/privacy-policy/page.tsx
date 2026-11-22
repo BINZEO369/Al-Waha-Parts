@@ -1,12 +1,21 @@
 import type { Metadata } from 'next';
 
+type PolicySection = {
+  title: string;
+  intro?: string;
+  paragraphs?: string[];
+  bullets?: string[];
+  contact?: boolean;
+  externalLink?: { href: string; label: string };
+};
+
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description:
     'How AL-WAHA collects, uses, shares and protects personal information when you use its website.',
 };
 
-const sections = [
+const sections: PolicySection[] = [
   {
     title: 'Introduction',
     paragraphs: [
@@ -43,8 +52,10 @@ const sections = [
     title: 'Sharing of Information',
     paragraphs: [
       'We may share personal information with payment providers, delivery partners, service providers, and authorised authorities where necessary for business operations or legal compliance.',
+      'To provide customer account registration and sign-in, we use Clerk as an authentication service provider. Information submitted through enabled sign-in methods, such as an email address or phone number, plus the authentication and session data needed to operate the account, is transmitted to Clerk for processing. We do not store customer account passwords in our own user-authentication database.',
       'We do not sell personal information to third parties.',
     ],
+    externalLink: { href: 'https://clerk.com/legal/privacy', label: "Read Clerk's Privacy Policy" },
   },
   {
     title: 'Cookies and Tracking',
@@ -107,6 +118,7 @@ export default function PrivacyPolicyPage() {
         .policy-page .policy-section h2 { margin: 0 0 9px; font-family: 'Montserrat', sans-serif; font-size: 16px; line-height: 1.35; }
         .policy-page .policy-section p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
         .policy-page .policy-section p + p { margin-top: 9px; }
+        .policy-page .policy-section .policy-external-link { color: var(--red); font-weight: 700; text-decoration: underline; }
         .policy-page .policy-section > ul { display: grid; gap: 7px; margin: 12px 0 0; padding-left: 21px; color: var(--muted); font-size: 13px; line-height: 1.65; }
         .policy-page .policy-contact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
         .policy-page .policy-contact-grid > div { min-width: 0; padding: 13px 14px; border: 1px solid #f1d9db; border-radius: 10px; background: #fff6f6; }
@@ -129,7 +141,7 @@ export default function PrivacyPolicyPage() {
         </p>
         <div className="policy-dates">
           <span>Effective Date: To be confirmed</span>
-          <span>Last Updated: 7 November 2026</span>
+          <span>Last Updated: 22 November 2026</span>
         </div>
       </header>
 
@@ -141,6 +153,13 @@ export default function PrivacyPolicyPage() {
             </h2>
             {section.intro && <p>{section.intro}</p>}
             {section.paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            {section.externalLink && (
+              <p>
+                <a className="policy-external-link" href={section.externalLink.href} target="_blank" rel="noreferrer">
+                  {section.externalLink.label}
+                </a>
+              </p>
+            )}
             {section.bullets && (
               <ul>
                 {section.bullets.map((item) => <li key={item}>{item}</li>)}

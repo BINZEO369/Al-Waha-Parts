@@ -107,3 +107,14 @@ An admin can upload/select a primary image or gallery image and click one action
 - Provide an authenticated, rate-limited AI analysis action that returns a concise evidence-based summary, key signals, prioritized actionable recommendations, and data caveats for the selected period. AI must use the configured existing Gemini API/model, report uncertainty, avoid inventing causes/conversions, and never trigger on each polling refresh.
 - The AI service receives only bounded aggregate counts/breakdowns and sanitized page paths; do not send IP addresses, visitor/session identifiers, user-agent strings, or row-level event records. Keep analytics table access restricted to server-side service role and active-admin API routes.
 - Preserve consent-gated tracking behavior, existing dashboard routes, privacy disclosures and existing analytics records; display clear loading, rate-limit, unavailable-AI, stale-result and error states.
+
+
+## Customer storefront sign-in and sign-up use Clerk
+- Add dedicated `/sign-in` and `/sign-up` pages in the customer storefront using Clerk authentication; customer authentication/account identity is managed by Clerk, not by a new Supabase customer-auth migration.
+- When Clerk keys are configured, wrap the storefront in `ClerkProvider` and initialize `clerkMiddleware()` for session awareness; do not automatically protect existing public catalog, browsing, booking, or public API routes.
+- Change `/login` to lead to `/sign-in`, and keep `apps/web/public/manus-routes.json` synchronized with the new pages.
+- When signed out, the customer navigation must expose sign-in and sign-up; when signed in, it must expose Clerk's user/profile menu. Controls must remain usable on mobile.
+- When Clerk environment values are absent, storefront pages/build must fail gracefully and the sign-in/up page must explain that authentication configuration is pending.
+- Add safe setup documentation listing required Clerk key names and route/redirect variables, distinguishing the public publishable key from server-only `CLERK_SECRET_KEY`; do not commit actual key values.
+- Update the public privacy policy to disclose Clerk's role in customer account creation/sign-in, the categories of account/authentication data sent for this purpose, and a link to Clerk's privacy notice.
+- Preserve the separate admin app's Supabase sign-in and the API's existing Supabase admin bearer-token validation/authorization unchanged.

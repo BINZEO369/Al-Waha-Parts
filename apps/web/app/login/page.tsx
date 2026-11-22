@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation';
 
-export default function Page() {
-  redirect('/booking');
+export const dynamic = 'force-dynamic';
+
+export default function LoginPage() {
+  redirect('/sign-in');
 }

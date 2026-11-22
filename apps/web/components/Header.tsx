@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useCart } from './CartProvider';
 import { useLanguage } from './LanguageProvider';
+import { ClerkNavControls } from './ClerkNavControls';
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -68,7 +69,7 @@ function MenuIcon({ open }: { open: boolean }) {
   );
 }
 
-export function Header() {
+export function Header({ clerkAuthEnabled }: { clerkAuthEnabled: boolean }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { itemCount } = useCart();
   const { locale, toggle: toggleLanguage } = useLanguage();
@@ -137,6 +138,7 @@ export function Header() {
               {item.label}
             </Link>
           ))}
+          <ClerkNavControls enabled={clerkAuthEnabled} />
           <button
             className="language-toggle"
             type="button"
